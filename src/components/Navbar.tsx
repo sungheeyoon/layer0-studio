@@ -1,6 +1,11 @@
 import Link from "next/link";
+import type { User } from "@supabase/supabase-js";
 
-export default function Navbar() {
+interface NavbarProps {
+  user: User | null;
+}
+
+export default function Navbar({ user }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 w-full h-16 px-10 flex justify-between items-center bg-[#f9f9f9] dark:bg-[#121212] border-b border-[#eeeeee] dark:border-[#222222] z-50">
       <div className="font-['Inter'] font-medium text-sm tracking-[0.1em] uppercase text-[#1a1a1a] dark:text-[#eeeeee] flex items-center gap-1 before:content-[''] before:w-1 before:h-1 before:bg-[#7d000c]">
@@ -33,8 +38,21 @@ export default function Navbar() {
         </Link>
       </div>
       <div className="flex items-center gap-6 font-['Inter'] font-light tracking-[0.05em] uppercase text-[0.6875rem]">
-        <button className="text-[#777777] hover:text-[#1a1a1a]">Sign In</button>
-        <button className="bg-primary text-on-primary px-6 py-2">Get Started</button>
+        {user ? (
+          <div className="flex items-center gap-4">
+            {user.email && (
+              <span className="text-[0.6875rem] lowercase text-[#777777] tracking-widest">{user.email}</span>
+            )}
+            <span className="material-symbols-outlined text-zinc-900 dark:text-zinc-100 cursor-pointer active:opacity-80 transition-opacity" data-icon="account_circle">
+              account_circle
+            </span>
+          </div>
+        ) : (
+          <>
+            <button className="text-[#777777] hover:text-[#1a1a1a]">Sign In</button>
+            <button className="bg-primary text-on-primary px-6 py-2">Get Started</button>
+          </>
+        )}
       </div>
     </nav>
   );

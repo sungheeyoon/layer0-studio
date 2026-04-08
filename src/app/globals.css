@@ -97,8 +97,8 @@
   }
 
   .blueprint-grid {
-    background-image: linear-gradient(to right, #eeeeee 1px, transparent 1px),
-                      linear-gradient(to bottom, #eeeeee 1px, transparent 1px);
+    background-image: linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 }
