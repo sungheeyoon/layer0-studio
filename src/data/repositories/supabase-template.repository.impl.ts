@@ -1,0 +1,163 @@
+import { SupabaseClient } from '@supabase/supabase-js';
+import { ITemplateRepository } from '@/domain/repositories/template.repository';
+import {
+  Template,
+  CreateTemplateDto,
+  UpdateTemplateDto,
+} from '@/domain/entities/template.entity';
+import { TemplateError } from '@/domain/errors/template.error';
+
+export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
+  constructor(private supabase: SupabaseClient) {}
+
+  private mapRow(row: Record<string, unknown>): Template {
+    return {
+      id: row.id as string,
+      name: row.name as string,
+      description: (row.description as string) ?? null,
+      slug: row.slug as string,
+      category: (row.category as string) ?? 'general',
+      status: row.status as Template['status'],
+      thumbnailUrl: (row.thumbnail_url as string) ?? null,
+      templateJson: row.template_json as Template['templateJson'],
+      version: (row.version as string) ?? '1.0.0',
+      createdBy: row.created_by as string,
+      createdAt: row.created_at as string,
+      updatedAt: row.updated_at as string,
+    };
+  }
+
+  async findAll(): Promise<Template[]> {
+    const { data, error } = await this.supabase
+      .from('templates')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[SupabaseTemplateRepo::findAll]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return (data ?? []).map(this.mapRow);
+  }
+
+  async findActiveTemplates(): Promise<Template[]> {
+    const { data, error } = await this.supabase
+      .from('templates')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[SupabaseTemplateRepo::findActiveTemplates]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return (data ?? []).map(this.mapRow);
+  }
+
+  async findById(id: string): Promise<Template | null> {
+    const { data, error } = await this.supabase
+      .from('templates')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error('[SupabaseTemplateRepo::findById]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return data ? this.mapRow(data) : null;
+  }
+
+  async findBySlug(slug: string): Promise<Template | null> {
+    const { data, error } = await this.supabase
+      .from('templates')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error('[SupabaseTemplateRepo::findBySlug]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return data ? this.mapRow(data) : null;
+  }
+
+  async create(dto: CreateTemplateDto): Promise<Template> {
+    const { data, error } = await this.supabase
+      .from('templates')
+      .insert({
+        name: dto.name,
+        description: dto.description,
+        slug: dto.slug,
+        category: dto.category,
+        status: dto.status,
+        thumbnail_url: dto.thumbnailUrl,
+        template_json: dto.templateJson,
+        version: dto.version,
+        created_by: dto.createdBy,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[SupabaseTemplateRepo::create]', error.message);
+      if (error.message.includes('duplicate key') || error.message.includes('unique')) {
+        throw new TemplateError('TEMPLATE_SLUG_EXISTS');
+      }
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return this.mapRow(data);
+  }
+
+  async update(id: string, dto: UpdateTemplateDto): Promise<Template> {
+    const updatePayload: Record<string, unknown> = {};
+    if (dto.name !== undefined) updatePayload.name = dto.name;
+    if (dto.description !== undefined) updatePayload.description = dto.description;
+    if (dto.slug !== undefined) updatePayload.slug = dto.slug;
+    if (dto.category !== undefined) updatePayload.category = dto.category;
+    if (dto.status !== undefined) updatePayload.status = dto.status;
+    if (dto.thumbnailUrl !== undefined) updatePayload.thumbnail_url = dto.thumbnailUrl;
+    if (dto.templateJson !== undefined) updatePayload.template_json = dto.templateJson;
+    if (dto.version !== undefined) updatePayload.version = dto.version;
+    updatePayload.updated_at = new Date().toISOString();
+
+    const { data, error } = await this.supabase
+      .from('templates')
+      .update(updatePayload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[SupabaseTemplateRepo::update]', error.message);
+      if (error.code === 'PGRST116') {
+        throw new TemplateError('TEMPLATE_NOT_FOUND');
+      }
+      if (error.message.includes('duplicate key') || error.message.includes('unique')) {
+        throw new TemplateError('TEMPLATE_SLUG_EXISTS');
+      }
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return this.mapRow(data);
+  }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('templates')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('[SupabaseTemplateRepo::delete]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+  }
+}

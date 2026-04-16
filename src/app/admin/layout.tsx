@@ -1,11 +1,26 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopNav from "@/components/admin/AdminTopNav";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // Role check: Only users with 'admin' role in their metadata can access
+  const role = user.app_metadata?.role;
+  if (role !== 'admin') {
+    redirect('/templates');
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <AdminSidebar />

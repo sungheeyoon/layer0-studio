@@ -27,6 +27,7 @@ export class SupabaseAuthRepositoryImpl implements IAuthRepository {
     return {
       id: data.user.id,
       email: data.user.email!,
+      role: (data.user.app_metadata?.role as 'admin' | 'user') ?? 'user',
     };
   }
 
@@ -48,6 +49,7 @@ export class SupabaseAuthRepositoryImpl implements IAuthRepository {
     return {
       id: data.user.id,
       email: data.user.email!,
+      role: (data.user.app_metadata?.role as 'admin' | 'user') ?? 'user',
     };
   }
 

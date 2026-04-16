@@ -9,7 +9,8 @@ export default function ConditionalLayoutWrapper({
 }) {
   const pathname = usePathname();
   
-  if (pathname.startsWith("/admin")) {
+  // /admin, /site 경로에서는 메인 Navbar 숨김
+  if (pathname.startsWith("/admin") || pathname.startsWith("/site/")) {
     return null;
   }
 
