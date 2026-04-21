@@ -25,4 +25,5 @@ export interface ThemeSlotDefinition {
 export interface ThemeModule {
   default: ComponentType<ThemeRendererProps>;
   slots: ThemeSlotDefinition[];
+  defaultTemplateJson: TemplateJson;
 }

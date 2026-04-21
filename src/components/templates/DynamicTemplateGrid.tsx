@@ -52,7 +52,7 @@ export default function DynamicTemplateGrid({ templates, mySites }: DynamicTempl
             // eslint-disable-next-line @next/next/no-img-element
             <img
               alt={template.name}
-              className="w-full h-full object-cover grayscale opacity-80"
+              className="w-full h-full object-cover"
               src={template.thumbnailUrl}
             />
           )}
@@ -106,12 +106,28 @@ export default function DynamicTemplateGrid({ templates, mySites }: DynamicTempl
                     </span>
                   </div>
                 </div>
-                <a
-                  href={`/editor?siteId=${site.id}`}
-                  className="border border-outline px-6 py-2 font-['Inter'] font-light text-[0.6875rem] uppercase tracking-[0.1em] hover:bg-primary hover:text-white transition-colors inline-block"
-                >
-                  Edit
-                </a>
+                <div className="flex gap-2">
+                  <a
+                    href={`/editor?siteId=${site.id}`}
+                    className="border border-outline px-6 py-2 font-['Inter'] font-light text-[0.6875rem] uppercase tracking-[0.1em] hover:bg-primary hover:text-white transition-colors inline-block"
+                  >
+                    Edit
+                  </a>
+                  {site.status === 'active' && site.domain && (
+                    <a
+                      href={`/site/${site.domain}`}
+                      target="_blank"
+                      className="border border-green-500 text-green-600 px-6 py-2 font-['Inter'] font-light text-[0.6875rem] uppercase tracking-[0.1em] hover:bg-green-500 hover:text-white transition-colors inline-block"
+                    >
+                      View
+                    </a>
+                  )}
+                  {site.status === 'active' && !site.domain && (
+                    <span className="text-[9px] uppercase tracking-widest text-amber-500 self-center">
+                      No domain
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

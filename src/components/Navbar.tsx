@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
+import ProfileDropdown from "./ProfileDropdown";
 
 interface NavbarProps {
   user: User | null;
@@ -39,18 +40,20 @@ export default function Navbar({ user }: NavbarProps) {
       </div>
       <div className="flex items-center gap-6 font-['Inter'] font-light tracking-[0.05em] uppercase text-[0.6875rem]">
         {user ? (
-          <div className="flex items-center gap-4">
-            {user.email && (
-              <span className="text-[0.6875rem] lowercase text-[#777777] tracking-widest">{user.email}</span>
-            )}
-            <span className="material-symbols-outlined text-zinc-900 dark:text-zinc-100 cursor-pointer active:opacity-80 transition-opacity" data-icon="account_circle">
-              account_circle
-            </span>
+          <div className="flex items-center gap-6">
+            <Link 
+              className="flex items-center gap-2 group cursor-pointer"
+              href="/templates"
+            >
+              <span className="w-[4px] h-[4px] bg-zinc-300 group-hover:bg-primary transition-colors"></span>
+              <span className="font-sans font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500 group-hover:text-zinc-900 transition-colors">GO_TO_DASHBOARD</span>
+            </Link>
+            <ProfileDropdown user={user} />
           </div>
         ) : (
           <>
-            <button className="text-[#777777] hover:text-[#1a1a1a]">Sign In</button>
-            <button className="bg-primary text-on-primary px-6 py-2">Get Started</button>
+            <Link className="text-[#777777] hover:text-[#1a1a1a]" href="/login">Sign In</Link>
+            <Link className="bg-primary text-on-primary px-6 py-2" href="/signup">Get Started</Link>
           </>
         )}
       </div>

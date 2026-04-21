@@ -32,3 +32,17 @@ export async function loginAction(formData: FormData) {
     };
   }
 }
+
+export async function logoutAction() {
+  const supabase = await createClient();
+  const { createLogoutUseCase } = await import('@/lib/di/container');
+  const logoutUseCase = createLogoutUseCase(supabase);
+
+  try {
+    await logoutUseCase.execute();
+    return { success: true };
+  } catch (error) {
+    console.error('Logout error:', error);
+    return { success: false };
+  }
+}

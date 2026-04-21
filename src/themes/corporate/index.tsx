@@ -1,6 +1,6 @@
 import { ComponentType } from 'react';
 import { ThemeRendererProps, ThemeSectionProps } from '../types';
-import { slots } from './slots';
+import { slots, defaultTemplateJson } from './slots';
 import HeroSection from './sections/HeroSection';
 import GenericSection from './sections/GenericSection';
 import AboutSection from './sections/AboutSection';
@@ -17,7 +17,7 @@ const sectionComponentMap: Record<string, ComponentType<ThemeSectionProps>> = {
   footer: FooterSection,
 };
 
-export { slots };
+export { slots, defaultTemplateJson };
 
 export default function CorporateTheme({ siteJson, selectedSectionId, onSectionClick }: ThemeRendererProps) {
   return (

@@ -20,6 +20,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   );
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
 
   // Theme Renderer loading
   const [ThemeRenderer, setThemeRenderer] = useState<React.ComponentType<ThemeRendererProps> | null>(null);
@@ -102,8 +103,15 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     await saveSiteJsonAction(site.id, siteJson);
     setPublishing(true);
     const result = await publishSiteAction(site.id);
+
     if (result && 'error' in result) {
       alert(`Publish failed: ${result.error}`);
+    } else {
+      if (site.domain) {
+        setPublishedUrl(`/site/${site.domain}`);
+      } else {
+        setPublishedUrl('NO_DOMAIN');
+      }
     }
     setPublishing(false);
     setSaving(false);
@@ -228,6 +236,26 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           >
             {saving ? 'Saving...' : 'Save Draft'}
           </button>
+
+          {publishedUrl === 'NO_DOMAIN' && (
+            <div className="mt-4 p-4 text-[10px] uppercase tracking-widest text-amber-600 border border-amber-300 bg-amber-50 leading-relaxed text-center">
+              Published! 
+              <a href="/domains" className="underline ml-1 font-bold hover:text-amber-800 transition-colors">
+                Set a domain in Domains
+              </a> 
+              to go live.
+            </div>
+          )}
+          {publishedUrl && publishedUrl !== 'NO_DOMAIN' && (
+            <a
+              href={publishedUrl}
+              target="_blank"
+              className="mt-4 flex items-center justify-center gap-2 p-4 text-[10px] uppercase tracking-widest text-green-700 border border-green-300 bg-green-50 hover:bg-green-100 transition-colors"
+            >
+              <span className="material-symbols-outlined text-sm">open_in_new</span>
+              View Published Site
+            </a>
+          )}
         </div>
       </section>
 

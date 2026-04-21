@@ -53,6 +53,14 @@ export class SupabaseAuthRepositoryImpl implements IAuthRepository {
     };
   }
 
+  async logout(): Promise<void> {
+    const { error } = await this.supabase.auth.signOut();
+    if (error) {
+      console.error('[Supabase::logout] Error:', error.message);
+      throw new AuthError('UNKNOWN');
+    }
+  }
+
   async deleteUser(userId: string): Promise<void> {
     // Note: Edge functions or service_role key are usually required to delete a user.
     // Provided here to align with the domain architecture.

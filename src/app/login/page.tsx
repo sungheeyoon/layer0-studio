@@ -17,7 +17,7 @@ export default function LoginPage() {
     } else {
       setError(null);
       console.log('로그인 성공', result.user);
-      router.push('/');
+      router.push('/templates');
     }
   }
 

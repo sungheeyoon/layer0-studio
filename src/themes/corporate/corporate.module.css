@@ -1,11 +1,7 @@
 .themeRoot {
-  --theme-primary: #000;
-  --theme-secondary: #666;
-  --theme-font-family: 'Inter', sans-serif;
-  --theme-font-size: 16px;
-
-  font-family: var(--theme-font-family);
-  font-size: var(--theme-font-size);
+  /* Variables are injected via DynamicEditor/Public renderer */
+  font-family: var(--theme-font-family, 'Inter', sans-serif);
+  font-size: var(--theme-font-size, 16px);
   color: #333;
   line-height: 1.5;
   background: #fff;
@@ -44,7 +40,7 @@
   font-weight: 100;
   letter-spacing: -0.05em;
   margin-bottom: 1.5rem;
-  color: var(--theme-primary);
+  color: var(--theme-primary, #000);
 }
 
 .heroSubtitle {
@@ -58,8 +54,8 @@
 .ctaButton {
   display: inline-block;
   padding: 0.75rem 2rem;
-  border: 1px solid var(--theme-primary);
-  color: var(--theme-primary);
+  border: 1px solid var(--theme-primary, #000);
+  color: var(--theme-primary, #000);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.75rem;
@@ -67,7 +63,7 @@
 }
 
 .ctaButton:hover {
-  background: var(--theme-primary);
+  background: var(--theme-primary, #000);
   color: #fff;
 }
 
@@ -82,7 +78,7 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 2rem;
-  color: var(--theme-primary);
+  color: var(--theme-primary, #000);
 }
 
 .sectionBody {

@@ -4,6 +4,7 @@ import { createGetPublishedSiteUseCase } from '@/lib/di/container';
 import { loadTheme } from '@/themes/registry';
 import type { Metadata } from 'next';
 import React from 'react';
+import ThemeClientWrapper from '@/themes/ThemeClientWrapper';
 
 interface Props {
   params: Promise<{ domain: string }>;
@@ -41,8 +42,6 @@ export default async function PublicSitePage({ params }: Props) {
   }
 
   const { siteJson } = site;
-  const themeModule = await loadTheme(siteJson.themeKey || 'corporate');
-  const ThemeRenderer = themeModule?.default;
 
   const themeVariables = {
     '--theme-primary': siteJson.globalStyles.primaryColor,
@@ -56,16 +55,11 @@ export default async function PublicSitePage({ params }: Props) {
       className="min-h-screen"
       style={themeVariables}
     >
-      {ThemeRenderer ? (
-        <ThemeRenderer 
-          siteJson={siteJson} 
-          selectedSectionId={null} 
-        />
-      ) : (
-        <div className="p-20 text-center font-light tracking-widest uppercase opacity-50">
-          Theme Not Found
-        </div>
-      )}
+      <ThemeClientWrapper
+        themeKey={siteJson.themeKey || 'corporate'}
+        siteJson={siteJson}
+        selectedSectionId={null}
+      />
     </main>
   );
 }
