@@ -6,7 +6,7 @@ export class UpdateSiteJsonUseCase {
   constructor(private userSiteRepository: IUserSiteRepository) {}
 
   /**
-   * 유저 본인이 자신의 사이트 JSON 교체 (소유권 체크 필수)
+   * Replace the site's JSON (Ownership check required)
    */
   async execute(siteId: string, siteJson: TemplateJson, userId: string) {
     const existing = await this.userSiteRepository.findById(siteId);
@@ -24,7 +24,7 @@ export class UpdateSiteJsonUseCase {
   }
 
   /**
-   * 관리자가 사이트 JSON 교체 (소유권 체크 우회)
+   * Replace the site's JSON by an Admin (Bypassing ownership check)
    */
   async executeAsAdmin(siteId: string, siteJson: TemplateJson) {
     const existing = await this.userSiteRepository.findById(siteId);
@@ -39,7 +39,7 @@ export class UpdateSiteJsonUseCase {
   }
 
   /**
-   * 개별 section의 개별 필드만 업데이트
+   * Update an individual field in an individual section
    */
   async executeFieldUpdate(
     siteId: string,
@@ -47,6 +47,7 @@ export class UpdateSiteJsonUseCase {
     fieldKey: string,
     value: string,
     userId: string,
+    pageId?: string,
   ) {
     const site = await this.userSiteRepository.findById(siteId);
     if (!site) {
@@ -61,7 +62,20 @@ export class UpdateSiteJsonUseCase {
     const updatedJson: TemplateJson = JSON.parse(JSON.stringify(site.siteJson));
 
     // Find the section and update the field
-    const section = updatedJson.sections.find((s) => s.id === sectionId);
+    let section;
+    if (pageId && updatedJson.pages) {
+      const page = updatedJson.pages.find(p => p.id === pageId);
+      section = page?.sections.find(s => s.id === sectionId);
+    } else if (updatedJson.sections) {
+      section = updatedJson.sections.find((s) => s.id === sectionId);
+    } else if (updatedJson.pages) {
+      // Fallback: search across all pages if pageId not provided
+      for (const page of updatedJson.pages) {
+        section = page.sections.find(s => s.id === sectionId);
+        if (section) break;
+      }
+    }
+
     if (!section) {
       throw new TemplateError('UNKNOWN');
     }
@@ -76,7 +90,11 @@ export class UpdateSiteJsonUseCase {
   }
 
   private validateJson(siteJson: TemplateJson) {
-    if (!siteJson.sections || !Array.isArray(siteJson.sections)) {
+    // Both pages and sections are allowed for now, but one must exist
+    const hasPages = siteJson.pages && Array.isArray(siteJson.pages);
+    const hasSections = siteJson.sections && Array.isArray(siteJson.sections);
+
+    if (!hasPages && !hasSections) {
       throw new TemplateError('INVALID_TEMPLATE_JSON');
     }
 

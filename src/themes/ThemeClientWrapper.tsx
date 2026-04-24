@@ -12,6 +12,7 @@ export default function ThemeClientWrapper({
   themeKey,
   siteJson, 
   selectedSectionId,
+  activePageId,
 }: ThemeClientWrapperProps) {
   const [ThemeRenderer, setThemeRenderer] = useState<React.ComponentType<ThemeRendererProps> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +60,7 @@ export default function ThemeClientWrapper({
     <ThemeRenderer 
       siteJson={siteJson} 
       selectedSectionId={selectedSectionId} 
+      activePageId={activePageId}
     />
   );
 }

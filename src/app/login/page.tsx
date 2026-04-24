@@ -16,7 +16,7 @@ export default function LoginPage() {
       setError(result.code || 'UNKNOWN ERROR');
     } else {
       setError(null);
-      console.log('로그인 성공', result.user);
+      console.log('Login success', result.user);
       router.push('/templates');
     }
   }

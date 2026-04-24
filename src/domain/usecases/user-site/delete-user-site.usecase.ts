@@ -5,7 +5,7 @@ export class DeleteUserSiteUseCase {
   constructor(private userSiteRepository: IUserSiteRepository) {}
 
   /**
-   * 유저 본인이 자신의 사이트를 삭제
+   * Delete a site owned by the user
    */
   async execute(id: string, userId: string) {
     const existing = await this.userSiteRepository.findById(id);
@@ -21,7 +21,7 @@ export class DeleteUserSiteUseCase {
   }
 
   /**
-   * 관리자가 강제로 사이트를 삭제 (소유권 체크 우회)
+   * Admin forces deletion of a site (bypassing ownership check)
    */
   async executeAsAdmin(id: string) {
     const existing = await this.userSiteRepository.findById(id);

@@ -16,7 +16,7 @@ export default function SignupPage() {
       setError(result.code || 'UNKNOWN ERROR');
     } else {
       setError(null);
-      console.log('회원가입 성공', result.user);
+      console.log('?�원가???�공', result.user);
       router.push('/login');
     }
   }
@@ -91,7 +91,7 @@ export default function SignupPage() {
                   className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 transition-all duration-300 placeholder:text-outline/30" 
                   id="password" 
                   name="password" 
-                  placeholder="••••••••••••" 
+                  placeholder="?�••••••••••�? 
                   type="password" 
                   required
                 />

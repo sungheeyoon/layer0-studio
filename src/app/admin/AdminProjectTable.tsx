@@ -82,7 +82,7 @@ export default function AdminProjectTable({ sites }: AdminProjectTableProps) {
                   {site.siteName}
                 </td>
                 <td className="py-6 font-body font-[300] text-xs text-neutral-500">
-                  {site.domain || '—'}
+                  {site.domain || '-'}
                 </td>
                 <td className="py-6 font-body font-[300] text-[10px] tracking-widest text-neutral-400">
                   {site.templateId ? `TPL_${site.templateId.slice(0, 6).toUpperCase()}` : 'CUSTOM'}

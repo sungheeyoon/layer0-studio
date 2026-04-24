@@ -17,7 +17,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const site = await useCase.execute(domain);
-    const heroTitle = site.siteJson.sections.find(s => s.type === 'hero')?.data['title']?.value;
+    const { siteJson } = site;
+    
+    // Find home page data for metadata
+    let sections = siteJson.sections || [];
+    if (siteJson.pages && siteJson.pages.length > 0) {
+      const homePage = siteJson.pages.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages[0];
+      sections = homePage.sections;
+    }
+    
+    const heroTitle = sections.find(s => s.type === 'hero')?.data['title']?.value;
 
     return {
       title: site.siteName,
@@ -42,6 +51,10 @@ export default async function PublicSitePage({ params }: Props) {
   }
 
   const { siteJson } = site;
+  
+  // Identify active page for the root domain (Home)
+  const homePage = siteJson.pages?.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages?.[0];
+  const activePageId = homePage?.id;
 
   const themeVariables = {
     '--theme-primary': siteJson.globalStyles.primaryColor,
@@ -59,6 +72,7 @@ export default async function PublicSitePage({ params }: Props) {
         themeKey={siteJson.themeKey || 'corporate'}
         siteJson={siteJson}
         selectedSectionId={null}
+        activePageId={activePageId}
       />
     </main>
   );

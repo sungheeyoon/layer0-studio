@@ -5,6 +5,7 @@ import {
   createListUserSitesUseCase,
   createCreateSiteFromTemplateUseCase,
   createDeleteUserSiteUseCase,
+  createAdminUpdateSiteUseCase,
 } from '@/lib/di/container';
 import { TemplateJson } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
@@ -67,50 +68,40 @@ export async function updateSiteStatusAction(siteId: string, status: 'draft' | '
   const user = await checkAdmin();
   if (!user) return { error: 'FORBIDDEN' };
 
-  const updatePayload: Record<string, unknown> = {
-    status,
-    updated_at: new Date().toISOString(),
-  };
+  try {
+    const adminSupabase = await createAdminClient();
+    const useCase = createAdminUpdateSiteUseCase(adminSupabase);
+    await useCase.updateStatus(siteId, status);
 
-  if (status === 'active') {
-    updatePayload.published_at = new Date().toISOString();
-  }
-
-  const adminSupabase = await createAdminClient();
-  const { error } = await adminSupabase
-    .from('user_sites')
-    .update(updatePayload)
-    .eq('id', siteId);
-
-  if (error) {
-    console.error('[Admin::updateSiteStatus]', error.message);
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (err) {
+    if (err instanceof TemplateError) {
+      return { error: err.code };
+    }
+    console.error('[Admin::updateSiteStatus]', err);
     return { error: 'UNKNOWN' };
   }
-
-  revalidatePath('/admin');
-  return { success: true };
 }
 
 export async function updateSiteDomainAction(siteId: string, domain: string) {
   const user = await checkAdmin();
   if (!user) return { error: 'FORBIDDEN' };
 
-  const adminSupabase = await createAdminClient();
-  const { error } = await adminSupabase
-    .from('user_sites')
-    .update({
-      domain,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', siteId);
+  try {
+    const adminSupabase = await createAdminClient();
+    const useCase = createAdminUpdateSiteUseCase(adminSupabase);
+    await useCase.updateDomain(siteId, domain);
 
-  if (error) {
-    console.error('[Admin::updateSiteDomain]', error.message);
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (err) {
+    if (err instanceof TemplateError) {
+      return { error: err.code };
+    }
+    console.error('[Admin::updateSiteDomain]', err);
     return { error: 'UNKNOWN' };
   }
-
-  revalidatePath('/admin');
-  return { success: true };
 }
 
 export async function terminateSiteAction(siteId: string) {

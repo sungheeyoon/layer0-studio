@@ -8,11 +8,15 @@ export default function ConditionalLayoutWrapper({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const dashboardRoutes = ["/editor", "/templates", "/domains", "/analytics", "/settings"];
-  const isDashboard = dashboardRoutes.some(route => pathname.startsWith(route));
+  
+  // Paths where the main Navbar should be hidden (dashboard, admin, site preview, etc.)
+  const isDashboard = pathname.startsWith("/dashboard");
+  const isAdmin = pathname.startsWith("/admin");
+  const isSite = pathname.startsWith("/site/");
+  const isPreview = pathname.startsWith("/preview/");
+  const isEditor = pathname.startsWith("/editor"); // In case the editor path is independent
 
-  // /admin, /site, 및 대시보드 경로에서는 메인 Navbar 숨김
-  if (pathname.startsWith("/admin") || pathname.startsWith("/site/") || isDashboard) {
+  if (isDashboard || isAdmin || isSite || isPreview || isEditor) {
     return null;
   }
 

@@ -20,50 +20,58 @@ const DEFAULT_JSON = JSON.stringify(
       fontSize: '16px',
       layout: 'asymmetric',
     },
-    sections: [
+    pages: [
       {
-        id: 'hero_01',
-        type: 'hero',
-        order: 1,
-        visible: true,
-        editable: true,
-        data: {
-          title: { value: 'Welcome', type: 'text', label: 'Hero Title', editable: true },
-          subtitle: {
-            value: 'Your subtitle here',
-            type: 'text',
-            label: 'Subtitle',
-            editable: true
+        id: 'home',
+        title: 'Home',
+        slug: '/',
+        order: 0,
+        sections: [
+          {
+            id: 'hero_01',
+            type: 'hero',
+            order: 1,
+            visible: true,
+            editable: true,
+            data: {
+              title: { value: 'Welcome', type: 'text', label: 'Hero Title', editable: true },
+              subtitle: {
+                value: 'Your subtitle here',
+                type: 'text',
+                label: 'Subtitle',
+                editable: true
+              },
+              backgroundImage: {
+                value: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000',
+                type: 'image',
+                label: 'Background Image',
+                editable: true
+              },
+              ctaText: { value: 'Explore More', type: 'text', label: 'CTA Text', editable: true },
+              ctaUrl: { value: '#', type: 'url', label: 'CTA URL', editable: true }
+            },
           },
-          backgroundImage: {
-            value: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000',
-            type: 'image',
-            label: 'Background Image',
-            editable: true
-          },
-          ctaText: { value: 'Explore More', type: 'text', label: 'CTA Text', editable: true },
-          ctaUrl: { value: '#', type: 'url', label: 'CTA URL', editable: true }
-        },
-      },
-      {
-        id: 'about_01',
-        type: 'about',
-        order: 2,
-        visible: true,
-        editable: true,
-        data: {
-          title: { value: 'Our Mission', type: 'text', label: 'Section Title', editable: true },
-          body: { value: 'We provide high-precision solutions for global enterprises.', type: 'textarea', label: 'Body Text', editable: true }
-        }
+          {
+            id: 'about_01',
+            type: 'about',
+            order: 2,
+            visible: true,
+            editable: true,
+            data: {
+              title: { value: 'Our Mission', type: 'text', label: 'Section Title', editable: true },
+              body: { value: 'We provide high-precision solutions for global enterprises.', type: 'textarea', label: 'Body Text', editable: true }
+            }
+          }
+        ]
       }
-    ],
+    ]
   },
   null,
   2,
 );
 
 interface TemplateEditorPanelProps {
-  /** 편집할 template. undefined면 새로 만들기 모드 */
+  /** Template to edit. If undefined, it is in create mode. */
   template?: Template;
   onDone?: () => void;
 }
@@ -75,13 +83,13 @@ export default function TemplateEditorPanel({
   const isEditing = !!template;
   const availableThemes = getAvailableThemeKeys();
 
-  // ── JSON state ────────────────────────────────────────────────────────────
+  // JSON state
   const [templateJsonStr, setTemplateJsonStr] = useState(
     template ? JSON.stringify(template.templateJson, null, 2) : DEFAULT_JSON,
   );
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  // ── Thumbnail state ───────────────────────────────────────────────────────
+  // Thumbnail state
   const [thumbnailUrl, setThumbnailUrl] = useState<string>(
     template?.thumbnailUrl ?? '',
   );
@@ -92,11 +100,11 @@ export default function TemplateEditorPanel({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Form submission state ─────────────────────────────────────────────────
+  // Form submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  // Handlers
   const handleJsonChange = (value: string) => {
     setTemplateJsonStr(value);
     try {
@@ -123,7 +131,7 @@ export default function TemplateEditorPanel({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 로컬 미리보기
+    // Local preview
     const objectUrl = URL.createObjectURL(file);
     setThumbnailPreview(objectUrl);
     setUploadError(null);
@@ -136,7 +144,7 @@ export default function TemplateEditorPanel({
     setIsUploading(false);
     if ('error' in result && result.error) {
       setUploadError(`Upload failed: ${result.error}`);
-      setThumbnailPreview(thumbnailUrl); // 롤백
+      setThumbnailPreview(thumbnailUrl); // Rollback
     } else if ('url' in result && result.url) {
       setThumbnailUrl(result.url);
     }
@@ -150,7 +158,7 @@ export default function TemplateEditorPanel({
     formData.set('templateJson', templateJsonStr);
     formData.set('thumbnailUrl', thumbnailUrl);
 
-    // Deploy Template 버튼은 status를 'active'로 강제
+    // Force status to 'active' for Deploy Template
     if (deployStatus) {
       formData.set('status', deployStatus);
     }
@@ -193,7 +201,7 @@ export default function TemplateEditorPanel({
             </span>
           </div>
           <h2 className="text-3xl font-[100] tracking-tight">
-            {isEditing ? `Edit — ${template.name}_` : 'Template Editor_'}
+            {isEditing ? `Edit ${template.name}_` : 'Template Editor_'}
           </h2>
         </header>
 
@@ -201,7 +209,7 @@ export default function TemplateEditorPanel({
           action={async (fd) => await handleSubmit(fd)}
           className="space-y-16"
         >
-          {/* ─── Section 1: Basic Info ──────────────────────────────────── */}
+          {/* Section 1: Basic Info */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
               <h3 className="text-[11px] font-medium uppercase tracking-widest">
@@ -287,7 +295,7 @@ export default function TemplateEditorPanel({
                 </div>
               </div>
 
-              {/* Status (Draft/Active/Archived) — 기본 select */}
+              {/* Status (Draft/Active/Archived) default select */}
               <div className="relative">
                 <label className="text-[9px] uppercase tracking-widest text-neutral-500 block mb-1">
                   Status
@@ -305,7 +313,7 @@ export default function TemplateEditorPanel({
             </div>
           </div>
 
-          {/* ─── Section 2: Thumbnail ───────────────────────────────────── */}
+          {/* Section 2: Thumbnail */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
               <h3 className="text-[11px] font-medium uppercase tracking-widest">
@@ -343,8 +351,7 @@ export default function TemplateEditorPanel({
                 {isUploading && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                     <span className="text-[10px] uppercase tracking-widest text-white animate-pulse">
-                      Uploading…
-                    </span>
+                      Uploading...                    </span>
                   </div>
                 )}
 
@@ -377,7 +384,7 @@ export default function TemplateEditorPanel({
             </div>
           </div>
 
-          {/* ─── Section 3: Data Schema ─────────────────────────────────── */}
+          {/* Section 3: Data Schema */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
               <h3 className="text-[11px] font-medium uppercase tracking-widest">
@@ -416,14 +423,14 @@ export default function TemplateEditorPanel({
             </div>
           </div>
 
-          {/* ─── Submit error ───────────────────────────────────────────── */}
+          {/* Submit error */}
           {submitError && (
             <p className="text-[11px] text-red-500 uppercase tracking-widest">
               Error: {submitError}
             </p>
           )}
 
-          {/* ─── Actions ────────────────────────────────────────────────── */}
+          {/* Actions */}
           <div className="pt-12 border-t border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
             <button
               className="text-[10px] uppercase tracking-widest text-neutral-400 hover:text-red-800 dark:hover:text-red-500 transition-colors"
@@ -433,16 +440,16 @@ export default function TemplateEditorPanel({
               Discard Changes
             </button>
             <div className="flex gap-4">
-              {/* Save Draft — status는 select에서 가져옴 */}
+              {/* Save as Draft */}
               <button
                 className="px-8 py-3 border border-black dark:border-white text-[10px] uppercase tracking-widest font-medium hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors disabled:opacity-40"
                 type="submit"
                 disabled={isSubmitting || isUploading}
               >
-                {isSubmitting ? 'Saving…' : 'Save Draft'}
+                {isSubmitting ? 'Saving...' : 'Save Draft'}
               </button>
 
-              {/* Deploy Template — status를 'active'로 강제 */}
+              {/* Deploy Template */}
               <button
                 className="px-10 py-3 bg-black dark:bg-white text-white dark:text-black text-[10px] uppercase tracking-widest font-medium hover:opacity-80 transition-opacity disabled:opacity-40"
                 type="button"
@@ -454,7 +461,7 @@ export default function TemplateEditorPanel({
                   await handleSubmit(fd, 'active');
                 }}
               >
-                {isSubmitting ? 'Deploying…' : 'Deploy Template'}
+                {isSubmitting ? 'Deploying...' : 'Deploy Template'}
               </button>
             </div>
           </div>

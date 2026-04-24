@@ -21,6 +21,11 @@ export default function TemplatesClientWrapper({
       <TemplateListPanel
         templates={templates}
         onEdit={(t) => setEditingTemplate(t)}
+        onDelete={(id) => {
+          if (editingTemplate?.id === id) {
+            setEditingTemplate(undefined);
+          }
+        }}
       />
       <TemplateEditorPanel
         template={editingTemplate}

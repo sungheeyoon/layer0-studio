@@ -22,7 +22,10 @@ export class UpdateTemplateUseCase {
 
     // Validate JSON if provided
     if (data.templateJson) {
-      if (!data.templateJson.sections || !Array.isArray(data.templateJson.sections)) {
+      const hasPages = data.templateJson.pages && Array.isArray(data.templateJson.pages);
+      const hasSections = data.templateJson.sections && Array.isArray(data.templateJson.sections);
+
+      if (!hasPages && !hasSections) {
         throw new TemplateError('INVALID_TEMPLATE_JSON');
       }
       if (!data.templateJson.globalStyles) {

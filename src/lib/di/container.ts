@@ -24,8 +24,15 @@ import { CreateSiteFromTemplateUseCase } from '@/domain/usecases/user-site/creat
 import { UpdateSiteJsonUseCase } from '@/domain/usecases/user-site/update-site-json.usecase';
 import { DeleteUserSiteUseCase } from '@/domain/usecases/user-site/delete-user-site.usecase';
 import { GetPublishedSiteUseCase } from '@/domain/usecases/user-site/get-published-site.usecase';
+import { PublishSiteUseCase } from '@/domain/usecases/user-site/publish-site.usecase';
+import { UpdateSiteDomainUseCase } from '@/domain/usecases/user-site/update-site-domain.usecase';
+import { AdminUpdateSiteUseCase } from '@/domain/usecases/user-site/admin-update-site.usecase';
 
-// ─── Auth UseCases ───────────────────────────────────────────
+// Asset
+import { SupabaseAssetRepositoryImpl } from '@/data/repositories/supabase-asset.repository.impl';
+import { AssetUploadUseCase } from '@/domain/usecases/asset-upload.usecase';
+
+// --- Auth UseCases -----------------------------------------------------------
 
 export const createLoginUseCase = (supabase: SupabaseClient) => {
   const repository = new SupabaseAuthRepositoryImpl(supabase);
@@ -52,7 +59,7 @@ export const createChangePasswordUseCase = (supabase: SupabaseClient) => {
   return new ChangePasswordUseCase(repository);
 };
 
-// ─── Template UseCases ───────────────────────────────────────
+// --- Template UseCases -------------------------------------------------------
 
 export const createListTemplatesUseCase = (supabase: SupabaseClient) => {
   const repository = new SupabaseTemplateRepositoryImpl(supabase);
@@ -79,7 +86,7 @@ export const createDeleteTemplateUseCase = (supabase: SupabaseClient) => {
   return new DeleteTemplateUseCase(repository);
 };
 
-// ─── UserSite UseCases ───────────────────────────────────────
+// --- UserSite UseCases -------------------------------------------------------
 
 export const createListUserSitesUseCase = (supabase: SupabaseClient) => {
   const repository = new SupabaseUserSiteRepositoryImpl(supabase);
@@ -110,4 +117,26 @@ export const createDeleteUserSiteUseCase = (supabase: SupabaseClient) => {
 export const createGetPublishedSiteUseCase = (supabase: SupabaseClient) => {
   const repository = new SupabaseUserSiteRepositoryImpl(supabase);
   return new GetPublishedSiteUseCase(repository);
+};
+
+export const createPublishSiteUseCase = (supabase: SupabaseClient) => {
+  const repository = new SupabaseUserSiteRepositoryImpl(supabase);
+  return new PublishSiteUseCase(repository);
+};
+
+export const createUpdateSiteDomainUseCase = (supabase: SupabaseClient) => {
+  const repository = new SupabaseUserSiteRepositoryImpl(supabase);
+  return new UpdateSiteDomainUseCase(repository);
+};
+
+export const createAdminUpdateSiteUseCase = (supabase: SupabaseClient) => {
+  const repository = new SupabaseUserSiteRepositoryImpl(supabase);
+  return new AdminUpdateSiteUseCase(repository);
+};
+
+// --- Asset UseCases ----------------------------------------------------------
+
+export const createAssetUploadUseCase = (supabase: SupabaseClient) => {
+  const repository = new SupabaseAssetRepositoryImpl(supabase);
+  return new AssetUploadUseCase(repository);
 };

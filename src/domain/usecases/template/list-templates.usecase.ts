@@ -10,4 +10,16 @@ export class ListTemplatesUseCase {
   async executeActive() {
     return this.templateRepository.findActiveTemplates();
   }
+
+  async executeByCategory(category: string) {
+    return this.templateRepository.findActiveByCategory(category);
+  }
+
+  async executePaginated(page: number, limit: number, category?: string | null) {
+    return this.templateRepository.findActivePaginated(page, limit, category);
+  }
+
+  async executeCategories() {
+    return this.templateRepository.getDistinctCategories();
+  }
 }

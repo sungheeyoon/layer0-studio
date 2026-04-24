@@ -3,25 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const navItems = [
+  { name: "OVERVIEW", href: "/dashboard", icon: "grid_view", exact: true },
+  { name: "TEMPLATES", href: "/dashboard/templates", icon: "layers" },
+  { name: "PROJECTS", href: "/dashboard/projects", icon: "folder_open" },
+  { name: "DOMAINS", href: "/dashboard/domains", icon: "language" },
+  { name: "SETTINGS", href: "/dashboard/settings", icon: "settings" },
+];
+
 export default function Sidebar() {
   const pathname = usePathname();
-
-  const navItems = [
-    { name: "Dashboard", href: "/editor", icon: "grid_view" },
-    { name: "Templates", href: "/templates", icon: "layers" },
-    { name: "Projects", href: "/domains", icon: "architecture" },
-    { name: "Settings", href: "/settings", icon: "settings" },
-  ];
 
   return (
     <aside className="fixed left-0 top-0 flex flex-col h-full py-8 bg-[#f3f3f3] dark:bg-zinc-900 w-64 border-none z-50">
       <div className="px-6 mb-12">
-        <h1 className="text-lg font-thin tracking-[0.15em] text-black dark:text-white">ARCH_SYSTEM</h1>
+        <h1 className="text-lg font-thin tracking-[0.15em] text-black dark:text-white uppercase">Layer0_Studio</h1>
         <p className="font-['Inter'] font-light uppercase tracking-[0.1em] text-[0.6875rem] text-zinc-500 mt-1">V.2.4.0_STABLE</p>
       </div>
       <nav className="flex-1 flex flex-col gap-1">
         {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          const isActive = item.exact 
+            ? pathname === item.href 
+            : pathname.startsWith(item.href);
           
           return (
             <Link

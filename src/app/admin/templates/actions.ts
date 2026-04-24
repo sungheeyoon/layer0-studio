@@ -22,7 +22,7 @@ async function checkAdmin() {
   return user;
 }
 
-// ─── Thumbnail Upload ────────────────────────────────────────────────────────
+// --- Thumbnail Upload --------------------------------------------------------
 
 export async function uploadThumbnailAction(formData: FormData) {
   const user = await checkAdmin();

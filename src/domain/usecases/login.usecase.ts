@@ -5,7 +5,7 @@ export class LoginUseCase {
   constructor(private authRepository: IAuthRepository) {}
 
   async execute(email: string, password: string) {
-    // validation (도메인 규칙)
+    // validation (email format)
     if (!email.includes('@')) {
       throw new AuthError('INVALID_EMAIL');
     }
@@ -16,9 +16,10 @@ export class LoginUseCase {
 
     const user = await this.authRepository.login(email, password);
 
-    // (확장 포인트) 로그인 후 로직
+    // After login logic
     // ex) audit log, analytics
 
     return user;
   }
 }
+

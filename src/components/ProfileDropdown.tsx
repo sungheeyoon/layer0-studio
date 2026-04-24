@@ -35,10 +35,10 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
 
   return (
     <div className="relative flex items-center gap-3" ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer">
+      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer flex items-center">
         {children || (
           <span
-            className="material-symbols-outlined text-zinc-900 dark:text-zinc-100 active:opacity-80 transition-opacity"
+            className="material-symbols-outlined text-zinc-500 dark:text-zinc-500 active:opacity-80 transition-opacity"
             data-icon="account_circle"
           >
             account_circle

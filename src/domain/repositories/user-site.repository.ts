@@ -10,4 +10,5 @@ export interface IUserSiteRepository {
   updateSiteJson(id: string, siteJson: TemplateJson): Promise<UserSite>;
   delete(id: string): Promise<void>;
   findByDomain(domain: string): Promise<UserSite | null>;
+  findByUserIdAndName(userId: string, name: string): Promise<UserSite | null>;
 }

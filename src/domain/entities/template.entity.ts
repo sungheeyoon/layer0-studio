@@ -1,10 +1,28 @@
-export interface TemplateField {
-  value: string;
-  type: 'text' | 'textarea' | 'image' | 'url' | 'color' | 'number' | 'select';
+export type TemplateFieldType = 'text' | 'textarea' | 'image' | 'url' | 'color' | 'number' | 'select';
+
+interface BaseTemplateField {
   label: string;
   editable?: boolean; // Basic true, hidden in editor if false
-  options?: string[]; // for 'select' type
 }
+
+export interface TextTemplateField extends BaseTemplateField {
+  type: 'text' | 'textarea' | 'url' | 'color' | 'number';
+  value: string;
+}
+
+export interface SelectTemplateField extends BaseTemplateField {
+  type: 'select';
+  value: string;
+  options: string[]; // for 'select' type
+}
+
+export interface ImageTemplateField extends BaseTemplateField {
+  type: 'image';
+  value: string; // CDN URL
+  assetId?: string | null; // UUID of physical asset for reference counting
+}
+
+export type TemplateField = TextTemplateField | SelectTemplateField | ImageTemplateField;
 
 export interface TemplateSection {
   id: string;
@@ -23,10 +41,19 @@ export interface TemplateGlobalStyles {
   layout: string;
 }
 
+export interface TemplatePage {
+  id: string;
+  title: string;
+  slug: string;
+  order: number;
+  sections: TemplateSection[];
+}
+
 export interface TemplateJson {
   themeKey: string; // 'corporate' | 'cafe' etc. - renderer key
   globalStyles: TemplateGlobalStyles;
-  sections: TemplateSection[];
+  pages: TemplatePage[];
+  sections?: TemplateSection[]; // DEPRECATED: use pages instead
 }
 
 export interface Template {

@@ -3,10 +3,12 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { UserSite } from '@/domain/entities/user-site.entity';
 import { TemplateJson, TemplateGlobalStyles } from '@/domain/entities/template.entity';
-import { saveSiteJsonAction, publishSiteAction } from '@/app/(dashboard)/editor/actions';
+import { saveSiteJsonAction, publishSiteAction } from '@/app/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTheme } from '@/themes/registry';
 import { ThemeRendererProps } from '@/themes/types';
+import { createClient } from '@/utils/supabase/client';
+import { initUploadAction, confirmUploadAction } from '@/app/dashboard/editor/actions';
 
 interface DynamicEditorProps {
   site: UserSite;
@@ -15,9 +17,29 @@ interface DynamicEditorProps {
 export default function DynamicEditor({ site }: DynamicEditorProps) {
   const [siteJson, setSiteJson] = useState<TemplateJson>(site.siteJson);
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
-  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
-    siteJson.sections[0]?.id ?? null
+
+  const [activePageId, setActivePageId] = useState<string>(
+    siteJson.pages?.[0]?.id || 'home'
   );
+
+  const activePage = useMemo(() => {
+    if (siteJson.pages && siteJson.pages.length > 0) {
+      return siteJson.pages.find(p => p.id === activePageId) || siteJson.pages[0];
+    }
+    // Backward compatibility
+    return {
+      id: 'home',
+      title: 'Home',
+      slug: '/',
+      order: 0,
+      sections: siteJson.sections || []
+    };
+  }, [siteJson.pages, siteJson.sections, activePageId]);
+
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
+    activePage.sections[0]?.id ?? null
+  );
+
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
@@ -60,20 +82,31 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     return () => { mounted = false; };
   }, [siteJson.themeKey]);
 
-  const selectedSection = siteJson.sections.find((s) => s.id === selectedSectionId) ?? null;
+  const selectedSection = activePage.sections.find((s) => s.id === selectedSectionId) ?? null;
 
   const handleFieldChange = useCallback(
-    (sectionId: string, fieldKey: string, value: string) => {
+    (sectionId: string, fieldKey: string, value: string, assetId?: string) => {
       setSiteJson((prev) => {
         const updated = JSON.parse(JSON.stringify(prev)) as TemplateJson;
-        const section = updated.sections.find((s) => s.id === sectionId);
+
+        let section;
+        if (updated.pages && updated.pages.length > 0) {
+          const page = updated.pages.find(p => p.id === activePageId);
+          section = page?.sections.find(s => s.id === sectionId);
+        } else {
+          section = updated.sections?.find((s) => s.id === sectionId);
+        }
+
         if (section && section.data[fieldKey]) {
           section.data[fieldKey].value = value;
+          if (assetId !== undefined) {
+            (section.data[fieldKey] as any).assetId = assetId;
+          }
         }
         return updated;
       });
     },
-    []
+    [activePageId]
   );
 
   const handleGlobalStyleChange = useCallback(
@@ -129,49 +162,81 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     '--theme-font-size': siteJson.globalStyles.fontSize,
   } as React.CSSProperties), [siteJson.globalStyles]);
 
+  useEffect(() => {
+    if (selectedSectionId) {
+      const element = document.getElementById(`section-${selectedSectionId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [selectedSectionId]);
+
   return (
     <>
       {/* Left Panel */}
-      <section className="w-1/4 flex flex-col border-r border-outline-variant bg-surface overflow-hidden">
+      <section className="w-[280px] min-w-[280px] shrink-0 flex flex-col border border-outline-variant bg-surface overflow-hidden">
         {/* Tab Switcher */}
         <div className="flex border-b border-outline-variant">
           <button
             onClick={() => setActiveTab('content')}
-            className={`flex-1 py-4 text-[0.6875rem] tracking-[0.2em] uppercase font-medium transition-colors ${
-              activeTab === 'content' ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-primary'
-            }`}
+            className={`flex-1 py-4 text-[0.6875rem] tracking-[0.2em] uppercase font-medium transition-colors ${activeTab === 'content' ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-primary'
+              }`}
           >
             Content
           </button>
           <button
             onClick={() => setActiveTab('design')}
-            className={`flex-1 py-4 text-[0.6875rem] tracking-[0.2em] uppercase font-medium transition-colors ${
-              activeTab === 'design' ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-primary'
-            }`}
+            className={`flex-1 py-4 text-[0.6875rem] tracking-[0.2em] uppercase font-medium transition-colors ${activeTab === 'design' ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-primary'
+              }`}
           >
             Design
           </button>
         </div>
 
-        <div className="flex-grow overflow-y-auto p-8 custom-scrollbar">
+        <div className="flex-grow overflow-y-auto p-6 custom-scrollbar">
           {activeTab === 'content' ? (
             <div className="space-y-12">
+              {/* Pages Selector */}
+              {siteJson.pages && siteJson.pages.length > 0 && (
+                <div>
+                  <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
+                    Pages
+                  </h3>
+                  <div className="flex flex-wrap gap-2 mb-8">
+                    {siteJson.pages.map((page) => (
+                      <button
+                        key={page.id}
+                        onClick={() => {
+                          setActivePageId(page.id);
+                          setSelectedSectionId(page.sections[0]?.id || null);
+                        }}
+                        className={`px-3 py-1.5 text-[10px] uppercase tracking-widest border transition-all ${activePageId === page.id
+                            ? 'bg-primary text-on-primary border-primary'
+                            : 'bg-surface text-outline border-outline-variant hover:border-primary'
+                          }`}
+                      >
+                        {page.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Hierarchy */}
               <div>
                 <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
                   Hierarchy
                 </h3>
                 <ul className="space-y-4">
-                  {siteJson.sections.map((section) => (
+                  {activePage.sections.map((section) => (
                     <li
                       key={section.id}
                       onClick={() => setSelectedSectionId(section.id)}
                       className="flex items-center justify-between group cursor-pointer"
                     >
                       <span
-                        className={`font-['Inter'] font-light text-xs tracking-wider transition-colors ${
-                          selectedSectionId === section.id ? 'text-primary font-medium' : section.visible ? 'text-on-surface' : 'text-outline'
-                        }`}
+                        className={`font-['Inter'] font-light text-xs tracking-wider transition-colors ${selectedSectionId === section.id ? 'text-primary font-medium' : section.visible ? 'text-on-surface' : 'text-outline'
+                          }`}
                       >
                         {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
                       </span>
@@ -189,7 +254,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               {selectedSection && selectedSection.editable && (
                 <div>
                   <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                    Parameters — {selectedSection.type}
+                    Parameters ??{selectedSection.type}
                   </h3>
                   <div className="space-y-8">
                     {Object.entries(selectedSection.data)
@@ -221,7 +286,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="p-8 border-t border-outline-variant bg-surface-container-low">
+        <div className="p-6 border-t border-outline-variant bg-surface-container-low">
           <button
             onClick={handlePublish}
             disabled={publishing || saving}
@@ -239,10 +304,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
           {publishedUrl === 'NO_DOMAIN' && (
             <div className="mt-4 p-4 text-[10px] uppercase tracking-widest text-amber-600 border border-amber-300 bg-amber-50 leading-relaxed text-center">
-              Published! 
-              <a href="/domains" className="underline ml-1 font-bold hover:text-amber-800 transition-colors">
+              Published!
+              <a href="/dashboard/domains" className="underline ml-1 font-bold hover:text-amber-800 transition-colors">
                 Set a domain in Domains
-              </a> 
+              </a>
               to go live.
             </div>
           )}
@@ -264,8 +329,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         <div className="absolute top-0 left-0 bg-primary text-on-primary px-3 py-1.5 text-[10px] font-medium tracking-[0.15em] z-50">
           LIVE PREVIEW
         </div>
-        
-        <div className="flex-grow overflow-y-auto custom-scrollbar p-12">
+
+        <div className="flex-grow overflow-y-auto custom-scrollbar p-6">
           <div style={themeVariables} className="min-h-full bg-white shadow-2xl">
             {loadingError ? (
               <div className="flex flex-col items-center justify-center h-[50vh] p-8 text-center">
@@ -278,6 +343,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 siteJson={siteJson}
                 selectedSectionId={selectedSectionId}
                 onSectionClick={handleSectionClick}
+                activePageId={activePageId}
               />
             ) : (
               <div className="flex items-center justify-center h-[50vh] text-outline font-light text-sm tracking-widest uppercase animate-pulse">
@@ -291,18 +357,55 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   );
 }
 
-// ─── Dynamic Field Input ─────────────────────────────────────
+// ?�?�?� Dynamic Field Input ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
 
 interface DynamicFieldProps {
   sectionId: string;
   fieldKey: string;
   field: { value: string; type: string; label: string; options?: string[] };
-  onChange: (sectionId: string, fieldKey: string, value: string) => void;
+  onChange: (sectionId: string, fieldKey: string, value: string, assetId?: string) => void;
 }
 
 function DynamicField({ sectionId, fieldKey, field, onChange }: DynamicFieldProps) {
+  const [isUploading, setIsUploading] = useState(false);
   const baseInputClass =
     "w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 pb-1 font-['Inter'] font-light text-xs transition-colors";
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      // 1. Initial pending DB record via Server Action
+      const initRes = await initUploadAction(file.name, file.type, file.size);
+      if (!initRes.success || !initRes.uploadPath) {
+        throw new Error(initRes.error || 'Failed to initialize upload');
+      }
+
+      // 2. Upload physically via Supabase Storage Client
+      const supabase = createClient();
+      const { error: uploadError } = await supabase.storage
+        .from('user_assets')
+        .upload(initRes.uploadPath, file);
+
+      if (uploadError) throw new Error(uploadError.message);
+
+      // 3. Confirm and transition to active
+      const confirmRes = await confirmUploadAction(initRes.assetId!, initRes.uploadPath);
+      if (!confirmRes.success || !confirmRes.publicUrl) {
+        throw new Error(confirmRes.error || 'Failed to confirm upload');
+      }
+
+      // 4. Update the state
+      onChange(sectionId, fieldKey, confirmRes.publicUrl, initRes.assetId!);
+    } catch (err: any) {
+      alert(`Upload failed: ${err.message}`);
+      console.error('[ASSET_UPLOAD_ERROR]', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <div className="relative group">
@@ -319,7 +422,7 @@ function DynamicField({ sectionId, fieldKey, field, onChange }: DynamicFieldProp
         />
       ) : field.type === 'color' ? (
         <div className="flex items-center gap-2">
-          <div 
+          <div
             className="w-6 h-6 border border-outline-variant overflow-hidden"
             style={{ backgroundColor: field.value }}
           >
@@ -353,9 +456,22 @@ function DynamicField({ sectionId, fieldKey, field, onChange }: DynamicFieldProp
             type="text"
             className={baseInputClass}
             value={field.value}
-            onChange={(e) => onChange(sectionId, fieldKey, e.target.value)}
+            onChange={(e) => onChange(sectionId, fieldKey, e.target.value, undefined)}
             placeholder="https://images.unsplash.com/..."
+            disabled={isUploading}
           />
+          <div className="mt-2">
+            <input
+              type="file"
+              accept="image/jpeg, image/png, image/webp, image/gif, image/svg+xml"
+              className="text-xs max-w-full"
+              onChange={handleUpload}
+              disabled={isUploading}
+            />
+          </div>
+          {isUploading && (
+            <div className="text-xs text-primary animate-pulse mt-1">Uploading...</div>
+          )}
           {field.value && (
             // eslint-disable-next-line @next/next/no-img-element
             <img

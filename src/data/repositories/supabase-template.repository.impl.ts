@@ -10,7 +10,7 @@ import { TemplateError } from '@/domain/errors/template.error';
 export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  private mapRow(row: Record<string, unknown>): Template {
+  private mapRow = (row: Record<string, unknown>): Template => {
     return {
       id: row.id as string,
       name: row.name as string,
@@ -19,12 +19,31 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
       category: (row.category as string) ?? 'general',
       status: row.status as Template['status'],
       thumbnailUrl: (row.thumbnail_url as string) ?? null,
-      templateJson: row.template_json as Template['templateJson'],
+      templateJson: this.migrateTemplateJson(row.template_json as any),
       version: (row.version as string) ?? '1.0.0',
       createdBy: row.created_by as string,
       createdAt: row.created_at as string,
       updatedAt: row.updated_at as string,
     };
+  }
+
+  private migrateTemplateJson(json: any): any {
+    if (!json) return json;
+    
+    // Add runtime conversion for pages if sections exist but pages do not
+    if (json.sections && (!json.pages || json.pages.length === 0)) {
+      json.pages = [
+        {
+          id: 'home',
+          title: 'Home',
+          slug: '/',
+          order: 0,
+          sections: json.sections,
+        }
+      ];
+    }
+    
+    return json;
   }
 
   async findAll(): Promise<Template[]> {
@@ -54,6 +73,61 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
     }
 
     return (data ?? []).map(this.mapRow);
+  }
+
+  async findActiveByCategory(category: string): Promise<Template[]> {
+    const { data, error } = await this.supabase
+      .from('templates')
+      .select('*')
+      .eq('status', 'active')
+      .eq('category', category)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[SupabaseTemplateRepo::findActiveByCategory]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return (data ?? []).map(this.mapRow);
+  }
+
+  async findActivePaginated(page: number, limit: number, category?: string | null): Promise<{ data: Template[]; total: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    
+    let query = this.supabase
+      .from('templates')
+      .select('*', { count: 'exact' })
+      .eq('status', 'active');
+      
+    if (category) {
+      query = query.eq('category', category);
+    }
+    
+    const { data, error, count } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error('[SupabaseTemplateRepo::findActivePaginated]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return { data: (data ?? []).map(this.mapRow), total: count ?? 0 };
+  }
+
+  async getDistinctCategories(): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from('templates')
+      .select('category')
+      .eq('status', 'active');
+
+    if (error) {
+      console.error('[SupabaseTemplateRepo::getDistinctCategories]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return [...new Set((data ?? []).map(r => r.category as string))].filter(Boolean);
   }
 
   async findById(id: string): Promise<Template | null> {

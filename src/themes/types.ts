@@ -6,6 +6,7 @@ export interface ThemeRendererProps {
   siteJson: TemplateJson;
   selectedSectionId: string | null;
   onSectionClick?: (sectionId: string) => void;
+  activePageId?: string; // ID of the page to render
 }
 
 /** Theme individual section renderer Props (for components within slots) */

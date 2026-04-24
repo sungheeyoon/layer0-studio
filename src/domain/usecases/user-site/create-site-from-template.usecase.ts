@@ -23,13 +23,20 @@ export class CreateSiteFromTemplateUseCase {
   ) {}
 
   /**
-   * 템플릿으로부터 사이트 인스턴스 생성 (JSON 복사)
+   * Create a site instance from a template (Copy JSON)
    */
   async execute(input: CreateSiteFromTemplateInput) {
+
     const template = await this.templateRepository.findById(input.templateId);
 
     if (!template) {
       throw new TemplateError('TEMPLATE_NOT_FOUND');
+    }
+
+    // Check for duplicate site name
+    const existing = await this.userSiteRepository.findByUserIdAndName(input.userId, input.siteName);
+    if (existing) {
+      throw new TemplateError('NAME_TAKEN' as any); // You can add it to TemplateError later or just throw
     }
 
     // Deep copy template JSON to user's site
@@ -48,7 +55,7 @@ export class CreateSiteFromTemplateUseCase {
   }
 
   /**
-   * Admin이 커스텀 사이트를 직접 생성 (template 없이)
+   * Admin direct creation of custom site (without template)
    */
   async executeCustom(input: CreateCustomSiteInput) {
     return this.userSiteRepository.create({

@@ -7,11 +7,13 @@ import { deleteTemplateAction } from './actions';
 interface TemplateListPanelProps {
   templates: Template[];
   onEdit: (template: Template) => void;
+  onDelete?: (id: string) => void;
 }
 
 export default function TemplateListPanel({
   templates,
   onEdit,
+  onDelete,
 }: TemplateListPanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(
     templates[0]?.id ?? null,
@@ -19,7 +21,18 @@ export default function TemplateListPanel({
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this template?')) return;
-    await deleteTemplateAction(id);
+    const result = await deleteTemplateAction(id);
+    if (result && 'error' in result) {
+      alert(`Failed to delete template: ${result.error}`);
+    } else {
+      onDelete?.(id);
+    }
+  };
+
+  const handleDuplicate = (template: Template) => {
+    // Placeholder for duplicate functionality
+    alert('Duplicate functionality is coming soon!');
+    console.log('Duplicate template:', template);
   };
 
   return (
@@ -49,7 +62,7 @@ export default function TemplateListPanel({
       <div className="px-8 pb-12 space-y-4">
         {templates.length === 0 && (
           <p className="text-[10px] text-neutral-400 uppercase tracking-widest pt-4">
-            No templates yet. Create one →
+            No templates yet. Create your first template to get started.
           </p>
         )}
 
@@ -118,7 +131,13 @@ export default function TemplateListPanel({
                     >
                       Edit
                     </button>
-                    <button className="text-[9px] uppercase tracking-tighter border-b border-neutral-300 dark:border-neutral-700 hover:border-black dark:hover:border-white">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDuplicate(template);
+                      }}
+                      className="text-[9px] uppercase tracking-tighter border-b border-neutral-300 dark:border-neutral-700 hover:border-black dark:hover:border-white"
+                    >
                       Duplicate
                     </button>
                     <button

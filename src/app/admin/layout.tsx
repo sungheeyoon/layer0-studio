@@ -18,7 +18,7 @@ export default async function AdminLayout({
   // Role check: Only users with 'admin' role in their metadata can access
   const role = user.app_metadata?.role;
   if (role !== 'admin') {
-    redirect('/templates');
+    redirect('/dashboard/templates');
   }
 
   return (

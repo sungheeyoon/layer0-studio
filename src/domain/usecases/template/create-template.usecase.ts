@@ -25,7 +25,10 @@ export class CreateTemplateUseCase {
     }
 
     // Validate JSON structure
-    if (!input.templateJson.sections || !Array.isArray(input.templateJson.sections)) {
+    const hasPages = input.templateJson.pages && Array.isArray(input.templateJson.pages);
+    const hasSections = input.templateJson.sections && Array.isArray(input.templateJson.sections);
+
+    if (!hasPages && !hasSections) {
       throw new TemplateError('INVALID_TEMPLATE_JSON');
     }
 

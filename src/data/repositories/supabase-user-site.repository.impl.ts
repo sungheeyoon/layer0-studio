@@ -11,7 +11,7 @@ import { TemplateError } from '@/domain/errors/template.error';
 export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  private mapRow(row: Record<string, unknown>): UserSite {
+  private mapRow = (row: Record<string, unknown>): UserSite => {
     return {
       id: row.id as string,
       userId: row.user_id as string,
@@ -19,12 +19,31 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       siteName: row.site_name as string,
       domain: (row.domain as string) ?? null,
       status: row.status as UserSite['status'],
-      siteJson: row.site_json as TemplateJson,
-      templateSnapshot: row.template_snapshot as TemplateJson,
+      siteJson: this.migrateTemplateJson(row.site_json as any),
+      templateSnapshot: this.migrateTemplateJson(row.template_snapshot as any),
       publishedAt: (row.published_at as string) ?? null,
       createdAt: row.created_at as string,
       updatedAt: row.updated_at as string,
     };
+  }
+
+  private migrateTemplateJson(json: any): TemplateJson {
+    if (!json) return json;
+    
+    // Add runtime conversion for pages if sections exist but pages do not
+    if (json.sections && (!json.pages || json.pages.length === 0)) {
+      json.pages = [
+        {
+          id: 'home',
+          title: 'Home',
+          slug: '/',
+          order: 0,
+          sections: json.sections,
+        }
+      ];
+    }
+    
+    return json as TemplateJson;
   }
 
   async findByUserId(userId: string): Promise<UserSite[]> {
@@ -126,25 +145,51 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
   }
 
   async updateSiteJson(id: string, siteJson: TemplateJson): Promise<UserSite> {
-    const { data, error } = await this.supabase
-      .from('user_sites')
-      .update({
-        site_json: siteJson,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single();
+    // Extract new asset usages
+    const newUsages: Array<{ asset_id: string; slot_key: string }> = [];
 
-    if (error) {
-      console.error('[SupabaseUserSiteRepo::updateSiteJson]', error.message);
-      if (error.code === 'PGRST116') {
-        throw new TemplateError('SITE_NOT_FOUND');
+    if (siteJson && Array.isArray(siteJson.pages)) {
+      for (const page of siteJson.pages) {
+        if (!Array.isArray(page.sections)) continue;
+        for (const section of page.sections) {
+          if (!section.data) continue;
+          for (const [key, field] of Object.entries(section.data)) {
+            const f = field as any;
+            if (f.type === 'image' && f.assetId) {
+              newUsages.push({
+                asset_id: f.assetId,
+                slot_key: `${page.id}.${section.id}.${key}`,
+              });
+            }
+          }
+        }
       }
-      throw new TemplateError('UNKNOWN');
     }
 
-    return this.mapRow(data);
+    // Call Postgres RPC to perform ATOMIC lock, delete orphaned usages, push to cleanup, update json
+    const { error: rpcError } = await this.supabase.rpc('save_site_template_with_lock', {
+      p_site_id: id,
+      p_new_json: siteJson,
+      p_new_usages: newUsages,
+    });
+
+    if (rpcError) {
+      console.error('[SupabaseUserSiteRepo::updateSiteJson]', rpcError.message);
+      throw new TemplateError('UNKNOWN'); // Propagates internal DB rollback
+    }
+
+    // Return the updated row
+    const { data: updatedData, error: fetchError } = await this.supabase
+      .from('user_sites')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !updatedData) {
+      throw new TemplateError('SITE_NOT_FOUND');
+    }
+
+    return this.mapRow(updatedData);
   }
 
   async delete(id: string): Promise<void> {
@@ -170,6 +215,23 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     if (error) {
       if (error.code === 'PGRST116') return null; // not found
       console.error('[SupabaseUserSiteRepo::findByDomain]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return data ? this.mapRow(data) : null;
+  }
+
+  async findByUserIdAndName(userId: string, name: string): Promise<UserSite | null> {
+    const { data, error } = await this.supabase
+      .from('user_sites')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('site_name', name)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // not found
+      console.error('[SupabaseUserSiteRepo::findByUserIdAndName]', error.message);
       throw new TemplateError('UNKNOWN');
     }
 
