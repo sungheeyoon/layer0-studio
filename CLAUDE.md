@@ -48,7 +48,7 @@ src/themes/       ← Theme renderers (pluggable)
 | `/admin/*` | Admin area — requires `app_metadata.role === 'admin'` |
 | `/site/[domain]` | Public published site renderer |
 | `/preview/[id]` | Preview before publishing |
-| `/api/cron/cleanup-assets` | Cron job: orphan asset cleanup via Supabase RPCs (Bearer `CRON_SECRET`) |
+| `/api/cron/cleanup-assets` | Cron job: orphan asset cleanup via Supabase RPCs (Bearer `CRON_SECRET`). Schedule: `0 3 * * *` (daily 03:00 UTC) — free Vercel plan limit (1 cron/day) |
 
 ### Theme system
 
