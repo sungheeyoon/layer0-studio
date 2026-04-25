@@ -9,9 +9,12 @@ export default function AdminTopNav() {
         </span>
       </div>
       <div className="flex items-center gap-6">
-        <div className="relative">
+        <div className="relative flex items-center">
+          <span className="material-symbols-outlined text-neutral-400 absolute left-2 scale-75" data-icon="search">
+            search
+          </span>
           <input
-            className="bg-transparent border-none focus:ring-0 font-['Inter'] font-light tracking-wider text-[10px] uppercase w-48 text-neutral-900 dark:text-neutral-100 outline-none"
+            className="bg-transparent border-none focus:ring-0 font-['Inter'] font-light tracking-wider text-[10px] uppercase w-48 text-neutral-900 dark:text-neutral-100 outline-none pl-8"
             placeholder="SEARCH_SYSTEM..."
             type="text"
           />

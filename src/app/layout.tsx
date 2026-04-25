@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/utils/supabase/server";
 import ConditionalLayoutWrapper from "@/components/ConditionalLayoutWrapper";
+import { SITE_URL } from "@/lib/seo/base-url";
 import "./globals.css";
 
 const inter = Inter({
@@ -11,9 +12,30 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const SITE_NAME = "Layer0 Studio";
+const SITE_DESCRIPTION = "Build and manage your website without developers.";
+
 export const metadata: Metadata = {
-  title: "Layer0 Studio",
-  description: "Build and manage your website without developers.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default async function RootLayout({
@@ -27,8 +49,8 @@ export default async function RootLayout({
     <html lang="en" className="light">
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         />
       </head>
       <body className={`${inter.variable} bg-surface font-body text-on-surface antialiased`}>

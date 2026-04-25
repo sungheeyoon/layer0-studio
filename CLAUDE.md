@@ -39,13 +39,16 @@ src/themes/       ← Theme renderers (pluggable)
 | Path | Purpose |
 |---|---|
 | `/` | Marketing landing page |
+| `/templates` | **Public** template catalog — unauthenticated browsing (shop-style product list). Selecting a template redirects through auth to `/dashboard/projects/create` |
 | `/login`, `/signup` | Auth pages (Server Actions in `actions.ts`) |
 | `/dashboard/*` | Authenticated user area (protected in `dashboard/layout.tsx`) |
+| `/dashboard/templates` | Authenticated template catalog (same data, different chrome) |
+| `/dashboard/projects/create?templateId=<id>` | Provision a new site from a template |
 | `/dashboard/editor?siteId=<id>` | Visual editor |
 | `/admin/*` | Admin area — requires `app_metadata.role === 'admin'` |
 | `/site/[domain]` | Public published site renderer |
 | `/preview/[id]` | Preview before publishing |
-| `/api/cron/cleanup-assets` | Cron job: orphan asset cleanup via Supabase RPCs |
+| `/api/cron/cleanup-assets` | Cron job: orphan asset cleanup via Supabase RPCs (Bearer `CRON_SECRET`) |
 
 ### Theme system
 
@@ -54,7 +57,7 @@ Themes live in `src/themes/`. Each theme directory exports a default renderer co
 The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer. It has:
 - `themeKey`: selects the renderer
 - `globalStyles`: CSS custom properties (`--theme-primary`, etc.) applied at the root
-- `pages`: array of pages, each with `sections` — always use `pages[].sections`; top-level `sections` was removed (2026-04-24, `scripts/migrate-sections-to-pages.sql`)
+- `pages`: array of pages, each with `sections` — always use `pages[].sections`; top-level `sections` was removed (2026-04-24, `docs/migrations/migrate-sections-to-pages.sql`)
 
 The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the theme renderer at runtime via `loadTheme()`. Clicking a section in the preview panel selects it in the left panel for inline editing.
 
@@ -74,9 +77,17 @@ Orphan cleanup runs via the cron endpoint using `sweep_orphaned_assets` and `cla
 
 ### Environment variables
 
-Required in `.env.local`:
+Required in `.env.local` (and in Vercel project env for deploys):
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SITE_URL=       # e.g. https://layer0.studio — used by sitemap, robots, metadataBase, OG canonical
+CRON_SECRET=                # Bearer token validated by /api/cron/cleanup-assets
 ```
+
+If `NEXT_PUBLIC_SITE_URL` is missing, `src/lib/seo/base-url.ts` falls back to `http://localhost:3000` — crawlers will then index localhost URLs. Set this before any production build.
+
+### Database migrations
+
+SQL migrations live in `docs/migrations/` (001–009). Apply manually via the Supabase dashboard SQL editor or `supabase db push`. Migration 009 (`009_storage_bucket_hardening.sql`) enforces bucket-level MIME/size on `user_assets` and restricts `template-thumbnails` writes to admins — must be applied before launch.

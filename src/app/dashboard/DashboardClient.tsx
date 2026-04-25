@@ -87,7 +87,7 @@ export default function DashboardClient({ initialSites }: DashboardClientProps) 
                     </div>
                   </div>
 
-                  <Link href={`/editor?siteId=${selectedSite.id}`} className="w-max bg-black dark:bg-white text-white dark:text-black font-['Inter'] font-medium text-[10px] uppercase tracking-[0.15em] py-4 px-10 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all inline-block">
+                  <Link href={`/dashboard/editor?siteId=${selectedSite.id}`} className="w-max bg-black dark:bg-white text-white dark:text-black font-['Inter'] font-medium text-[10px] uppercase tracking-[0.15em] py-4 px-10 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all inline-block">
                     CONTINUE_EDITING
                   </Link>
                 </>
@@ -211,15 +211,16 @@ export default function DashboardClient({ initialSites }: DashboardClientProps) 
                       View
                     </a>
                   ) : (
-                    <button
-                      disabled
-                      className="border border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest cursor-not-allowed"
+                    <Link
+                      href={`/preview/${site.id}`}
+                      target="_blank"
+                      className="border border-zinc-300 dark:border-zinc-700 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                     >
-                      View
-                    </button>
+                      Preview
+                    </Link>
                   )}
                   <Link
-                    href={`/editor?siteId=${site.id}`}
+                    href={`/dashboard/editor?siteId=${site.id}`}
                     className="bg-black text-white dark:bg-white dark:text-black h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
                   >
                     Edit

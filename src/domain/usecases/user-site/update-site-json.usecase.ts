@@ -63,13 +63,11 @@ export class UpdateSiteJsonUseCase {
 
     // Find the section and update the field
     let section;
-    if (pageId && updatedJson.pages) {
+    if (pageId) {
       const page = updatedJson.pages.find(p => p.id === pageId);
       section = page?.sections.find(s => s.id === sectionId);
-    } else if (updatedJson.sections) {
-      section = updatedJson.sections.find((s) => s.id === sectionId);
-    } else if (updatedJson.pages) {
-      // Fallback: search across all pages if pageId not provided
+    } else {
+      // Search across all pages when pageId is not provided
       for (const page of updatedJson.pages) {
         section = page.sections.find(s => s.id === sectionId);
         if (section) break;
@@ -90,11 +88,7 @@ export class UpdateSiteJsonUseCase {
   }
 
   private validateJson(siteJson: TemplateJson) {
-    // Both pages and sections are allowed for now, but one must exist
-    const hasPages = siteJson.pages && Array.isArray(siteJson.pages);
-    const hasSections = siteJson.sections && Array.isArray(siteJson.sections);
-
-    if (!hasPages && !hasSections) {
+    if (!Array.isArray(siteJson.pages) || siteJson.pages.length === 0) {
       throw new TemplateError('INVALID_TEMPLATE_JSON');
     }
 

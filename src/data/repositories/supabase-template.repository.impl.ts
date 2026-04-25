@@ -2,6 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { ITemplateRepository } from '@/domain/repositories/template.repository';
 import {
   Template,
+  TemplateJson,
   CreateTemplateDto,
   UpdateTemplateDto,
 } from '@/domain/entities/template.entity';
@@ -19,31 +20,12 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
       category: (row.category as string) ?? 'general',
       status: row.status as Template['status'],
       thumbnailUrl: (row.thumbnail_url as string) ?? null,
-      templateJson: this.migrateTemplateJson(row.template_json as any),
+      templateJson: row.template_json as TemplateJson,
       version: (row.version as string) ?? '1.0.0',
       createdBy: row.created_by as string,
       createdAt: row.created_at as string,
       updatedAt: row.updated_at as string,
     };
-  }
-
-  private migrateTemplateJson(json: any): any {
-    if (!json) return json;
-    
-    // Add runtime conversion for pages if sections exist but pages do not
-    if (json.sections && (!json.pages || json.pages.length === 0)) {
-      json.pages = [
-        {
-          id: 'home',
-          title: 'Home',
-          slug: '/',
-          order: 0,
-          sections: json.sections,
-        }
-      ];
-    }
-    
-    return json;
   }
 
   async findAll(): Promise<Template[]> {

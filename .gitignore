@@ -45,3 +45,4 @@ next-env.d.ts
 
 # local scripts (migration helpers, one-off tooling)
 /scripts/
+.claude/

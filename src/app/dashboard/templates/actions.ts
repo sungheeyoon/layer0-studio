@@ -58,13 +58,11 @@ export async function selectTemplateAction(templateId: string, siteName: string,
     });
 
     if (urlSlug) {
-      const domainResult = await updateSiteDomainAction(site.id, urlSlug);
-      // Domain errors here shouldn't stop the project creation, 
-      // but maybe we could handle them. For now, we proceed.
+      await updateSiteDomainAction(site.id, urlSlug);
     }
 
     revalidatePath('/templates');
-    redirect(`/editor?siteId=${site.id}`);
+    redirect(`/dashboard/editor?siteId=${site.id}`);
   } catch (err) {
     if (err instanceof TemplateError) {
       return { error: err.code };

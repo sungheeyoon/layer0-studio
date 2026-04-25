@@ -36,7 +36,9 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
       const result = await updateSiteDomainAction(settingsSite.id, editDomain);
       if (result.error) {
         if (result.error === 'DOMAIN_TAKEN') {
-          setDomainError('?��? ?�용 중인 ?�메?�입?�다');
+          setDomainError('이미 사용 중인 도메인입니다');
+        } else if (result.error === 'INVALID_DOMAIN') {
+          setDomainError('도메인 형식이 올바르지 않거나 예약된 단어입니다 (최소 3자, 영문/숫자/하이픈)');
         } else {
           setDomainError(result.error);
         }
@@ -44,7 +46,7 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
         setDomainVerified(true);
         setSettingsSite({ ...settingsSite, domain: result.domain });
       }
-    } catch (e) {
+    } catch {
       setDomainError('An unexpected error occurred.');
     } finally {
       setIsVerifying(false);
@@ -161,15 +163,16 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
                     View
                   </a>
                 ) : (
-                  <button
-                    disabled
-                    className="border border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest cursor-not-allowed"
+                  <Link
+                    href={`/preview/${site.id}`}
+                    target="_blank"
+                    className="border border-zinc-300 dark:border-zinc-700 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                   >
-                    View
-                  </button>
+                    Preview
+                  </Link>
                 )}
                 <Link
-                  href={`/editor?siteId=${site.id}`}
+                  href={`/dashboard/editor?siteId=${site.id}`}
                   className="bg-black text-white dark:bg-white dark:text-black h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
                 >
                   Edit

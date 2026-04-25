@@ -1,5 +1,4 @@
 import { ThemeSectionProps } from '../../types';
-import styles from '../corporate.module.css';
 
 export default function FooterSection({ section }: ThemeSectionProps) {
   const { data } = section;
@@ -47,8 +46,8 @@ export default function FooterSection({ section }: ThemeSectionProps) {
           {copyright}
         </span>
         <div className="flex gap-8">
-          <span className="text-[10px] uppercase tracking-widest opacity-40 hover:opacity-100 cursor-pointer transition-opacity font-light">Privacy</span>
-          <span className="text-[10px] uppercase tracking-widest opacity-40 hover:opacity-100 cursor-pointer transition-opacity font-light">Terms</span>
+          <a href="/legal/privacy" className="text-[10px] uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity font-light">Privacy</a>
+          <a href="/legal/terms" className="text-[10px] uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity font-light">Terms</a>
         </div>
       </div>
     </footer>

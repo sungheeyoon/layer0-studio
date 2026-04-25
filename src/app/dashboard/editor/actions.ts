@@ -22,6 +22,7 @@ export async function loadSiteAction(siteId: string) {
   try {
     const site = await useCase.execute(siteId);
     if (site && user && site.userId !== user.id) {
+      console.warn('[loadSiteAction] FORBIDDEN: user %s attempted to access site %s', user?.id, siteId);
       return null;
     }
     return site;
@@ -29,6 +30,7 @@ export async function loadSiteAction(siteId: string) {
     if (err instanceof TemplateError) {
       return null;
     }
+    console.error('[loadSiteAction] unexpected error for site %s:', siteId, err);
     return null;
   }
 }
@@ -45,7 +47,7 @@ export async function saveSiteJsonAction(siteId: string, siteJson: TemplateJson)
     const useCase = createUpdateSiteJsonUseCase(supabase);
     const site = await useCase.execute(siteId, siteJson, user.id);
 
-    revalidatePath('/editor');
+    revalidatePath('/dashboard/editor');
     return { success: true, site };
   } catch (err) {
     if (err instanceof TemplateError) {
@@ -90,11 +92,31 @@ export async function publishSiteAction(siteId: string) {
     return { error: 'UNAUTHORIZED' };
   }
 
+  // Rate limit: 30-second cooldown per user across all sites
+  const { data: latestPublish } = await supabase
+    .from('user_sites')
+    .select('published_at')
+    .eq('user_id', user.id)
+    .not('published_at', 'is', null)
+    .order('published_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (latestPublish?.published_at) {
+    const elapsed = (Date.now() - new Date(latestPublish.published_at).getTime()) / 1000;
+    if (elapsed < 30) {
+      return { error: 'RATE_LIMITED' };
+    }
+  }
+
   try {
     const useCase = createPublishSiteUseCase(supabase);
-    await useCase.execute(siteId, user.id);
+    const site = await useCase.execute(siteId, user.id);
 
-    revalidatePath('/editor');
+    revalidatePath('/dashboard/editor');
+    if (site.domain) {
+      revalidatePath(`/site/${site.domain}`);
+    }
     return { success: true };
   } catch (err) {
     if (err instanceof TemplateError) {
@@ -116,14 +138,11 @@ export async function updateSiteDomainAction(siteId: string, domain: string) {
     const useCase = createUpdateSiteDomainUseCase(supabase);
     const site = await useCase.execute(siteId, domain, user.id);
 
-    revalidatePath('/editor');
+    revalidatePath('/dashboard/editor');
     return { success: true, domain: site.domain };
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof TemplateError) {
       return { error: err.code };
-    }
-    if (err.message === 'INVALID_DOMAIN' || err.message === 'DOMAIN_TAKEN') {
-      return { error: err.message };
     }
     return { error: 'UNKNOWN' };
   }
@@ -141,7 +160,7 @@ export async function deleteSiteAction(siteId: string) {
     const useCase = createDeleteUserSiteUseCase(supabase);
     await useCase.execute(siteId, user.id);
 
-    revalidatePath('/templates');
+    revalidatePath('/dashboard/projects');
     return { success: true };
   } catch (err) {
     if (err instanceof TemplateError) {
@@ -178,9 +197,9 @@ export async function initUploadAction(
     const uploadPath = `${user.id}/${asset.id}/${filename}`;
 
     return { success: true, assetId: asset.id, uploadPath };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[initUploadAction]', err);
-    return { error: err.message || 'UNKNOWN' };
+    return { error: err instanceof Error ? err.message : 'UNKNOWN' };
   }
 }
 
@@ -202,8 +221,8 @@ export async function confirmUploadAction(assetId: string, uploadPath: string) {
       .getPublicUrl(uploadPath);
 
     return { success: true, asset, publicUrl };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[confirmUploadAction]', err);
-    return { error: err.message || 'UNKNOWN' };
+    return { error: err instanceof Error ? err.message : 'UNKNOWN' };
   }
 }

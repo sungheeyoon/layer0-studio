@@ -19,31 +19,12 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       siteName: row.site_name as string,
       domain: (row.domain as string) ?? null,
       status: row.status as UserSite['status'],
-      siteJson: this.migrateTemplateJson(row.site_json as any),
-      templateSnapshot: this.migrateTemplateJson(row.template_snapshot as any),
+      siteJson: row.site_json as TemplateJson,
+      templateSnapshot: (row.template_snapshot as TemplateJson) ?? null,
       publishedAt: (row.published_at as string) ?? null,
       createdAt: row.created_at as string,
       updatedAt: row.updated_at as string,
     };
-  }
-
-  private migrateTemplateJson(json: any): TemplateJson {
-    if (!json) return json;
-    
-    // Add runtime conversion for pages if sections exist but pages do not
-    if (json.sections && (!json.pages || json.pages.length === 0)) {
-      json.pages = [
-        {
-          id: 'home',
-          title: 'Home',
-          slug: '/',
-          order: 0,
-          sections: json.sections,
-        }
-      ];
-    }
-    
-    return json as TemplateJson;
   }
 
   async findByUserId(userId: string): Promise<UserSite[]> {
@@ -154,7 +135,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
         for (const section of page.sections) {
           if (!section.data) continue;
           for (const [key, field] of Object.entries(section.data)) {
-            const f = field as any;
+            const f = field as { type: string; assetId?: string };
             if (f.type === 'image' && f.assetId) {
               newUsages.push({
                 asset_id: f.assetId,

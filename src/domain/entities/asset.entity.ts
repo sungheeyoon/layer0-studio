@@ -20,7 +20,6 @@ export const ASSET_VALIDATION_RULES = {
     'image/png',
     'image/gif',
     'image/webp',
-    'image/svg+xml'
   ]
 };
 

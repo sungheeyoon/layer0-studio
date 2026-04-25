@@ -36,7 +36,7 @@ export class CreateSiteFromTemplateUseCase {
     // Check for duplicate site name
     const existing = await this.userSiteRepository.findByUserIdAndName(input.userId, input.siteName);
     if (existing) {
-      throw new TemplateError('NAME_TAKEN' as any); // You can add it to TemplateError later or just throw
+      throw new TemplateError('NAME_TAKEN');
     }
 
     // Deep copy template JSON to user's site

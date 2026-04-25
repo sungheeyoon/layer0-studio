@@ -2,12 +2,23 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/container';
 import { loadTheme } from '@/themes/registry';
+import { SITE_URL } from '@/lib/seo/base-url';
 import type { Metadata } from 'next';
 import React from 'react';
-import ThemeClientWrapper from '@/themes/ThemeClientWrapper';
 
 interface Props {
   params: Promise<{ domain: string }>;
+}
+
+function buildDescription(siteName: string, homeTitle: string | undefined, heroTitle: string, heroSubtitle: string): string {
+  const parts: string[] = [];
+  if (heroSubtitle) parts.push(heroSubtitle);
+  else if (heroTitle) parts.push(heroTitle);
+  if (homeTitle && homeTitle !== siteName && !parts.join(' ').includes(homeTitle)) {
+    parts.push(homeTitle);
+  }
+  if (parts.length === 0) return `${siteName} — official website`;
+  return parts.join(' · ').slice(0, 200);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -18,22 +29,38 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const site = await useCase.execute(domain);
     const { siteJson } = site;
-    
-    // Find home page data for metadata
-    let sections = siteJson.sections || [];
-    if (siteJson.pages && siteJson.pages.length > 0) {
-      const homePage = siteJson.pages.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages[0];
-      sections = homePage.sections;
-    }
-    
-    const heroTitle = sections.find(s => s.type === 'hero')?.data['title']?.value;
+
+    const homePage = siteJson.pages.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages[0];
+    const heroSection = homePage?.sections.find(s => s.type === 'hero');
+    const heroTitle = heroSection?.data['title']?.value || heroSection?.data['heading']?.value || '';
+    const heroSubtitle = heroSection?.data['subtitle']?.value || '';
+    const description = buildDescription(site.siteName, homePage?.title, heroTitle, heroSubtitle);
+
+    const canonical = `${SITE_URL}/site/${domain}`;
 
     return {
       title: site.siteName,
-      description: heroTitle || `${site.siteName} — Built with Layer0 Studio`,
+      description,
+      alternates: { canonical },
+      openGraph: {
+        title: site.siteName,
+        description,
+        type: 'website',
+        siteName: site.siteName,
+        url: canonical,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: site.siteName,
+        description,
+      },
+      robots: { index: true, follow: true },
     };
   } catch {
-    return { title: 'Site Not Found' };
+    return {
+      title: 'Site Not Found',
+      robots: { index: false, follow: false },
+    };
   }
 }
 
@@ -51,9 +78,18 @@ export default async function PublicSitePage({ params }: Props) {
   }
 
   const { siteJson } = site;
-  
-  // Identify active page for the root domain (Home)
-  const homePage = siteJson.pages?.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages?.[0];
+
+  const themeKey = siteJson.themeKey || 'corporate';
+  const themeModule = await loadTheme(themeKey);
+
+  if (!themeModule) {
+    console.error(`[PublicSitePage] Theme "${themeKey}" not found`);
+    notFound();
+  }
+
+  const ThemeRenderer = themeModule.default;
+
+  const homePage = siteJson.pages.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages[0];
   const activePageId = homePage?.id;
 
   const themeVariables = {
@@ -68,8 +104,7 @@ export default async function PublicSitePage({ params }: Props) {
       className="min-h-screen"
       style={themeVariables}
     >
-      <ThemeClientWrapper
-        themeKey={siteJson.themeKey || 'corporate'}
+      <ThemeRenderer
         siteJson={siteJson}
         selectedSectionId={null}
         activePageId={activePageId}

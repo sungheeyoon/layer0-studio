@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Template } from '@/domain/entities/template.entity';
 import { selectTemplateAction } from '@/app/dashboard/templates/actions';
 
@@ -10,34 +9,34 @@ interface CreateProjectClientProps {
 }
 
 export default function CreateProjectClient({ template }: CreateProjectClientProps) {
-  const router = useRouter();
   const [siteName, setSiteName] = useState('');
   const [urlSlug, setUrlSlug] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [provisionError, setProvisionError] = useState<string | null>(null);
 
   const handleProvision = async () => {
     if (!siteName) {
-      alert('Please enter a site name.');
+      setProvisionError('사이트 이름을 입력해주세요.');
       return;
     }
+    setProvisionError(null);
     setIsSubmitting(true);
     try {
       const result = await selectTemplateAction(template.id, siteName, urlSlug);
       if (result?.error) {
-        if (result.error === 'NAME_TAKEN') {
-          alert('Error: Site name is already taken.');
-        } else {
-          alert('Error: ' + result.error);
-        }
+        setProvisionError(
+          result.error === 'NAME_TAKEN'
+            ? '이미 사용 중인 사이트 이름입니다.'
+            : '오류가 발생했습니다: ' + result.error
+        );
         setIsSubmitting(false);
       }
-    } catch (e) {
-      // redirect throws so this might catch that if not careful, but Next.js router redirect 
-      // is usually handled automatically.
+    } catch {
+      // Next.js redirect() throws internally and is handled automatically.
     }
   };
 
-  const sectionsCount = template.templateJson?.sections?.length || 0;
+  const sectionsCount = template.templateJson?.pages?.[0]?.sections?.length || 0;
 
   return (
     <div className="-mx-12 -my-12 px-12 py-12 bg-white min-h-[calc(100vh-3.5rem)] text-on-background">
@@ -127,6 +126,11 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
 
             {/* ACTION */}
             <div className="pt-8">
+              {provisionError && (
+                <div className="px-4 py-3 border border-error/40 bg-error/5 text-[10px] tracking-widest text-error uppercase">
+                  {provisionError}
+                </div>
+              )}
               <button
                 onClick={handleProvision}
                 disabled={isSubmitting}

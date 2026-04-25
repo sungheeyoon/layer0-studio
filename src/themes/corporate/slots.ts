@@ -97,5 +97,4 @@ export const defaultTemplateJson: TemplateJson = {
       ]
     }
   ],
-  sections: [] // DEPRECATED
 };

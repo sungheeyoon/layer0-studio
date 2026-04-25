@@ -1,5 +1,6 @@
 import { IUserSiteRepository } from '../../repositories/user-site.repository';
 import { TemplateError } from '../../errors/template.error';
+import { validateDomainSlug } from '../../entities/user-site.entity';
 
 export class UpdateSiteDomainUseCase {
   constructor(private userSiteRepo: IUserSiteRepository) {}
@@ -15,16 +16,18 @@ export class UpdateSiteDomainUseCase {
       throw new TemplateError('SITE_ACCESS_DENIED');
     }
 
-    // domain slug validation (can also be done in entity/usecase)
-    const slug = domain.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 50);
-    if (!slug) {
-      throw new Error('INVALID_DOMAIN');
+    // domain slug validation
+    let slug: string;
+    try {
+      slug = validateDomainSlug(domain);
+    } catch {
+      throw new TemplateError('INVALID_DOMAIN');
     }
 
     // Check uniqueness
     const existing = await this.userSiteRepo.findByDomain(slug);
     if (existing && existing.id !== siteId) {
-      throw new Error('DOMAIN_TAKEN');
+      throw new TemplateError('DOMAIN_TAKEN');
     }
 
     return this.userSiteRepo.update(siteId, {

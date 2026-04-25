@@ -2,17 +2,28 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { AssetRepository } from '@/domain/repositories/asset.repository';
 import { Asset, AssetStatus, CreateAssetDto } from '@/domain/entities/asset.entity';
 
+type AssetRow = {
+  id: string;
+  user_id: string;
+  filename: string;
+  mime_type: string;
+  size: number | string;
+  status: AssetStatus;
+  created_at: string;
+  updated_at: string;
+};
+
 export class SupabaseAssetRepositoryImpl implements AssetRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  private mapRow(row: any): Asset {
+  private mapRow(row: AssetRow): Asset {
     return {
       id: row.id,
       userId: row.user_id,
       filename: row.filename,
       mimeType: row.mime_type,
       size: Number(row.size),
-      status: row.status as AssetStatus,
+      status: row.status,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

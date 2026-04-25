@@ -1,3 +1,5 @@
+'use client';
+
 import { ThemeSectionProps } from '../../types';
 import styles from '../corporate.module.css';
 

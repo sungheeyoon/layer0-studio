@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { UserSite } from '@/domain/entities/user-site.entity';
-import { TemplateJson, TemplateGlobalStyles } from '@/domain/entities/template.entity';
+import { TemplateJson, TemplateGlobalStyles, ImageTemplateField } from '@/domain/entities/template.entity';
 import { saveSiteJsonAction, publishSiteAction } from '@/app/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTheme } from '@/themes/registry';
@@ -23,18 +23,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   );
 
   const activePage = useMemo(() => {
-    if (siteJson.pages && siteJson.pages.length > 0) {
-      return siteJson.pages.find(p => p.id === activePageId) || siteJson.pages[0];
-    }
-    // Backward compatibility
-    return {
-      id: 'home',
-      title: 'Home',
-      slug: '/',
-      order: 0,
-      sections: siteJson.sections || []
-    };
-  }, [siteJson.pages, siteJson.sections, activePageId]);
+    return siteJson.pages.find(p => p.id === activePageId) || siteJson.pages[0];
+  }, [siteJson.pages, activePageId]);
 
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
     activePage.sections[0]?.id ?? null
@@ -43,6 +33,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const lastSaveRef = useRef<number>(0);
 
   // Theme Renderer loading
   const [ThemeRenderer, setThemeRenderer] = useState<React.ComponentType<ThemeRendererProps> | null>(null);
@@ -50,12 +42,13 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   useEffect(() => {
     let mounted = true;
+    let loaded = false;
     const fetchTheme = async () => {
       setLoadingError(null);
       setThemeRenderer(null);
 
       const timeoutId = setTimeout(() => {
-        if (mounted && !ThemeRenderer) {
+        if (mounted && !loaded) {
           setLoadingError('Theme loading timed out. Please check your connection or theme configuration.');
         }
       }, 10000);
@@ -65,6 +58,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         clearTimeout(timeoutId);
         if (mounted) {
           if (themeModule) {
+            loaded = true;
             setThemeRenderer(() => themeModule.default);
           } else {
             setLoadingError(`Theme "${siteJson.themeKey}" not found.`);
@@ -87,20 +81,15 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const handleFieldChange = useCallback(
     (sectionId: string, fieldKey: string, value: string, assetId?: string) => {
       setSiteJson((prev) => {
-        const updated = JSON.parse(JSON.stringify(prev)) as TemplateJson;
+        const updated = structuredClone(prev);
 
-        let section;
-        if (updated.pages && updated.pages.length > 0) {
-          const page = updated.pages.find(p => p.id === activePageId);
-          section = page?.sections.find(s => s.id === sectionId);
-        } else {
-          section = updated.sections?.find((s) => s.id === sectionId);
-        }
+        const page = updated.pages.find(p => p.id === activePageId);
+        const section = page?.sections.find(s => s.id === sectionId);
 
         if (section && section.data[fieldKey]) {
           section.data[fieldKey].value = value;
           if (assetId !== undefined) {
-            (section.data[fieldKey] as any).assetId = assetId;
+            (section.data[fieldKey] as ImageTemplateField).assetId = assetId;
           }
         }
         return updated;
@@ -123,22 +112,32 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   );
 
   const handleSave = async () => {
+    const now = Date.now();
+    if (now - lastSaveRef.current < 2000) return;
+    lastSaveRef.current = now;
+
+    setActionError(null);
     setSaving(true);
     const result = await saveSiteJsonAction(site.id, siteJson);
     if (result && 'error' in result) {
-      alert(`Save failed: ${result.error}`);
+      setActionError(`Save failed: ${result.error}`);
     }
     setSaving(false);
   };
 
   const handlePublish = async () => {
+    setActionError(null);
     setSaving(true);
     await saveSiteJsonAction(site.id, siteJson);
     setPublishing(true);
     const result = await publishSiteAction(site.id);
 
     if (result && 'error' in result) {
-      alert(`Publish failed: ${result.error}`);
+      setActionError(
+        result.error === 'RATE_LIMITED'
+          ? 'Please wait 30 seconds between publishes.'
+          : `Publish failed: ${result.error}`
+      );
     } else {
       if (site.domain) {
         setPublishedUrl(`/site/${site.domain}`);
@@ -254,7 +253,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               {selectedSection && selectedSection.editable && (
                 <div>
                   <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                    Parameters ??{selectedSection.type}
+                    Parameters // {selectedSection.type}
                   </h3>
                   <div className="space-y-8">
                     {Object.entries(selectedSection.data)
@@ -266,6 +265,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                           fieldKey={fieldKey}
                           field={field}
                           onChange={handleFieldChange}
+                          onError={setActionError}
                         />
                       ))}
                   </div>
@@ -287,6 +287,11 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
         {/* Action Buttons */}
         <div className="p-6 border-t border-outline-variant bg-surface-container-low">
+          {actionError && (
+            <div className="mb-4 px-3 py-2 text-[10px] uppercase tracking-widest text-error border border-error/30 bg-error/5 leading-relaxed">
+              {actionError}
+            </div>
+          )}
           <button
             onClick={handlePublish}
             disabled={publishing || saving}
@@ -357,16 +362,17 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   );
 }
 
-// ?�?�?� Dynamic Field Input ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Dynamic Field Input ──────────────────────────────────────────────────
 
 interface DynamicFieldProps {
   sectionId: string;
   fieldKey: string;
   field: { value: string; type: string; label: string; options?: string[] };
   onChange: (sectionId: string, fieldKey: string, value: string, assetId?: string) => void;
+  onError: (msg: string) => void;
 }
 
-function DynamicField({ sectionId, fieldKey, field, onChange }: DynamicFieldProps) {
+function DynamicField({ sectionId, fieldKey, field, onChange, onError }: DynamicFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
   const baseInputClass =
     "w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 pb-1 font-['Inter'] font-light text-xs transition-colors";
@@ -399,8 +405,8 @@ function DynamicField({ sectionId, fieldKey, field, onChange }: DynamicFieldProp
 
       // 4. Update the state
       onChange(sectionId, fieldKey, confirmRes.publicUrl, initRes.assetId!);
-    } catch (err: any) {
-      alert(`Upload failed: ${err.message}`);
+    } catch (err: unknown) {
+      onError(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       console.error('[ASSET_UPLOAD_ERROR]', err);
     } finally {
       setIsUploading(false);
@@ -463,7 +469,7 @@ function DynamicField({ sectionId, fieldKey, field, onChange }: DynamicFieldProp
           <div className="mt-2">
             <input
               type="file"
-              accept="image/jpeg, image/png, image/webp, image/gif, image/svg+xml"
+              accept="image/jpeg, image/png, image/webp, image/gif"
               className="text-xs max-w-full"
               onChange={handleUpload}
               disabled={isUploading}

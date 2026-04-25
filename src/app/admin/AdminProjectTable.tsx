@@ -1,7 +1,7 @@
 'use client';
 
 import { UserSite } from '@/domain/entities/user-site.entity';
-import { updateSiteDomainAction, terminateSiteAction, updateSiteStatusAction } from './actions';
+import { adminUpdateSiteDomainAction, terminateSiteAction, updateSiteStatusAction } from './actions';
 
 interface AdminProjectTableProps {
   sites: UserSite[];
@@ -11,7 +11,7 @@ export default function AdminProjectTable({ sites }: AdminProjectTableProps) {
   const handleConfigureDomain = async (siteId: string, currentDomain: string | null) => {
     const domain = prompt('Enter domain:', currentDomain || '');
     if (domain === null) return;
-    const result = await updateSiteDomainAction(siteId, domain);
+    const result = await adminUpdateSiteDomainAction(siteId, domain);
     if (result.error) {
       alert(`Error: ${result.error}`);
     }

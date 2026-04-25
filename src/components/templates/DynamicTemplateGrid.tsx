@@ -41,12 +41,9 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
 
   const handleSelect = (templateId: string) => {
     setSelectingId(templateId);
-    router.push(`/projects/create?templateId=${templateId}`);
+    router.push(`/dashboard/projects/create?templateId=${templateId}`);
   };
 
-  const handlePreview = (templateId: string) => {
-    window.open(`/preview/${templateId}`, '_blank');
-  };
 
   const handleCategoryChange = (category: string | null) => {
     setSelectedCategory(category);
@@ -159,7 +156,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
             <div className="grid grid-cols-2 gap-4 border-t border-neutral-200 dark:border-zinc-800 pt-4">
               <div>
                 <div className="text-[8px] text-neutral-400 tracking-widest uppercase mb-1">Page_Count</div>
-                <div className="text-xs font-light tracking-widest text-black dark:text-white">{template.templateJson?.sections?.length ?? 0}_UNITS</div>
+                <div className="text-xs font-light tracking-widest text-black dark:text-white">{template.templateJson?.pages?.[0]?.sections?.length ?? 0}_UNITS</div>
               </div>
               <div>
                 <div className="text-[8px] text-neutral-400 tracking-widest uppercase mb-1">Responsive_Status</div>
@@ -175,12 +172,14 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
               >
                 {selectingId === template.id ? 'INITIALIZING...' : 'SELECT'}
               </button>
-              <button
-                onClick={() => handlePreview(template.id)}
-                className="h-9 border border-black dark:border-white bg-transparent text-black dark:text-white text-[9px] font-light tracking-[0.2em] uppercase hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+              <a
+                href={`/preview/${template.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-9 border border-black dark:border-white bg-transparent text-black dark:text-white text-[9px] font-light tracking-[0.2em] uppercase hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center"
               >
                 PREVIEW
-              </button>
+              </a>
             </div>
           </div>
         ))}

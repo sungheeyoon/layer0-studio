@@ -22,7 +22,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen">
       <AdminSidebar />
       <AdminTopNav />
       {/* Background Grid Simulation */}
@@ -35,7 +35,10 @@ export default async function AdminLayout({
           }}
         ></div>
       </div>
-      {children}
+      {/* ml-64: sidebar width, pt-12: top nav height (h-12 = 3rem = 48px) */}
+      <div className="ml-64 pt-12">
+        {children}
+      </div>
     </div>
   );
 }

@@ -18,7 +18,11 @@ pnpm dev                           # http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SITE_URL=          # e.g. https://layer0.studio — sitemap, robots, metadataBase, OG canonical
+CRON_SECRET=                   # Bearer token for /api/cron/cleanup-assets
 ```
+
+> `NEXT_PUBLIC_SITE_URL` falls back to `http://localhost:3000` if unset. Set it in Vercel before the first production build or crawlers will index localhost URLs.
 
 ## Commands
 
@@ -50,13 +54,16 @@ Server Actions call `create*UseCase(supabase)` factories from `src/lib/di/contai
 | Path | Purpose |
 |---|---|
 | `/` | Marketing landing page |
+| `/templates` | **Public** template catalog — visitors can browse without signing in (think shop-style product list). Selecting a template gates through auth into `/dashboard/projects/create` |
 | `/login`, `/signup` | Auth (Server Actions) |
 | `/dashboard/*` | Authenticated user area |
+| `/dashboard/templates` | Authenticated catalog (same data, different chrome) |
+| `/dashboard/projects/create?templateId=<id>` | Provision a new site from a template |
 | `/dashboard/editor?siteId=<id>` | Visual editor |
 | `/admin/*` | Admin area (`app_metadata.role === 'admin'`) |
 | `/site/[domain]` | Published site renderer |
 | `/preview/[id]` | Preview before publishing |
-| `/api/cron/cleanup-assets` | Orphan asset cleanup cron |
+| `/api/cron/cleanup-assets` | Orphan asset cleanup cron (Bearer `CRON_SECRET`) |
 
 ## Theme system
 
@@ -79,4 +86,4 @@ Orphan cleanup runs via the cron endpoint using `sweep_orphaned_assets` and `cla
 
 ## Database migrations
 
-Migration SQL lives in `scripts/`. Apply manually via the Supabase dashboard SQL editor or `supabase db push`.
+Migration SQL lives in `docs/migrations/` (001–009). Apply manually via the Supabase dashboard SQL editor or `supabase db push`. Migration 009 (`009_storage_bucket_hardening.sql`) enforces bucket-level MIME/size on `user_assets` and admin-only writes on `template-thumbnails` — apply it before launch.

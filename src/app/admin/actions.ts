@@ -14,20 +14,20 @@ import { revalidatePath } from 'next/cache';
 async function checkAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user || user.app_metadata?.role !== 'admin') {
     return null;
   }
-  return user;
+  const adminSupabase = await createAdminClient();
+  return { user, adminSupabase };
 }
 
 export async function listAllSitesAction() {
-  const user = await checkAdmin();
-  if (!user) return { error: 'FORBIDDEN' };
+  const admin = await checkAdmin();
+  if (!admin) return { error: 'FORBIDDEN' };
 
   try {
-    const adminSupabase = await createAdminClient();
-    const useCase = createListUserSitesUseCase(adminSupabase);
+    const useCase = createListUserSitesUseCase(admin.adminSupabase);
     return await useCase.executeAll();
   } catch (err) {
     console.error('[Admin::listAllSites]', err);
@@ -41,12 +41,11 @@ export async function createCustomSiteAction(
   siteJson: TemplateJson,
   domain?: string,
 ) {
-  const user = await checkAdmin();
-  if (!user) return { error: 'FORBIDDEN' };
+  const admin = await checkAdmin();
+  if (!admin) return { error: 'FORBIDDEN' };
 
   try {
-    const adminSupabase = await createAdminClient();
-    const useCase = createCreateSiteFromTemplateUseCase(adminSupabase);
+    const useCase = createCreateSiteFromTemplateUseCase(admin.adminSupabase);
     const site = await useCase.executeCustom({
       userId,
       siteName,
@@ -65,12 +64,11 @@ export async function createCustomSiteAction(
 }
 
 export async function updateSiteStatusAction(siteId: string, status: 'draft' | 'active' | 'suspended') {
-  const user = await checkAdmin();
-  if (!user) return { error: 'FORBIDDEN' };
+  const admin = await checkAdmin();
+  if (!admin) return { error: 'FORBIDDEN' };
 
   try {
-    const adminSupabase = await createAdminClient();
-    const useCase = createAdminUpdateSiteUseCase(adminSupabase);
+    const useCase = createAdminUpdateSiteUseCase(admin.adminSupabase);
     await useCase.updateStatus(siteId, status);
 
     revalidatePath('/admin');
@@ -84,13 +82,12 @@ export async function updateSiteStatusAction(siteId: string, status: 'draft' | '
   }
 }
 
-export async function updateSiteDomainAction(siteId: string, domain: string) {
-  const user = await checkAdmin();
-  if (!user) return { error: 'FORBIDDEN' };
+export async function adminUpdateSiteDomainAction(siteId: string, domain: string) {
+  const admin = await checkAdmin();
+  if (!admin) return { error: 'FORBIDDEN' };
 
   try {
-    const adminSupabase = await createAdminClient();
-    const useCase = createAdminUpdateSiteUseCase(adminSupabase);
+    const useCase = createAdminUpdateSiteUseCase(admin.adminSupabase);
     await useCase.updateDomain(siteId, domain);
 
     revalidatePath('/admin');
@@ -105,12 +102,11 @@ export async function updateSiteDomainAction(siteId: string, domain: string) {
 }
 
 export async function terminateSiteAction(siteId: string) {
-  const user = await checkAdmin();
-  if (!user) return { error: 'FORBIDDEN' };
+  const admin = await checkAdmin();
+  if (!admin) return { error: 'FORBIDDEN' };
 
   try {
-    const adminSupabase = await createAdminClient();
-    const useCase = createDeleteUserSiteUseCase(adminSupabase);
+    const useCase = createDeleteUserSiteUseCase(admin.adminSupabase);
     await useCase.executeAsAdmin(siteId);
 
     revalidatePath('/admin');

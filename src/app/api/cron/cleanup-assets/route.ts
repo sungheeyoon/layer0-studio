@@ -1,17 +1,21 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/server';
 
 // Opt out of caching, this is a worker endpoint run by cron
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(req: Request) {
-  // Authorization boundary: typically check API key or internal header if called from Vercel Cron
-  // if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-  //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  // }
+  if (!process.env.CRON_SECRET) {
+    console.error('[Cleanup Cron] CRON_SECRET env var is not set');
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+  }
 
-  const supabase = await createClient();
+  if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const supabase = await createAdminClient();
 
   // 1. Sweep orphans
   console.log('[Cleanup Cron] Sweeping orphans...');
@@ -88,17 +92,18 @@ export async function GET(req: Request) {
     console.log(`[Cleanup Cron] Successfully cleared asset ${assetId}`);
 
     return NextResponse.json({ message: `Processed ${assetId}` });
-  } catch (err: any) {
-    console.error(`[Cleanup Cron] Task ${task.id} failed:`, err.message);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[Cleanup Cron] Task ${task.id} failed:`, message);
 
     // Rollback task status
     await supabase.from('cleanup_queue').update({
       status: 'failed',
-      last_error: err.message,
+      last_error: message,
       retry_count: task.retry_count + 1,
       updated_at: new Date().toISOString()
     }).eq('id', task.id);
 
-    return NextResponse.json({ error: 'Processing error', details: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'Processing error', details: message }, { status: 500 });
   }
 }

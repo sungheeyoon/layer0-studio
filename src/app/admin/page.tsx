@@ -1,16 +1,12 @@
 import { listAllSitesAction } from './actions';
 import AdminProjectTable from './AdminProjectTable';
-import { redirect } from 'next/navigation';
 
 export default async function AdminPage() {
   const result = await listAllSitesAction();
 
-  if ('error' in result) {
-    if (result.error === 'FORBIDDEN') {
-      redirect('/login');
-    }
+  if (!Array.isArray(result)) {
     return (
-      <main className="ml-64 pt-24 px-12 min-h-screen pb-20">
+      <main className="px-12 min-h-[calc(100vh-48px)] pb-20">
         <div className="p-20 text-center border border-dashed border-outline-variant/30">
           <h1 className="font-label font-[500] text-[0.6875rem] tracking-[0.1em] uppercase text-error mb-2">
             SYSTEM_ERROR
@@ -27,7 +23,7 @@ export default async function AdminPage() {
   const pendingCount = sites.filter((s) => s.status === 'draft').length;
 
   return (
-    <main className="ml-64 pt-24 px-12 min-h-screen pb-20">
+    <main className="px-12 min-h-[calc(100vh-48px)] pb-20">
       {/* Header Section */}
       <div className="grid grid-cols-12 gap-8 mb-16">
         <div className="col-span-8">
@@ -60,7 +56,7 @@ export default async function AdminPage() {
           ACTIVE_NODES [{sites.length}]
         </h2>
         <button className="flex items-center gap-2 border border-outline px-6 py-2 hover:bg-neutral-100 transition-colors">
-          <span className="material-symbols-outlined text-xs" data-icon="add">
+          <span className=" text-xs" data-icon="add">
             add
           </span>
           <span className="font-label font-[500] text-[0.6875rem] tracking-[0.1em] uppercase">

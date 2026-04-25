@@ -53,7 +53,6 @@ export interface TemplateJson {
   themeKey: string; // 'corporate' | 'cafe' etc. - renderer key
   globalStyles: TemplateGlobalStyles;
   pages: TemplatePage[];
-  sections?: TemplateSection[]; // DEPRECATED: use pages instead
 }
 
 export interface Template {

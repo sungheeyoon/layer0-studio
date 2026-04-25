@@ -120,7 +120,7 @@ export default function TemplateEditorPanel({
       const currentJson = JSON.parse(templateJsonStr);
       currentJson.themeKey = themeKey;
       setTemplateJsonStr(JSON.stringify(currentJson, null, 2));
-    } catch (e) {
+    } catch {
       // If JSON is invalid, just update it if we can
     }
   };
@@ -187,7 +187,7 @@ export default function TemplateEditorPanel({
   let currentThemeKey = 'corporate';
   try {
     currentThemeKey = JSON.parse(templateJsonStr).themeKey || 'corporate';
-  } catch (e) {}
+  } catch { /* invalid JSON, keep previous themeKey */ }
 
   return (
     <section className="col-span-8 bg-surface overflow-y-auto">
@@ -368,7 +368,7 @@ export default function TemplateEditorPanel({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg, image/png, image/webp, image/gif"
                 className="hidden"
                 onChange={handleThumbnailChange}
               />

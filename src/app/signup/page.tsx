@@ -5,20 +5,55 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signupAction } from "./actions";
 
+const ERROR_MESSAGES: Record<string, string> = {
+  INVALID_EMAIL: '올바른 이메일 형식이 아닙니다.',
+  WEAK_PASSWORD: '비밀번호는 6자 이상이어야 합니다.',
+  USER_ALREADY_EXISTS: '이미 사용 중인 이메일입니다.',
+  EMAIL_NOT_CONFIRMED: '이메일 확인이 필요합니다. 받은 메일함을 확인해주세요.',
+  UNKNOWN: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+};
+
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
+  const [signupEmail, setSignupEmail] = useState<string | null>(null);
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
     const result = await signupAction(formData);
 
     if (!result.success) {
-      setError(result.code || 'UNKNOWN ERROR');
+      setError(ERROR_MESSAGES[result.code ?? 'UNKNOWN'] ?? ERROR_MESSAGES.UNKNOWN);
     } else {
       setError(null);
-      console.log('?�원가???�공', result.user);
-      router.push('/login');
+      const email = formData.get('email') as string;
+      setSignupEmail(email);
     }
+  }
+
+  if (signupEmail) {
+    return (
+      <main className="relative min-h-screen blueprint-grid flex items-center justify-center px-8">
+        <div className="text-center max-w-md">
+          <div className="w-1 h-1 bg-tertiary mx-auto mb-8"></div>
+          <h2 className="font-headline text-2xl font-thin tracking-tight text-primary uppercase mb-4">
+            ACCOUNT_CREATED
+          </h2>
+          <p className="font-body text-sm font-light text-outline leading-relaxed mb-2">
+            가입이 완료되었습니다.
+          </p>
+          <p className="font-body text-sm font-light text-outline leading-relaxed mb-8">
+            <span className="text-primary font-medium">{signupEmail}</span>으로 확인 메일이 발송되었습니다.
+            메일함에서 링크를 클릭한 후 로그인해주세요.
+          </p>
+          <button
+            onClick={() => router.push('/login')}
+            className="bg-primary text-on-primary font-label text-[0.6875rem] font-medium tracking-[0.2em] px-12 h-12 uppercase hover:bg-primary-fixed transition-colors duration-200"
+          >
+            LOGIN_PAGE
+          </button>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -91,8 +126,8 @@ export default function SignupPage() {
                   className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 transition-all duration-300 placeholder:text-outline/30" 
                   id="password" 
                   name="password" 
-                  placeholder="?�••••••••••�? 
-                  type="password" 
+                  placeholder="••••••••••"
+                  type="password"
                   required
                 />
                 <div className="absolute top-0 right-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
@@ -118,8 +153,8 @@ export default function SignupPage() {
               {/* CTA Section */}
               <div className="pt-8 flex flex-col items-start gap-6">
                 {error && (
-                  <div className="text-red-500 font-label text-[10px] tracking-widest uppercase">
-                    ERROR: {error}
+                  <div className="text-red-500 font-label text-[10px] tracking-wide">
+                    {error}
                   </div>
                 )}
                 <div className="flex items-center gap-3">
@@ -144,8 +179,9 @@ export default function SignupPage() {
           {/* Right Visual Accent */}
           <div className="hidden lg:block lg:col-start-10 lg:col-span-3 pt-24 pl-12">
             <div className="relative w-full h-[400px] border border-outline-variant/10 group overflow-hidden">
-              <img 
-                alt="minimalist architectural concrete structure with sharp shadows and technical precision" 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt="minimalist architectural concrete structure with sharp shadows and technical precision"
                 className="w-full h-full object-cover grayscale opacity-40 group-hover:opacity-60 transition-opacity duration-700 group-hover:scale-105" 
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6ocqqCx1dAmaV5lwQARHk-ARiVjNs1xMnG3m_p_XlvC3k4Z4zQ3Z0z_a18vuCQCaxJUaMpRqvQQeh5hKm_MZqoSzKxXvnryAUYyav633d-E3kjtdzZpq9khP1bPhSRk1bbP7okw2bvoLWBC5qx2M_Bb0uvWR1NI9rN6MXEDoGHpEqwbh-cxc3C9mGM1TsbQBXVY6nA7uIZossNMRakD-YUf7zhUnkAW55T_fyUszXdcr7ygd5wT7LzQM1cd-JBXz7RrRSnVn4lQC-" 
               />

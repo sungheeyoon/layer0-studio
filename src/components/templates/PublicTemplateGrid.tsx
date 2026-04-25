@@ -26,12 +26,9 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
 
   const handleSelect = (templateId: string) => {
     setSelectingId(templateId);
-    router.push(`/projects/create?templateId=${templateId}`);
+    router.push(`/dashboard/projects/create?templateId=${templateId}`);
   };
 
-  const handlePreview = (templateId: string) => {
-    window.open(`/preview/${templateId}`, '_blank');
-  };
 
   const handleCategoryChange = (category: string | null) => {
     setSelectedCategory(category);
@@ -119,12 +116,14 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
                   >
                     {selectingId === template.id ? 'Initializing...' : 'Use Template'}
                   </button>
-                  <button 
-                    onClick={() => handlePreview(template.id)}
-                    className="w-full border border-white text-white font-medium text-[11px] tracking-[0.1em] uppercase py-4 hover:bg-white hover:text-black transition-colors"
+                  <a
+                    href={`/preview/${template.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full border border-white text-white font-medium text-[11px] tracking-[0.1em] uppercase py-4 hover:bg-white hover:text-black transition-colors flex items-center justify-center"
                   >
                     Preview
-                  </button>
+                  </a>
                 </div>
               </div>
               
@@ -172,7 +171,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
       <section className="mt-32 border-t border-outline-variant/30 pt-20 grid grid-cols-12">
         <div className="col-span-12 md:col-start-4 md:col-span-6 text-center">
           <span className="font-['Inter'] font-medium text-[11px] tracking-[0.2em] uppercase text-tertiary mb-4 block">Custom Inquiry</span>
-          <h2 className="text-4xl font-thin tracking-tight mb-8 text-primary">Can't find the right blueprint?</h2>
+          <h2 className="text-4xl font-thin tracking-tight mb-8 text-primary">Can&apos;t find the right blueprint?</h2>
           <button className="border border-primary text-primary font-medium text-[11px] tracking-[0.2em] uppercase px-12 py-5 hover:bg-primary hover:text-white transition-all duration-300">
             Contact Engineering
           </button>

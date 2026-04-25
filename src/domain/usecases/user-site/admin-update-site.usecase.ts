@@ -1,6 +1,6 @@
 import { IUserSiteRepository } from '../../repositories/user-site.repository';
 import { TemplateError } from '../../errors/template.error';
-import { UpdateUserSiteDto } from '../../entities/user-site.entity';
+import { UpdateUserSiteDto, validateDomainSlug } from '../../entities/user-site.entity';
 
 export class AdminUpdateSiteUseCase {
   constructor(private userSiteRepo: IUserSiteRepository) {}
@@ -21,6 +21,19 @@ export class AdminUpdateSiteUseCase {
     const site = await this.userSiteRepo.findById(siteId);
     if (!site) throw new TemplateError('SITE_NOT_FOUND');
 
-    return this.userSiteRepo.update(siteId, { domain });
+    let slug: string;
+    try {
+      slug = validateDomainSlug(domain);
+    } catch {
+      throw new TemplateError('INVALID_DOMAIN');
+    }
+
+    // Check uniqueness
+    const existing = await this.userSiteRepo.findByDomain(slug);
+    if (existing && existing.id !== siteId) {
+      throw new TemplateError('DOMAIN_TAKEN');
+    }
+
+    return this.userSiteRepo.update(siteId, { domain: slug });
   }
 }

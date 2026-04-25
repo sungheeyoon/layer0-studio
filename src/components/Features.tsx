@@ -26,7 +26,7 @@ export default function Features() {
           <p className="text-outline font-light leading-relaxed text-sm">
             Modify text, images, and styles in seconds. Our direct
             editing interface gives you full control over your
-            site's content without any complexity.
+            site&apos;s content without any complexity.
           </p>
         </div>
 
