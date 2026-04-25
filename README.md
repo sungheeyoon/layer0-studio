@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Layer0 Studio
 
-## Getting Started
+A no-code website builder — pick a template, edit visually, publish to a custom domain.
 
-First, run the development server:
+Built on **Next.js 16** (App Router), **Supabase** (auth + DB + storage), and **Tailwind CSS v4**.
+
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local   # fill in Supabase credentials
+pnpm install
+pnpm dev                           # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Required environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Commands
 
-## Learn More
+| Command | Purpose |
+|---|---|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+| `pnpm tsc --noEmit` | Type-check without emitting |
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The codebase follows **Clean Architecture** — dependencies flow inward only:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/domain/       ← Pure business logic (entities, repository interfaces, use cases)
+src/data/         ← Supabase repository implementations
+src/lib/di/       ← DI factory functions (wire repos → use cases per request)
+src/app/          ← Next.js App Router pages and Server Actions
+src/components/   ← UI components
+src/themes/       ← Pluggable theme renderers
+```
 
-## Deploy on Vercel
+Server Actions call `create*UseCase(supabase)` factories from `src/lib/di/container.ts`. No singletons — a fresh Supabase client is passed per request.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Route map
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Path | Purpose |
+|---|---|
+| `/` | Marketing landing page |
+| `/login`, `/signup` | Auth (Server Actions) |
+| `/dashboard/*` | Authenticated user area |
+| `/dashboard/editor?siteId=<id>` | Visual editor |
+| `/admin/*` | Admin area (`app_metadata.role === 'admin'`) |
+| `/site/[domain]` | Published site renderer |
+| `/preview/[id]` | Preview before publishing |
+| `/api/cron/cleanup-assets` | Orphan asset cleanup cron |
+
+## Theme system
+
+Themes live in `src/themes/`. Each exports a renderer component, a `slots` array, and a `defaultTemplateJson`. Register new themes in `src/themes/registry.ts`.
+
+The core data model is `TemplateJson` (`src/domain/entities/template.entity.ts`):
+- `themeKey` — selects the renderer
+- `globalStyles` — CSS custom properties applied at the root
+- `pages[].sections` — page content (top-level `sections` was removed 2026-04-24)
+
+## Asset uploads
+
+Two-phase commit to avoid orphaned storage files:
+
+1. `initUploadAction` — creates a `pending` DB record, returns upload path
+2. Client uploads directly to Supabase Storage (`user_assets` bucket)
+3. `confirmUploadAction` — marks record `active`, returns CDN URL
+
+Orphan cleanup runs via the cron endpoint using `sweep_orphaned_assets` and `claim_cleanup_task` Supabase RPCs.
+
+## Database migrations
+
+Migration SQL lives in `scripts/`. Apply manually via the Supabase dashboard SQL editor or `supabase db push`.
