@@ -2,29 +2,29 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { ITemplateRepository } from '@/domain/repositories/template.repository';
 import {
   Template,
-  TemplateJson,
   CreateTemplateDto,
   UpdateTemplateDto,
 } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
+import { TemplateRow } from '@/types/database';
 
 export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  private mapRow = (row: Record<string, unknown>): Template => {
+  private mapRow = (row: TemplateRow): Template => {
     return {
-      id: row.id as string,
-      name: row.name as string,
-      description: (row.description as string) ?? null,
-      slug: row.slug as string,
-      category: (row.category as string) ?? 'general',
-      status: row.status as Template['status'],
-      thumbnailUrl: (row.thumbnail_url as string) ?? null,
-      templateJson: row.template_json as TemplateJson,
-      version: (row.version as string) ?? '1.0.0',
-      createdBy: row.created_by as string,
-      createdAt: row.created_at as string,
-      updatedAt: row.updated_at as string,
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      slug: row.slug,
+      category: row.category ?? 'general',
+      status: row.status,
+      thumbnailUrl: row.thumbnail_url,
+      templateJson: row.template_json,
+      version: row.version ?? '1.0.0',
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     };
   }
 

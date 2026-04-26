@@ -4,6 +4,7 @@ export type TemplateErrorCode =
   | 'INVALID_TEMPLATE_JSON'
   | 'SITE_NOT_FOUND'
   | 'SITE_ACCESS_DENIED'
+  | 'STALE_VERSION'
   | 'INVALID_DOMAIN'
   | 'DOMAIN_TAKEN'
   | 'NAME_TAKEN'

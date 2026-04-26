@@ -1,6 +1,8 @@
 # Pre-Launch Review — Layer0 Studio
 
-_검토일: 2026-04-25 / 브랜치: `main`_
+_검토일: 2026-04-25 / 브랜치: `main` / 배포 URL: https://layer0-studio-cms.vercel.app_
+
+**상태:** P0·P1·P2 모든 코드 항목 ✅ — 운영 배포 완료. 잔여 항목은 §5 체크리스트의 디자인 의존 항목(`/legal/*`)뿐.
 
 ---
 
@@ -198,9 +200,9 @@ templateSnapshot: TemplateJson;
 
 ## 5. 출시 전 체크리스트
 
-- [ ] Vercel 환경변수 등록: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, **`NEXT_PUBLIC_SITE_URL`**, **`CRON_SECRET`**
-- [ ] 마이그레이션 001–009 모두 운영 Supabase에 적용되었는지 확인
-- [ ] `user_assets` / `template-thumbnails` 버킷 생성 및 RLS 정책 반영
+- [x] Vercel 환경변수 등록: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, **`NEXT_PUBLIC_SITE_URL`**, **`CRON_SECRET`**
+- [x] 마이그레이션 001–009 모두 운영 Supabase에 적용되었는지 확인
+- [x] `user_assets` / `template-thumbnails` 버킷 생성 및 RLS 정책 반영
 - [x] Signup 에러 메시지 한국어화 및 이메일 확인 안내 UI 추가
 - [x] README / CLAUDE.md env 목록 및 migration 경로 수정
 - [ ] `/legal/privacy`, `/legal/terms` 플레이스홀더 페이지 연결 (P1 2.4)

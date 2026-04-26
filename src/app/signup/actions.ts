@@ -7,7 +7,6 @@ import { AuthError } from '@/domain/errors/auth.error';
 export async function signupAction(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  // TODO: Handle full_name and workspace_id if needed by the domain
 
   const supabase = await createClient();
   const signupUseCase = createSignupUseCase(supabase);

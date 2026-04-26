@@ -24,7 +24,8 @@ export default function SettingsClient({ user }: SettingsClientProps) {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-  
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const [isPending, startTransition] = useTransition();
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -73,7 +74,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
     startTransition(async () => {
       const result = await deleteAccountAction();
       if (result?.error) {
-        alert(`Deletion failed: ${result.error}`);
+        setDeleteError('계정 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
         setIsConfirmingDelete(false);
       }
     });
@@ -110,7 +111,6 @@ export default function SettingsClient({ user }: SettingsClientProps) {
               <label className="block text-[0.6rem] font-medium uppercase tracking-[0.1em] text-outline mb-1">NAME</label>
               <div className="flex items-center border-b border-outline-variant py-2 focus-within:border-primary transition-colors">
                 <span className="text-[0.875rem] font-light flex-grow">{userName}</span>
-                <span className="material-symbols-outlined text-outline cursor-pointer hover:text-primary transition-colors">edit</span>
               </div>
             </div>
             
@@ -118,7 +118,6 @@ export default function SettingsClient({ user }: SettingsClientProps) {
               <label className="block text-[0.6rem] font-medium uppercase tracking-[0.1em] text-outline mb-1">EMAIL</label>
               <div className="flex items-center border-b border-outline-variant py-2 focus-within:border-primary transition-colors">
                 <span className="text-[0.875rem] font-light flex-grow">{userEmail}</span>
-                <span className="material-symbols-outlined text-outline cursor-pointer hover:text-primary transition-colors">edit</span>
               </div>
             </div>
             
@@ -219,54 +218,10 @@ export default function SettingsClient({ user }: SettingsClientProps) {
           </div>
         </section>
 
-        {/* 3. PREFERENCES */}
-        <section className="col-span-12 md:col-span-6">
-          <div className="mb-8 flex items-baseline justify-between border-b border-outline-variant pb-2">
-            <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-primary">03 // PREFERENCES</h3>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="block text-[0.6rem] font-medium uppercase tracking-[0.1em] text-outline">LANGUAGE</label>
-              <div className="relative">
-                <select className="w-full bg-transparent border-0 border-b border-outline-variant py-2 pl-0 pr-8 text-[0.875rem] font-light appearance-none focus:ring-0 focus:border-primary">
-                  <option>EN (ENGLISH)</option>
-                  <option>KR (KOREAN)</option>
-                </select>
-                <span className="material-symbols-outlined absolute right-0 bottom-2 text-outline pointer-events-none">keyboard_arrow_down</span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="block text-[0.6rem] font-medium uppercase tracking-[0.1em] text-outline">TIMEZONE</label>
-              <div className="relative">
-                <select className="w-full bg-transparent border-0 border-b border-outline-variant py-2 pl-0 pr-8 text-[0.875rem] font-light appearance-none focus:ring-0 focus:border-primary">
-                  <option>UTC (COORDINATED)</option>
-                  <option>KST (SEOUL_STD)</option>
-                </select>
-                <span className="material-symbols-outlined absolute right-0 bottom-2 text-outline pointer-events-none">keyboard_arrow_down</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-12 flex items-center space-x-6">
-            <div className="flex items-center cursor-pointer">
-              <div className="w-4 h-4 border border-primary flex items-center justify-center mr-3">
-                <div className="w-2 h-2 bg-primary"></div>
-              </div>
-              <span className="text-[0.6875rem] font-light uppercase tracking-[0.05em]">SYNC_RESOURCES_AUTO</span>
-            </div>
-            <div className="flex items-center cursor-pointer">
-              <div className="w-4 h-4 border border-outline flex items-center justify-center mr-3"></div>
-              <span className="text-[0.6875rem] font-light uppercase tracking-[0.05em] text-outline">DEBUG_LOG_VERBOSE</span>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. ACCOUNT_ACTIONS */}
+        {/* 3. ACCOUNT_ACTIONS */}
         <section className="col-span-12 md:col-span-5 md:col-start-8">
           <div className="mb-8 flex items-baseline justify-between border-b border-outline-variant pb-2">
-            <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-primary">04 // ACCOUNT_ACTIONS</h3>
+            <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-primary">03 // ACCOUNT_ACTIONS</h3>
           </div>
           
           <div className="space-y-4">
@@ -309,6 +264,10 @@ export default function SettingsClient({ user }: SettingsClientProps) {
             </div>
           </div>
           
+          {deleteError && (
+            <p className="mt-4 text-[0.6rem] text-tertiary uppercase tracking-widest">{deleteError}</p>
+          )}
+
           <div className="mt-10">
             <p className="text-[0.6rem] font-light text-outline leading-relaxed">
               WARNING: PERMANENT_DELETION IS IRREVERSIBLE. ALL ARCHIVAL DATA AND LOGICAL NODES WILL BE PURGED FROM THE SYSTEM CORES.

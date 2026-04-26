@@ -1,17 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AssetRepository } from '@/domain/repositories/asset.repository';
-import { Asset, AssetStatus, CreateAssetDto } from '@/domain/entities/asset.entity';
-
-type AssetRow = {
-  id: string;
-  user_id: string;
-  filename: string;
-  mime_type: string;
-  size: number | string;
-  status: AssetStatus;
-  created_at: string;
-  updated_at: string;
-};
+import { Asset, CreateAssetDto } from '@/domain/entities/asset.entity';
+import { AssetRow } from '@/types/database';
 
 export class SupabaseAssetRepositoryImpl implements AssetRepository {
   constructor(private supabase: SupabaseClient) {}

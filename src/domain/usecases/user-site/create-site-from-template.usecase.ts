@@ -40,7 +40,7 @@ export class CreateSiteFromTemplateUseCase {
     }
 
     // Deep copy template JSON to user's site
-    const siteJson: TemplateJson = JSON.parse(JSON.stringify(template.templateJson));
+    const siteJson: TemplateJson = structuredClone(template.templateJson);
 
     return this.userSiteRepository.create({
       userId: input.userId,

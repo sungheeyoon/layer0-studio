@@ -4,14 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signupAction } from "./actions";
-
-const ERROR_MESSAGES: Record<string, string> = {
-  INVALID_EMAIL: '올바른 이메일 형식이 아닙니다.',
-  WEAK_PASSWORD: '비밀번호는 6자 이상이어야 합니다.',
-  USER_ALREADY_EXISTS: '이미 사용 중인 이메일입니다.',
-  EMAIL_NOT_CONFIRMED: '이메일 확인이 필요합니다. 받은 메일함을 확인해주세요.',
-  UNKNOWN: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
-};
+import { getAuthError } from "@/lib/errors/messages";
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +15,7 @@ export default function SignupPage() {
     const result = await signupAction(formData);
 
     if (!result.success) {
-      setError(ERROR_MESSAGES[result.code ?? 'UNKNOWN'] ?? ERROR_MESSAGES.UNKNOWN);
+      setError(getAuthError(result.code));
     } else {
       setError(null);
       const email = formData.get('email') as string;

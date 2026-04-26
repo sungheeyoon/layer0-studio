@@ -7,7 +7,7 @@ export interface IUserSiteRepository {
   findAll(): Promise<UserSite[]>;
   create(data: CreateUserSiteDto): Promise<UserSite>;
   update(id: string, data: UpdateUserSiteDto): Promise<UserSite>;
-  updateSiteJson(id: string, siteJson: TemplateJson): Promise<UserSite>;
+  updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt?: string): Promise<UserSite>;
   delete(id: string): Promise<void>;
   findByDomain(domain: string): Promise<UserSite | null>;
   findByUserIdAndName(userId: string, name: string): Promise<UserSite | null>;

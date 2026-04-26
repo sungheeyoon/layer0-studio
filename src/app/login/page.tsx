@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginAction } from "./actions";
+import { getAuthError } from "@/lib/errors/messages";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -13,10 +14,9 @@ export default function LoginPage() {
     const result = await loginAction(formData);
 
     if (!result.success) {
-      setError(result.code || 'UNKNOWN ERROR');
+      setError(getAuthError(result.code));
     } else {
       setError(null);
-      console.log('Login success', result.user);
       router.push('/templates');
     }
   }
@@ -103,9 +103,9 @@ export default function LoginPage() {
               </button>
               
               <div className="flex justify-between items-center">
-                <Link 
-                  className="font-label text-[9px] font-light tracking-[0.1em] uppercase text-zinc-400 hover:text-zinc-900 transition-colors border-b border-transparent hover:border-zinc-900 pb-0.5" 
-                  href="#"
+                <Link
+                  className="font-label text-[9px] font-light tracking-[0.1em] uppercase text-zinc-400 hover:text-zinc-900 transition-colors border-b border-transparent hover:border-zinc-900 pb-0.5"
+                  href="/forgot-password"
                 >
                   FORGOT_KEY?
                 </Link>
@@ -143,10 +143,6 @@ export default function LoginPage() {
       <footer className="fixed bottom-0 left-0 w-full px-6 py-4 flex justify-between items-end pointer-events-none">
         <div className="font-label text-[8px] tracking-widest text-zinc-300 uppercase pointer-events-auto">
           © 2024 LAYER0_STUDIO_CORP. ALL RIGHTS RESERVED.
-        </div>
-        <div className="flex gap-4 pointer-events-auto">
-          <span className="material-symbols-outlined text-[14px] text-zinc-300 hover:text-zinc-900 cursor-pointer transition-colors">terminal</span>
-          <span className="material-symbols-outlined text-[14px] text-zinc-300 hover:text-zinc-900 cursor-pointer transition-colors">help_outline</span>
         </div>
       </footer>
     </>

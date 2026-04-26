@@ -7,23 +7,24 @@ import {
 } from '@/domain/entities/user-site.entity';
 import { TemplateJson } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
+import { UserSiteRow } from '@/types/database';
 
 export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  private mapRow = (row: Record<string, unknown>): UserSite => {
+  private mapRow = (row: UserSiteRow): UserSite => {
     return {
-      id: row.id as string,
-      userId: row.user_id as string,
-      templateId: (row.template_id as string) ?? null,
-      siteName: row.site_name as string,
-      domain: (row.domain as string) ?? null,
-      status: row.status as UserSite['status'],
-      siteJson: row.site_json as TemplateJson,
-      templateSnapshot: (row.template_snapshot as TemplateJson) ?? null,
-      publishedAt: (row.published_at as string) ?? null,
-      createdAt: row.created_at as string,
-      updatedAt: row.updated_at as string,
+      id: row.id,
+      userId: row.user_id,
+      templateId: row.template_id,
+      siteName: row.site_name,
+      domain: row.domain,
+      status: row.status,
+      siteJson: row.site_json,
+      templateSnapshot: row.template_snapshot,
+      publishedAt: row.published_at,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     };
   }
 
@@ -125,7 +126,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     return this.mapRow(data);
   }
 
-  async updateSiteJson(id: string, siteJson: TemplateJson): Promise<UserSite> {
+  async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt?: string): Promise<UserSite> {
     // Extract new asset usages
     const newUsages: Array<{ asset_id: string; slot_key: string }> = [];
 
@@ -147,16 +148,21 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       }
     }
 
-    // Call Postgres RPC to perform ATOMIC lock, delete orphaned usages, push to cleanup, update json
-    const { error: rpcError } = await this.supabase.rpc('save_site_template_with_lock', {
+    // Call Postgres RPC — atomic lock, usage diff, json update
+    const { data: rpcResult, error: rpcError } = await this.supabase.rpc('save_site_template_with_lock', {
       p_site_id: id,
       p_new_json: siteJson,
       p_new_usages: newUsages,
+      p_expected_updated_at: expectedUpdatedAt ?? null,
     });
 
     if (rpcError) {
       console.error('[SupabaseUserSiteRepo::updateSiteJson]', rpcError.message);
-      throw new TemplateError('UNKNOWN'); // Propagates internal DB rollback
+      throw new TemplateError('UNKNOWN');
+    }
+
+    if (rpcResult === 'STALE_VERSION') {
+      throw new TemplateError('STALE_VERSION');
     }
 
     // Return the updated row

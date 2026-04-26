@@ -5,11 +5,12 @@ import {
   createListTemplatesUseCase,
   createCreateSiteFromTemplateUseCase,
   createListUserSitesUseCase,
+  createUpdateSiteDomainUseCase,
+  createDeleteUserSiteUseCase,
 } from '@/lib/di/container';
 import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { updateSiteDomainAction } from '../editor/actions';
 
 export async function listActiveTemplatesAction() {
   const supabase = await createClient();
@@ -58,7 +59,17 @@ export async function selectTemplateAction(templateId: string, siteName: string,
     });
 
     if (urlSlug) {
-      await updateSiteDomainAction(site.id, urlSlug);
+      try {
+        const domainUseCase = createUpdateSiteDomainUseCase(supabase);
+        await domainUseCase.execute(site.id, urlSlug, user.id);
+      } catch (domainErr) {
+        const deleteUseCase = createDeleteUserSiteUseCase(supabase);
+        await deleteUseCase.execute(site.id, user.id);
+        if (domainErr instanceof TemplateError) {
+          return { error: domainErr.code };
+        }
+        return { error: 'UNKNOWN' };
+      }
     }
 
     revalidatePath('/templates');

@@ -8,6 +8,7 @@ import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTheme } from '@/themes/registry';
 import { ThemeRendererProps } from '@/themes/types';
 import { createClient } from '@/utils/supabase/client';
+import { getSiteError } from '@/lib/errors/messages';
 import { initUploadAction, confirmUploadAction } from '@/app/dashboard/editor/actions';
 
 interface DynamicEditorProps {
@@ -35,6 +36,55 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const lastSaveRef = useRef<number>(0);
+
+  const [isDirty, setIsDirty] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [conflictDetected, setConflictDetected] = useState(false);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const siteJsonRef = useRef(siteJson);
+  const knownUpdatedAtRef = useRef<string>(site.updatedAt);
+
+  useEffect(() => { siteJsonRef.current = siteJson; }, [siteJson]);
+
+  useEffect(() => () => { if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current); }, []);
+
+  useEffect(() => {
+    if (autoSaveStatus !== 'saved') return;
+    const t = setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    return () => clearTimeout(t);
+  }, [autoSaveStatus]);
+
+  useEffect(() => {
+    const guard = (e: BeforeUnloadEvent) => { if (isDirty) e.preventDefault(); };
+    window.addEventListener('beforeunload', guard);
+    return () => window.removeEventListener('beforeunload', guard);
+  }, [isDirty]);
+
+  const applySuccessfulSave = useCallback((updatedAt: string) => {
+    knownUpdatedAtRef.current = updatedAt;
+    setIsDirty(false);
+    setAutoSaveStatus('saved');
+    lastSaveRef.current = Date.now();
+  }, []);
+
+  const scheduleAutoSave = useCallback(() => {
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    setIsDirty(true);
+    setAutoSaveStatus('idle');
+    autoSaveTimerRef.current = setTimeout(async () => {
+      setAutoSaveStatus('saving');
+      const result = await saveSiteJsonAction(site.id, siteJsonRef.current, knownUpdatedAtRef.current);
+      if (result && 'error' in result) {
+        if (result.error === 'STALE_VERSION') {
+          setConflictDetected(true);
+        } else {
+          setAutoSaveStatus('error');
+        }
+      } else if (result && 'updatedAt' in result) {
+        applySuccessfulSave(result.updatedAt);
+      }
+    }, 4000);
+  }, [site.id, applySuccessfulSave]);
 
   // Theme Renderer loading
   const [ThemeRenderer, setThemeRenderer] = useState<React.ComponentType<ThemeRendererProps> | null>(null);
@@ -94,8 +144,9 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         }
         return updated;
       });
+      scheduleAutoSave();
     },
-    [activePageId]
+    [activePageId, scheduleAutoSave]
   );
 
   const handleGlobalStyleChange = useCallback(
@@ -107,8 +158,9 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           [key]: value,
         },
       }));
+      scheduleAutoSave();
     },
-    []
+    [scheduleAutoSave]
   );
 
   const handleSave = async () => {
@@ -116,28 +168,41 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     if (now - lastSaveRef.current < 2000) return;
     lastSaveRef.current = now;
 
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     setActionError(null);
     setSaving(true);
-    const result = await saveSiteJsonAction(site.id, siteJson);
+    const result = await saveSiteJsonAction(site.id, siteJson, knownUpdatedAtRef.current);
     if (result && 'error' in result) {
-      setActionError(`Save failed: ${result.error}`);
+      if (result.error === 'STALE_VERSION') {
+        setConflictDetected(true);
+      } else {
+        setActionError(`Save failed: ${result.error}`);
+      }
+    } else if (result && 'updatedAt' in result) {
+      applySuccessfulSave(result.updatedAt);
     }
     setSaving(false);
   };
 
   const handlePublish = async () => {
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     setActionError(null);
     setSaving(true);
-    await saveSiteJsonAction(site.id, siteJson);
+    const saveResult = await saveSiteJsonAction(site.id, siteJson, knownUpdatedAtRef.current);
+    if (saveResult && 'error' in saveResult) {
+      if (saveResult.error === 'STALE_VERSION') {
+        setConflictDetected(true);
+        setSaving(false);
+        return;
+      }
+    } else if (saveResult && 'updatedAt' in saveResult) {
+      applySuccessfulSave(saveResult.updatedAt);
+    }
     setPublishing(true);
     const result = await publishSiteAction(site.id);
 
     if (result && 'error' in result) {
-      setActionError(
-        result.error === 'RATE_LIMITED'
-          ? 'Please wait 30 seconds between publishes.'
-          : `Publish failed: ${result.error}`
-      );
+      setActionError(getSiteError(result.error, `발행 실패: ${result.error}`));
     } else {
       if (site.domain) {
         setPublishedUrl(`/site/${site.domain}`);
@@ -172,6 +237,35 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   return (
     <>
+      {/* Conflict Modal */}
+      {conflictDetected && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-surface border border-outline-variant p-8 max-w-sm w-full mx-4 shadow-2xl">
+            <span className="material-symbols-outlined text-amber-500 text-3xl mb-4 block">sync_problem</span>
+            <h2 className="font-['Inter'] font-medium text-sm tracking-widest uppercase text-on-surface mb-3">
+              Conflict Detected
+            </h2>
+            <p className="font-['Inter'] font-light text-xs text-outline leading-relaxed mb-6">
+              This site was saved from another tab or device. Reloading will load the latest version — your current unsaved changes will be lost.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="flex-1 bg-primary text-on-primary h-10 font-['Inter'] font-medium text-[0.6875rem] tracking-[0.2em] uppercase hover:brightness-110 transition-all"
+              >
+                Reload
+              </button>
+              <button
+                onClick={() => setConflictDetected(false)}
+                className="flex-1 border border-outline h-10 font-['Inter'] font-light text-[0.6875rem] tracking-[0.1em] uppercase hover:bg-surface-container transition-colors"
+              >
+                Keep Editing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Left Panel */}
       <section className="w-[280px] min-w-[280px] shrink-0 flex flex-col border border-outline-variant bg-surface overflow-hidden">
         {/* Tab Switcher */}
@@ -287,6 +381,20 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
         {/* Action Buttons */}
         <div className="p-6 border-t border-outline-variant bg-surface-container-low">
+          <div className="mb-3 h-4 flex items-center">
+            {autoSaveStatus === 'saving' && (
+              <span className="text-[10px] tracking-widest uppercase text-outline animate-pulse">Saving…</span>
+            )}
+            {autoSaveStatus === 'saved' && (
+              <span className="text-[10px] tracking-widest uppercase text-green-600">✓ Saved</span>
+            )}
+            {autoSaveStatus === 'error' && (
+              <span className="text-[10px] tracking-widest uppercase text-amber-600">Auto-save failed — save manually</span>
+            )}
+            {isDirty && autoSaveStatus === 'idle' && (
+              <span className="text-[10px] tracking-widest uppercase text-outline">● Unsaved changes</span>
+            )}
+          </div>
           {actionError && (
             <div className="mb-4 px-3 py-2 text-[10px] uppercase tracking-widest text-error border border-error/30 bg-error/5 leading-relaxed">
               {actionError}
@@ -385,7 +493,7 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
     try {
       // 1. Initial pending DB record via Server Action
       const initRes = await initUploadAction(file.name, file.type, file.size);
-      if (!initRes.success || !initRes.uploadPath) {
+      if ('error' in initRes) {
         throw new Error(initRes.error || 'Failed to initialize upload');
       }
 
@@ -398,13 +506,13 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
       if (uploadError) throw new Error(uploadError.message);
 
       // 3. Confirm and transition to active
-      const confirmRes = await confirmUploadAction(initRes.assetId!, initRes.uploadPath);
-      if (!confirmRes.success || !confirmRes.publicUrl) {
+      const confirmRes = await confirmUploadAction(initRes.assetId, initRes.uploadPath);
+      if ('error' in confirmRes) {
         throw new Error(confirmRes.error || 'Failed to confirm upload');
       }
 
       // 4. Update the state
-      onChange(sectionId, fieldKey, confirmRes.publicUrl, initRes.assetId!);
+      onChange(sectionId, fieldKey, confirmRes.publicUrl, initRes.assetId);
     } catch (err: unknown) {
       onError(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       console.error('[ASSET_UPLOAD_ERROR]', err);

@@ -3,26 +3,65 @@
 import { UserSite } from "@/domain/entities/user-site.entity";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { updateSiteDomainAction } from "@/app/dashboard/editor/actions";
+import { useRouter } from "next/navigation";
+import {
+  updateSiteDomainAction,
+  publishSiteAction,
+  deleteSiteAction,
+  updateSiteNameAction,
+  unpublishSiteAction,
+} from "@/app/dashboard/editor/actions";
+import { getDomainError, getSiteError } from "@/lib/errors/messages";
 
 interface ProjectsClientProps {
   initialSites: UserSite[];
 }
 
 export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedSite, setSelectedSite] = useState<UserSite | null>(initialSites[0] || null);
   const [settingsSite, setSettingsSite] = useState<UserSite | null>(null);
 
+  const filteredSites = searchQuery.trim()
+    ? initialSites.filter(s =>
+        s.siteName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.domain && s.domain.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : initialSites;
+
+  // Domain state
   const [editDomain, setEditDomain] = useState('');
   const [domainError, setDomainError] = useState<string | null>(null);
   const [domainVerified, setDomainVerified] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // Site name state
+  const [editSiteName, setEditSiteName] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [saveNameError, setSaveNameError] = useState<string | null>(null);
+  const [saveNameSuccess, setSaveNameSuccess] = useState(false);
+
+  // Status toggle state
+  const [isTogglingStatus, setIsTogglingStatus] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
+
+  // Delete state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   useEffect(() => {
     if (settingsSite) {
       setEditDomain(settingsSite.domain || '');
+      setEditSiteName(settingsSite.siteName);
       setDomainError(null);
       setDomainVerified(false);
+      setSaveNameError(null);
+      setSaveNameSuccess(false);
+      setStatusError(null);
+      setShowDeleteConfirm(false);
+      setDeleteError(null);
     }
   }, [settingsSite]);
 
@@ -34,15 +73,9 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
 
     try {
       const result = await updateSiteDomainAction(settingsSite.id, editDomain);
-      if (result.error) {
-        if (result.error === 'DOMAIN_TAKEN') {
-          setDomainError('이미 사용 중인 도메인입니다');
-        } else if (result.error === 'INVALID_DOMAIN') {
-          setDomainError('도메인 형식이 올바르지 않거나 예약된 단어입니다 (최소 3자, 영문/숫자/하이픈)');
-        } else {
-          setDomainError(result.error);
-        }
-      } else if (result.success && result.domain) {
+      if ('error' in result) {
+        setDomainError(getDomainError(result.error));
+      } else if (result.domain) {
         setDomainVerified(true);
         setSettingsSite({ ...settingsSite, domain: result.domain });
       }
@@ -51,6 +84,64 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
     } finally {
       setIsVerifying(false);
     }
+  };
+
+  const handleCommitName = async () => {
+    if (!settingsSite) return;
+    if (editSiteName.trim() === settingsSite.siteName) return;
+
+    setIsSavingName(true);
+    setSaveNameError(null);
+    setSaveNameSuccess(false);
+
+    const result = await updateSiteNameAction(settingsSite.id, editSiteName);
+    if ('error' in result) {
+      setSaveNameError('이름 저장에 실패했습니다.');
+    } else {
+      setSaveNameSuccess(true);
+      setSettingsSite({ ...settingsSite, siteName: editSiteName.trim() });
+      router.refresh();
+    }
+    setIsSavingName(false);
+  };
+
+  const handleToggleStatus = async () => {
+    if (!settingsSite) return;
+    setIsTogglingStatus(true);
+    setStatusError(null);
+
+    const isActive = settingsSite.status === 'active';
+    const result = isActive
+      ? await unpublishSiteAction(settingsSite.id)
+      : await publishSiteAction(settingsSite.id);
+
+    if (result.error) {
+      setStatusError(getSiteError(result.error, '상태 변경에 실패했습니다.'));
+    } else {
+      const newStatus = isActive ? 'draft' : 'active';
+      setSettingsSite({ ...settingsSite, status: newStatus as UserSite['status'] });
+      router.refresh();
+    }
+    setIsTogglingStatus(false);
+  };
+
+  const handleDelete = async () => {
+    if (!settingsSite) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    const result = await deleteSiteAction(settingsSite.id);
+    if ('error' in result) {
+      setDeleteError('삭제에 실패했습니다. 다시 시도해주세요.');
+      setIsDeleting(false);
+    } else {
+      setSettingsSite(null);
+      router.refresh();
+    }
+  };
+
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const formatDate = (dateString: string) => {
@@ -63,6 +154,7 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
   };
 
   const currentSyncTime = formatDate(new Date().toISOString()) + " UTC";
+  const isNameDirty = settingsSite && editSiteName.trim() !== settingsSite.siteName;
 
   return (
     <div className="w-full">
@@ -75,9 +167,30 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
             Manage deployment states, URL mapping, and core structural configurations.
           </p>
         </div>
-        <div className="text-right">
-          <span className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400 block mb-1">Last Sync</span>
-          <span className="text-[0.875rem] font-light text-black dark:text-white">{currentSyncTime}</span>
+        <div className="flex flex-col items-end gap-3">
+          <div className="text-right">
+            <span className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400 block mb-1">Last Sync</span>
+            <span className="text-[0.875rem] font-light text-black dark:text-white">{currentSyncTime}</span>
+          </div>
+          {/* Search */}
+          <div className="relative flex items-center">
+            <span className="material-symbols-outlined text-zinc-400 absolute left-3 !text-[1rem]">search</span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="SEARCH_PROJECTS..."
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 pl-8 pr-4 py-2 text-[0.6875rem] font-light uppercase tracking-widest text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-black dark:focus:border-white w-52 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 text-zinc-400 hover:text-black dark:hover:text-white"
+              >
+                <span className="material-symbols-outlined !text-[0.875rem]">close</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -97,7 +210,13 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
           </div>
         )}
 
-        {initialSites.map((site, index) => {
+        {initialSites.length > 0 && filteredSites.length === 0 && (
+          <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
+            No projects match &ldquo;{searchQuery}&rdquo;
+          </div>
+        )}
+
+        {filteredSites.map((site, index) => {
           const isPublished = site.status === 'active';
 
           return (
@@ -258,20 +377,32 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
             <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
               {/* Settings Sidebar */}
               <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121212] p-6 space-y-1">
-                <button className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black transition-colors flex items-center justify-between group">
+                <button
+                  onClick={() => scrollToSection('settings-basic-info')}
+                  className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center justify-between group"
+                >
                   <span>Basic Info</span>
-                  <span className="material-symbols-outlined !text-[1rem] opacity-50 group-hover:opacity-100">chevron_right</span>
+                  <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-500 hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 transition-colors flex items-center justify-between group">
+                <button
+                  onClick={() => scrollToSection('settings-domain')}
+                  className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-500 hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 transition-colors flex items-center justify-between group"
+                >
                   <span>Domain & URL</span>
-                  <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-100">chevron_right</span>
+                  <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-500 hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 transition-colors flex items-center justify-between group">
-                  <span>Deployments</span>
-                  <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-100">chevron_right</span>
+                <button
+                  onClick={() => scrollToSection('settings-status')}
+                  className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-500 hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 transition-colors flex items-center justify-between group"
+                >
+                  <span>Status</span>
+                  <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
                 </button>
                 <div className="pt-6 mt-6 border-t border-zinc-200 dark:border-zinc-800">
-                  <button className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center justify-between group">
+                  <button
+                    onClick={() => scrollToSection('settings-danger')}
+                    className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center justify-between group"
+                  >
                     <span>Danger Zone</span>
                     <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-100 text-red-600">warning</span>
                   </button>
@@ -281,7 +412,7 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
               {/* Settings Form Area */}
               <div className="flex-1 overflow-y-auto p-8 grid-blueprint bg-[#f9f9f9] dark:bg-[#0a0a0a]">
                 <div className="max-w-2xl space-y-12">
-                  <section>
+                  <section id="settings-basic-info">
                     <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined !text-[1rem]">tune</span>
                       Basic Info
@@ -291,22 +422,21 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
                         <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">Site Name</label>
                         <input
                           type="text"
-                          defaultValue={settingsSite.siteName}
+                          value={editSiteName}
+                          onChange={(e) => {
+                            setEditSiteName(e.target.value);
+                            setSaveNameError(null);
+                            setSaveNameSuccess(false);
+                          }}
                           className="w-full bg-transparent border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm font-light text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition-all placeholder:text-zinc-400"
                         />
-                      </div>
-                      <div>
-                        <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">System Description</label>
-                        <textarea
-                          rows={3}
-                          placeholder="Initialize project context..."
-                          className="w-full bg-transparent border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm font-light text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition-all placeholder:text-zinc-400"
-                        ></textarea>
+                        {saveNameError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{saveNameError}</p>}
+                        {saveNameSuccess && <p className="text-[0.6875rem] text-green-500 mt-2 font-light">이름이 저장되었습니다.</p>}
                       </div>
                     </div>
                   </section>
 
-                  <section>
+                  <section id="settings-domain">
                     <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined !text-[1rem]">router</span>
                       Domain & URL
@@ -335,28 +465,17 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
                           </button>
                         </div>
                         {domainError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light tracking-wide">{domainError}</p>}
-                        {domainVerified && <p className="text-[0.6875rem] text-green-500 mt-2 font-light tracking-wide">Domain is available and successfully verified.</p>}
-                        {!domainError && !domainVerified && <p className="text-[0.6875rem] text-zinc-500 mt-2 font-light tracking-wide">Leave blank to use the default internal routing: internal.id/{settingsSite.id.substring(0, 8)}</p>}
-                      </div>
-                      <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
-                        <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">URL Slug</label>
-                        <div className="flex">
-                          <span className="bg-[#f3f3f3] dark:bg-[#1a1a1a] border border-r-0 border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm font-light text-zinc-500 flex items-center">
-                            layer0.studio/
-                          </span>
-                          <input
-                            type="text"
-                            defaultValue={settingsSite.siteName.toLowerCase().replace(/\s+/g, '-')}
-                            placeholder="project-slug"
-                            className="flex-1 bg-transparent border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm font-light text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition-all placeholder:text-zinc-400"
-                          />
-                        </div>
-                        <p className="text-[0.6875rem] text-zinc-500 mt-2 font-light tracking-wide">This will be your default project URL if no custom domain is provided.</p>
+                        {domainVerified && <p className="text-[0.6875rem] text-green-500 mt-2 font-light tracking-wide">도메인이 성공적으로 설정되었습니다.</p>}
+                        {!domainError && !domainVerified && (
+                          <p className="text-[0.6875rem] text-zinc-500 mt-2 font-light tracking-wide">
+                            Leave blank to use the default internal routing: internal.id/{settingsSite.id.substring(0, 8)}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </section>
 
-                  <section>
+                  <section id="settings-status">
                     <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined !text-[1rem]">power_settings_new</span>
                       Execution Status
@@ -364,15 +483,22 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
                     <div className="flex items-center justify-between p-6 bg-white dark:bg-[#121212] border border-zinc-200 dark:border-zinc-800">
                       <div>
                         <span className="block text-[0.75rem] font-medium uppercase tracking-widest text-black dark:text-white mb-1">Production State</span>
-                        <span className="block text-[0.6875rem] font-light text-zinc-500">Currently {settingsSite.status === 'active' ? 'published and globally accessible' : 'in local draft execution mode'}.</span>
+                        <span className="block text-[0.6875rem] font-light text-zinc-500">
+                          Currently {settingsSite.status === 'active' ? 'published and globally accessible' : 'in local draft execution mode'}.
+                        </span>
+                        {statusError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{statusError}</p>}
                       </div>
-                      <button className="border border-zinc-300 dark:border-zinc-700 px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors">
-                        {settingsSite.status === 'active' ? 'Suspend Instance' : 'Publish Instance'}
+                      <button
+                        onClick={handleToggleStatus}
+                        disabled={isTogglingStatus}
+                        className="border border-zinc-300 dark:border-zinc-700 px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors disabled:opacity-50"
+                      >
+                        {isTogglingStatus ? 'Processing...' : settingsSite.status === 'active' ? 'Suspend Instance' : 'Publish Instance'}
                       </button>
                     </div>
                   </section>
 
-                  <section>
+                  <section id="settings-danger">
                     <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-red-500 block mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined !text-[1rem]">warning</span>
                       Danger Zone
@@ -383,10 +509,35 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
                         <span className="block text-[0.6875rem] font-light text-red-500/80 dark:text-red-400/80 max-w-sm">
                           Permanently remove this project and all its associated data. This action cannot be undone.
                         </span>
+                        {deleteError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{deleteError}</p>}
                       </div>
-                      <button className="border border-red-200 dark:border-red-900/50 bg-white dark:bg-black px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-red-600 dark:text-red-500 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white transition-colors">
-                        Delete Site
-                      </button>
+                      {showDeleteConfirm ? (
+                        <div className="flex flex-col gap-2 items-end">
+                          <span className="text-[0.6875rem] text-red-600 font-medium uppercase tracking-widest">확인하시겠습니까?</span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setShowDeleteConfirm(false)}
+                              className="border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleDelete}
+                              disabled={isDeleting}
+                              className="border border-red-500 bg-red-600 text-white px-4 py-2 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-red-700 transition-colors disabled:opacity-50"
+                            >
+                              {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setShowDeleteConfirm(true)}
+                          className="border border-red-200 dark:border-red-900/50 bg-white dark:bg-black px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-red-600 dark:text-red-500 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white transition-colors"
+                        >
+                          Delete Site
+                        </button>
+                      )}
                     </div>
                   </section>
                 </div>
@@ -396,17 +547,21 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
             {/* Footer */}
             <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-white dark:bg-[#121212]">
               <div className="text-[0.625rem] font-light text-zinc-400 tracking-widest uppercase hidden sm:block">
-                Unsaved modifications pending execution
+                {isNameDirty ? 'Site name changes pending' : 'No pending changes'}
               </div>
               <div className="flex gap-4 w-full sm:w-auto justify-end">
                 <button
                   onClick={() => setSettingsSite(null)}
                   className="px-6 py-3 border border-transparent text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors"
                 >
-                  Discard
+                  Close
                 </button>
-                <button className="px-8 py-3 bg-black text-white dark:bg-white dark:text-black text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
-                  Commit Changes
+                <button
+                  onClick={handleCommitName}
+                  disabled={!isNameDirty || isSavingName}
+                  className="px-8 py-3 bg-black text-white dark:bg-white dark:text-black text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isSavingName ? 'Saving...' : 'Commit Changes'}
                 </button>
               </div>
             </div>

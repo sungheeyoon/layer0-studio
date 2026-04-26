@@ -1,5 +1,6 @@
 'use server';
 
+import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/server';
 import {
   createGetUserSiteUseCase,
@@ -9,10 +10,27 @@ import {
   createUpdateSiteDomainUseCase,
   createAssetUploadUseCase,
 } from '@/lib/di/container';
+import { SupabaseUserSiteRepositoryImpl } from '@/data/repositories/supabase-user-site.repository.impl';
 import { TemplateJson } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';
-import { validateAssetInfo } from '@/domain/entities/asset.entity';
+import { AssetValidationError } from '@/domain/entities/asset.entity';
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
+async function withUser<T>(
+  handler: (user: User, supabase: SupabaseServerClient) => Promise<T>
+): Promise<T | { error: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'UNAUTHORIZED' };
+  try {
+    return await handler(user, supabase);
+  } catch (err) {
+    if (err instanceof TemplateError) return { error: err.code };
+    return { error: 'UNKNOWN' };
+  }
+}
 
 export async function loadSiteAction(siteId: string) {
   const supabase = await createClient();
@@ -27,34 +45,19 @@ export async function loadSiteAction(siteId: string) {
     }
     return site;
   } catch (err) {
-    if (err instanceof TemplateError) {
-      return null;
-    }
+    if (err instanceof TemplateError) return null;
     console.error('[loadSiteAction] unexpected error for site %s:', siteId, err);
     return null;
   }
 }
 
-export async function saveSiteJsonAction(siteId: string, siteJson: TemplateJson) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'UNAUTHORIZED' };
-  }
-
-  try {
+export async function saveSiteJsonAction(siteId: string, siteJson: TemplateJson, expectedUpdatedAt?: string) {
+  return withUser(async (user, supabase) => {
     const useCase = createUpdateSiteJsonUseCase(supabase);
-    const site = await useCase.execute(siteId, siteJson, user.id);
-
+    const site = await useCase.execute(siteId, siteJson, user.id, expectedUpdatedAt);
     revalidatePath('/dashboard/editor');
-    return { success: true, site };
-  } catch (err) {
-    if (err instanceof TemplateError) {
-      return { error: err.code };
-    }
-    return { error: 'UNKNOWN' };
-  }
+    return { success: true as const, updatedAt: site.updatedAt };
+  });
 }
 
 export async function updateSiteFieldAction(
@@ -64,165 +67,106 @@ export async function updateSiteFieldAction(
   value: string,
   pageId?: string,
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'UNAUTHORIZED' };
-  }
-
-  try {
+  return withUser(async (user, supabase) => {
     const useCase = createUpdateSiteJsonUseCase(supabase);
     const site = await useCase.executeFieldUpdate(siteId, sectionId, fieldKey, value, user.id, pageId);
-
-    return { success: true, site };
-  } catch (err) {
-    if (err instanceof TemplateError) {
-      return { error: err.code };
-    }
-    return { error: 'UNKNOWN' };
-  }
+    return { success: true as const, site };
+  });
 }
 
 export async function publishSiteAction(siteId: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  return withUser(async (user, supabase) => {
+    const { data: latestPublish } = await supabase
+      .from('user_sites')
+      .select('published_at')
+      .eq('user_id', user.id)
+      .not('published_at', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  if (!user) {
-    return { error: 'UNAUTHORIZED' };
-  }
-
-  // Rate limit: 30-second cooldown per user across all sites
-  const { data: latestPublish } = await supabase
-    .from('user_sites')
-    .select('published_at')
-    .eq('user_id', user.id)
-    .not('published_at', 'is', null)
-    .order('published_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (latestPublish?.published_at) {
-    const elapsed = (Date.now() - new Date(latestPublish.published_at).getTime()) / 1000;
-    if (elapsed < 30) {
-      return { error: 'RATE_LIMITED' };
+    if (latestPublish?.published_at) {
+      const elapsed = (Date.now() - new Date(latestPublish.published_at).getTime()) / 1000;
+      if (elapsed < 30) return { error: 'RATE_LIMITED' as const };
     }
-  }
 
-  try {
     const useCase = createPublishSiteUseCase(supabase);
     const site = await useCase.execute(siteId, user.id);
-
     revalidatePath('/dashboard/editor');
-    if (site.domain) {
-      revalidatePath(`/site/${site.domain}`);
-    }
-    return { success: true };
-  } catch (err) {
-    if (err instanceof TemplateError) {
-      return { error: err.code };
-    }
-    return { error: 'UNKNOWN' };
-  }
+    if (site.domain) revalidatePath(`/site/${site.domain}`);
+    return { success: true as const };
+  });
 }
 
 export async function updateSiteDomainAction(siteId: string, domain: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'UNAUTHORIZED' };
-  }
-
-  try {
+  return withUser(async (user, supabase) => {
     const useCase = createUpdateSiteDomainUseCase(supabase);
     const site = await useCase.execute(siteId, domain, user.id);
-
     revalidatePath('/dashboard/editor');
-    return { success: true, domain: site.domain };
-  } catch (err: unknown) {
-    if (err instanceof TemplateError) {
-      return { error: err.code };
-    }
-    return { error: 'UNKNOWN' };
-  }
+    return { success: true as const, domain: site.domain };
+  });
 }
 
 export async function deleteSiteAction(siteId: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'UNAUTHORIZED' };
-  }
-
-  try {
+  return withUser(async (user, supabase) => {
     const useCase = createDeleteUserSiteUseCase(supabase);
     await useCase.execute(siteId, user.id);
-
     revalidatePath('/dashboard/projects');
-    return { success: true };
-  } catch (err) {
-    if (err instanceof TemplateError) {
-      return { error: err.code };
-    }
-    return { error: 'UNKNOWN' };
-  }
+    return { success: true as const };
+  });
 }
 
+export async function updateSiteNameAction(siteId: string, siteName: string) {
+  const trimmed = siteName.trim();
+  if (!trimmed) return { error: 'INVALID_NAME' };
+  return withUser(async (user, supabase) => {
+    const repo = new SupabaseUserSiteRepositoryImpl(supabase);
+    const site = await repo.findById(siteId);
+    if (!site || site.userId !== user.id) return { error: 'SITE_ACCESS_DENIED' as const };
+    await repo.update(siteId, { siteName: trimmed });
+    revalidatePath('/dashboard/projects');
+    return { success: true as const };
+  });
+}
+
+export async function unpublishSiteAction(siteId: string) {
+  return withUser(async (user, supabase) => {
+    const repo = new SupabaseUserSiteRepositoryImpl(supabase);
+    const site = await repo.findById(siteId);
+    if (!site || site.userId !== user.id) return { error: 'SITE_ACCESS_DENIED' as const };
+    const updated = await repo.update(siteId, { status: 'draft' });
+    revalidatePath('/dashboard/projects');
+    revalidatePath('/dashboard/editor');
+    if (site.domain) revalidatePath(`/site/${site.domain}`);
+    return { success: true as const, site: updated };
+  });
+}
 
 export async function initUploadAction(
   filename: string,
   mimeType: string,
-  size: number
+  size: number,
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'UNAUTHORIZED' };
-  }
-
-  try {
-    validateAssetInfo(size, mimeType);
-
-    const useCase = createAssetUploadUseCase(supabase);
-    const asset = await useCase.initUpload({
-      userId: user.id,
-      filename,
-      mimeType,
-      size,
-    });
-
-    const uploadPath = `${user.id}/${asset.id}/${filename}`;
-
-    return { success: true, assetId: asset.id, uploadPath };
-  } catch (err: unknown) {
-    console.error('[initUploadAction]', err);
-    return { error: err instanceof Error ? err.message : 'UNKNOWN' };
-  }
+  return withUser(async (user, supabase) => {
+    try {
+      const useCase = createAssetUploadUseCase(supabase);
+      const asset = await useCase.executeInit({ userId: user.id, filename, mimeType, size });
+      const uploadPath = `${user.id}/${asset.id}/${filename}`;
+      return { success: true as const, assetId: asset.id, uploadPath };
+    } catch (err) {
+      if (err instanceof AssetValidationError) return { error: err.message };
+      throw err;
+    }
+  });
 }
 
 export async function confirmUploadAction(assetId: string, uploadPath: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'UNAUTHORIZED' };
-  }
-
-  try {
+  return withUser(async (user, supabase) => {
     const useCase = createAssetUploadUseCase(supabase);
-    const asset = await useCase.confirmUpload(assetId, uploadPath);
-
-    // Get public URL
+    const asset = await useCase.executeConfirm({ userId: user.id, assetId, uploadPath });
     const { data: { publicUrl } } = supabase.storage
       .from('user_assets')
       .getPublicUrl(uploadPath);
-
-    return { success: true, asset, publicUrl };
-  } catch (err: unknown) {
-    console.error('[confirmUploadAction]', err);
-    return { error: err instanceof Error ? err.message : 'UNKNOWN' };
-  }
+    return { success: true as const, asset, publicUrl };
+  });
 }

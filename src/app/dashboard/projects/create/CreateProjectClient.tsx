@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Template } from '@/domain/entities/template.entity';
 import { selectTemplateAction } from '@/app/dashboard/templates/actions';
+import { getDomainError } from '@/lib/errors/messages';
 
 interface CreateProjectClientProps {
   template: Template;
@@ -24,11 +25,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
     try {
       const result = await selectTemplateAction(template.id, siteName, urlSlug);
       if (result?.error) {
-        setProvisionError(
-          result.error === 'NAME_TAKEN'
-            ? '이미 사용 중인 사이트 이름입니다.'
-            : '오류가 발생했습니다: ' + result.error
-        );
+        setProvisionError(getDomainError(result.error));
         setIsSubmitting(false);
       }
     } catch {

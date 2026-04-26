@@ -8,7 +8,7 @@ export class UpdateSiteJsonUseCase {
   /**
    * Replace the site's JSON (Ownership check required)
    */
-  async execute(siteId: string, siteJson: TemplateJson, userId: string) {
+  async execute(siteId: string, siteJson: TemplateJson, userId: string, expectedUpdatedAt?: string) {
     const existing = await this.userSiteRepository.findById(siteId);
     if (!existing) {
       throw new TemplateError('SITE_NOT_FOUND');
@@ -20,7 +20,7 @@ export class UpdateSiteJsonUseCase {
     // Validate JSON structure
     this.validateJson(siteJson);
 
-    return this.userSiteRepository.updateSiteJson(siteId, siteJson);
+    return this.userSiteRepository.updateSiteJson(siteId, siteJson, expectedUpdatedAt);
   }
 
   /**
@@ -59,7 +59,7 @@ export class UpdateSiteJsonUseCase {
     }
 
     // Deep copy current JSON
-    const updatedJson: TemplateJson = JSON.parse(JSON.stringify(site.siteJson));
+    const updatedJson: TemplateJson = structuredClone(site.siteJson);
 
     // Find the section and update the field
     let section;

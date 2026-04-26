@@ -13,7 +13,7 @@ pnpm start      # Start production server
 pnpm lint       # Run ESLint (eslint config: eslint-config-next)
 ```
 
-No test runner is configured. TypeScript checking: `pnpm tsc --noEmit`.
+Test runner: `pnpm test` (vitest v2, domain layer only — `src/domain/__tests__/`). TypeScript checking: `pnpm tsc --noEmit`.
 
 ## Architecture
 
@@ -86,8 +86,12 @@ NEXT_PUBLIC_SITE_URL=       # e.g. https://layer0.studio — used by sitemap, ro
 CRON_SECRET=                # Bearer token validated by /api/cron/cleanup-assets
 ```
 
-If `NEXT_PUBLIC_SITE_URL` is missing, `src/lib/seo/base-url.ts` falls back to `http://localhost:3000` — crawlers will then index localhost URLs. Set this before any production build.
+Production builds **hard-fail** if `NEXT_PUBLIC_SITE_URL` is missing (`next.config.ts:3-8`). In dev, `src/lib/seo/base-url.ts` falls back to `http://localhost:3000`.
 
 ### Database migrations
 
-SQL migrations live in `docs/migrations/` (001–009). Apply manually via the Supabase dashboard SQL editor or `supabase db push`. Migration 009 (`009_storage_bucket_hardening.sql`) enforces bucket-level MIME/size on `user_assets` and restricts `template-thumbnails` writes to admins — must be applied before launch.
+SQL migrations live in `docs/migrations/` (001–009). Apply manually via the Supabase dashboard SQL editor or `supabase db push`. Migration 009 (`009_storage_bucket_hardening.sql`) — bucket-level MIME/size on `user_assets` and admin-only writes on `template-thumbnails` — is applied to production.
+
+### Deployment
+
+Production: https://layer0-studio-cms.vercel.app (Vercel). Pre-launch review and remaining items: `docs/PRE_LAUNCH_REVIEW.md`.
