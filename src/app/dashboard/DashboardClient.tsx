@@ -3,13 +3,11 @@
 import { UserSite } from "@/domain/entities/user-site.entity";
 import Link from "next/link";
 import { useState } from "react";
+import { useDashboardData } from "./DashboardDataProvider";
 
-interface DashboardClientProps {
-  initialSites: UserSite[];
-}
-
-export default function DashboardClient({ initialSites }: DashboardClientProps) {
-  const [selectedSite, setSelectedSite] = useState<UserSite | null>(initialSites[0] || null);
+export default function DashboardClient() {
+  const { sites } = useDashboardData();
+  const [selectedSite, setSelectedSite] = useState<UserSite | null>(sites[0] || null);
 
   const formatDate = (dateString: string) => {
     try {
@@ -20,9 +18,9 @@ export default function DashboardClient({ initialSites }: DashboardClientProps) 
     }
   };
 
-  const activeNodes = initialSites.filter(site => site.status === 'active').length;
-  const draftStates = initialSites.filter(site => site.status !== 'active').length;
-  const totalSites = initialSites.length;
+  const activeNodes = sites.filter(site => site.status === 'active').length;
+  const draftStates = sites.filter(site => site.status !== 'active').length;
+  const totalSites = sites.length;
 
   return (
     <div className="max-w-[1400px] w-full">
@@ -148,13 +146,13 @@ export default function DashboardClient({ initialSites }: DashboardClientProps) 
             <div className="col-span-3 text-right text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Execution</div>
           </div>
 
-          {initialSites.length === 0 && (
+          {sites.length === 0 && (
             <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
               No projects found. Provision a new project to begin.
             </div>
           )}
 
-          {initialSites.map((site, index) => {
+          {sites.map((site, index) => {
             const isPublished = site.status === 'active';
 
             return (

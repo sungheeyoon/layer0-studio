@@ -1,16 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { UserSite } from '@/domain/entities/user-site.entity';
 import { updateSiteDomainAction } from '@/app/dashboard/editor/actions';
 import { getDomainError } from '@/lib/errors/messages';
+import { useDashboardData } from '../DashboardDataProvider';
 
-interface DomainsClientProps {
-  initialSites: UserSite[];
-}
-
-export default function DomainsClient({ initialSites }: DomainsClientProps) {
-  const [sites, setSites] = useState(initialSites);
+export default function DomainsClient() {
+  const { sites, patchSite } = useDashboardData();
   const [editingDomain, setEditingDomain] = useState<{ siteId: string; value: string } | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<{ siteId: string; message: string } | null>(null);
@@ -24,7 +20,7 @@ export default function DomainsClient({ initialSites }: DomainsClientProps) {
     if (result && 'error' in result) {
       setDomainError({ siteId, message: getDomainError(result.error) });
     } else if (result && 'domain' in result && result.domain) {
-      setSites(prev => prev.map(s => s.id === siteId ? { ...s, domain: result.domain ?? null } : s));
+      patchSite(siteId, { domain: result.domain ?? null });
       setEditingDomain(null);
     }
     setSavingId(null);

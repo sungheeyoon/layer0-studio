@@ -12,23 +12,21 @@ import {
   unpublishSiteAction,
 } from "@/app/dashboard/editor/actions";
 import { getDomainError, getSiteError } from "@/lib/errors/messages";
+import { useDashboardData } from "../DashboardDataProvider";
 
-interface ProjectsClientProps {
-  initialSites: UserSite[];
-}
-
-export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
+export default function ProjectsClient() {
   const router = useRouter();
+  const { sites, patchSite, removeSite } = useDashboardData();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSite, setSelectedSite] = useState<UserSite | null>(initialSites[0] || null);
+  const [selectedSite, setSelectedSite] = useState<UserSite | null>(sites[0] || null);
   const [settingsSite, setSettingsSite] = useState<UserSite | null>(null);
 
   const filteredSites = searchQuery.trim()
-    ? initialSites.filter(s =>
+    ? sites.filter(s =>
         s.siteName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (s.domain && s.domain.toLowerCase().includes(searchQuery.toLowerCase()))
       )
-    : initialSites;
+    : sites;
 
   // Domain state
   const [editDomain, setEditDomain] = useState('');
@@ -78,6 +76,7 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
       } else if (result.domain) {
         setDomainVerified(true);
         setSettingsSite({ ...settingsSite, domain: result.domain });
+        patchSite(settingsSite.id, { domain: result.domain });
       }
     } catch {
       setDomainError('An unexpected error occurred.');
@@ -99,7 +98,9 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
       setSaveNameError('이름 저장에 실패했습니다.');
     } else {
       setSaveNameSuccess(true);
-      setSettingsSite({ ...settingsSite, siteName: editSiteName.trim() });
+      const trimmed = editSiteName.trim();
+      setSettingsSite({ ...settingsSite, siteName: trimmed });
+      patchSite(settingsSite.id, { siteName: trimmed });
       router.refresh();
     }
     setIsSavingName(false);
@@ -118,8 +119,9 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
     if (result.error) {
       setStatusError(getSiteError(result.error, '상태 변경에 실패했습니다.'));
     } else {
-      const newStatus = isActive ? 'draft' : 'active';
-      setSettingsSite({ ...settingsSite, status: newStatus as UserSite['status'] });
+      const newStatus = (isActive ? 'draft' : 'active') as UserSite['status'];
+      setSettingsSite({ ...settingsSite, status: newStatus });
+      patchSite(settingsSite.id, { status: newStatus });
       router.refresh();
     }
     setIsTogglingStatus(false);
@@ -130,12 +132,15 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
     setIsDeleting(true);
     setDeleteError(null);
 
-    const result = await deleteSiteAction(settingsSite.id);
+    const deletedId = settingsSite.id;
+    const result = await deleteSiteAction(deletedId);
     if ('error' in result) {
       setDeleteError('삭제에 실패했습니다. 다시 시도해주세요.');
       setIsDeleting(false);
     } else {
+      removeSite(deletedId);
       setSettingsSite(null);
+      if (selectedSite?.id === deletedId) setSelectedSite(null);
       router.refresh();
     }
   };
@@ -204,13 +209,13 @@ export default function ProjectsClient({ initialSites }: ProjectsClientProps) {
           <div className="col-span-3 text-right text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Execution</div>
         </div>
 
-        {initialSites.length === 0 && (
+        {sites.length === 0 && (
           <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
             No projects found. Provision a new project to begin.
           </div>
         )}
 
-        {initialSites.length > 0 && filteredSites.length === 0 && (
+        {sites.length > 0 && filteredSites.length === 0 && (
           <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
             No projects match &ldquo;{searchQuery}&rdquo;
           </div>

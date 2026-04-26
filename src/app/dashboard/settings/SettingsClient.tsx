@@ -4,19 +4,11 @@ import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { changePasswordAction, deleteAccountAction } from "./actions";
 import { logoutAction } from "@/app/login/actions";
+import { useDashboardData } from "../DashboardDataProvider";
 
-interface SettingsClientProps {
-  user: {
-    email?: string;
-    id: string;
-    user_metadata?: {
-      full_name?: string;
-    }
-  } | null;
-}
-
-export default function SettingsClient({ user }: SettingsClientProps) {
+export default function SettingsClient() {
   const router = useRouter();
+  const { user } = useDashboardData();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
