@@ -1,6 +1,6 @@
 # Post-Launch Improvements — Layer0 Studio
 
-_작성일: 2026-04-25 / 최근 갱신: 2026-04-26 (P3 3.2 / 3.3 코어 완료 · `010_optimistic_concurrency.sql` prod 적용) / 브랜치: `main` / 운영: https://layer0-studio-cms.vercel.app_
+_작성일: 2026-04-25 / 최근 갱신: 2026-04-26 (P3 3.2 / 3.3 코어 완료 · `010_optimistic_concurrency.sql` prod 적용) / 브랜치: `main` / 운영: https://layer0-studio.vercel.app_
 
 `PRE_LAUNCH_REVIEW.md` 의 P0~P2, 본 문서 이전판 P1 1.1~1.8, P1 후속 1.1~1.3, P2 2.1~2.6 모두 종결(2026-04-26). 2026-04-26 재오픈된 P2 2.4 (DynamicEditor 영문 ternary)도 동일자 재종결. P3 3.2 (auto-save 코어) / 3.3 (낙관적 동시성 RPC + `010_optimistic_concurrency.sql` prod 적용) 도 동일자 완료 — debounce 4s auto-save / `beforeunload` 가드 / `expectedUpdatedAt` 비교 / Conflict 모달 동작 확인. 본 문서는 코어 완료 후 남은 잔존 race 항목과 P3 잔여 작업만 유지합니다.
 

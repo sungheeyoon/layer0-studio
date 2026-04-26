@@ -1,6 +1,6 @@
 # Pre-Launch Review — Layer0 Studio
 
-_검토일: 2026-04-25 / 브랜치: `main` / 배포 URL: https://layer0-studio-cms.vercel.app_
+_검토일: 2026-04-25 / 브랜치: `main` / 배포 URL: https://layer0-studio.vercel.app_
 
 **상태:** P0·P1·P2 모든 코드 항목 ✅ — 운영 배포 완료. 잔여 항목은 §5 체크리스트의 디자인 의존 항목(`/legal/*`)뿐.
 
