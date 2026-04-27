@@ -212,13 +212,19 @@ export default function SettingsClient() {
           </div>
           
           <div className="space-y-4">
-            <button 
+            <button
               onClick={handleLogout}
               disabled={isPending}
-              className="w-full group flex items-center justify-between border border-outline px-6 py-4 hover:bg-black hover:text-white transition-all dark:hover:bg-white dark:hover:text-black disabled:opacity-50"
+              className="w-full group flex items-center justify-between border border-outline px-6 py-4 hover:bg-black hover:text-white transition-all dark:hover:bg-white dark:hover:text-black disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="text-[0.6875rem] font-medium uppercase tracking-[0.1em]">TERMINATE_SESSION</span>
-              <span className="material-symbols-outlined">logout</span>
+              <span className="text-[0.6875rem] font-medium uppercase tracking-[0.1em]">
+                {isPending ? "TERMINATING..." : "TERMINATE_SESSION"}
+              </span>
+              {isPending ? (
+                <span className="w-[14px] h-[14px] border border-current border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <span className="material-symbols-outlined">logout</span>
+              )}
             </button>
             
             <div className="space-y-2">

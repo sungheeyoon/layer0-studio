@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { logoutAction } from "@/app/login/actions";
@@ -12,6 +12,7 @@ interface ProfileDropdownProps {
 
 export default function ProfileDropdown({ user, children }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,8 +25,10 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
-    await logoutAction();
+  const handleLogout = () => {
+    startTransition(async () => {
+      await logoutAction();
+    });
   };
 
   return (
@@ -76,13 +79,18 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
             <li className="mt-2 border-t border-outline-variant/20">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-between px-4 py-4 font-['Inter'] font-medium tracking-[0.1em] uppercase text-[11px] text-[#7d000c] hover:bg-[#7d000c]/5 transition-colors duration-75 text-left"
+                disabled={isPending}
+                className="w-full flex items-center justify-between px-4 py-4 font-['Inter'] font-medium tracking-[0.1em] uppercase text-[11px] text-[#7d000c] hover:bg-[#7d000c]/5 transition-colors duration-75 text-left disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-sm">power_settings_new</span>
-                  TERMINATE_SESSION
+                  {isPending ? (
+                    <span className="w-[12px] h-[12px] border border-[#7d000c] border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <span className="material-symbols-outlined text-sm">power_settings_new</span>
+                  )}
+                  {isPending ? "TERMINATING..." : "TERMINATE_SESSION"}
                 </span>
-                <div className="w-[4px] h-[4px] bg-[#7d000c]"></div> {/* Red accent dot */}
+                <div className="w-[4px] h-[4px] bg-[#7d000c]"></div>
               </button>
             </li>
           </ul>

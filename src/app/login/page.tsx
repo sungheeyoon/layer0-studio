@@ -1,24 +1,27 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { loginAction } from "./actions";
 import { getAuthError } from "@/lib/errors/messages";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
-    const result = await loginAction(formData);
+    startTransition(async () => {
+      const result = await loginAction(formData);
 
-    if (!result.success) {
-      setError(getAuthError(result.code));
-    } else {
-      setError(null);
-      router.push('/templates');
-    }
+      if (!result.success) {
+        setError(getAuthError(result.code));
+      } else {
+        setError(null);
+        router.push('/templates');
+      }
+    });
   }
 
   return (
@@ -94,12 +97,22 @@ export default function LoginPage() {
                   ERROR: {error}
                 </div>
               )}
-              <button 
-                className="w-full h-12 bg-primary text-on-primary font-label text-[11px] font-medium tracking-[0.2em] uppercase active:scale-[0.98] transition-transform flex items-center justify-center gap-3" 
+              <button
+                className="w-full h-12 bg-primary text-on-primary font-label text-[11px] font-medium tracking-[0.2em] uppercase active:scale-[0.98] transition-transform flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
                 type="submit"
+                disabled={isPending}
               >
-                <span>INITIATE_SESSION</span>
-                <span className="w-[4px] h-[4px] bg-tertiary-fixed"></span>
+                {isPending ? (
+                  <>
+                    <span className="w-[10px] h-[10px] border border-on-primary border-t-transparent rounded-full animate-spin"></span>
+                    <span>AUTHENTICATING...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>INITIATE_SESSION</span>
+                    <span className="w-[4px] h-[4px] bg-tertiary-fixed"></span>
+                  </>
+                )}
               </button>
               
               <div className="flex justify-between items-center">
