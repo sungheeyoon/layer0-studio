@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Hero() {
   return (
     <section className="relative min-h-[90vh] grid-blueprint border-b border-surface-container flex items-center px-10 overflow-hidden">
@@ -13,9 +15,12 @@ export default function Hero() {
             Using Templates.
           </h1>
           <div className="flex flex-col md:flex-row gap-12 items-start md:items-center">
-            <button className="bg-primary text-on-primary px-12 py-5 font-medium text-[0.75rem] tracking-[0.2em] uppercase hover:brightness-110 transition-all shadow-xl">
+            <Link
+              href="/templates"
+              className="bg-primary text-on-primary px-12 py-5 font-medium text-[0.75rem] tracking-[0.2em] uppercase hover:brightness-110 transition-all shadow-xl"
+            >
               Browse Templates
-            </button>
+            </Link>
             <div className="max-w-md border-l border-outline-variant pl-8 py-2">
               <p className="text-outline font-light text-sm leading-relaxed">
                 Choose a template, customize your content, and launch instantly. 

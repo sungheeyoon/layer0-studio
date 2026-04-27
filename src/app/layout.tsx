@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
-import { createClient } from "@/utils/supabase/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import ConditionalLayoutWrapper from "@/components/ConditionalLayoutWrapper";
 import { SITE_URL } from "@/lib/seo/base-url";
 import "./globals.css";
@@ -43,8 +43,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   return (
     <html lang="en" className="light">
       <head>

@@ -1,9 +1,14 @@
+import Link from "next/link";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import Footer from "@/components/Footer";
 import EditorPreview from "@/components/EditorPreview";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 export default async function Home() {
+  const user = await getCurrentUser();
+  const primaryCtaHref = user ? "/dashboard" : "/signup";
+  const primaryCtaLabel = user ? "Open Dashboard" : "Get Started";
 
   return (
     <>
@@ -59,7 +64,12 @@ export default async function Home() {
                 <p className="text-outline text-[0.625rem] uppercase tracking-[0.3em]">Curated Library // Available: 01</p>
               </div>
               <div className="hidden md:block">
-                <button className="text-[0.6875rem] font-medium uppercase tracking-widest border-b border-primary pb-1">Browse all templates</button>
+                <Link
+                  href="/templates"
+                  className="text-[0.6875rem] font-medium uppercase tracking-widest border-b border-primary pb-1"
+                >
+                  Browse all templates
+                </Link>
               </div>
             </div>
 
@@ -98,9 +108,13 @@ export default async function Home() {
                     <span className="w-1.5 h-1.5 bg-tertiary"></span> Fully responsive
                   </li>
                 </ul>
-                <button className="w-max border border-outline px-10 py-4 text-[0.6875rem] font-medium uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all">
+                {/* TODO(post-launch): link directly to /dashboard/projects/create?templateId=<corporate-id> once the template is seeded — see POST_LAUNCH_IMPROVEMENTS.md */}
+                <Link
+                  href="/templates"
+                  className="w-max border border-outline px-10 py-4 text-[0.6875rem] font-medium uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all"
+                >
                   Use This Template
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -115,12 +129,18 @@ export default async function Home() {
             <span className="italic text-outline-variant">In Minutes.</span>
           </h2>
           <div className="flex flex-col md:flex-row gap-6">
-            <button className="bg-primary text-on-primary px-16 py-6 text-[0.75rem] font-medium uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-2xl">
-              Get Started
-            </button>
-            <button className="border border-outline px-16 py-6 text-[0.75rem] font-medium uppercase tracking-[0.3em] hover:bg-surface-container transition-all">
+            <Link
+              href={primaryCtaHref}
+              className="bg-primary text-on-primary px-16 py-6 text-[0.75rem] font-medium uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-2xl"
+            >
+              {primaryCtaLabel}
+            </Link>
+            <Link
+              href="/templates"
+              className="border border-outline px-16 py-6 text-[0.75rem] font-medium uppercase tracking-[0.3em] hover:bg-surface-container transition-all"
+            >
               Browse Templates
-            </button>
+            </Link>
           </div>
 
           <div className="mt-20 text-[0.625rem] font-mono text-outline uppercase tracking-[0.4em] opacity-40">

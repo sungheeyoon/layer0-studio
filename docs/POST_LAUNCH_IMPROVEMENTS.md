@@ -81,6 +81,20 @@ Auto-save (debounce 4s) / `beforeunload` 가드 / Conflict 모달은 적용 완�
 
 ---
 
+### 3.9 홈 "Use This Template" CTA 가 카탈로그로 우회
+
+`src/app/page.tsx` (Templates You Can Start With 섹션, "Corporate Layout" 카드)
+
+현재 카드 CTA 는 단일 하드코딩 카드인데도 `/templates` 카탈로그로 보냄(임시 연결, 2026-04-27). 의도는 카드에 표시된 그 템플릿으로 바로 `/dashboard/projects/create?templateId=<id>` 로 직진하는 것. 
+
+**조치**: 시드된 "Corporate" 템플릿 ID 확정 후 직결로 교체, 또는 카드 자체를 DB 의 "featured" 템플릿 1건을 fetch 해서 동적 렌더로 전환. 코드에 `TODO(post-launch)` 주석 마킹됨.
+
+### 3.10 Footer Security / Status 링크 비활성
+
+`src/components/Footer.tsx` — 대상 페이지 부재로 비활성 (`<span aria-disabled>`). 정책 결정 후 (a) 페이지 신설 / (b) 외부 status page 연동 / (c) 영구 제거 중 택1.
+
+---
+
 ## 4. 다음 리뷰 권장 시점
 
 - **P2 정합성 패치 완료**: P2 전 항목 종결.

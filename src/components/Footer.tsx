@@ -10,18 +10,18 @@ export default function Footer() {
         <span>© 2024 LAYER0 STUDIO. ALL RIGHTS RESERVED.</span>
       </div>
       <div className="flex gap-8 mt-6 md:mt-0">
-        <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="#">
+        <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="/legal/terms">
           Terms
         </Link>
-        <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="#">
+        <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="/legal/privacy">
           Privacy
         </Link>
-        <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="#">
+        <span className="opacity-40 cursor-not-allowed select-none" aria-disabled="true">
           Security
-        </Link>
-        <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="#">
+        </span>
+        <span className="opacity-40 cursor-not-allowed select-none" aria-disabled="true">
           Status
-        </Link>
+        </span>
       </div>
     </footer>
   );
