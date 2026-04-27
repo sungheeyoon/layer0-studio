@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { changePasswordAction, deleteAccountAction } from "./actions";
 import { logoutAction } from "@/app/login/actions";
 import { useDashboardData } from "../DashboardDataProvider";
 
 export default function SettingsClient() {
-  const router = useRouter();
   const { user } = useDashboardData();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -50,10 +48,7 @@ export default function SettingsClient() {
 
   const handleLogout = async () => {
     startTransition(async () => {
-      const result = await logoutAction();
-      if (result.success) {
-        router.push("/login");
-      }
+      await logoutAction();
     });
   };
 

@@ -1,5 +1,7 @@
 'use server';
 
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { createLoginUseCase } from '@/lib/di/container';
 import { AuthError } from '@/domain/errors/auth.error';
@@ -40,9 +42,11 @@ export async function logoutAction() {
 
   try {
     await logoutUseCase.execute();
-    return { success: true };
   } catch (error) {
     console.error('Logout error:', error);
     return { success: false };
   }
+
+  revalidatePath('/', 'layout');
+  redirect('/login');
 }

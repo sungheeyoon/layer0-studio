@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { logoutAction } from "@/app/login/actions";
-import { useRouter } from "next/navigation";
 
 interface ProfileDropdownProps {
   user: User;
@@ -14,7 +13,6 @@ interface ProfileDropdownProps {
 export default function ProfileDropdown({ user, children }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -27,10 +25,7 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
   }, []);
 
   const handleLogout = async () => {
-    const result = await logoutAction();
-    if (result.success) {
-      router.push("/login");
-    }
+    await logoutAction();
   };
 
   return (
