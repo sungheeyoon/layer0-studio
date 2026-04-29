@@ -131,7 +131,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
                 <img
                   src={template.thumbnailUrl}
                   alt={template.name}
-                  className="w-full h-full object-cover grayscale opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-neutral-200 dark:bg-zinc-800">

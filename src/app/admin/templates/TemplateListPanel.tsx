@@ -81,7 +81,7 @@ export default function TemplateListPanel({
             >
               <div className="flex items-start gap-4">
                 {/* Thumbnail */}
-                <div className="w-16 h-16 bg-neutral-200 dark:bg-neutral-800 flex-shrink-0 grayscale overflow-hidden">
+                <div className="w-16 h-16 bg-neutral-200 dark:bg-neutral-800 flex-shrink-0 overflow-hidden">
                   {template.thumbnailUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

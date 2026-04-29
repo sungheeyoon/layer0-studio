@@ -97,7 +97,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
                 // eslint-disable-next-line @next/next/no-img-element
                 <img 
                   alt={template.name} 
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105" 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   src={template.thumbnailUrl}
                 />
               ) : (
