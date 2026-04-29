@@ -2,6 +2,7 @@ import { ThemeModule } from './types';
 
 const themeMap: Record<string, () => Promise<ThemeModule>> = {
   corporate: () => import('./corporate'),
+  wedding: () => import('./wedding'),
 };
 
 export function getAvailableThemeKeys(): string[] {
