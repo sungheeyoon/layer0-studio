@@ -28,6 +28,7 @@ export default function TemplatesClientWrapper({
         }}
       />
       <TemplateEditorPanel
+        key={editingTemplate?.id ?? 'new'}
         template={editingTemplate}
         onDone={() => setEditingTemplate(undefined)}
       />
