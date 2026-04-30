@@ -1,0 +1,121 @@
+.themeRoot {
+  --l-navy: var(--theme-primary, #0f172a);
+  --l-navy-light: #1e2b5e;
+  --l-accent: var(--theme-secondary, #92400e);
+  --l-accent-light: #d97706;
+  --l-accent-muted: #fef3c7;
+  --l-text-primary: #0c0a09;
+  --l-text-secondary: #57534e;
+  --l-surface: #fafaf9;
+  --l-border: #e7e5e4;
+
+  font-family: var(--theme-font-family, 'Pretendard Variable', 'Pretendard', system-ui, sans-serif);
+  font-size: var(--theme-font-size, 16px);
+  background-color: var(--l-surface);
+  color: var(--l-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+.selectedSlot {
+  outline: 2px solid var(--l-accent-light);
+  outline-offset: 2px;
+  cursor: pointer;
+  transition: outline 0.2s ease;
+}
+
+.section {
+  padding: 6rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 8rem 1rem;
+  }
+}
+
+.container {
+  max-width: 72rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--l-navy);
+  color: #fff;
+  padding: 0.875rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+}
+
+.btnPrimary:hover {
+  background: var(--l-navy-light);
+  transform: scale(1.02);
+}
+
+.btnOutline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--l-navy);
+  padding: 0.875rem 2rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--l-navy);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btnOutline:hover {
+  background: var(--l-navy);
+  color: #fff;
+  transform: scale(1.02);
+}
+
+.btnGold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--l-accent-light);
+  color: #fff;
+  padding: 1rem 2.25rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+}
+
+.btnGold:hover {
+  background: var(--l-accent);
+  transform: scale(1.02);
+}
+
+.underlineAccent {
+  text-decoration: underline;
+  text-decoration-color: var(--l-accent-light);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+
+.sectionSep {
+  width: 3rem;
+  height: 3px;
+  background: linear-gradient(to right, var(--l-accent-light), var(--l-accent));
+  border-radius: 9999px;
+}
