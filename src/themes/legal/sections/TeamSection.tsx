@@ -9,7 +9,7 @@ export default function TeamSection({ section }: ThemeSectionProps) {
     name: data[`member${n}Name`]?.value || '',
     role: data[`member${n}Role`]?.value || '',
     body: data[`member${n}Body`]?.value || '',
-    image: data[`member${n}Image']?.value || `https://picsum.photos/seed/legal_team_${n}/600/450`,
+    image: data[`member${n}Image`]?.value || `https://picsum.photos/seed/legal_team_${n}/600/450`,
     badge: n === 1 ? '대표 변호사' : n === 2 ? '수석 세무사' : '파트너 변호사',
     badgeBg: n === 1 ? 'bg-amber-500' : 'bg-[#1e2b5e]',
   }));

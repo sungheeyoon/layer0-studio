@@ -7,7 +7,7 @@ export default function ProcessSection({ section }: ThemeSectionProps) {
 
   const steps = [1, 2, 3, 4, 5].map(n => ({
     title: data[`step${n}Title`]?.value || '',
-    body: data[`step${n}Body']?.value || '',
+    body: data[`step${n}Body`]?.value || '',
   }));
 
   return (

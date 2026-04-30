@@ -33,7 +33,7 @@ export default function TestimonialsSection({ section }: ThemeSectionProps) {
                   <StarIcon key={j} size={14} className="text-amber-400" />
                 ))}
               </div>
-              <p className={`font-serif text-4xl leading-none opacity-60 mb-[-1rem] ${r.featured ? 'text-amber-400' : 'text-amber-600'}`}>"</p>
+              <p className={`font-serif text-4xl leading-none opacity-60 mb-[-1rem] ${r.featured ? 'text-amber-400' : 'text-amber-600'}`}>&ldquo;</p>
               <p className={`text-sm leading-relaxed mb-5 ${r.featured ? 'text-blue-100/80' : 'text-stone-700'}`}>
                 {r.body}
               </p>
