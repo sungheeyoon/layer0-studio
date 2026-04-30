@@ -10,8 +10,8 @@ export default function NavSection({ section }: ThemeSectionProps) {
   const ctaText = data['ctaText']?.value || '무료 상담 신청';
 
   return (
-    <header className="fixed top-4 left-0 right-0 z-50 px-4">
-      <nav className={`${styles.container} bg-white/88 backdrop-blur-xl border border-black/8 rounded-2xl px-6 py-3.5 flex items-center justify-between`}>
+    <header className={styles.navWrap}>
+      <nav className={styles.navInner}>
         <a href="#" className="flex items-center gap-2.5 select-none no-underline">
           <div className="w-8 h-8 bg-[#0f172a] rounded-lg flex items-center justify-center flex-shrink-0">
             <ShieldCheckIcon size={16} className="text-amber-400" />
