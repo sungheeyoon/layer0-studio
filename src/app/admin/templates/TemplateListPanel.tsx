@@ -28,8 +28,8 @@ export default function TemplateListPanel({
     const result = await deleteTemplateAction(id);
     if (result && 'error' in result) {
       setDeleteError({ id, message: `Failed to delete: ${result.error}` });
-      setConfirmDeleteId(null);
     } else {
+      setConfirmDeleteId(null);
       onDelete?.(id);
     }
     setDeletingId(null);
@@ -69,9 +69,6 @@ export default function TemplateListPanel({
         {templates.map((template) => {
           const isActive = template.status === 'active';
           const isSelected = selectedId === template.id;
-          const isConfirmingDelete = confirmDeleteId === template.id;
-          const isDeletingThis = deletingId === template.id;
-          const thisDeleteError = deleteError?.id === template.id ? deleteError.message : null;
 
           return (
             <div
@@ -124,43 +121,21 @@ export default function TemplateListPanel({
                   </div>
 
                   {/* Actions */}
-                  <div className="mt-3 space-y-2">
-                    {isConfirmingDelete ? (
-                      <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                        <span className="text-[9px] uppercase text-neutral-500 tracking-widest">Delete?</span>
-                        <button
-                          onClick={() => handleDelete(template.id)}
-                          disabled={isDeletingThis}
-                          className="text-[9px] uppercase tracking-tighter text-red-800 dark:text-red-500 border-b border-red-800/50 hover:border-red-800 disabled:opacity-50"
-                        >
-                          {isDeletingThis ? '...' : 'Yes'}
-                        </button>
-                        <button
-                          onClick={() => { setConfirmDeleteId(null); setDeleteError(null); }}
-                          className="text-[9px] uppercase tracking-tighter text-neutral-400 border-b border-neutral-300 hover:border-black dark:hover:border-white"
-                        >
-                          No
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => onEdit(template)}
-                          className="text-[9px] uppercase tracking-tighter border-b border-black dark:border-white"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => { setConfirmDeleteId(template.id); setDeleteError(null); }}
-                          className="text-[9px] uppercase tracking-tighter text-red-800 border-b border-red-800/30 dark:text-red-500 dark:border-red-500/30 hover:border-red-800 dark:hover:border-red-500 transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                    {thisDeleteError && (
-                      <p className="text-[9px] text-red-500">{thisDeleteError}</p>
-                    )}
+                  <div className="mt-3">
+                    <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => onEdit(template)}
+                        className="text-[9px] uppercase tracking-tighter border-b border-black dark:border-white"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => { setConfirmDeleteId(template.id); setDeleteError(null); }}
+                        className="text-[9px] uppercase tracking-tighter text-red-800 border-b border-red-800/30 dark:text-red-500 dark:border-red-500/30 hover:border-red-800 dark:hover:border-red-500 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -168,6 +143,53 @@ export default function TemplateListPanel({
           );
         })}
       </div>
+
+      {/* Delete confirmation modal */}
+      {confirmDeleteId && (() => {
+        const target = templates.find((t) => t.id === confirmDeleteId);
+        if (!target) return null;
+        const isDeletingThis = deletingId === confirmDeleteId;
+        const thisDeleteError = deleteError?.id === confirmDeleteId ? deleteError.message : null;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="relative bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-10 w-[460px]">
+              <div className="absolute top-3 right-3 w-1 h-1 bg-[#7d000c]" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-1 bg-neutral-400" />
+                <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-neutral-400">
+                  Destructive Action
+                </span>
+              </div>
+              <h3 className="text-xl font-[100] tracking-tight mb-2">Delete Template?</h3>
+              <p className="text-sm font-medium tracking-tight mb-4">{target.name}</p>
+              <p className="text-[11px] text-neutral-500 font-light leading-relaxed mb-8">
+                This action cannot be undone. Sites already created from this template will not be affected.
+              </p>
+              {thisDeleteError && (
+                <p className="text-[10px] text-red-500 mb-4">{thisDeleteError}</p>
+              )}
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => { setConfirmDeleteId(null); setDeleteError(null); }}
+                  disabled={isDeletingThis}
+                  className="px-8 py-3 text-[10px] uppercase tracking-widest font-medium text-neutral-500 hover:text-black dark:hover:text-white transition-colors disabled:opacity-40"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(confirmDeleteId)}
+                  disabled={isDeletingThis}
+                  className="px-10 py-3 bg-[#7d000c] text-white text-[10px] uppercase tracking-widest font-medium hover:opacity-80 transition-opacity disabled:opacity-40"
+                >
+                  {isDeletingThis ? 'Deleting...' : 'Delete Permanently'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </section>
   );
 }

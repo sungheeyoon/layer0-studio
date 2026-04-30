@@ -103,6 +103,7 @@ export default function TemplateEditorPanel({
   // Form submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showDeployConfirm, setShowDeployConfirm] = useState(false);
 
   // Handlers
   const handleJsonChange = (value: string) => {
@@ -454,12 +455,7 @@ export default function TemplateEditorPanel({
                 className="px-10 py-3 bg-black dark:bg-white text-white dark:text-black text-[10px] uppercase tracking-widest font-medium hover:opacity-80 transition-opacity disabled:opacity-40"
                 type="button"
                 disabled={!!jsonError || isSubmitting || isUploading}
-                onClick={async () => {
-                  const fd = new FormData(
-                    document.querySelector('form') as HTMLFormElement,
-                  );
-                  await handleSubmit(fd, 'active');
-                }}
+                onClick={() => setShowDeployConfirm(true)}
               >
                 {isSubmitting ? 'Deploying...' : 'Deploy Template'}
               </button>
@@ -467,6 +463,49 @@ export default function TemplateEditorPanel({
           </div>
         </form>
       </div>
+
+      {/* Deploy confirmation modal */}
+      {showDeployConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="relative bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-10 w-[420px]">
+            <div className="absolute top-3 right-3 w-1 h-1 bg-[#7d000c]" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-1 bg-[#7d000c]" />
+              <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-neutral-400">
+                Publish to Live
+              </span>
+            </div>
+            <h3 className="text-xl font-[100] tracking-tight mb-4">Deploy Template?</h3>
+            <p className="text-[11px] text-neutral-500 font-light leading-relaxed mb-8">
+              {!isEditing
+                ? 'This template will become publicly available to all users.'
+                : template.status !== 'active'
+                ? 'Changes will go live immediately and be visible to all users.'
+                : 'This update will be applied immediately to the live template.'}
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={() => setShowDeployConfirm(false)}
+                className="px-8 py-3 text-[10px] uppercase tracking-widest font-medium text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setShowDeployConfirm(false);
+                  const fd = new FormData(document.querySelector('form') as HTMLFormElement);
+                  await handleSubmit(fd, 'active');
+                }}
+                className="px-10 py-3 bg-black dark:bg-white text-white dark:text-black text-[10px] uppercase tracking-widest font-medium hover:opacity-80 transition-opacity"
+              >
+                Deploy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
