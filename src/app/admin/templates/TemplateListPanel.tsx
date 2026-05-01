@@ -2,18 +2,20 @@
 
 import { useState } from 'react';
 import { Template } from '@/domain/entities/template.entity';
-import { deleteTemplateAction } from './actions';
+import { deleteTemplateAction, archiveTemplateAction } from './actions';
 
 interface TemplateListPanelProps {
   templates: Template[];
   onEdit: (template: Template) => void;
   onDelete?: (id: string) => void;
+  onArchive?: (id: string) => void;
 }
 
 export default function TemplateListPanel({
   templates,
   onEdit,
   onDelete,
+  onArchive,
 }: TemplateListPanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(
     templates[0]?.id ?? null,
@@ -21,6 +23,8 @@ export default function TemplateListPanel({
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null);
+  const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null);
+  const [archivingId, setArchivingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
@@ -33,6 +37,18 @@ export default function TemplateListPanel({
       onDelete?.(id);
     }
     setDeletingId(null);
+  };
+
+  const handleArchive = async (id: string) => {
+    setArchivingId(id);
+    const result = await archiveTemplateAction(id);
+    if (result && 'error' in result) {
+      // Silently fail or show error — for now just close modal
+    } else {
+      setConfirmArchiveId(null);
+      onArchive?.(id);
+    }
+    setArchivingId(null);
   };
 
   return (
@@ -129,6 +145,14 @@ export default function TemplateListPanel({
                       >
                         Edit
                       </button>
+                      {template.status !== 'archived' && (
+                        <button
+                          onClick={() => setConfirmArchiveId(template.id)}
+                          className="text-[9px] uppercase tracking-tighter text-neutral-500 border-b border-neutral-400/30 hover:border-neutral-500 transition-colors"
+                        >
+                          Archive
+                        </button>
+                      )}
                       <button
                         onClick={() => { setConfirmDeleteId(template.id); setDeleteError(null); }}
                         className="text-[9px] uppercase tracking-tighter text-red-800 border-b border-red-800/30 dark:text-red-500 dark:border-red-500/30 hover:border-red-800 dark:hover:border-red-500 transition-colors"
@@ -184,6 +208,49 @@ export default function TemplateListPanel({
                   className="px-10 py-3 bg-[#7d000c] text-white text-[10px] uppercase tracking-widest font-medium hover:opacity-80 transition-opacity disabled:opacity-40"
                 >
                   {isDeletingThis ? 'Deleting...' : 'Delete Permanently'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Archive confirmation modal */}
+      {confirmArchiveId && (() => {
+        const target = templates.find((t) => t.id === confirmArchiveId);
+        if (!target) return null;
+        const isArchivingThis = archivingId === confirmArchiveId;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="relative bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-10 w-[420px]">
+              <div className="absolute top-3 right-3 w-1 h-1 bg-neutral-400" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-1 bg-neutral-400" />
+                <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-neutral-400">
+                  Status Change
+                </span>
+              </div>
+              <h3 className="text-xl font-[100] tracking-tight mb-2">Archive Template?</h3>
+              <p className="text-sm font-medium tracking-tight mb-4">{target.name}</p>
+              <p className="text-[11px] text-neutral-500 font-light leading-relaxed mb-8">
+                This template will be hidden from the public catalog. You can restore it later by editing and deploying again.
+              </p>
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setConfirmArchiveId(null)}
+                  disabled={isArchivingThis}
+                  className="px-8 py-3 text-[10px] uppercase tracking-widest font-medium text-neutral-500 hover:text-black dark:hover:text-white transition-colors disabled:opacity-40"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArchive(confirmArchiveId)}
+                  disabled={isArchivingThis}
+                  className="px-10 py-3 bg-neutral-700 text-white text-[10px] uppercase tracking-widest font-medium hover:opacity-80 transition-opacity disabled:opacity-40"
+                >
+                  {isArchivingThis ? 'Archiving...' : 'Archive'}
                 </button>
               </div>
             </div>

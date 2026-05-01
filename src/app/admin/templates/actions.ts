@@ -175,3 +175,22 @@ export async function deleteTemplateAction(id: string) {
     return { error: 'UNKNOWN' };
   }
 }
+
+export async function archiveTemplateAction(id: string) {
+  const user = await checkAdmin();
+  if (!user) return { error: 'FORBIDDEN' };
+
+  try {
+    const adminSupabase = await createAdminClient();
+    const useCase = createUpdateTemplateUseCase(adminSupabase);
+    await useCase.execute(id, { status: 'archived' });
+
+    revalidatePath('/admin/templates');
+    return { success: true };
+  } catch (err) {
+    if (err instanceof TemplateError) {
+      return { error: err.code };
+    }
+    return { error: 'UNKNOWN' };
+  }
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { Template } from '@/domain/entities/template.entity';
 import {
@@ -104,6 +104,7 @@ export default function TemplateEditorPanel({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showDeployConfirm, setShowDeployConfirm] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   // Handlers
   const handleJsonChange = (value: string) => {
@@ -151,18 +152,14 @@ export default function TemplateEditorPanel({
     }
   };
 
-  const handleSubmit = async (formData: FormData, deployStatus?: 'active') => {
+  const handleSubmit = useCallback(async (formData: FormData, status: 'draft' | 'active') => {
     if (jsonError) return;
     setIsSubmitting(true);
     setSubmitError(null);
 
     formData.set('templateJson', templateJsonStr);
     formData.set('thumbnailUrl', thumbnailUrl);
-
-    // Force status to 'active' for Deploy Template
-    if (deployStatus) {
-      formData.set('status', deployStatus);
-    }
+    formData.set('status', status);
 
     if (isEditing) {
       formData.set('id', template.id);
@@ -182,7 +179,8 @@ export default function TemplateEditorPanel({
     }
 
     setIsSubmitting(false);
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jsonError, templateJsonStr, thumbnailUrl, isEditing, template, onDone]);
 
   // Get current themeKey for select input
   let currentThemeKey = 'corporate';
@@ -207,7 +205,8 @@ export default function TemplateEditorPanel({
         </header>
 
         <form
-          action={async (fd) => await handleSubmit(fd)}
+          ref={formRef}
+          onSubmit={(e) => e.preventDefault()}
           className="space-y-16"
         >
           {/* Section 1: Basic Info */}
@@ -296,21 +295,24 @@ export default function TemplateEditorPanel({
                 </div>
               </div>
 
-              {/* Status (Draft/Active/Archived) default select */}
-              <div className="relative">
-                <label className="text-[9px] uppercase tracking-widest text-neutral-500 block mb-1">
-                  Status
-                </label>
-                <select
-                  className="w-full bg-transparent border-none border-b border-neutral-200 dark:border-neutral-800 focus:border-black dark:focus:border-white focus:ring-0 p-0 py-2 text-sm font-light tracking-wide transition-colors outline-none"
-                  name="status"
-                  defaultValue={template?.status ?? 'draft'}
-                >
-                  <option value="draft">Draft</option>
-                  <option value="active">Active</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
+              {/* Status indicator (read-only) */}
+              {isEditing && (
+                <div className="relative">
+                  <label className="text-[9px] uppercase tracking-widest text-neutral-500 block mb-1">
+                    Current Status
+                  </label>
+                  <div className="flex items-center gap-2 py-2">
+                    <div className={`w-1.5 h-1.5 rounded-full ${
+                      template.status === 'active' ? 'bg-[#7d000c]' :
+                      template.status === 'draft' ? 'bg-amber-500' :
+                      'bg-neutral-400'
+                    }`} />
+                    <span className="text-sm font-light tracking-wide capitalize">
+                      {template.status}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -444,8 +446,13 @@ export default function TemplateEditorPanel({
               {/* Save as Draft */}
               <button
                 className="px-8 py-3 border border-black dark:border-white text-[10px] uppercase tracking-widest font-medium hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors disabled:opacity-40"
-                type="submit"
-                disabled={isSubmitting || isUploading}
+                type="button"
+                disabled={!!jsonError || isSubmitting || isUploading}
+                onClick={() => {
+                  if (!formRef.current) return;
+                  const fd = new FormData(formRef.current);
+                  handleSubmit(fd, 'draft');
+                }}
               >
                 {isSubmitting ? 'Saving...' : 'Save Draft'}
               </button>
@@ -477,11 +484,8 @@ export default function TemplateEditorPanel({
             </div>
             <h3 className="text-xl font-[100] tracking-tight mb-4">Deploy Template?</h3>
             <p className="text-[11px] text-neutral-500 font-light leading-relaxed mb-8">
-              {!isEditing
-                ? 'This template will become publicly available to all users.'
-                : template.status !== 'active'
-                ? 'Changes will go live immediately and be visible to all users.'
-                : 'This update will be applied immediately to the live template.'}
+              This will set the template status to <strong>Active</strong> and make it publicly available to all users.
+              {isEditing && template.status !== 'active' && ' The current status will change from ' + template.status + ' to active.'}
             </p>
             <div className="flex justify-end gap-4">
               <button
@@ -495,7 +499,8 @@ export default function TemplateEditorPanel({
                 type="button"
                 onClick={async () => {
                   setShowDeployConfirm(false);
-                  const fd = new FormData(document.querySelector('form') as HTMLFormElement);
+                  if (!formRef.current) return;
+                  const fd = new FormData(formRef.current);
                   await handleSubmit(fd, 'active');
                 }}
                 className="px-10 py-3 bg-black dark:bg-white text-white dark:text-black text-[10px] uppercase tracking-widest font-medium hover:opacity-80 transition-opacity"
