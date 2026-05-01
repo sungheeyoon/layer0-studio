@@ -4,6 +4,7 @@ const themeMap: Record<string, () => Promise<ThemeModule>> = {
   corporate: () => import('./corporate'),
   wedding: () => import('./wedding'),
   legal: () => import('./legal'),
+  medical: () => import('./medical'),
 };
 
 export function getAvailableThemeKeys(): string[] {
