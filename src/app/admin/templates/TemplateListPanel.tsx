@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Template } from '@/domain/entities/template.entity';
-import { deleteTemplateAction, archiveTemplateAction } from './actions';
+import { deleteTemplateAction, archiveTemplateAction, revertToDraftAction } from './actions';
 
 interface TemplateListPanelProps {
   templates: Template[];
@@ -25,6 +25,7 @@ export default function TemplateListPanel({
   const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null);
   const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
+  const [revertingId, setRevertingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
@@ -49,6 +50,15 @@ export default function TemplateListPanel({
       onArchive?.(id);
     }
     setArchivingId(null);
+  };
+
+  const handleRevertToDraft = async (id: string) => {
+    setRevertingId(id);
+    const result = await revertToDraftAction(id);
+    if (result && !('error' in result)) {
+      onArchive?.(id); // reuse callback to trigger list refresh
+    }
+    setRevertingId(null);
   };
 
   return (
@@ -153,6 +163,15 @@ export default function TemplateListPanel({
                           Archive
                         </button>
                       )}
+                      {template.status === 'archived' && (
+                        <button
+                          onClick={() => handleRevertToDraft(template.id)}
+                          disabled={revertingId === template.id}
+                          className="text-[9px] uppercase tracking-tighter text-amber-700 dark:text-amber-500 border-b border-amber-700/30 dark:border-amber-500/30 hover:border-amber-700 dark:hover:border-amber-500 transition-colors disabled:opacity-40"
+                        >
+                          {revertingId === template.id ? 'Reverting...' : 'Revert to Draft'}
+                        </button>
+                      )}
                       <button
                         onClick={() => { setConfirmDeleteId(template.id); setDeleteError(null); }}
                         className="text-[9px] uppercase tracking-tighter text-red-800 border-b border-red-800/30 dark:text-red-500 dark:border-red-500/30 hover:border-red-800 dark:hover:border-red-500 transition-colors"
@@ -233,7 +252,7 @@ export default function TemplateListPanel({
               <h3 className="text-xl font-[100] tracking-tight mb-2">Archive Template?</h3>
               <p className="text-sm font-medium tracking-tight mb-4">{target.name}</p>
               <p className="text-[11px] text-neutral-500 font-light leading-relaxed mb-8">
-                This template will be hidden from the public catalog. You can restore it later by editing and deploying again.
+                이 템플릿은 공개 카탈로그에서 숨겨집니다. 리스트에서 &quot;Revert to Draft&quot;를 클릭하거나, Edit → Save Draft로 수정 상태로 되돌릴 수 있습니다.
               </p>
               <div className="flex justify-end gap-4">
                 <button

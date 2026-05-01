@@ -194,3 +194,23 @@ export async function archiveTemplateAction(id: string) {
     return { error: 'UNKNOWN' };
   }
 }
+
+export async function revertToDraftAction(id: string) {
+  const user = await checkAdmin();
+  if (!user) return { error: 'FORBIDDEN' };
+
+  try {
+    const adminSupabase = await createAdminClient();
+    const useCase = createUpdateTemplateUseCase(adminSupabase);
+    await useCase.execute(id, { status: 'draft' });
+
+    revalidatePath('/admin/templates');
+    return { success: true };
+  } catch (err) {
+    if (err instanceof TemplateError) {
+      return { error: err.code };
+    }
+    return { error: 'UNKNOWN' };
+  }
+}
+
