@@ -29,7 +29,7 @@ export default function ServicesSection({ section }: ThemeSectionProps) {
             <span className={styles.secTag}>{label}</span>
             <span className={styles.goldBar} style={{ background: 'linear-gradient(270deg, #C9A96E, rgba(201,169,110,0))' }}></span>
           </div>
-          <h2 className={`${styles.reveal} ${styles.revealIn} ${styles.delay1} font-extrabold tracking-tight mb-4 text-[var(--i-cream)]`} style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', lineWeight: 1.1 }}>
+          <h2 className={`${styles.reveal} ${styles.revealIn} ${styles.delay1} font-extrabold tracking-tight mb-4 text-[var(--i-cream)]`} style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1 }}>
             {title.split('\n').map((line, i) => (
               <span key={i}>
                 {line.includes('에스파시오가 함께합니다') ? (
