@@ -59,7 +59,7 @@ async function ensureDevServer() {
   throw new Error('Timeout waiting for dev server');
 }
 
-async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: any) {
+async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: any, isCheck: boolean): Promise<boolean> {
   const page = await browser.newPage();
   await page.setViewportSize(config.viewport);
 
@@ -128,8 +128,6 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
   let hasVisualChange = true;
   if (existsSync(outputPath)) {
     const oldWebpBuffer = readFileSync(outputPath);
-    // Note: Comparing WebP directly might be tricky due to compression.
-    // Ideally we compare the raw pixels from sharp.
     const newPixels = await sharp(newWebpBuffer).raw().toBuffer();
     const oldPixels = await sharp(oldWebpBuffer).raw().toBuffer();
     
@@ -161,21 +159,24 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
   }
 
   if (hasVisualChange) {
-    writeFileSync(outputPath, newWebpBuffer);
-    console.log(`✅ Saved → ${config.output}`);
+    if (isCheck) {
+      console.error(`❌ [${themeKey}] FAILED: Visual changes detected in --check mode.`);
+    } else {
+      writeFileSync(outputPath, newWebpBuffer);
+      console.log(`✅ Saved → ${config.output}`);
+    }
   } else {
-    console.log(`⏭️ No visual change for [${themeKey}], skipping save.`);
+    console.log(`⏭️ No visual change for [${themeKey}].`);
   }
   
   await page.close();
+  return !hasVisualChange;
 }
 
 async function run() {
   const args = process.argv.slice(2);
+  const isCheck = args.includes('--check');
   const targetTheme = args.find((a) => !a.startsWith('--'));
-  const needsDevServer = targetTheme 
-    ? true // Simplified: check config source later
-    : true; // All might need it
 
   if (!existsSync(OUTPUT_DIR)) {
     mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -200,7 +201,6 @@ async function run() {
 
   for (const key of filteredThemes) {
     const configPath = join(THEMES_DIR, key, 'thumbnail.config.ts');
-    // Using dynamic import with file URL for reliability in TSX
     const configModule = await import(pathToFileURL(configPath).href);
     const config = configModule.default as ThumbnailConfig;
     configs[key] = config;
@@ -214,20 +214,26 @@ async function run() {
   }
 
   const browser = await chromium.launch();
+  let anyFailed = false;
 
   for (const key of filteredThemes) {
     try {
-      await captureTheme(key, configs[key], browser);
+      const ok = await captureTheme(key, configs[key], browser, isCheck);
+      if (!ok && isCheck) anyFailed = true;
     } catch (err) {
       console.error(`❌ Failed to capture ${key}:`, err);
+      if (isCheck) anyFailed = true;
     }
   }
 
   await browser.close();
-  console.log('🎉 All captures completed!');
   
-  // If we started the dev server, we might want to kill it, 
-  // but it's unref'd so it will just stay. In a CI env, it will die with the process.
+  if (anyFailed && isCheck) {
+    console.error('\n💥 Thumbnail check failed for one or more themes.');
+    process.exit(1);
+  }
+
+  console.log('\n🎉 All captures completed!');
 }
 
 run().catch((err) => {

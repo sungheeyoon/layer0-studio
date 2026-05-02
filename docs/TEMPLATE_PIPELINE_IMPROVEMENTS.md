@@ -23,9 +23,9 @@ _상태: Phase 1~4 완료, Phase 5 진행 중, Phase 6 미착수_
 ### 2.1 가이드/UX
 
 - [x] `TEMPLATE_AUTHORING_GUIDE.md` 새 흐름 반영 완료
-- [ ] `--apply` 단독 사용 시 5초 카운트다운 + 변경 row 수 표시 (CI는 `--apply --yes`로 우회) — 안전장치
-- [ ] `pnpm template:capture --check` 모드 (변경 없이 해시 검증, CI용)
-- [ ] HTML→preset scaffold (`pnpm template:scaffold <key> --from templates-ui/<key>.html`) — 1차 PR 외 PoC
+- [x] `--apply` 단독 사용 시 5초 카운트다운 + 변경 row 수 표시 (CI는 `--apply --yes`로 우회) — 안전장치
+- [x] `pnpm template:capture --check` 모드 (변경 없이 해시 검증, CI용)
+- [x] HTML→preset scaffold (`pnpm template:scaffold <key> --from templates-ui/<key>.html`) — 1차 PR 외 PoC
 
 ### 2.2 `section.order` 처리
 현재 validate가 warn만 출력. Phase 6 composition 모델로 가면 자동 해소되므로, **Phase 6 도입 시 schema에서 즉시 제거**(별도 정리 안 함). Phase 6 미착수 동안은 warn 유지.

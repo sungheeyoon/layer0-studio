@@ -12,6 +12,7 @@
     "generate:themes": "node scripts/generate-themes.mjs",
     "template:sync": "tsx scripts/sync-templates.ts",
     "template:capture": "tsx scripts/capture-templates.ts",
+    "template:scaffold": "tsx scripts/scaffold-template.ts",
     "predev": "node scripts/generate-themes.mjs",
     "prebuild": "node scripts/generate-themes.mjs"
   },
