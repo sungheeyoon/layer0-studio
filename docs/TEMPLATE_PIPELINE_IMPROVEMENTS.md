@@ -579,11 +579,11 @@ pnpm template:scaffold interior --from templates-ui/interior.html
 - [x] codegen `scripts/generate-themes.mjs` + `_generated.ts` 커밋 + `predev`/`prebuild` 자동 실행
 
 ### Phase 2 — 동기화 (2~3일)
-- [ ] `pnpm template:sync` CLI 구현 (**default = dry-run**, `--apply` 명시 시만 반영)
-- [ ] sync 시 **메타 보존 정책** 구현 (DB에 값 있으면 `defaults` 무시) + 테스트
-- [ ] PR-style diff 출력 포맷 (UPDATE/NEW/NO CHANGE 구분, JSON 필드별 변경 표시)
-- [ ] `/api/admin/template-sync` 엔드포인트 (`?dryRun=true|false`)
-- [ ] audit log 테이블 마이그레이션 (`011_template_sync_audit.sql`)
+- [x] `pnpm template:sync` CLI 구현 (**default = dry-run**, `--apply` 명시 시만 반영)
+- [x] sync 시 **메타 보존 정책** 구현 (DB에 값 있으면 `defaults` 무시) + 테스트
+- [x] PR-style diff 출력 포맷 (UPDATE/NEW/NO CHANGE 구분, JSON 필드별 변경 표시)
+- [x] `/api/admin/template-sync` 엔드포인트 (`?dryRun=true|false`)
+- [x] audit log 테이블 마이그레이션 (`011_template_sync_audit.sql`)
 
 ### Phase 3 — 썸네일 (1~2일)
 - [ ] `thumbnail.config.ts` 7개 테마에 추가 — source는 일단 HTML, 포팅 검증 후 `preview://`로 교체
