@@ -12,7 +12,7 @@ export const themeMap: Record<string, () => Promise<ThemeModule>> = {
   wedding: () => import('./wedding'),
 } as const;
 
-export const presetMap: Record<string, () => Promise<TemplatePreset>> = {
+export const presetMap: Record<string, () => Promise<{ default: TemplatePreset }>> = {
   'cafe/default': () => import('./cafe/presets/default.preset'),
   'corporate/default': () => import('./corporate/presets/default.preset'),
   'fitness/default': () => import('./fitness/presets/default.preset'),

@@ -33,6 +33,9 @@ importers:
       '@types/pixelmatch':
         specifier: ^5.2.6
         version: 5.2.6
+      '@types/pngjs':
+        specifier: ^6.0.5
+        version: 6.0.5
       '@types/react':
         specifier: ^19
         version: 19.2.14
@@ -51,6 +54,9 @@ importers:
       playwright:
         specifier: ^1.59.1
         version: 1.59.1
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
@@ -1028,6 +1034,9 @@ packages:
 
   '@types/pixelmatch@5.2.6':
     resolution: {integrity: sha512-wC83uexE5KGuUODn6zkm9gMzTwdY5L0chiK+VrKcDfEjzxh1uadlWTvOmAbCpnM9zx/Ww3f8uKlYQVnO/TrqVg==}
+
+  '@types/pngjs@6.0.5':
+    resolution: {integrity: sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==}
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
@@ -3379,6 +3388,10 @@ snapshots:
       undici-types: 6.21.0
 
   '@types/pixelmatch@5.2.6':
+    dependencies:
+      '@types/node': 20.19.37
+
+  '@types/pngjs@6.0.5':
     dependencies:
       '@types/node': 20.19.37
 

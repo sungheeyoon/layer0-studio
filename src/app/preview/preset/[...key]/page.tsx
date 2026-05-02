@@ -17,7 +17,7 @@ export default async function PresetPreviewPage({ params }: Props) {
     notFound();
   }
 
-  const preset = await loader();
+  const preset = (await loader()).default;
   const { templateJson } = preset;
 
   const themeVariables = {

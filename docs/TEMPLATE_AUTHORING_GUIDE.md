@@ -229,16 +229,12 @@ sync 전·`pnpm test`·어드민 Save에서 모두 호출됨.
 | Sync 코어 로직 | `src/lib/template/sync.ts` |
 | Sync CLI | `scripts/sync-templates.ts` |
 | Capture CLI | `scripts/capture-templates.ts` |
-| Sync API 엔드포인트 | `src/app/api/admin/template-sync/route.ts` (※ UI는 server action 사용 — 7.1 참고) |
 | Sync server action | `src/app/admin/templates/actions.ts` `syncTemplatesAction` |
 | 어드민 UI (sync 버튼) | `src/app/admin/templates/TemplateListPanel.tsx` |
 | 어드민 editor | `src/app/admin/templates/TemplateEditorPanel.tsx` |
 | Preset preview (capture용) | `src/app/preview/preset/[...key]/page.tsx` |
 | Audit log 테이블 | `docs/migrations/011_template_sync_audit.sql` |
 | 참조 테마 | `src/themes/corporate/` |
-
-### 7.1 Sync 진입점이 두 개인 이유 (현재 상태)
-`/api/admin/template-sync` 라우트와 `syncTemplatesAction` server action이 둘 다 존재하지만 어드민 UI는 server action만 사용한다. 라우트는 외부 도구(curl/CI)용 보조 진입점이며 super-admin 플래그 검사가 없다 — 외부에서 호출하지 말 것. 정리 후보(Phase 5).
 
 ---
 

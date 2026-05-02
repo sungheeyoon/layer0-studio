@@ -20,21 +20,14 @@ _상태: Phase 1~4 완료, Phase 5 진행 중, Phase 6 미착수_
 
 ## 2. Phase 5 — 잔여 정리
 
-### 2.1 즉시 수정 필요 (버그)
-
-- **🐛 `scripts/capture-templates.ts:161`** — `fs.promises.writeFile` 호출. 그러나 import는 specific funcs만(`readdirSync, existsSync, mkdirSync, readFileSync`). `fs` 네임스페이스 누락 → 시각 변경 감지 시 `ReferenceError`. `import * as fs from 'fs'` 또는 `writeFileSync`로 교체.
-- **🐛 preset `thumbnailPath`가 `.jpg`인데 `thumbnail.config.ts.output`이 `.webp`** — 7테마 모두. `pnpm template:capture` 결과물(`.webp`)이 sync에서 사용되지 않고, 옛 `.jpg`가 있으면 그걸 업로드, 없으면 로컬 경로 문자열을 그대로 DB에 박음. preset의 `thumbnailPath`를 `.webp`로 일괄 교체할 것.
-  - `medical/presets/default.preset.ts`는 `template-hospital.jpg`(레거시 파일명) 참조 — 이것도 `template-medical.webp`로 정리.
-- **🧹 sync 진입점 중복** — `/api/admin/template-sync/route.ts`와 `syncTemplatesAction` server action이 둘 다 존재. UI는 server action만 사용하며 라우트는 super-admin 플래그 검사도 없음. 외부 호출이 필요 없으면 라우트 제거, 필요하면 게이트 추가.
-
-### 2.2 가이드/UX
+### 2.1 가이드/UX
 
 - [x] `TEMPLATE_AUTHORING_GUIDE.md` 새 흐름 반영 완료
 - [ ] `--apply` 단독 사용 시 5초 카운트다운 + 변경 row 수 표시 (CI는 `--apply --yes`로 우회) — 안전장치
 - [ ] `pnpm template:capture --check` 모드 (변경 없이 해시 검증, CI용)
 - [ ] HTML→preset scaffold (`pnpm template:scaffold <key> --from templates-ui/<key>.html`) — 1차 PR 외 PoC
 
-### 2.3 `section.order` 처리
+### 2.2 `section.order` 처리
 현재 validate가 warn만 출력. Phase 6 composition 모델로 가면 자동 해소되므로, **Phase 6 도입 시 schema에서 즉시 제거**(별도 정리 안 함). Phase 6 미착수 동안은 warn 유지.
 
 ---

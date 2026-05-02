@@ -48,7 +48,7 @@ const lines = [
   ...themeKeys.map((k) => `  ${k}: () => import('./${k}'),`),
   `} as const;`,
   ``,
-  `export const presetMap: Record<string, () => Promise<TemplatePreset>> = {`,
+  `export const presetMap: Record<string, () => Promise<{ default: TemplatePreset }>> = {`,
   ...presets.map((p) => `  '${p.theme}/${p.name}': () => import('${p.importPath}'),`),
   `} as const;`,
   ``,

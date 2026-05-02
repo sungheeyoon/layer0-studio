@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';
-import { readdirSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { readdirSync, existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import sharp from 'sharp';
@@ -121,6 +121,9 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
     .resize(config.resize.width, config.resize.height)
     .webp({ quality: 85 })
     .toBuffer();
+
+  // Discard the intermediate PNG once sharp has the buffer.
+  try { unlinkSync(tempPng); } catch {}
 
   let hasVisualChange = true;
   if (existsSync(outputPath)) {
