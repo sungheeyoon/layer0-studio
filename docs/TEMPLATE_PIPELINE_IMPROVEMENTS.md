@@ -586,10 +586,10 @@ pnpm template:scaffold interior --from templates-ui/interior.html
 - [x] audit log 테이블 마이그레이션 (`011_template_sync_audit.sql`)
 
 ### Phase 3 — 썸네일 (1~2일)
-- [ ] `thumbnail.config.ts` 7개 테마에 추가 — source는 일단 HTML, 포팅 검증 후 `preview://`로 교체
-- [ ] `pnpm template:capture` CLI 구현 (Playwright + sharp + perceptual hash)
-- [ ] `preview://` 스킴 핸들러 (임시 dev server + in-memory render)
-- [ ] `template:sync`가 캡쳐 파일을 Storage로 자동 업로드 (해시 기반 멱등)
+- [x] `thumbnail.config.ts` 7개 테마에 추가 — source는 일단 HTML, 포팅 검증 후 `preview://`로 교체
+- [x] `pnpm template:capture` CLI 구현 (Playwright + sharp + perceptual hash)
+- [x] `preview://` 스킴 핸들러 (임시 dev server + in-memory render)
+- [x] `template:sync`가 캡쳐 파일을 Storage로 자동 업로드 (해시 기반 멱등)
 
 ### Phase 4 — 레지스트리/UI 정리 (1~2일)
 - [ ] `registry.ts`를 `_generated.ts` import로 교체

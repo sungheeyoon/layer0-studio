@@ -2,6 +2,9 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { presetMap } from '@/themes/_generated';
 import { validateTemplateJson } from './validate';
 import type { TemplatePreset } from '@/themes/types';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
 export interface SyncResult {
   slug: string;
@@ -17,6 +20,38 @@ export interface SyncSummary {
   errors: number;
   affectedSlugs: string[];
   details: SyncResult[];
+}
+
+async function uploadThumbnail(supabase: SupabaseClient, localPath: string): Promise<string> {
+  const fileBuffer = fs.readFileSync(localPath);
+  const hash = crypto.createHash('md5').update(fileBuffer).digest('hex');
+  const ext = path.extname(localPath);
+  const fileName = `${path.basename(localPath, ext)}-${hash}${ext}`;
+  const storagePath = `thumbnails/${fileName}`;
+
+  // Check if file already exists in storage
+  const { data: existingFiles } = await supabase.storage
+    .from('template-thumbnails')
+    .list('thumbnails', { search: fileName });
+
+  if (existingFiles && existingFiles.length > 0) {
+    // Already exists
+    const { data } = supabase.storage.from('template-thumbnails').getPublicUrl(storagePath);
+    return data.publicUrl;
+  }
+
+  // Upload
+  const { error: uploadError } = await supabase.storage
+    .from('template-thumbnails')
+    .upload(storagePath, fileBuffer, {
+      contentType: ext === '.webp' ? 'image/webp' : 'image/png',
+      upsert: true
+    });
+
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from('template-thumbnails').getPublicUrl(storagePath);
+  return data.publicUrl;
 }
 
 export async function syncTemplates(
@@ -68,6 +103,19 @@ export async function syncTemplates(
     }
 
     const existing = existingMap.get(preset.slug);
+    
+    // Determine thumbnail URL (local path -> storage URL)
+    let thumbnailUrl = preset.thumbnailPath;
+    if (preset.thumbnailPath.startsWith('public/thumbnails/')) {
+      const localPath = path.join(process.cwd(), preset.thumbnailPath);
+      if (fs.existsSync(localPath)) {
+        if (!dryRun) {
+          thumbnailUrl = await uploadThumbnail(supabase, localPath);
+        } else {
+          thumbnailUrl = `[will-be-uploaded]/${path.basename(localPath)}`;
+        }
+      }
+    }
 
     if (!existing) {
       // NEW
@@ -83,7 +131,7 @@ export async function syncTemplates(
           category: preset.defaults.category,
           template_json: preset.templateJson,
           version: preset.version,
-          thumbnail_url: preset.thumbnailPath,
+          thumbnail_url: thumbnailUrl,
           status: 'draft'
         });
       }
@@ -94,15 +142,14 @@ export async function syncTemplates(
       // Compare templateJson
       if (JSON.stringify(existing.template_json) !== JSON.stringify(preset.templateJson)) {
         changes.push('templateJson changed');
-        // Note: For API, we might want more granular diffs, but for now let's keep it simple.
       }
       
       if (existing.version !== preset.version) {
         changes.push(`version: ${existing.version} -> ${preset.version}`);
       }
       
-      if (existing.thumbnail_url !== preset.thumbnailPath) {
-        changes.push(`thumbnail: ${existing.thumbnail_url} -> ${preset.thumbnailPath}`);
+      if (existing.thumbnail_url !== thumbnailUrl) {
+        changes.push(`thumbnail: ${existing.thumbnail_url} -> ${thumbnailUrl}`);
       }
 
       if (changes.length > 0) {
@@ -116,7 +163,7 @@ export async function syncTemplates(
             .update({
               template_json: preset.templateJson,
               version: preset.version,
-              thumbnail_url: preset.thumbnailPath,
+              thumbnail_url: thumbnailUrl,
               updated_at: new Date().toISOString()
             })
             .eq('slug', preset.slug);

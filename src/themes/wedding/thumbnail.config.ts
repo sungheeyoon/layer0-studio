@@ -1,0 +1,8 @@
+export default {
+  source: 'templates-ui/wedding.html',
+  viewport: { width: 1600, height: 1000 },
+  capture: 'fullpage',
+  output: 'public/thumbnails/template-wedding.webp',
+  resize: { width: 800, height: 500 },
+  waitFor: { fonts: true, networkIdle: true, minDelay: 500 },
+};
