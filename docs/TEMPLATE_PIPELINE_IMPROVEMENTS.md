@@ -592,11 +592,11 @@ pnpm template:scaffold interior --from templates-ui/interior.html
 - [x] `template:sync`가 캡쳐 파일을 Storage로 자동 업로드 (해시 기반 멱등)
 
 ### Phase 4 — 레지스트리/UI 정리 (1~2일)
-- [ ] `registry.ts`를 `_generated.ts` import로 교체
-- [ ] 어드민 UI: 카드 클릭 시 JSON textarea를 collapsible **read-only**로 (preset 코드 row), manual row만 편집 가능
-- [ ] 어드민 UI: **Preview Sync → Apply Sync 2단계** 버튼 + super-admin 게이트 (`canPublishTemplates` 플래그)
-- [ ] `TemplateEditorPanel`의 `DEFAULT_JSON` 제거 — manual 생성은 빈 폼에서 시작
-- [ ] 카드에 `code` / `manual` 배지 표시
+- [x] `registry.ts`를 `_generated.ts` import로 교체
+- [x] 어드민 UI: 카드 클릭 시 JSON textarea를 collapsible **read-only**로 (preset 코드 row), manual row만 편집 가능
+- [x] 어드민 UI: **Preview Sync → Apply Sync 2단계** 버튼 + super-admin 게이트 (`canPublishTemplates` 플래그)
+- [x] `TemplateEditorPanel`의 `DEFAULT_JSON` 제거 — manual 생성은 빈 폼에서 시작
+- [x] 카드에 `code` / `manual` 배지 표시
 
 ### Phase 5 — 문서/정리 (1일)
 - [ ] `TEMPLATE_AUTHORING_GUIDE.md` 갱신 — 새 흐름 반영 (composition 모델 포함)

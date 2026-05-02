@@ -22,10 +22,24 @@ export const presetMap: Record<string, () => Promise<TemplatePreset>> = {
   'wedding/default': () => import('./wedding/presets/default.preset'),
 } as const;
 
+export const presetSlugs = [
+  'cafe-default',
+  'corporate-default',
+  'fitness-default',
+  'interior-default',
+  'legal-default',
+  'medical-default',
+  'wedding-default',
+] as const;
+
 export function getAvailableThemeKeys(): string[] {
   return Object.keys(themeMap);
 }
 
 export function getAvailablePresetKeys(): string[] {
   return Object.keys(presetMap);
+}
+
+export function isPresetSlug(slug: string): boolean {
+  return (presetSlugs as readonly string[]).includes(slug);
 }

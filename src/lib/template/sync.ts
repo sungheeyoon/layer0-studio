@@ -56,9 +56,9 @@ async function uploadThumbnail(supabase: SupabaseClient, localPath: string): Pro
 
 export async function syncTemplates(
   supabase: SupabaseClient,
-  options: { dryRun: boolean; targetSlug?: string }
+  options: { dryRun: boolean; targetSlug?: string; performedBy?: string }
 ): Promise<SyncSummary> {
-  const { dryRun, targetSlug } = options;
+  const { dryRun, targetSlug, performedBy } = options;
   const summary: SyncSummary = {
     creates: 0,
     updates: 0,
@@ -178,6 +178,7 @@ export async function syncTemplates(
   // Record audit log if not dry run
   if (!dryRun && summary.affectedSlugs.length > 0) {
     await supabase.from('template_sync_audit').insert({
+      performed_by: performedBy,
       affected_slugs: summary.affectedSlugs,
       dry_run: false,
       summary: {
