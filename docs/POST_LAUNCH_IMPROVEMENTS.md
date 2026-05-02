@@ -95,6 +95,21 @@ Auto-save (debounce 4s) / `beforeunload` 가드 / Conflict 모달은 적용 완�
 
 ---
 
+### 3.11 Admin 템플릿 썸네일 업로드 — 1MB 초과 시 "Uploading..." 영구 고정
+
+`src/app/admin/templates/TemplateEditorPanel.tsx:138-150` / `src/app/admin/templates/actions.ts:27-49`
+
+`uploadThumbnailAction` 이 Server Action 이라 Next.js 기본 본문 한도(`serverActions.bodySizeLimit`, 1MB) 에 걸림. 1MB 초과 이미지 업로드 시 프레임워크가 reject → `await uploadThumbnailAction(fd)` 가 throw → `setIsUploading(false)` 가 영영 호출되지 않아 "Uploading..." 오버레이가 박제됨. 클라이언트에 try/catch 도 사이즈 사전 검증도 없음.
+
+**조치 (셋 중 택1 또는 조합)**:
+- (a) `next.config.ts` 에 `experimental.serverActions.bodySizeLimit: '10mb'` 설정 — 가장 간단, but Server Action 일반 한도가 같이 풀림
+- (b) `user_assets` 흐름처럼 **브라우저 → Supabase Storage 직접 업로드** 로 전환 — Server Action 우회, 정석. `template-thumbnails` 버킷에 admin-only INSERT 정책은 이미 있음(009 마이그레이션)
+- (c) 클라이언트에 사이즈 사전 검증 + try/catch/finally 로 `setIsUploading(false)` 보장 — 최소한의 UX 픽스
+
+권장: (c) 즉시 + (b) 차후. (a) 는 권장하지 않음(다른 Server Action 까지 한도 풀림).
+
+---
+
 ## 4. 다음 리뷰 권장 시점
 
 - **P2 정합성 패치 완료**: P2 전 항목 종결.
