@@ -4,7 +4,7 @@ import { defaultTemplateJson } from '../slots';
 const preset: TemplatePreset = {
   slug: 'wedding-default',
   templateJson: defaultTemplateJson,
-  thumbnailPath: 'public/thumbnails/template-wedding.jpg',
+  thumbnailPath: 'public/thumbnails/template-wedding.webp',
   version: '1.0.0',
   defaults: {
     name: 'Wedding',

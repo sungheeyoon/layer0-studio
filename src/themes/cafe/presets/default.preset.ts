@@ -4,7 +4,7 @@ import { defaultTemplateJson } from '../slots';
 const preset: TemplatePreset = {
   slug: 'cafe-default',
   templateJson: defaultTemplateJson,
-  thumbnailPath: 'public/thumbnails/template-cafe.jpg',
+  thumbnailPath: 'public/thumbnails/template-cafe.webp',
   version: '1.0.0',
   defaults: {
     name: 'Cafe',

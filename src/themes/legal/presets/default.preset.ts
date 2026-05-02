@@ -4,7 +4,7 @@ import { defaultTemplateJson } from '../slots';
 const preset: TemplatePreset = {
   slug: 'legal-default',
   templateJson: defaultTemplateJson,
-  thumbnailPath: 'public/thumbnails/template-legal.jpg',
+  thumbnailPath: 'public/thumbnails/template-legal.webp',
   version: '1.0.0',
   defaults: {
     name: 'Legal',

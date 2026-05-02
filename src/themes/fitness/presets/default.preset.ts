@@ -4,7 +4,7 @@ import { defaultTemplateJson } from '../slots';
 const preset: TemplatePreset = {
   slug: 'fitness-default',
   templateJson: defaultTemplateJson,
-  thumbnailPath: 'public/thumbnails/template-fitness.jpg',
+  thumbnailPath: 'public/thumbnails/template-fitness.webp',
   version: '1.0.0',
   defaults: {
     name: 'Fitness',

@@ -4,7 +4,7 @@ import { defaultTemplateJson } from '../slots';
 const preset: TemplatePreset = {
   slug: 'interior-default',
   templateJson: defaultTemplateJson,
-  thumbnailPath: 'public/thumbnails/template-interior.jpg',
+  thumbnailPath: 'public/thumbnails/template-interior.webp',
   version: '1.0.0',
   defaults: {
     name: 'Interior',

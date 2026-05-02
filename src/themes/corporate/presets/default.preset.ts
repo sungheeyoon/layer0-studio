@@ -4,7 +4,7 @@ import { defaultTemplateJson } from '../slots';
 const preset: TemplatePreset = {
   slug: 'corporate-default',
   templateJson: defaultTemplateJson,
-  thumbnailPath: 'public/thumbnails/template-corporate.jpg',
+  thumbnailPath: 'public/thumbnails/template-corporate.webp',
   version: '1.0.0',
   defaults: {
     name: 'Corporate',

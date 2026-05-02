@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';
-import { readdirSync, existsSync, mkdirSync, readFileSync } from 'fs';
+import { readdirSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import sharp from 'sharp';
@@ -158,7 +158,7 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
   }
 
   if (hasVisualChange) {
-    await fs.promises.writeFile(outputPath, newWebpBuffer);
+    writeFileSync(outputPath, newWebpBuffer);
     console.log(`✅ Saved → ${config.output}`);
   } else {
     console.log(`⏭️ No visual change for [${themeKey}], skipping save.`);
