@@ -1,339 +1,249 @@
 # Template Authoring Guide — Layer0 Studio
 
 _대상: 새 템플릿 또는 새 테마를 추가하려는 개발자_
-
-이 문서를 처음 읽으면 "뭘 어디부터 손대야 하지?"가 사라지도록 작성했습니다. 코드 위치·JSON 구조·자주 빠지는 함정까지 한 곳에 모았습니다.
+_파이프라인 리팩터(Phase 1~4) 반영본 — 2026-05-02_
 
 ---
 
-## 0. 핵심 개념: Theme vs Template
+## 0. 핵심 개념: Theme · Preset · Template · UserSite
 
 | 용어 | 무엇 | 어디 산다 | 누가 만든다 |
 |---|---|---|---|
-| **Theme** | React 렌더러 (코드). slot 정의 + section 컴포넌트들 | `src/themes/<key>/` | 개발자 (코드 PR) |
-| **Template** | JSON 데이터. 어느 theme을 쓰고 어떤 텍스트/이미지를 채울지 | DB `templates` 테이블 | 어드민 (관리자 UI) 또는 개발자 (시드 SQL) |
-| **UserSite** | Template을 복사해서 사용자가 편집한 인스턴스 | DB `user_sites` 테이블 | 일반 사용자 |
+| **Theme** | React 렌더러 + slot 정의 + section 컴포넌트 | `src/themes/<key>/` | 개발자 (코드 PR) |
+| **Preset** | 코드가 진실인 시드 템플릿. `templateJson`/썸네일/버전을 코드에서 관리 | `src/themes/<key>/presets/*.preset.ts` | 개발자 (코드 PR) |
+| **Template (DB row)** | `templates` 테이블의 한 행. preset에서 시드되거나 어드민이 manual로 만듦 | DB | sync CLI 또는 어드민 |
+| **UserSite** | Template을 복사해 사용자가 편집한 인스턴스 | DB `user_sites` | 일반 사용자 |
 
-**관계**:
-1. Theme이 "어떤 모양의 슬롯이 가능한가"를 정의 (`slots.ts`)
-2. Template이 "그 슬롯들을 어떻게 채울 것인가"를 JSON으로 기술
-3. 사용자가 Template을 고르면 JSON이 deep-copy 되어 자기 UserSite가 됨 (`create-site-from-template.usecase.ts:43`)
+**소유권 매트릭스 (sync 정책)**:
 
-> **의사결정 first**: 기존 테마(`corporate`)로 표현 가능하면 → Template만 추가 (코드 변경 0).
-> 새 레이아웃·새 섹션 타입이 필요하면 → Theme부터 추가 후 Template 추가.
+| 필드 | 코드(preset) | DB(어드민) | sync 동작 |
+|---|---|---|---|
+| `slug` | ✅ (upsert 키, 변경 금지) | — | 일치 보장 |
+| `templateJson` | ✅ | — | 항상 코드값으로 덮어씀 |
+| `thumbnailUrl` | ✅ (해시 기반) | — | 해시 다르면 재업로드 |
+| `version` | ✅ (semver) | — | 코드값으로 덮어씀 |
+| `name`/`description`/`category` | 신규 row 시드값 only | ✅ | DB에 값 있으면 유지 |
+| `status` | — | ✅ | sync 절대 안 건드림 (신규 row만 `draft`) |
+
+> **핵심 약속**: 운영자가 어드민에서 description을 바꿔도 다음 sync가 코드값으로 되돌리지 않는다. 단 `templateJson`/썸네일/버전은 *항상 코드 진실* — 어드민에서 편집 불가(코드 preset row는 read-only).
 
 ---
 
-## 1. TemplateJson 구조 한눈에
+## 1. TemplateJson 구조
 
 ```ts
-// src/domain/entities/template.entity.ts:52
+// src/domain/entities/template.entity.ts
 TemplateJson = {
-  themeKey: "corporate",          // 어느 theme의 렌더러를 쓸지
+  themeKey: "corporate",
   globalStyles: {
-    primaryColor: "#1a1a2e",
+    primaryColor: "#1a1a2e",     // hex 권장 (validate가 warn)
     secondaryColor: "#e94560",
     fontFamily: "'Inter', sans-serif",
-    fontSize: "16px",
-    layout: "wide",
+    fontSize: "16px",            // CSS length
+    layout: "wide",              // 'wide'|'narrow'|'asymmetric'|'default'|'full'
   },
   pages: [
     {
-      id: "home",                 // page 식별자
+      id: "home",
       title: "Home",
-      slug: "/",
+      slug: "/",                 // 모든 페이지에서 unique
       order: 0,
       sections: [
         {
-          id: "hero-001",         // section 식별자 (페이지 내 unique)
-          type: "hero",           // ★ theme의 slot.type과 매칭 필수
-          order: 1,
-          visible: true,          // false면 renderer에서 숨김
-          editable: true,         // false면 editor 좌측 Parameters 패널 숨김
+          id: "hero-001",        // 페이지 내 unique
+          type: "hero",          // theme.slots[].type 중 하나
+          order: 1,              // ⚠️ deprecated — 렌더러는 slots[] 순서를 따름
+          visible: true,
+          editable: true,
           data: {
-            title:    { value: "We Build Digital Experiences", type: "text",     label: "Main Title",    editable: true },
-            subtitle: { value: "Strategy · Design · Tech",     type: "text",     label: "Subtitle",      editable: true },
-            backgroundImage: {
-              value: "https://images.unsplash.com/photo-...",
-              type: "image",
-              label: "Background Image",
-              editable: true,
-              // assetId?: string  ← 사용자가 업로드한 자산이면 추가됨 (lifecycle 추적)
-            },
-            ctaText: { value: "Explore", type: "text", label: "CTA Text", editable: true },
-            ctaUrl:  { value: "#contact", type: "url", label: "CTA Link", editable: true },
+            title: { value: "...", type: "text", label: "Main Title", editable: true },
+            // 모든 value는 string. number/image도 마찬가지.
           },
         },
-        // ... 다음 section
       ],
     },
   ],
 }
 ```
 
-### 필드 타입 (`TemplateFieldType`, `template.entity.ts:1`)
+### 필드 타입
 
-| `type` | 에디터 입력 UI | 비고 |
+| `type` | 입력 UI | 비고 |
 |---|---|---|
-| `text` | single-line input | |
-| `textarea` | multi-line | |
-| `url` | url input | 검증은 브라우저 기본만 |
-| `color` | color picker + hex input | |
-| `number` | number input | 값은 string으로 저장됨 |
-| `select` | dropdown | `options: string[]` 필수 |
-| `image` | URL 입력 + 파일 업로드 버튼 | 업로드 시 `assetId` 자동 부여 |
-
-> **모든 `value`는 string**입니다. number 타입도 문자열로 저장됨에 주의 (`template.entity.ts:8-11` 참조).
-
-### globalStyles
-`src/components/editor/DynamicEditor.tsx:157-162`에서 `--theme-primary` 등 CSS 변수로 root에 주입됩니다. 테마 컴포넌트는 `var(--theme-primary)` 형태로 참조해야 사용자 색상 변경이 즉시 반영됩니다.
+| `text` / `textarea` / `url` / `color` / `number` | 자명 | `number`도 string 저장 |
+| `select` | dropdown | `options: string[]` 필요 |
+| `image` | URL + 업로드 | 업로드 시 `assetId` 자동 부여 |
 
 ---
 
-## 2. 시나리오 A — 기존 테마로 새 템플릿 추가 (코드 변경 없음)
+## 2. 시나리오 A — 기존 테마로 새 preset 추가 (가장 흔함)
 
-가장 흔한 케이스. 디자인은 `corporate` 그대로 두되 텍스트·이미지·기본 색상만 다른 템플릿을 만들고 싶을 때.
+PR 한 개로 끝남. CLI 두 줄.
 
 ### 단계
-1. **관리자로 로그인** (계정에 `app_metadata.role = 'admin'` 필요)
-2. `/admin/templates` 접속 → 우측 패널 "Template Editor"
-3. 폼 채우기:
-   - **Template Title**: 사용자가 카탈로그에서 보는 이름 ("Modern Corporate")
-   - **Theme Blueprint**: 드롭다운에서 `corporate` 선택 (현재 등록된 유일한 theme)
-   - **Description**: 카탈로그 카드 설명
-   - **Slug**: URL 친화 ID. 비워두면 title 기반으로 자동 생성
-   - **Category**: 자유 텍스트 ("Business", "Portfolio" 등)
-   - **Status**: `draft` / `active` / `archived`
-   - **Thumbnail**: 카탈로그 미리보기 이미지 (클릭 → 업로드 → `template-thumbnails` 버킷에 저장됨)
-   - **template_schema.json**: 본 가이드 §1의 구조로 작성
-4. **Save Draft** (사용자에게 미노출) 또는 **Deploy Template** (`status='active'` 강제)
 
-### JSON 작성 팁
-- 출발점: `src/themes/corporate/slots.ts:14` `defaultTemplateJson`을 그대로 복사 → 값만 수정
-- 또는 `TemplateEditorPanel`이 자동으로 채워주는 `DEFAULT_JSON` (`TemplateEditorPanel.tsx:13`)
-- corporate 테마가 인식하는 slot type만 사용 (다음 섹션 참고)
+1. **preset 파일 작성** — `src/themes/<theme>/presets/<slug-suffix>.preset.ts`
+   ```ts
+   import { TemplatePreset } from '../../types';
 
-### corporate 테마의 slot 명세
+   const preset: TemplatePreset = {
+     slug: 'corporate-modern',           // DB upsert 키, 영원히 변경 금지
+     templateJson: {
+       themeKey: 'corporate',
+       globalStyles: { /* ... */ },
+       pages: [{ /* ... */ }],
+     },
+     thumbnailPath: 'public/thumbnails/template-corporate-modern.webp',
+     version: '1.0.0',
+     defaults: {
+       name: 'Modern Corporate',
+       description: '...',
+       category: 'business',
+     },
+   };
+   export default preset;
+   ```
 
-`src/themes/corporate/slots.ts:6` 기준 등록된 slot:
+2. **`pnpm test`** — preset이 `validateTemplateJson` 10개 규칙을 통과하는지 자동 검증
 
-| `type` | required | 컴포넌트 | 인식하는 `data` 키 |
-|---|---|---|---|
-| `hero` | ✅ | `HeroSection.tsx` | `title`(또는 `heading`), `subtitle`, `backgroundImage`(또는 `image`), `ctaText`, `ctaUrl` |
-| `about` | ❌ | `AboutSection.tsx` | `title`, `subtitle`, `body`, `image`(또는 `backgroundImage`) |
-| `features` | ❌ | `FeaturesSection.tsx` | `title`, `subtitle`, **+ 임의 키들** (각각이 feature 카드로 렌더) |
-| `contact` | ❌ | `ContactSection.tsx` | `title`, `email`, `phone`, `address` |
-| `footer` | ❌ | `FooterSection.tsx` | `companyName`, `copyright` |
+3. **썸네일 캡처** — `pnpm template:capture <theme>` 또는 직접 `public/thumbnails/`에 저장
+   - `src/themes/<theme>/thumbnail.config.ts`의 `output` 경로와 preset의 `thumbnailPath`를 **동일하게 맞출 것** (`.webp` ↔ `.jpg` mismatch 흔함)
 
-> **slot에 등록은 됐지만 `sectionComponentMap`에 없는 type**은 `GenericSection.tsx`로 폴백 렌더됩니다 (`corporate/index.tsx:34`). 즉 미디어가 부족한 임시 섹션을 정의해도 깨지진 않음.
+4. **sync dry-run** — `pnpm template:sync` (변경 사항만 출력, DB 미반영)
 
-### Features 섹션이 가장 헷갈리는 부분
-`FeaturesSection.tsx:10`이 `title`/`subtitle`/`heading` 외 **모든 `data` 키를 feature 카드로 취급**합니다. 그래서:
+5. **PR 머지 → prod sync** — 어드민 UI "Sync from Code" → Preview Sync → Apply Sync (super-admin: `app_metadata.canPublishTemplates === true`)
 
-```json
-{
-  "type": "features",
-  "data": {
-    "title":    { "value": "Core Capabilities", "type": "text", "label": "Title", "editable": true },
-    "subtitle": { "value": "What we do best",   "type": "text", "label": "Subtitle", "editable": true },
-    "strategy":    { "value": "Data-driven", "type": "text", "label": "Strategy",    "editable": true },
-    "design":      { "value": "Human-first", "type": "text", "label": "Design",      "editable": true },
-    "development": { "value": "Modern arch", "type": "text", "label": "Development", "editable": true }
-  }
-}
-```
-→ feature 카드 3개 (strategy, design, development) 자동 생성. 카드 수를 늘리려면 키만 추가하면 됨.
+6. **(선택) 메타 보정 + 활성화** — 어드민에서 status를 `active`로 토글
 
-### Contact 섹션은 반대로 키가 고정
-`title`, `email`, `phone`, `address` **외 키는 무시**됩니다 (`ContactSection.tsx:8-11`). 추가 정보를 넣고 싶으면 새 컴포넌트가 필요 (시나리오 B).
+### 어드민 UI에서 직접 만드는 manual one-off
+
+시즌 프로모션 등 일회성 시드는 여전히 `+ New Template` 버튼으로 가능. 카드 옆 `Manual` 배지로 구분되며 JSON textarea 직접 편집이 허용됨.
 
 ---
 
-## 3. 시나리오 B — 새 테마 추가 (코드 변경)
+## 3. 시나리오 B — 새 테마 추가
 
-`corporate`로 표현 못 하는 레이아웃이 필요할 때 (예: `cafe`, `portfolio`).
-
-### 디렉터리 구조 (`src/themes/<key>/`)
+`src/themes/<key>/` 디렉터리만 만들면 codegen이 자동 발견:
 
 ```
 src/themes/cafe/
-├── index.tsx          ← ThemeRenderer + ThemeModule export
-├── slots.ts           ← slot 정의 + defaultTemplateJson
-├── cafe.module.css    ← (선택) 스타일
+├── index.tsx              # ThemeRenderer + ThemeModule export
+├── slots.ts               # slots + defaultTemplateJson
+├── presets/
+│   └── default.preset.ts  # ★ 최소 1개 필요
+├── thumbnail.config.ts    # Playwright 캡처 설정
 └── sections/
     ├── HeroSection.tsx
-    ├── MenuSection.tsx
     └── ...
 ```
 
 ### 4단계
 
-**1. Slot 정의 (`slots.ts`)**
+1. **`slots.ts`** — slot 정의 + `defaultTemplateJson`
+2. **`sections/*.tsx`** — `ThemeSectionProps`를 받는 컴포넌트들
+3. **`index.tsx`** — 기존 테마 복사 후 `sectionComponentMap`만 교체
+4. **`presets/default.preset.ts`** — 위 시나리오 A의 preset 형식, `templateJson: defaultTemplateJson`로 시드
 
-```ts
-import { ThemeSlotDefinition } from '../types';
-import { TemplateJson } from '@/domain/entities/template.entity';
+5. **`pnpm dev` 또는 `pnpm build`** — `predev`/`prebuild` 훅이 자동으로 `pnpm generate:themes` 실행 → `src/themes/_generated.ts` 갱신 (registry는 더 이상 수동 편집 안 함)
 
-export const slots: ThemeSlotDefinition[] = [
-  { type: 'hero', label: 'Hero', required: true },
-  { type: 'menu', label: 'Menu', required: true },
-  { type: 'hours', label: 'Opening Hours', required: false },
-];
-
-export const defaultTemplateJson: TemplateJson = {
-  themeKey: 'cafe',
-  globalStyles: { primaryColor: '#3a2618', /* ... */ },
-  pages: [
-    {
-      id: 'home', title: 'Home', slug: '/', order: 0,
-      sections: [
-        { id: 'hero-001',  type: 'hero',  order: 1, visible: true, editable: true, data: { /* ... */ } },
-        { id: 'menu-001',  type: 'menu',  order: 2, visible: true, editable: true, data: { /* ... */ } },
-        { id: 'hours-001', type: 'hours', order: 3, visible: true, editable: true, data: { /* ... */ } },
-      ],
-    },
-  ],
-};
-```
-
-**2. Section 컴포넌트들**
-
-```tsx
-// src/themes/cafe/sections/HeroSection.tsx
-import { ThemeSectionProps } from '../../types';
-
-export default function HeroSection({ section }: ThemeSectionProps) {
-  const { data } = section;
-  const title = data['title']?.value || '';
-  // ...
-  return <section>{title}</section>;
-}
-```
-
-`ThemeSectionProps` (`src/themes/types.ts:13`)는 `section`, `isSelected`, `onClick`을 받습니다. 인라인 편집 하이라이트는 wrapper(`index.tsx`)가 처리하므로 컴포넌트는 데이터만 신경 쓰면 됩니다.
-
-**3. Theme renderer (`index.tsx`)** — `corporate/index.tsx`를 그대로 복사 후 import만 교체
-
-```tsx
-import { ThemeRendererProps, ThemeSectionProps } from '../types';
-import { slots, defaultTemplateJson } from './slots';
-import HeroSection from './sections/HeroSection';
-import MenuSection from './sections/MenuSection';
-// ...
-
-const sectionComponentMap: Record<string, ComponentType<ThemeSectionProps>> = {
-  hero: HeroSection,
-  menu: MenuSection,
-  hours: HoursSection,
-};
-
-export { slots, defaultTemplateJson };
-
-export default function CafeTheme({ siteJson, selectedSectionId, onSectionClick, activePageId }: ThemeRendererProps) {
-  // corporate/index.tsx:22-57 동일 패턴
-}
-```
-
-**4. Registry 등록 (`src/themes/registry.ts:3`)**
-
-```ts
-const themeMap: Record<string, () => Promise<ThemeModule>> = {
-  corporate: () => import('./corporate'),
-  cafe:      () => import('./cafe'),   // ★ 추가
-};
-```
-
-이 한 줄이 추가되면 `TemplateEditorPanel`의 Theme Blueprint 드롭다운에 자동 노출됩니다 (`TemplateEditorPanel.tsx:84` `getAvailableThemeKeys()`).
-
-> **dynamic import** 형태를 유지해야 합니다. 정적 import로 바꾸면 모든 테마가 사용자 사이트 번들에 포함됨.
+> `registry.ts`는 `_generated.ts`를 import만 함. 디렉터리 추가가 곧 등록.
 
 ---
 
-## 4. 자주 빠지는 함정 (Gotchas)
+## 4. CLI 한 장 요약
 
-### 4.1 `section.type`이 slot 목록에 없으면 안 보임
-`corporate/index.tsx:30` — 렌더러는 `slots` 배열을 순회하며 매칭되는 section만 찾습니다. JSON에 멋진 section을 넣어도 slot에 등록 안 했으면 화면에 0픽셀.
-
-### 4.2 같은 page 안에 같은 `type`이 두 개면 첫 것만 렌더
-`corporate/index.tsx:31` `sections.find(...)`. 한 페이지에 hero를 두 개 두려면 theme 레벨에서 slot type을 구분(`hero-primary`, `hero-secondary`)하거나 컴포넌트 자체를 둘로 나눠야 합니다.
-
-### 4.3 `section.order`는 사실상 무시
-렌더러는 `slots` 배열 순서로 그립니다 — `section.order`는 데이터에는 있지만 정렬에 쓰이지 않습니다. 순서를 바꾸려면 **theme의 `slots` 배열 순서**를 바꾸는 것이 정답.
-
-### 4.4 `id`는 페이지 내에서 unique 해야 함
-`update-site-json.usecase.ts:71-75`의 fieldUpdate 분기가 `find(s => s.id === sectionId)`로 첫 매칭만 가져옵니다. 중복 id는 silent하게 잘못된 섹션을 갱신.
-
-### 4.5 모든 `value`는 string
-`type: 'number'`도 string으로 저장되고, `type: 'image'`의 `value`는 URL 문자열입니다. 컴포넌트에서 숫자 연산이 필요하면 `Number(field.value)`.
-
-### 4.6 image 필드의 두 가지 패턴
-- **외부 URL** (`https://images.unsplash.com/...`): `value`만 있음. 자산 lifecycle 추적 안 됨
-- **사용자 업로드**: `value` + `assetId`. `save_site_template_with_lock` RPC가 `asset_usages` 테이블을 갱신해 자동 정리(`SupabaseUserSiteRepoImpl::updateSiteJson:128`)
-
-템플릿 시드는 보통 외부 URL을 쓰면 됩니다. 사용자가 자기 이미지로 바꾸면 `assetId`가 붙음.
-
-### 4.7 JSON 검증은 매우 느슨
-`UpdateSiteJsonUseCase.validateJson:90-98`은 `pages` 배열 비어있지 않음 + `globalStyles` 존재 두 가지만 봅니다. section.type이 slot에 없거나 data가 비어있어도 통과 → 화면은 텅 빔. **수동으로 미리보기 확인 필수**.
-
-### 4.8 `themeKey` 누락 → `'corporate'` 폴백
-`site/[domain]/page.tsx:82`, `DynamicEditor.tsx:57`. 의도된 동작이지만 새 테마 만들고 JSON에서 themeKey 빠뜨리면 corporate로 그려져서 디버깅 시간 낭비.
-
-### 4.9 다중 페이지 — 데이터는 있지만 공개 사이트 네비게이션 부재
-`pages` 배열은 여러 개 정의 가능하나, `corporate/index.tsx`는 `activePageId` (또는 `pages[0]`) **한 장만** 렌더합니다. 공개 사이트(`/site/[domain]`)에서 페이지 전환 메뉴는 현재 없음. 다중 페이지 템플릿을 정말 원하면 theme 안에 `<Nav>` 컴포넌트 추가 필요.
-
-### 4.10 `editable`가 false인데 사용자가 직접 JSON 편집하면?
-`section.editable=false`는 에디터 UI에서 Parameters 패널만 숨길 뿐(`DynamicEditor.tsx:253`), 데이터 자체는 변경 가능합니다. 사용자가 절대 못 바꾸게 하려면 server-side에서도 검증 추가 필요 — 현재는 그런 가드 없음.
-
-### 4.11 `templateSnapshot` 컬럼은 저장은 되지만 사용 안 함
-`user-site.entity.ts:13` 주석 참고. 향후 "템플릿 리셋" 기능용. 현재 시점엔 무시해도 OK.
+```bash
+pnpm generate:themes            # _generated.ts 재생성 (predev/prebuild에 자동 연결)
+pnpm template:capture <theme>   # Playwright + sharp로 썸네일 캡처 → .webp 저장
+pnpm template:capture           # 모든 테마 일괄 (templates-ui/<key>.html이 source 기본)
+pnpm template:sync              # ★ default = dry-run, diff만 출력
+pnpm template:sync --apply      # 실제 DB upsert + Storage 업로드 + audit log
+pnpm template:sync cafe         # 특정 테마만 (dry-run)
+pnpm test                       # validate 규칙으로 모든 preset 자동 검증
+```
 
 ---
 
-## 5. 체크리스트
+## 5. Validate 규칙 (`src/lib/template/validate.ts`)
 
-### 새 템플릿 등록 전
-- [ ] `themeKey`가 등록된 theme key 중 하나
-- [ ] 각 `section.type`이 해당 theme의 `slots` 배열에 존재
-- [ ] `pages`, 각 page의 `sections` 비어있지 않음
-- [ ] page 내 `section.id` 중복 없음
-- [ ] 모든 `data` 필드가 `value` + `type` + `label` 보유
-- [ ] image 필드의 URL이 실제 접근 가능 (외부 URL이면 CORS / hotlink 정책 확인)
-- [ ] 색상 값은 hex 또는 CSS named color (themeVariables가 그대로 CSS 변수에 들어감)
-- [ ] 어드민 UI에서 JSON 입력 후 `Invalid JSON format` 에러 없음
-- [ ] Save Draft → `/dashboard/templates`에서 카드로 보이는지
-- [ ] 카드 클릭 → 사이트 생성 → editor에서 모든 필드 편집 가능
-- [ ] preview/published 상태 둘 다 시각적으로 정상
+sync 전·`pnpm test`·어드민 Save에서 모두 호출됨.
 
-### 새 테마 등록 전
-- [ ] `slots.ts`에 `slots`, `defaultTemplateJson` 둘 다 export
-- [ ] `index.tsx`에 `default` (renderer), `slots`, `defaultTemplateJson` 모두 export — `ThemeModule` 인터페이스 (`types.ts:26`) 만족
-- [ ] `registry.ts`에 dynamic import 등록
-- [ ] 모든 section 컴포넌트가 `data['key']?.value` 패턴 — 누락 키에 대한 안전한 폴백
-- [ ] `globalStyles` CSS 변수(`var(--theme-primary)` 등)를 적어도 일부 활용
-- [ ] `defaultTemplateJson`으로 admin이 한 번에 시드 가능
-- [ ] 새 테마용 minimal Template 1건을 `templates` 테이블에 등록해 카탈로그 노출
+**Errors (블로킹)**
+1. `themeKey`가 registry에 존재
+2. `section.type`이 theme의 slot 목록에 존재 (slot 옵션 전달 시)
+3. required slot은 모든 page에 최소 1개
+4. page 내 `section.id` unique
+5. `data` 필드의 `type`/`label`/`value` 누락 금지
+6. `pages` 비어있지 않음 + `page.slug` unique
+7. `globalStyles.primaryColor`/`secondaryColor` 필수, `fontSize` CSS length, `layout` 화이트리스트
+8. `data[].value`는 string
+
+**Warnings (통과하지만 stderr)**
+9. `section.order` 사용 (deprecated — 배열 순서가 곧 렌더 순서)
+10. `image`/`url` 필드의 `http://` (mixed-content 위험)
+11. 색상이 hex가 아님 (CSS named color는 통과)
 
 ---
 
-## 6. 코드 위치 맵
+## 6. 자주 빠지는 함정
+
+### 6.1 thumbnailPath 확장자 mismatch (★현재 코드에 미해결)
+`thumbnail.config.ts`는 `.webp`로 출력하는데 preset이 `.jpg`를 가리키면, sync는 옛 `.jpg`를 업로드하거나(파일 존재 시) 로컬 경로 문자열을 그대로 DB에 박는다(파일 없으면). **preset 작성 시 두 경로를 일치시킬 것.**
+
+### 6.2 `section.type`이 slot 목록에 없으면 안 보임
+렌더러는 `slots[]`을 순회하며 매칭되는 section만 찾음 (`<theme>/index.tsx`). validate가 잡지만 slot 옵션을 안 넘기면 silent.
+
+### 6.3 같은 page에 같은 `type`이 두 개면 첫 것만 렌더
+`sections.find(s => s.type === slot.type)`. 두 개 두려면 slot type을 분리(`hero-primary`, `hero-secondary`)하거나 컴포넌트 분리.
+
+### 6.4 `section.order` 무시
+렌더 순서는 `slots[]` 배열 순서. validate가 warn 출력. 순서 바꾸려면 theme의 `slots` 배열을 바꿈.
+
+### 6.5 모든 `value`는 string
+`type: 'number'`도 string. 컴포넌트에서 `Number(field.value)` 필요.
+
+### 6.6 `themeKey` 누락 → `'corporate'` 폴백
+`site/[domain]/page.tsx`, `DynamicEditor.tsx`. 의도된 동작이지만 디버깅 시간 낭비 흔함.
+
+### 6.7 Features 섹션의 카드는 임의 키로 생성
+`FeaturesSection.tsx`가 `title`/`subtitle`/`heading` 외 모든 키를 카드로 취급. 카드 수 늘리려면 `data`에 키 추가.
+
+### 6.8 Contact 섹션은 키 고정
+`title`/`email`/`phone`/`address` 외 키는 무시. 추가 정보는 새 컴포넌트가 필요.
+
+### 6.9 `editable: false`는 UI만 숨김
+서버 가드 없음. 사용자가 JSON 직접 수정하면 변경 가능.
+
+---
+
+## 7. 코드 위치 맵
 
 | 무엇을 보고 싶을 때 | 어디 |
 |---|---|
-| TemplateJson 타입 정의 | `src/domain/entities/template.entity.ts` |
+| TemplateJson 타입 | `src/domain/entities/template.entity.ts` |
+| TemplatePreset 타입 | `src/themes/types.ts` |
 | 슬롯/모듈 인터페이스 | `src/themes/types.ts` |
-| 테마 등록 | `src/themes/registry.ts` |
-| 참조용 테마 구현 | `src/themes/corporate/` 전체 |
-| 어드민이 템플릿 만드는 UI | `src/app/admin/templates/TemplateEditorPanel.tsx` |
-| 어드민 server actions (CRUD) | `src/app/admin/templates/actions.ts` |
-| 사용자가 템플릿 → 사이트 만드는 흐름 | `src/domain/usecases/user-site/create-site-from-template.usecase.ts` |
-| 에디터 (DynamicField 입력 UI 매핑) | `src/components/editor/DynamicEditor.tsx:375-500` |
-| 공개 사이트 렌더 | `src/app/site/[domain]/page.tsx` |
-| 미리보기 (DB 미반영 상태) | `src/app/preview/[id]/page.tsx` |
+| 자동생성 레지스트리 | `src/themes/_generated.ts` (커밋, 수정 금지) |
+| Codegen 스크립트 | `scripts/generate-themes.mjs` |
+| Validate 규칙 | `src/lib/template/validate.ts` (+ `__tests__/`) |
+| Sync 코어 로직 | `src/lib/template/sync.ts` |
+| Sync CLI | `scripts/sync-templates.ts` |
+| Capture CLI | `scripts/capture-templates.ts` |
+| Sync API 엔드포인트 | `src/app/api/admin/template-sync/route.ts` (※ UI는 server action 사용 — 7.1 참고) |
+| Sync server action | `src/app/admin/templates/actions.ts` `syncTemplatesAction` |
+| 어드민 UI (sync 버튼) | `src/app/admin/templates/TemplateListPanel.tsx` |
+| 어드민 editor | `src/app/admin/templates/TemplateEditorPanel.tsx` |
+| Preset preview (capture용) | `src/app/preview/preset/[...key]/page.tsx` |
+| Audit log 테이블 | `docs/migrations/011_template_sync_audit.sql` |
+| 참조 테마 | `src/themes/corporate/` |
+
+### 7.1 Sync 진입점이 두 개인 이유 (현재 상태)
+`/api/admin/template-sync` 라우트와 `syncTemplatesAction` server action이 둘 다 존재하지만 어드민 UI는 server action만 사용한다. 라우트는 외부 도구(curl/CI)용 보조 진입점이며 super-admin 플래그 검사가 없다 — 외부에서 호출하지 말 것. 정리 후보(Phase 5).
 
 ---
 
-## 7. 한 줄 요약
+## 8. 한 줄 요약
 
-> **기존 테마 안 건드릴 수 있나?** → 어드민 UI에서 JSON 채우면 끝.
-> **새 슬롯/레이아웃 필요?** → `src/themes/<key>/` 디렉터리 + `registry.ts` 한 줄.
-> **어떻게 미리 검증하나?** → 작성 직후 admin Save Draft → 카탈로그 → 사이트 생성 → editor 편집까지 손으로 한 번 흘려보내는 게 가장 빠름. JSON 스키마 검증은 의도적으로 느슨.
+> **새 시드 추가** = `presets/<name>.preset.ts` 1파일 + `pnpm template:capture` + `pnpm template:sync --apply`.
+> **새 테마 추가** = 디렉터리만 만들면 codegen이 등록.
+> **시드 데이터는 코드가 진실, 메타데이터는 DB가 진실.** 어드민 UI는 메타 편집과 sync 트리거만.
