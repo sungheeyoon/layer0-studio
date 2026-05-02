@@ -572,11 +572,11 @@ pnpm template:scaffold interior --from templates-ui/interior.html
 기존 코드 박살내지 않고 단계 진행:
 
 ### Phase 1 — 기반 (1~2일)
-- [ ] `TemplatePreset` 타입 신규 (`templateJson`/`thumbnailPath`/`version` 코드-진실, `defaults.*` 시드-only)
-- [ ] 기존 7개 테마에 `presets/default.preset.ts` 추가 (각 테마의 `defaultTemplateJson` + 현재 DB row의 메타를 `defaults`로 복사)
-- [ ] `validateTemplateJson` 함수 구현 (§2.4의 1~10번 규칙 + warning/error 분리) + vitest 테스트
-- [ ] `pnpm test`에서 모든 preset 검증 (errors=0 보장)
-- [ ] codegen `scripts/generate-themes.ts` + `_generated.ts` 커밋 + `predev`/`prebuild` 자동 실행
+- [x] `TemplatePreset` 타입 신규 (`templateJson`/`thumbnailPath`/`version` 코드-진실, `defaults.*` 시드-only)
+- [x] 기존 7개 테마에 `presets/default.preset.ts` 추가 (각 테마의 `defaultTemplateJson` + 현재 DB row의 메타를 `defaults`로 복사)
+- [x] `validateTemplateJson` 함수 구현 (§2.4의 1~10번 규칙 + warning/error 분리) + vitest 테스트
+- [x] `pnpm test`에서 모든 preset 검증 (errors=0 보장)
+- [x] codegen `scripts/generate-themes.mjs` + `_generated.ts` 커밋 + `predev`/`prebuild` 자동 실행
 
 ### Phase 2 — 동기화 (2~3일)
 - [ ] `pnpm template:sync` CLI 구현 (**default = dry-run**, `--apply` 명시 시만 반영)
