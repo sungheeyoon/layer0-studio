@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validateTemplateJson } from '../validate';
 import { TemplateJson } from '@/domain/entities/template.entity';
+import type { ThemeLibrary } from '@/themes/types';
 
 // -- All 7 presets + their slots --
 import corporatePreset from '@/themes/corporate/presets/default.preset';
@@ -186,6 +187,51 @@ describe('validateTemplateJson — warnings', () => {
     json.pages[0].sections[0].order = 1;
     const result = validateTemplateJson(json);
     expect(result.warnings.some((w) => w.code === 'DEPRECATED_SECTION_ORDER')).toBe(true);
+  });
+});
+
+describe('validateTemplateJson — library rules (Phase 6)', () => {
+  const mockLibrary = {
+    hero: {
+      meta: {
+        componentKey: 'hero',
+        category: 'hero',
+        label: 'Hero',
+        dataSchema: {
+          title: { type: 'text', label: 'Title', required: true },
+          image: { type: 'image', label: 'Image', required: false },
+        },
+      },
+    },
+  } as unknown as ThemeLibrary;
+
+  it('errors when componentKey is unknown', () => {
+    const json = minimalJson();
+    json.pages[0].sections[0].type = 'unknown-comp';
+    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(result.errors.some((e) => e.code === 'UNKNOWN_COMPONENT_KEY')).toBe(true);
+  });
+
+  it('errors when required field is missing', () => {
+    const json = minimalJson();
+    json.pages[0].sections[0].data = {}; // title is required
+    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
+  });
+
+  it('errors on field type mismatch', () => {
+    const json = minimalJson();
+    // @ts-expect-error intentional bad data
+    json.pages[0].sections[0].data.title.type = 'image'; // expected text
+    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(result.errors.some((e) => e.code === 'FIELD_TYPE_MISMATCH')).toBe(true);
+  });
+
+  it('warns on unknown data fields', () => {
+    const json = minimalJson();
+    json.pages[0].sections[0].data.extra = { type: 'text', label: 'Extra', value: '...', editable: true };
+    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(result.warnings.some((w) => w.code === 'UNKNOWN_DATA_FIELD')).toBe(true);
   });
 });
 

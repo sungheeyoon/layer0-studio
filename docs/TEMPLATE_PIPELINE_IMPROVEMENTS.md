@@ -1,7 +1,7 @@
 # Template Pipeline — 남은 작업
 
-_최초 작성: 2026-05-02 / 컴팩트화: 2026-05-02_
-_상태: Phase 1~4 완료, Phase 5 진행 중, Phase 6 미착수_
+_최초 작성: 2026-05-02 / 컴팩트화: 2026-05-02 / Phase 6a 완료: 2026-05-03_
+_상태: Phase 1~5 완료, Phase 6a 완료, Phase 6b~d 미착수_
 
 > Phase 1~4의 구현 세부와 시드 워크플로우 가이드는 `docs/TEMPLATE_AUTHORING_GUIDE.md`로 이전됨. 이 문서는 **남은 작업과 Phase 6 (Composition 모델) 설계**만 다룬다.
 
@@ -15,10 +15,12 @@ _상태: Phase 1~4 완료, Phase 5 진행 중, Phase 6 미착수_
 | 2 | `pnpm template:sync` (default dry-run, `--apply`), `/api/admin/template-sync`, `template_sync_audit` 테이블 (마이그레이션 011) | `24fba85` |
 | 3 | `pnpm template:capture` (Playwright + sharp + pixelmatch), `thumbnail.config.ts`, `preview://` 스킴, `/preview/preset/[...key]` 라우트, sync→Storage 자동 업로드 | `e35963b` |
 | 4 | `registry.ts` 자동화, 어드민 2단계 sync UI, `code`/`manual` 배지, preset row read-only, super-admin (`canPublishTemplates`) 게이트 | `34617e2` |
+| 5 | `--apply` 5초 카운트다운, `template:capture --check` 모드, `template:scaffold` PoC | `72434eb` |
+| 6a | `SectionComponent.meta` / `SectionDataSchema` / `ThemeLibrary` 타입, `library/buildLibraryFromSlots.ts` 어댑터, `renderComposition.tsx` 범용 렌더러, 7테마 index.tsx composition 전환, `validateTemplateJson` 의 `themeLibrary` 옵션 (UNKNOWN_COMPONENT_KEY / MISSING_REQUIRED_FIELD / FIELD_TYPE_MISMATCH / UNKNOWN_DATA_FIELD), 4종 신규 테스트 | _이 PR_ |
 
 ---
 
-## 2. Phase 5 — 잔여 정리
+## 2. Phase 5 — 완료
 
 ### 2.1 가이드/UX
 
@@ -28,7 +30,7 @@ _상태: Phase 1~4 완료, Phase 5 진행 중, Phase 6 미착수_
 - [x] HTML→preset scaffold (`pnpm template:scaffold <key> --from templates-ui/<key>.html`) — 1차 PR 외 PoC
 
 ### 2.2 `section.order` 처리
-현재 validate가 warn만 출력. Phase 6 composition 모델로 가면 자동 해소되므로, **Phase 6 도입 시 schema에서 즉시 제거**(별도 정리 안 함). Phase 6 미착수 동안은 warn 유지.
+Phase 6a 도입 후에도 `DEPRECATED_SECTION_ORDER` warn은 유지 (renderer는 이미 배열 순서를 따르며 `order` 필드는 무시). Phase 6d 정리 단계에서 schema에서 제거 + DB JSONB 정리 마이그레이션.
 
 ---
 
@@ -130,14 +132,21 @@ page.composition.map((section) => {
 
 ### 3.7 점진 마이그레이션
 
-| 서브-Phase | 작업 | 추정 |
-|---|---|---|
-| **6a — 어댑터** | `SectionComponent.meta`/`SectionDataSchema` 타입 신설. `library/` 어댑터: 기존 `slots.ts` + `sectionComponentMap`을 자동으로 라이브러리 형태로 감쌈. Renderer를 composition-walking으로 교체. preset의 `composition`은 `defaultTemplateJson.pages[].sections`로부터 자동 변환. | 1~2일 |
-| **6b — 라이브러리 확장** | cafe 한 테마에서 동일 카테고리에 variant 컴포넌트 2~3개 추가 (`HeroVideo`/`HeroImage`/`HeroSplit`). 각 컴포넌트에 `meta` 동봉. 어드민 카탈로그에 composition 다이어그램. | 2~3일 |
-| **6c — preset 분화** | cafe에 새 preset 2개 (`cafe-modern`, `cafe-cozy`) — composition이 서로 다른 것을 시연. DX·검증 비용 검증. | 1~2일 |
-| **6d — 정리** | `slots.ts` 완전 제거, 어댑터 삭제, `section.order` 필드 제거 + DB JSONB 정리 마이그레이션. 기존 6테마 라이브러리 확장은 후속 PR. | 1일 |
+| 서브-Phase | 작업 | 추정 | 상태 |
+|---|---|---|---|
+| **6a — 어댑터** | `SectionComponent.meta`/`SectionDataSchema` 타입 신설. `library/` 어댑터: 기존 `slots.ts` + `sectionComponentMap`을 자동으로 라이브러리 형태로 감쌈. Renderer를 composition-walking으로 교체. preset의 `composition`은 `defaultTemplateJson.pages[].sections`로부터 자동 변환. | 1~2일 | ✅ 완료 (2026-05-03) |
+| **6b — 라이브러리 확장** | cafe 한 테마에서 동일 카테고리에 variant 컴포넌트 2~3개 추가 (`HeroVideo`/`HeroImage`/`HeroSplit`). 각 컴포넌트에 `meta` 동봉. 어드민 카탈로그에 composition 다이어그램. | 2~3일 | ⏳ 미착수 |
+| **6c — preset 분화** | cafe에 새 preset 2개 (`cafe-modern`, `cafe-cozy`) — composition이 서로 다른 것을 시연. DX·검증 비용 검증. | 1~2일 | ⏳ 미착수 |
+| **6d — 정리** | `slots.ts` 완전 제거, 어댑터 삭제, `section.order` 필드 제거 + DB JSONB 정리 마이그레이션. 기존 6테마 라이브러리 확장은 후속 PR. | 1일 | ⏳ 미착수 |
 
 기존 사용자 사이트 데이터는 어댑터가 `section.type` → `componentKey`로 1:1 매핑하여 무손실 호환.
+
+#### 6a 잔여 항목 / 알려진 한계
+
+- `buildLibraryFromSlots`는 컴포넌트 함수에 `.meta` 속성을 직접 주입한다(임시 어댑터). 6b에서 컴포넌트가 자체 `meta`를 export하기 시작하면 이 mutation은 사라진다.
+- `buildLibraryFromSlots`는 `dataSchema.required`를 모든 필드에 대해 `true`로 설정한다. 실제 필수성은 6b에서 컴포넌트가 직접 선언하면서 정밀화된다.
+- `src/lib/template/sync.ts:94`의 `validateTemplateJson(preset.templateJson)` 호출은 여전히 `themeLibrary` 옵션을 넘기지 않는다 — sync 시 신규 라이브러리 검증 규칙이 발화되지 않음. (Phase 1~5 동작과 동일하게 유지) 6b에서 `themeMap`을 import해 wiring 필요.
+- preset 자체는 아직 `defaultTemplateJson.pages[].sections` 형태로 작성되며, `PresetSection[]` 배열로 전환은 6c 시점.
 
 ### 3.8 트레이드오프
 
@@ -162,4 +171,4 @@ page.composition.map((section) => {
 
 ## 5. 한 줄 요약
 
-> Phase 1~4로 **"코드가 진실, sync로 DB 반영"** 파이프라인 완성. 남은 건 Phase 5 잔여 정리(버그 2건 + UX 안전장치)와 Phase 6 composition 모델로 **"같은 테마 = 다양한 구조"** 해방.
+> Phase 1~5로 **"코드가 진실, sync로 DB 반영"** 파이프라인 완성. Phase 6a로 7테마가 모두 composition 렌더러 위에서 동작 (기존 `slots.ts`는 어댑터로 호환). 남은 건 Phase 6b~d로 **"같은 테마 = 다양한 구조"** 해방.

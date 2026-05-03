@@ -1,5 +1,48 @@
-import { TemplateJson, TemplateSection } from '@/domain/entities/template.entity';
+import { TemplateJson, TemplateSection, TemplateFieldType, TemplateField } from '@/domain/entities/template.entity';
 import { ComponentType } from 'react';
+
+/**
+ * Metadata for a section component
+ */
+export interface SectionComponentMeta {
+  componentKey: string;            // Unique key in the library ('hero-video', 'menu-grid', etc.)
+  category: string;                 // 'hero' | 'menu' | 'story' | 'footer' | ...
+  label: string;                    // Display name in admin catalog
+  dataSchema: SectionDataSchema;   // Field type/required definitions
+  previewImage?: string;            // Admin catalog thumbnail (optional)
+}
+
+export interface SectionDataSchema {
+  [fieldKey: string]: {
+    type: TemplateFieldType;
+    label: string;
+    required?: boolean;
+  };
+}
+
+/**
+ * A section component that carries its metadata
+ */
+export interface SectionComponent extends ComponentType<ThemeSectionProps> {
+  meta: SectionComponentMeta;
+}
+
+/**
+ * Library of components exported by a theme module
+ */
+export interface ThemeLibrary {
+  [componentKey: string]: SectionComponent;
+}
+
+/**
+ * A section entry within a preset or page
+ */
+export interface PresetSection {
+  id: string;                       // Stable ID preserved in user sites
+  componentKey: string;             // Must exist in theme.library
+  visible?: boolean;
+  data: Record<string, TemplateField>;
+}
 
 /**
  * A seed template stored in code.
@@ -51,4 +94,5 @@ export interface ThemeModule {
   default: ComponentType<ThemeRendererProps>;
   slots: ThemeSlotDefinition[];
   defaultTemplateJson: TemplateJson;
+  library?: ThemeLibrary; // 6a: Optional, 6d: Required
 }

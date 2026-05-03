@@ -1,4 +1,5 @@
 import { TemplateJson } from '@/domain/entities/template.entity';
+import { ThemeLibrary } from '@/themes/types';
 
 export interface ValidationIssue {
   code: string;
@@ -19,8 +20,10 @@ export interface SlotDefinition {
 export interface ValidateOptions {
   /** When provided, themeKey must be in this list. */
   availableThemeKeys?: string[];
-  /** When provided, section.type is checked against this list and required slots are enforced. */
+  /** @deprecated Phase 1-5 legacy. Use themeLibrary for Phase 6. */
   themeSlots?: SlotDefinition[];
+  /** Phase 6: Provides component library and their data schemas for deep validation. */
+  themeLibrary?: ThemeLibrary;
 }
 
 const KNOWN_LAYOUTS = ['wide', 'narrow', 'asymmetric', 'default', 'full'];
@@ -86,6 +89,7 @@ export function validateTemplateJson(
     pageSlugs.add(page.slug);
   }
 
+  // Legacy slots support
   const slotTypeSet = options.themeSlots
     ? new Set(options.themeSlots.map((s) => s.type))
     : null;
@@ -96,7 +100,7 @@ export function validateTemplateJson(
   for (const page of json.pages) {
     const pageRef = `pages[slug=${page.slug}]`;
 
-    // Rule 3: required slots must appear in every page
+    // Rule 3: required slots must appear in every page (Legacy)
     if (requiredSlotTypes.length > 0) {
       const presentTypes = new Set(page.sections.map((s) => s.type));
       for (const reqType of requiredSlotTypes) {
@@ -121,8 +125,47 @@ export function validateTemplateJson(
       }
       sectionIds.add(section.id);
 
-      // Rule 2: section.type must be in themeSlots when provided
-      if (slotTypeSet && !slotTypeSet.has(section.type)) {
+      // Rule 2: section.type must be in themeSlots (Legacy) or themeLibrary (Phase 6)
+      if (options.themeLibrary) {
+        const component = options.themeLibrary[section.type];
+        if (!component) {
+          err(
+            'UNKNOWN_COMPONENT_KEY',
+            `componentKey "${section.type}" not found in theme library for "${json.themeKey}"`,
+            `${secRef}.type`,
+          );
+        } else {
+          // Rule 2-bis: data schema validation
+          const schema = component.meta.dataSchema;
+          for (const [fieldKey, fieldSchema] of Object.entries(schema)) {
+            const field = section.data[fieldKey];
+            if (!field && fieldSchema.required) {
+              err(
+                'MISSING_REQUIRED_FIELD',
+                `required field "${fieldKey}" is missing in section "${section.id}"`,
+                `${secRef}.data.${fieldKey}`,
+              );
+            } else if (field && field.type !== fieldSchema.type) {
+              err(
+                'FIELD_TYPE_MISMATCH',
+                `field "${fieldKey}" type mismatch: expected ${fieldSchema.type}, got ${field.type}`,
+                `${secRef}.data.${fieldKey}`,
+              );
+            }
+          }
+
+          // Warn on unknown fields
+          for (const fieldKey of Object.keys(section.data)) {
+            if (!schema[fieldKey]) {
+              warn(
+                'UNKNOWN_DATA_FIELD',
+                `field "${fieldKey}" is not defined in component schema`,
+                `${secRef}.data.${fieldKey}`,
+              );
+            }
+          }
+        }
+      } else if (slotTypeSet && !slotTypeSet.has(section.type)) {
         err(
           'UNKNOWN_SECTION_TYPE',
           `section type "${section.type}" is not defined in theme slots for "${json.themeKey}"`,
@@ -139,7 +182,7 @@ export function validateTemplateJson(
         );
       }
 
-      // Rules 5 & 8: data fields must have type/label/value, and value must be a string
+      // Rules 5 & 8: basic data integrity
       for (const [fieldKey, field] of Object.entries(section.data)) {
         const fieldRef = `${secRef}.data.${fieldKey}`;
 
