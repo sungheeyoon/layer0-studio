@@ -1,14 +1,15 @@
-import { ThemeLibrary } from '../../types';
+import { ThemeLibrary, libEntry } from '../../types';
 import Hero from './Hero';
 import About from './About';
 import Features from './Features';
 import Contact from './Contact';
+import { contactMeta } from './Contact.meta';
 import Footer from './Footer';
 
 export const corporateLibrary: ThemeLibrary = {
-  hero: Hero,
-  about: About,
-  features: Features,
-  contact: Contact,
-  footer: Footer,
+  hero: libEntry(Hero),
+  about: libEntry(About),
+  features: libEntry(Features),
+  contact: libEntry(Contact, contactMeta),
+  footer: libEntry(Footer),
 };

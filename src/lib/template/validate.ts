@@ -102,8 +102,8 @@ export function validateTemplateJson(
 
       // Rule 2: section.type must be in themeLibrary (Phase 6)
       if (options.themeLibrary) {
-        const component = options.themeLibrary[section.type];
-        if (!component) {
+        const entry = options.themeLibrary[section.type];
+        if (!entry) {
           err(
             'UNKNOWN_COMPONENT_KEY',
             `componentKey "${section.type}" not found in theme library for "${json.themeKey}"`,
@@ -111,7 +111,7 @@ export function validateTemplateJson(
           );
         } else {
           // Rule 2-bis: data schema validation
-          const schema = component.meta.dataSchema;
+          const schema = entry.meta.dataSchema;
           for (const [fieldKey, fieldSchema] of Object.entries(schema)) {
             const field = section.data[fieldKey];
             if (!field && fieldSchema.required) {

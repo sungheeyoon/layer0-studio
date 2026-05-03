@@ -33,11 +33,12 @@ export function RenderComposition({
       {sections.map((section) => {
         if (!section.visible) return null;
 
-        const Component = library[section.type];
-        if (!Component) {
+        const entry = library[section.type];
+        if (!entry) {
           console.warn(`[RenderComposition] Component not found for type: ${section.type}`);
           return null;
         }
+        const Component = entry.Component;
 
         return (
           <div

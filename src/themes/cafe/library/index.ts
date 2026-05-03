@@ -1,5 +1,6 @@
-import { ThemeLibrary } from '../../types';
+import { ThemeLibrary, libEntry } from '../../types';
 import Navigation from './Navigation';
+import { navigationMeta } from './Navigation.meta';
 import HeroImage from './HeroImage';
 import HeroVideo from './HeroVideo';
 import HeroSplit from './HeroSplit';
@@ -12,17 +13,17 @@ import Visit from './Visit';
 import Footer from './Footer';
 
 export const cafeLibrary: ThemeLibrary = {
-  nav: Navigation,
-  'hero-image': HeroImage,
-  'hero-video': HeroVideo,
-  'hero-split': HeroSplit,
-  marquee: Marquee,
-  menu: MenuBento,
-  story: Story,
-  space: Space,
-  testimonials: Testimonials,
-  visit: Visit,
-  footer: Footer,
-  // Legacy mappings for backward compatibility during transition
-  hero: HeroImage,
+  nav: libEntry(Navigation, navigationMeta),
+  'hero-image': libEntry(HeroImage),
+  'hero-video': libEntry(HeroVideo),
+  'hero-split': libEntry(HeroSplit),
+  marquee: libEntry(Marquee),
+  menu: libEntry(MenuBento),
+  story: libEntry(Story),
+  space: libEntry(Space),
+  testimonials: libEntry(Testimonials),
+  visit: libEntry(Visit),
+  footer: libEntry(Footer),
+  // Legacy mapping for backward compatibility
+  hero: libEntry(HeroImage),
 };

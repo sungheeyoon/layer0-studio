@@ -1,4 +1,4 @@
-import { ThemeLibrary } from '../../types';
+import { ThemeLibrary, libEntry } from '../../types';
 import Nav from './Nav';
 import Hero from './Hero';
 import Philosophy from './Philosophy';
@@ -8,19 +8,21 @@ import Process from './Process';
 import Pricing from './Pricing';
 import Testimonials from './Testimonials';
 import Faq from './Faq';
+import { faqMeta } from './Faq.meta';
 import Contact from './Contact';
+import { contactMeta } from './Contact.meta';
 import Footer from './Footer';
 
 export const weddingLibrary: ThemeLibrary = {
-  nav: Nav,
-  hero: Hero,
-  philosophy: Philosophy,
-  services: Services,
-  gallery: Gallery,
-  process: Process,
-  pricing: Pricing,
-  testimonials: Testimonials,
-  faq: Faq,
-  contact: Contact,
-  footer: Footer,
+  nav: libEntry(Nav),
+  hero: libEntry(Hero),
+  philosophy: libEntry(Philosophy),
+  services: libEntry(Services),
+  gallery: libEntry(Gallery),
+  process: libEntry(Process),
+  pricing: libEntry(Pricing),
+  testimonials: libEntry(Testimonials),
+  faq: libEntry(Faq, faqMeta),
+  contact: libEntry(Contact, contactMeta),
+  footer: libEntry(Footer),
 };

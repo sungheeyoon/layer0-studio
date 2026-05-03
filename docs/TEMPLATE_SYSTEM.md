@@ -128,7 +128,7 @@ interface PresetSection {
 
 > `composition`을 쓰면 `deriveTemplateJsonFromPreset` (`src/lib/template/preset.ts`) 가 sync 시점에 `TemplateJson` 으로 변환해 DB에 저장한다. `templateJson` 레거시 형태도 여전히 동작하지만 **신규 preset은 항상 `composition`**을 쓴다.
 
-### 2.3 `SectionComponentMeta` (컴포넌트가 자기를 설명) — `src/themes/types.ts`
+### 2.3 `SectionComponentMeta` & 라이브러리 entry — `src/themes/types.ts`
 
 ```ts
 interface SectionComponentMeta {
@@ -143,8 +143,26 @@ interface SectionDataSchema {
   [fieldKey: string]: { type: TemplateFieldType; label: string; required?: boolean };
 }
 
-type SectionComponent = ComponentType<ThemeSectionProps> & { meta: SectionComponentMeta };
+type SectionComponent = ComponentType<ThemeSectionProps> & { meta?: SectionComponentMeta };
+
+interface ThemeLibraryEntry {
+  Component: SectionComponent;
+  meta: SectionComponentMeta;            // 항상 server-resolved
+}
+
+interface ThemeLibrary {
+  [componentKey: string]: ThemeLibraryEntry;
+}
+
+// helper used in every <theme>/library/index.ts
+function libEntry(Component: SectionComponent, metaOverride?: SectionComponentMeta): ThemeLibraryEntry;
 ```
+
+라이브러리는 항상 **`{ Component, meta }` 쌍**으로 등록한다. **이유**: `'use client'` 컴포넌트는 server-side import 시 client reference로 wrapping되어 모듈 본문이 서버에서 실행되지 않는다 → `Component.meta = {...}` side-effect가 server에서 안 보인다. sync/validate는 서버에서 돌기 때문에 meta를 server-resolved 위치에 따로 두어야 한다 (자세한 함정은 §10.10).
+
+운영 패턴:
+- **server 컴포넌트** (no `'use client'`): `.tsx` 안에서 `Component.meta = {...}` 으로 부착. `libEntry(Component)` 만 호출 — 헬퍼가 `Component.meta` 를 자동으로 가져옴.
+- **client 컴포넌트** (`'use client'`): meta를 sibling `<Component>.meta.ts` 에 named export 로 정의 → `libEntry(Component, componentMeta)` 로 명시 전달.
 
 ### 2.4 `ThemeModule` (`src/themes/types.ts`)
 
@@ -168,10 +186,12 @@ interface ThemeModule {
 src/themes/cafe/
 ├── tokens.ts                      # defaultGlobalStyles export (primary/secondary/font/layout)
 ├── library/
-│   ├── index.ts                   # cafeLibrary: ThemeLibrary 매핑
-│   ├── HeroImage.tsx              # SectionComponent + .meta
+│   ├── index.ts                   # cafeLibrary: { componentKey: { Component, meta } } 매핑 — libEntry 사용
+│   ├── HeroImage.tsx              # 서버 컴포넌트: 본문 끝에 Component.meta = {...}
 │   ├── HeroVideo.tsx              # 같은 'hero' 카테고리, 다른 componentKey
 │   ├── HeroSplit.tsx
+│   ├── Navigation.tsx             # ★ 'use client' 컴포넌트 — meta는 sibling .meta.ts
+│   ├── Navigation.meta.ts         #    server-resolved meta (named export)
 │   ├── MenuBento.tsx
 │   ├── Story.tsx
 │   ├── Visit.tsx
@@ -416,12 +436,14 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
    ```
 2. `library/index.ts` 에 등록:
    ```ts
+   import { libEntry } from '../../types';
    import HeroParallax from './HeroParallax';
    export const cafeLibrary: ThemeLibrary = {
      // ...기존
-     'hero-parallax': HeroParallax,
+     'hero-parallax': libEntry(HeroParallax),  // server 컴포넌트 → meta는 .tsx 안에서 자동 픽업
    };
    ```
+   **만약 새 컴포넌트가 `'use client'` 라면**: `HeroParallax.meta = {...}` 대신 sibling `HeroParallax.meta.ts` 에 `export const heroParallaxMeta` 로 정의 → `libEntry(HeroParallax, heroParallaxMeta)` 로 명시 전달 (이유는 §10.10).
 3. preset에서 사용 — `composition: [{ id: 'hero-1', componentKey: 'hero-parallax', data: { ... } }]`
 4. `pnpm test` → `pnpm template:sync` → 어드민 Apply.
 
@@ -483,7 +505,12 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 9. **`globalStyles` 머지 규칙**
    `composition` 사용 시 sync는 `themeModule.defaultTemplateJson.globalStyles` (= `tokens.ts` 시드) ◀ `preset.globalStyles` 순서로 spread. preset에서 `Partial`로 일부만 덮을 것.
 
-10. **Capture는 dev server를 띄움**
+10. **`'use client'` 컴포넌트의 `Component.meta = {...}` 는 서버에서 안 보임** ⚠️
+    Next.js는 `'use client'` 모듈을 server-side import 시 client reference로 wrapping하고 모듈 본문을 서버에서 실행하지 않는다. 그래서 `.tsx` 파일 끝에서 한 `Component.meta = {...}` side-effect는 server에는 보이지 않고 → `library['nav'].meta` 가 undefined → sync/validate 시 `Cannot read properties of undefined (reading 'dataSchema')` 폭발.
+    **해법**: client 컴포넌트의 meta는 항상 sibling `<Component>.meta.ts` 에 named export 로 정의하고, library/index.ts 에서 `libEntry(Component, componentMeta)` 로 명시 전달. server 컴포넌트는 종전대로 `.meta = {...}` 그대로 OK.
+    현재 client 컴포넌트 9개 (cafe/Navigation, corporate/Contact, fitness/Nav, interior/{Contact,Nav}, legal/{Contact,Faq}, wedding/{Contact,Faq}) 가 이 패턴을 따른다.
+
+11. **Capture는 dev server를 띄움**
     `thumbnail.config.ts`의 `source`가 `preview://`로 시작하면 `capture-templates.ts`가 자동으로 `pnpm dev`를 백그라운드로 실행. CI에서는 `templates-ui/*.html` 파일 source를 쓰면 server-less.
 
 ---
