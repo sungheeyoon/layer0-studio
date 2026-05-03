@@ -130,23 +130,63 @@ page.composition.map((section) => {
 
 `section.order` 필드는 schema에서 즉시 제거.
 
-### 3.7 점진 마이그레이션
+### 3.7 실행 순서 (체크리스트)
 
-| 서브-Phase | 작업 | 추정 | 상태 |
-|---|---|---|---|
-| **6a — 어댑터** | `SectionComponent.meta`/`SectionDataSchema` 타입 신설. `library/` 어댑터: 기존 `slots.ts` + `sectionComponentMap`을 자동으로 라이브러리 형태로 감쌈. Renderer를 composition-walking으로 교체. preset의 `composition`은 `defaultTemplateJson.pages[].sections`로부터 자동 변환. | 1~2일 | ✅ 완료 (2026-05-03) |
-| **6b — 라이브러리 확장** | cafe 한 테마에서 동일 카테고리에 variant 컴포넌트 2~3개 추가 (`HeroVideo`/`HeroImage`/`HeroSplit`). 각 컴포넌트에 `meta` 동봉. 어드민 카탈로그에 composition 다이어그램. | 2~3일 | ⏳ 미착수 |
-| **6c — preset 분화** | cafe에 새 preset 2개 (`cafe-modern`, `cafe-cozy`) — composition이 서로 다른 것을 시연. DX·검증 비용 검증. | 1~2일 | ⏳ 미착수 |
-| **6d — 정리** | `slots.ts` 완전 제거, 어댑터 삭제, `section.order` 필드 제거 + DB JSONB 정리 마이그레이션. 기존 6테마 라이브러리 확장은 후속 PR. | 1일 | ⏳ 미착수 |
+**현재 상태:** 6a 완료 (2026-05-03). Step 1부터 순차 진행.
 
-기존 사용자 사이트 데이터는 어댑터가 `section.type` → `componentKey`로 1:1 매핑하여 무손실 호환.
+> 6a의 임시적 한계 (.meta mutation, `required:true` 자동 추론, sync wiring 미연결, preset 형태)는 별도 정리 단계 없이 Step 1~4 진행 중 자연 해소됨. 각 Step 끝에 어떤 한계가 풀리는지 명시함.
 
-#### 6a 잔여 항목 / 알려진 한계
+#### 곁다리 정리 (Step 1 PR에 묻어가기 권장)
 
-- `buildLibraryFromSlots`는 컴포넌트 함수에 `.meta` 속성을 직접 주입한다(임시 어댑터). 6b에서 컴포넌트가 자체 `meta`를 export하기 시작하면 이 mutation은 사라진다.
-- `buildLibraryFromSlots`는 `dataSchema.required`를 모든 필드에 대해 `true`로 설정한다. 실제 필수성은 6b에서 컴포넌트가 직접 선언하면서 정밀화된다.
-- `src/lib/template/sync.ts:94`의 `validateTemplateJson(preset.templateJson)` 호출은 여전히 `themeLibrary` 옵션을 넘기지 않는다 — sync 시 신규 라이브러리 검증 규칙이 발화되지 않음. (Phase 1~5 동작과 동일하게 유지) 6b에서 `themeMap`을 import해 wiring 필요.
-- preset 자체는 아직 `defaultTemplateJson.pages[].sections` 형태로 작성되며, `PresetSection[]` 배열로 전환은 6c 시점.
+- [ ] `scripts/scaffold-template.ts:196` unterminated template literal 픽스 — Phase 5 잔존 버그. `pnpm tsc --noEmit` 클린 상태로 만들어 이후 작업의 회귀 감지 용이화.
+
+#### Step 1 — 6b-1: cafe 컴포넌트 self-describing 전환 (1~2일)
+
+- [ ] `src/themes/cafe/library/HeroVideo.tsx` 신규 — `meta` export 동봉 (`componentKey`, `category`, `label`, `dataSchema`, `previewImage`)
+- [ ] `HeroImage.tsx`, `HeroSplit.tsx` variant 추가 (같은 `hero` 카테고리)
+- [ ] 기존 `cafe/sections/*Section.tsx`를 `meta` 동봉 형태로 전환
+- [ ] `cafe/library/index.ts` 작성 — componentKey → 컴포넌트 매핑
+- [ ] `cafe/index.tsx`가 `buildLibraryFromSlots` 대신 `library/index.ts` 직접 import
+- [ ] cafe만 어댑터 우회 (나머지 6테마는 그대로 어댑터 사용)
+
+→ 해소: 6a 한계 ① `.meta` mutation, ② `required:true` 자동 추론 (cafe 한정)
+
+#### Step 2 — 6b-2: sync 파이프라인 wiring (반나절)
+
+- [ ] `src/lib/template/sync.ts:94`의 `validateTemplateJson` 호출에 `themeMap`에서 로드한 `themeLibrary` 전달
+- [ ] cafe는 진짜 `dataSchema`로 검증, 나머지 6테마는 어댑터 산출물로 검증 — 둘 다 동작 확인
+- [ ] 어드민 카탈로그에 composition 다이어그램 표시 (componentKey 별 라벨/카테고리)
+
+→ 해소: 6a 한계 ③ sync wiring 미연결
+
+#### Step 3 — 6b-3: 나머지 6테마 컴포넌트 meta 이주 (2일)
+
+- [ ] corporate / fitness / interior / legal / medical / wedding 각 테마의 `sections/*` 컴포넌트에 `meta` export
+- [ ] 각 테마 `library/index.ts` 작성 후 `index.tsx`에서 어댑터 우회
+- [ ] 테마별 작은 PR 권장 — 회귀 영향 격리
+
+#### Step 4 — 6c: preset 분화 (1~2일)
+
+- [ ] `cafe/presets/modern.preset.ts`, `cozy.preset.ts` 신규 — composition 배열이 서로 다른 것을 시연
+- [ ] `TemplatePreset` 인터페이스가 `composition: PresetSection[]` 채택 (legacy `templateJson` 도 호환 유지하다가 점진 제거)
+- [ ] `_generated.ts` codegen이 다중 preset 인식 (이미 `presetMap`은 다중 슬러그 지원함 — 새 슬러그만 등록)
+- [ ] DX 검증: 새 preset 추가 비용 측정, 검증 파이프라인 회귀 없음 확인
+
+→ 해소: 6a 한계 ④ preset 형태가 `defaultTemplateJson.pages[].sections` 그대로
+
+#### Step 5 — 6d: 정리 (1일)
+
+- [ ] `src/themes/*/slots.ts` 7개 파일 완전 제거
+- [ ] `src/themes/library/buildLibraryFromSlots.ts` 어댑터 삭제
+- [ ] `ThemeSlotDefinition`, `ThemeModule.slots` 타입 제거 (`ThemeModule.library` 필수화)
+- [ ] `section.order` 필드를 `TemplateSection` 타입에서 제거
+- [ ] `DEPRECATED_SECTION_ORDER` 검증 룰 삭제
+- [ ] `MISSING_REQUIRED_SLOT` / `UNKNOWN_SECTION_TYPE` 검증 룰 (legacy `themeSlots` 옵션) 정리
+- [ ] DB JSONB 정리 마이그레이션 — 기존 `user_sites` / `templates` JSONB의 `section.order` 필드 삭제
+
+---
+
+기존 사용자 사이트 데이터는 6a 어댑터가 `section.type` → `componentKey`로 1:1 매핑하여 무손실 호환. Step 5 도달 시 모든 테마가 라이브러리로 전환된 상태이므로 어댑터 제거가 안전함.
 
 ### 3.8 트레이드오프
 
