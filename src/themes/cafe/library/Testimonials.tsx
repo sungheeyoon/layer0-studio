@@ -1,8 +1,8 @@
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { StarIcon } from './icons';
+import { StarIcon } from '../sections/icons';
 
-export default function TestimonialsSection({ section }: ThemeSectionProps) {
+const Testimonials: SectionComponent = function Testimonials({ section }: ThemeSectionProps) {
   const { data } = section;
   const label = data['label']?.value || '손님 후기';
   const title = data['title']?.value || '이 공간에서\n느낀 것들';
@@ -69,4 +69,36 @@ export default function TestimonialsSection({ section }: ThemeSectionProps) {
       </div>
     </section>
   );
-}
+};
+
+Testimonials.meta = {
+  componentKey: 'testimonials',
+  category: 'social',
+  label: 'Guest Reviews',
+  dataSchema: {
+    label: { type: 'text', label: '섹션 라벨' },
+    title: { type: 'textarea', label: '섹션 타이틀' },
+    ratingValue: { type: 'text', label: '별점 수치' },
+    r1Body: { type: 'textarea', label: '후기 1 본문', required: true },
+    r1Author: { type: 'text', label: '후기 1 작성자' },
+    r1Meta: { type: 'text', label: '후기 1 메타' },
+    r2Body: { type: 'textarea', label: '후기 2 본문' },
+    r2Author: { type: 'text', label: '후기 2 작성자' },
+    r2Meta: { type: 'text', label: '후기 2 메타' },
+    r3Body: { type: 'textarea', label: '후기 3 본문' },
+    r3Author: { type: 'text', label: '후기 3 작성자' },
+    r3Meta: { type: 'text', label: '후기 3 메타' },
+    r4Body: { type: 'textarea', label: '후기 4 본문' },
+    r4Author: { type: 'text', label: '후기 4 작성자' },
+    r4Meta: { type: 'text', label: '후기 4 메타' },
+    r5Body: { type: 'textarea', label: '후기 5 본문' },
+    r5Author: { type: 'text', label: '후기 5 작성자' },
+    r5Meta: { type: 'text', label: '후기 5 메타' },
+    r6Body: { type: 'textarea', label: '후기 6 본문' },
+    r6Author: { type: 'text', label: '후기 6 작성자' },
+    r6Meta: { type: 'text', label: '후기 6 메타' },
+  },
+  previewImage: '/component-previews/cafe/testimonials.webp',
+};
+
+export default Testimonials;

@@ -1,8 +1,8 @@
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIcon } from './icons';
+import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIcon } from '../sections/icons';
 
-export default function FooterSection({ section }: ThemeSectionProps) {
+const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
   const { data } = section;
   const brandName = data['brandName']?.value || 'MONO';
   const brandSubtext = data['brandSubtext']?.value || 'Specialty Coffee & Bakery';
@@ -105,4 +105,24 @@ export default function FooterSection({ section }: ThemeSectionProps) {
       </div>
     </footer>
   );
-}
+};
+
+Footer.meta = {
+  componentKey: 'footer',
+  category: 'footer',
+  label: 'Footer',
+  dataSchema: {
+    brandName: { type: 'text', label: '브랜드 이름', required: true },
+    brandSubtext: { type: 'text', label: '브랜드 보조텍스트' },
+    description: { type: 'textarea', label: '브랜드 설명' },
+    phone: { type: 'text', label: '전화번호' },
+    address: { type: 'textarea', label: '주소' },
+    weekdayHours: { type: 'text', label: '평일 영업시간' },
+    weekendHours: { type: 'text', label: '주말 영업시간' },
+    copyright: { type: 'text', label: '저작권' },
+    businessInfo: { type: 'text', label: '사업자 정보' },
+  },
+  previewImage: '/component-previews/cafe/footer.webp',
+};
+
+export default Footer;

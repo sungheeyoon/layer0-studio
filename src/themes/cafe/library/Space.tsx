@@ -1,8 +1,8 @@
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { SunIcon, BuildingsIcon, LaptopIcon, BookIcon, VinylIcon } from './icons';
+import { SunIcon, BuildingsIcon, LaptopIcon, BookIcon, VinylIcon } from '../sections/icons';
 
-export default function SpaceSection({ section }: ThemeSectionProps) {
+const Space: SectionComponent = function Space({ section }: ThemeSectionProps) {
   const { data } = section;
   const label = data['label']?.value || '공간';
   const title = data['title']?.value || '머물고 싶은\n공간을 만듭니다';
@@ -90,4 +90,30 @@ export default function SpaceSection({ section }: ThemeSectionProps) {
       </div>
     </section>
   );
-}
+};
+
+Space.meta = {
+  componentKey: 'space',
+  category: 'about',
+  label: 'Space & Features',
+  dataSchema: {
+    label: { type: 'text', label: '섹션 라벨' },
+    title: { type: 'textarea', label: '섹션 타이틀' },
+    description: { type: 'textarea', label: '섹션 설명' },
+    imageLarge: { type: 'image', label: '큰 이미지' },
+    imageSmall: { type: 'image', label: '작은 이미지' },
+    cardTitle: { type: 'text', label: '카드 제목' },
+    cardDesc: { type: 'textarea', label: '카드 설명' },
+    f1Title: { type: 'text', label: '특징 1 제목' },
+    f1Desc: { type: 'text', label: '특징 1 설명' },
+    f2Title: { type: 'text', label: '특징 2 제목' },
+    f2Desc: { type: 'text', label: '특징 2 설명' },
+    f3Title: { type: 'text', label: '특징 3 제목' },
+    f3Desc: { type: 'text', label: '특징 3 설명' },
+    f4Title: { type: 'text', label: '특징 4 제목' },
+    f4Desc: { type: 'text', label: '특징 4 설명' },
+  },
+  previewImage: '/component-previews/cafe/space.webp',
+};
+
+export default Space;

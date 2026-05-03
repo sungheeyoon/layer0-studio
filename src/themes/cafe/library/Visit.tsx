@@ -1,8 +1,8 @@
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { PhoneIcon, ArrowUpRightIcon, MapPointIcon, ClockIcon } from './icons';
+import { PhoneIcon, ArrowUpRightIcon, MapPointIcon, ClockIcon } from '../sections/icons';
 
-export default function VisitSection({ section }: ThemeSectionProps) {
+const Visit: SectionComponent = function Visit({ section }: ThemeSectionProps) {
   const { data } = section;
   const bgImage = data['backgroundImage']?.value || '';
   const label = data['label']?.value || '방문 안내';
@@ -103,4 +103,31 @@ export default function VisitSection({ section }: ThemeSectionProps) {
       </div>
     </section>
   );
-}
+};
+
+Visit.meta = {
+  componentKey: 'visit',
+  category: 'about',
+  label: 'Visit Info',
+  dataSchema: {
+    backgroundImage: { type: 'image', label: '배경 이미지' },
+    label: { type: 'text', label: '섹션 라벨' },
+    title: { type: 'textarea', label: '섹션 타이틀' },
+    description: { type: 'textarea', label: '섹션 설명' },
+    phone: { type: 'text', label: '전화번호' },
+    instagram: { type: 'url', label: '인스타그램 링크' },
+    h1Label: { type: 'text', label: '시간 1 라벨' },
+    h1Value: { type: 'text', label: '시간 1 수치' },
+    h2Label: { type: 'text', label: '시간 2 라벨' },
+    h2Value: { type: 'text', label: '시간 2 수치' },
+    h3Label: { type: 'text', label: '시간 3 라벨' },
+    h3Value: { type: 'text', label: '시간 3 수치' },
+    h4Label: { type: 'text', label: '시간 4 라벨' },
+    h4Value: { type: 'text', label: '시간 4 수치' },
+    address: { type: 'text', label: '주소' },
+    addressDetail: { type: 'textarea', label: '상세 주소/주차' },
+  },
+  previewImage: '/component-previews/cafe/visit.webp',
+};
+
+export default Visit;

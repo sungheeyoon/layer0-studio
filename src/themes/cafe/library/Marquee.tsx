@@ -1,8 +1,8 @@
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { CoffeeIcon } from './icons';
+import { CoffeeIcon } from '../sections/icons';
 
-export default function MarqueeSection({ section }: ThemeSectionProps) {
+const Marquee: SectionComponent = function Marquee({ section }: ThemeSectionProps) {
   const { data } = section;
   const items = [1, 2, 3, 4, 5, 6, 7, 8].map(n => data[`item${n}`]?.value).filter(Boolean);
 
@@ -36,4 +36,23 @@ export default function MarqueeSection({ section }: ThemeSectionProps) {
       </div>
     </section>
   );
-}
+};
+
+Marquee.meta = {
+  componentKey: 'marquee',
+  category: 'feature',
+  label: 'Ticker Strip',
+  dataSchema: {
+    item1: { type: 'text', label: '항목 1' },
+    item2: { type: 'text', label: '항목 2' },
+    item3: { type: 'text', label: '항목 3' },
+    item4: { type: 'text', label: '항목 4' },
+    item5: { type: 'text', label: '항목 5' },
+    item6: { type: 'text', label: '항목 6' },
+    item7: { type: 'text', label: '항목 7' },
+    item8: { type: 'text', label: '항목 8' },
+  },
+  previewImage: '/component-previews/cafe/marquee.webp',
+};
+
+export default Marquee;

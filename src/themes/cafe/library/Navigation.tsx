@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { MapPointIcon, HamburgerIcon } from './icons';
+import { MapPointIcon, HamburgerIcon } from '../sections/icons';
 
-export default function NavSection({ section }: ThemeSectionProps) {
+const Navigation: SectionComponent = function Navigation({ section }: ThemeSectionProps) {
   const { data } = section;
   const brandName = data['brandName']?.value || 'MONO';
   const brandSubtext = data['brandSubtext']?.value || 'Specialty Coffee';
@@ -92,4 +92,22 @@ export default function NavSection({ section }: ThemeSectionProps) {
       </div>
     </nav>
   );
-}
+};
+
+Navigation.meta = {
+  componentKey: 'nav',
+  category: 'navigation',
+  label: 'Navigation',
+  dataSchema: {
+    brandName: { type: 'text', label: '브랜드 이름', required: true },
+    brandSubtext: { type: 'text', label: '보조 텍스트' },
+    menu1: { type: 'text', label: '메뉴 1' },
+    menu2: { type: 'text', label: '메뉴 2' },
+    menu3: { type: 'text', label: '메뉴 3' },
+    menu4: { type: 'text', label: '메뉴 4' },
+    ctaText: { type: 'text', label: 'CTA 텍스트' },
+  },
+  previewImage: '/component-previews/cafe/nav.webp',
+};
+
+export default Navigation;

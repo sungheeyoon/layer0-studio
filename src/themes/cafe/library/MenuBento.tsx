@@ -1,8 +1,8 @@
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { ArrowRightIcon, CupIcon, PieChartIcon } from './icons';
+import { ArrowRightIcon, CupIcon, PieChartIcon } from '../sections/icons';
 
-export default function MenuSection({ section }: ThemeSectionProps) {
+const MenuBento: SectionComponent = function MenuBento({ section }: ThemeSectionProps) {
   const { data } = section;
   const label = data['label']?.value || '메뉴';
   const title = data['title']?.value || '매일 정성껏\n내리는 한 잔';
@@ -136,4 +136,36 @@ export default function MenuSection({ section }: ThemeSectionProps) {
       </div>
     </section>
   );
-}
+};
+
+MenuBento.meta = {
+  componentKey: 'menu',
+  category: 'menu',
+  label: 'Menu (Bento)',
+  dataSchema: {
+    label: { type: 'text', label: '섹션 라벨' },
+    title: { type: 'textarea', label: '섹션 타이틀' },
+    description: { type: 'textarea', label: '섹션 설명' },
+    p1Badge: { type: 'text', label: 'P1 배지' },
+    p1Title: { type: 'text', label: 'P1 제목', required: true },
+    p1Desc: { type: 'text', label: 'P1 설명' },
+    p1Price: { type: 'text', label: 'P1 가격' },
+    p1Image: { type: 'image', label: 'P1 이미지' },
+    p2Title: { type: 'text', label: 'P2 제목' },
+    p2Desc: { type: 'text', label: 'P2 설명' },
+    p2Image: { type: 'image', label: 'P2 이미지' },
+    p3Title: { type: 'text', label: 'P3 제목' },
+    p3Desc: { type: 'text', label: 'P3 설명' },
+    p3Price: { type: 'text', label: 'P3 가격' },
+    p4Title: { type: 'text', label: 'P4 제목' },
+    p4Desc: { type: 'text', label: 'P4 설명' },
+    p4Price: { type: 'text', label: 'P4 가격' },
+    p5Badge: { type: 'text', label: 'P5 배지' },
+    p5Title: { type: 'text', label: 'P5 제목' },
+    p5Desc: { type: 'text', label: 'P5 설명' },
+    p5Image: { type: 'image', label: 'P5 이미지' },
+  },
+  previewImage: '/component-previews/cafe/menu-bento.webp',
+};
+
+export default MenuBento;

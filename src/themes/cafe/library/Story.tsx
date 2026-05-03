@@ -1,8 +1,8 @@
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { LeafIcon, FireIcon, HandHeartIcon } from './icons';
+import { LeafIcon, FireIcon, HandHeartIcon } from '../sections/icons';
 
-export default function StorySection({ section }: ThemeSectionProps) {
+const Story: SectionComponent = function Story({ section }: ThemeSectionProps) {
   const { data } = section;
   const label = data['label']?.value || '카페 소개';
   const title1 = data['title1']?.value || '커피 한 잔에는';
@@ -17,6 +17,9 @@ export default function StorySection({ section }: ThemeSectionProps) {
     { title: data['f2Title']?.value, desc: data['f2Desc']?.value, icon: <FireIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
     { title: data['f3Title']?.value, desc: data['f3Desc']?.value, icon: <HandHeartIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
   ].filter(p => p.title);
+
+  // Wait, I should check the field names in slots.ts for Story
+  // story: label, title1, titleAccent, title2, quote, description, image, f1Title, f1Desc, f2Title, f2Desc, f3Title, f3Desc
 
   return (
     <section className="py-24 lg:py-32 bg-[var(--c-espresso)]" id="story">
@@ -76,4 +79,28 @@ export default function StorySection({ section }: ThemeSectionProps) {
       </div>
     </section>
   );
-}
+};
+
+Story.meta = {
+  componentKey: 'story',
+  category: 'about',
+  label: 'Our Story',
+  dataSchema: {
+    label: { type: 'text', label: '섹션 라벨' },
+    title1: { type: 'text', label: '타이틀 1행' },
+    titleAccent: { type: 'text', label: '강조 타이틀' },
+    title2: { type: 'text', label: '타이틀 2행' },
+    quote: { type: 'textarea', label: '인용구' },
+    description: { type: 'textarea', label: '설명' },
+    image: { type: 'image', label: '섹션 이미지' },
+    f1Title: { type: 'text', label: '특징 1 제목' },
+    f1Desc: { type: 'textarea', label: '특징 1 설명' },
+    f2Title: { type: 'text', label: '특징 2 제목' },
+    f2Desc: { type: 'textarea', label: '특징 2 설명' },
+    f3Title: { type: 'text', label: '특징 3 제목' },
+    f3Desc: { type: 'textarea', label: '특징 3 설명' },
+  },
+  previewImage: '/component-previews/cafe/story.webp',
+};
+
+export default Story;

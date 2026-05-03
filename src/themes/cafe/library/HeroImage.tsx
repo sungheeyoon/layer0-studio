@@ -1,8 +1,8 @@
-import { ThemeSectionProps } from '../../types';
+import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { ArrowRightIcon, LeafIcon } from './icons';
+import { ArrowRightIcon, LeafIcon } from '../sections/icons';
 
-export default function HeroSection({ section }: ThemeSectionProps) {
+const HeroImage: SectionComponent = function HeroImage({ section }: ThemeSectionProps) {
   const { data } = section;
   const label = data['label']?.value || 'Seoul Seongsu — Specialty Coffee';
   const title1 = data['title1']?.value || '천천히,';
@@ -105,4 +105,32 @@ export default function HeroSection({ section }: ThemeSectionProps) {
       </div>
     </section>
   );
-}
+};
+
+HeroImage.meta = {
+  componentKey: 'hero-image',
+  category: 'hero',
+  label: 'Hero (Image Background)',
+  dataSchema: {
+    label: { type: 'text', label: '상단 라벨' },
+    title1: { type: 'text', label: '타이틀 1행' },
+    titleAccent: { type: 'text', label: '강조 타이틀' },
+    subtitle: { type: 'text', label: '서브타이틀' },
+    description: { type: 'textarea', label: '설명' },
+    image: { type: 'image', label: '배경 이미지', required: true },
+    ctaPrimary: { type: 'text', label: '기본 CTA' },
+    ctaSecondary: { type: 'text', label: '보조 CTA' },
+    stat1Value: { type: 'text', label: '통계 1 수치' },
+    stat1Label: { type: 'text', label: '통계 1 라벨' },
+    stat2Value: { type: 'text', label: '통계 2 수치' },
+    stat2Label: { type: 'text', label: '통계 2 라벨' },
+    stat3Value: { type: 'text', label: '통계 3 수치' },
+    stat3Label: { type: 'text', label: '통계 3 라벨' },
+    badgeText: { type: 'text', label: '플로팅 배지 텍스트' },
+    badgeSubtext: { type: 'text', label: '플로팅 배지 보조텍스트' },
+    seasonTag: { type: 'text', label: '시즌 태그' },
+  },
+  previewImage: '/component-previews/cafe/hero-image.webp',
+};
+
+export default HeroImage;

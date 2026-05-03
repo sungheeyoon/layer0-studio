@@ -138,16 +138,16 @@ page.composition.map((section) => {
 
 #### 곁다리 정리 (Step 1 PR에 묻어가기 권장)
 
-- [ ] `scripts/scaffold-template.ts:196` unterminated template literal 픽스 — Phase 5 잔존 버그. `pnpm tsc --noEmit` 클린 상태로 만들어 이후 작업의 회귀 감지 용이화.
+- [x] `scripts/scaffold-template.ts:196` unterminated template literal 픽스 — Phase 5 잔존 버그. `pnpm tsc --noEmit` 클린 상태로 만들어 이후 작업의 회귀 감지 용이화.
 
 #### Step 1 — 6b-1: cafe 컴포넌트 self-describing 전환 (1~2일)
 
-- [ ] `src/themes/cafe/library/HeroVideo.tsx` 신규 — `meta` export 동봉 (`componentKey`, `category`, `label`, `dataSchema`, `previewImage`)
-- [ ] `HeroImage.tsx`, `HeroSplit.tsx` variant 추가 (같은 `hero` 카테고리)
-- [ ] 기존 `cafe/sections/*Section.tsx`를 `meta` 동봉 형태로 전환
-- [ ] `cafe/library/index.ts` 작성 — componentKey → 컴포넌트 매핑
-- [ ] `cafe/index.tsx`가 `buildLibraryFromSlots` 대신 `library/index.ts` 직접 import
-- [ ] cafe만 어댑터 우회 (나머지 6테마는 그대로 어댑터 사용)
+- [x] `src/themes/cafe/library/HeroVideo.tsx` 신규 — `meta` export 동봉 (`componentKey`, `category`, `label`, `dataSchema`, `previewImage`)
+- [x] `HeroImage.tsx`, `HeroSplit.tsx` variant 추가 (같은 `hero` 카테고리)
+- [x] 기존 `cafe/sections/*Section.tsx`를 `meta` 동봉 형태로 전환
+- [x] `cafe/library/index.ts` 작성 — componentKey → 컴포넌트 매핑
+- [x] `cafe/index.tsx`가 `buildLibraryFromSlots` 대신 `library/index.ts` 직접 import
+- [x] cafe만 어댑터 우회 (나머지 6테마는 그대로 어댑터 사용)
 
 → 해소: 6a 한계 ① `.meta` mutation, ② `required:true` 자동 추론 (cafe 한정)
 
