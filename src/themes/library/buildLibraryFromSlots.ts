@@ -40,13 +40,14 @@ export function buildLibraryFromSlots(
       };
     });
 
-    const SectionWithMeta = Component as SectionComponent;
-    SectionWithMeta.meta = {
-      componentKey: slot.type,
-      category: slot.type, // Map 1:1 for now
-      label: slot.label,
-      dataSchema,
-    };
+    const SectionWithMeta: SectionComponent = Object.assign(Component, {
+      meta: {
+        componentKey: slot.type,
+        category: slot.type, // Map 1:1 for now
+        label: slot.label,
+        dataSchema,
+      },
+    });
 
     library[slot.type] = SectionWithMeta;
   });

@@ -23,9 +23,9 @@ export interface SectionDataSchema {
 /**
  * A section component that carries its metadata
  */
-export interface SectionComponent extends ComponentType<ThemeSectionProps> {
+export type SectionComponent = ComponentType<ThemeSectionProps> & {
   meta: SectionComponentMeta;
-}
+};
 
 /**
  * Library of components exported by a theme module
