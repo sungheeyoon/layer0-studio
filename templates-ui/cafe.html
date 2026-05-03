@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="모노 카페 — 성수동 스페셜티 커피 & 베이커리. 한 잔의 커피에 담긴 이야기를 천천히, 제대로 즐기세요." />
+  <title>MONO — 천천히, 제대로</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            linen:    '#F5F0E8',
+            'linen-dark': '#EBE4D5',
+            espresso: '#231509',
+            'espresso-soft': '#3D2A1A',
+            terra:    '#C96A3A',
+            'terra-dim': 'rgba(201,106,58,0.10)',
+            caramel:  '#B8874A',
+            dust:     '#8C7B6B',
+            'dust-light': '#B5A898',
+            cream:    '#F0E9DC',
+          },
+          fontFamily: {
+            sans:    ['Pretendard', 'Apple SD Gothic Neo', 'sans-serif'],
+            serif:   ['"Playfair Display"', 'Georgia', 'serif'],
+            dm:      ['"DM Sans"', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    html  { scroll-behavior: smooth; }
+    body  {
+      font-family: 'Pretendard', sans-serif;
+      background: #F5F0E8;
+      color: #231509;
+      word-break: keep-all;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Spring ease ── */
+    .spring { transition: all 0.65s cubic-bezier(0.16,1,0.3,1); }
+
+    /* ── Scroll reveals ── */
+    .reveal      { opacity:0; transform:translateY(32px); }
+    .reveal-x    { opacity:0; transform:translateX(-32px); }
+    .reveal-rx   { opacity:0; transform:translateX(32px); }
+    .reveal-fade { opacity:0; }
+    .reveal.in, .reveal-x.in, .reveal-rx.in, .reveal-fade.in {
+      opacity:1; transform:none;
+      transition: opacity .9s cubic-bezier(0.16,1,0.3,1),
+                  transform .9s cubic-bezier(0.16,1,0.3,1);
+    }
+    .d1 { transition-delay:.06s!important }
+    .d2 { transition-delay:.14s!important }
+    .d3 { transition-delay:.22s!important }
+    .d4 { transition-delay:.30s!important }
+    .d5 { transition-delay:.38s!important }
+    .d6 { transition-delay:.46s!important }
+
+    /* ── Navbar ── */
+    .navbar {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      transition: background .4s ease, box-shadow .4s ease;
+    }
+    .navbar.scrolled {
+      background: rgba(245,240,232,.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(35,21,9,.07);
+    }
+
+    /* ── Buttons ── */
+    .btn-espresso {
+      display:inline-flex; align-items:center; gap:9px;
+      padding:14px 30px;
+      background:#231509; color:#F5F0E8;
+      font-size:13px; font-weight:500; letter-spacing:.06em;
+      border:none; cursor:pointer;
+      position:relative; overflow:hidden;
+      text-decoration:none;
+    }
+    .btn-espresso::after {
+      content:''; position:absolute; inset:0;
+      background:#C96A3A;
+      transform:translateX(-101%);
+      transition:transform .55s cubic-bezier(0.16,1,0.3,1);
+    }
+    .btn-espresso:hover::after { transform:translateX(0); }
+    .btn-espresso > * { position:relative; z-index:1; }
+
+    .btn-ghost {
+      display:inline-flex; align-items:center; gap:9px;
+      padding:13px 29px;
+      background:transparent; color:#231509;
+      font-size:13px; font-weight:500; letter-spacing:.06em;
+      border:1.5px solid rgba(35,21,9,.22); cursor:pointer;
+      position:relative; overflow:hidden;
+      text-decoration:none;
+    }
+    .btn-ghost::after {
+      content:''; position:absolute; inset:0;
+      background:#231509;
+      transform:translateX(-101%);
+      transition:transform .55s cubic-bezier(0.16,1,0.3,1);
+    }
+    .btn-ghost:hover { color:#F5F0E8; border-color:#231509; }
+    .btn-ghost:hover::after { transform:translateX(0); }
+    .btn-ghost > * { position:relative; z-index:1; transition:color .55s cubic-bezier(0.16,1,0.3,1); }
+
+    /* ── Section label ── */
+    .s-label {
+      display:inline-flex; align-items:center; gap:10px;
+      font-size:11px; font-weight:600; letter-spacing:.18em;
+      text-transform:uppercase; color:#C96A3A;
+    }
+    .s-label::before { content:''; display:block; width:28px; height:1.5px; background:#C96A3A; }
+
+    /* ── Marquee ── */
+    .marquee-track {
+      display:flex; width:max-content;
+      animation: mrun 36s linear infinite;
+    }
+    @keyframes mrun {
+      0%   { transform:translateX(0); }
+      100% { transform:translateX(-50%); }
+    }
+
+    /* ── Menu card ── */
+    .menu-card { position:relative; overflow:hidden; cursor:pointer; }
+    .menu-card img { transition:transform .85s cubic-bezier(0.16,1,0.3,1); }
+    .menu-card:hover img { transform:scale(1.04); }
+    .menu-card::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(35,21,9,.75) 0%, rgba(35,21,9,.15) 50%, transparent 100%);
+    }
+    .menu-card-body { position:absolute; bottom:0; left:0; right:0; z-index:1; padding:22px; }
+
+    /* ── Quote line ── */
+    .quote-line {
+      border-left: 2px solid #C96A3A;
+    }
+
+    /* ── Circle tag ── */
+    .circle-tag {
+      width:44px; height:44px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      border: 1.5px solid rgba(35,21,9,.15);
+      background: transparent;
+      transition: all .4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .circle-tag:hover {
+      background: #231509;
+      border-color: #231509;
+    }
+    .circle-tag:hover iconify-icon { color: #F5F0E8 !important; }
+
+    /* ── Hours table ── */
+    .hours-row {
+      border-bottom: 1px solid rgba(35,21,9,.08);
+      transition: background .3s ease;
+    }
+    .hours-row:hover { background: rgba(201,106,58,.06); }
+
+    /* ── Image with oval frame ── */
+    .oval { border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; overflow:hidden; }
+
+    /* ── Floating badge ── */
+    @keyframes float-soft {
+      0%,100% { transform:translateY(0); }
+      50%      { transform:translateY(-7px); }
+    }
+    .float-soft { animation:float-soft 5s ease-in-out infinite; }
+
+    /* ── Mobile menu ── */
+    .mob-menu {
+      opacity:0; transform:translateY(-8px); pointer-events:none;
+      transition:all .4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .mob-menu.open { opacity:1; transform:none; pointer-events:all; }
+
+    /* ── Review card ── */
+    .review-card {
+      background:#fff;
+      border:1px solid rgba(35,21,9,.07);
+      transition: transform .5s cubic-bezier(0.16,1,0.3,1), box-shadow .5s cubic-bezier(0.16,1,0.3,1);
+    }
+    .review-card:hover { transform:translateY(-4px); box-shadow:0 20px 56px rgba(35,21,9,.09); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-thumb { background:#C96A3A; border-radius:2px; }
+  </style>
+</head>
+
+<body>
+
+<!-- ══════════════════════════════════════
+     NAVIGATION
+══════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="flex items-center justify-between h-[68px]">
+
+      <!-- Logo -->
+      <a href="#" class="flex flex-col spring hover:opacity-60" aria-label="모노 카페">
+        <span class="font-serif font-bold text-[22px] tracking-[.16em] text-espresso italic leading-none">MONO</span>
+        <span class="text-[9px] font-medium tracking-[.22em] text-dust uppercase mt-0.5">Specialty Coffee</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <div class="hidden lg:flex items-center gap-10">
+        <a href="#menu"    class="text-[13px] font-medium text-dust tracking-wide spring hover:text-espresso">메뉴</a>
+        <a href="#story"   class="text-[13px] font-medium text-dust tracking-wide spring hover:text-espresso">카페 소개</a>
+        <a href="#space"   class="text-[13px] font-medium text-dust tracking-wide spring hover:text-espresso">공간</a>
+        <a href="#visit"   class="text-[13px] font-medium text-dust tracking-wide spring hover:text-espresso">방문 안내</a>
+      </div>
+
+      <!-- Right -->
+      <div class="flex items-center gap-4">
+        <a href="#visit" class="hidden sm:inline-flex">
+          <button class="btn-espresso text-[11px] tracking-widest px-5 py-2.5">
+            <span>오시는 길</span>
+            <iconify-icon icon="solar:map-point-linear" style="font-size:14px"></iconify-icon>
+          </button>
+        </a>
+        <button class="lg:hidden p-2 text-dust spring hover:text-espresso" onclick="toggleMob()" aria-label="메뉴">
+          <iconify-icon icon="solar:hamburger-menu-linear" style="font-size:22px"></iconify-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="mob-menu lg:hidden bg-linen border-t border-linen-dark px-6 py-6 space-y-4" id="mob-menu">
+    <a href="#menu"   class="block text-[14px] font-medium text-espresso py-2" onclick="toggleMob()">메뉴</a>
+    <a href="#story"  class="block text-[14px] font-medium text-espresso py-2" onclick="toggleMob()">카페 소개</a>
+    <a href="#space"  class="block text-[14px] font-medium text-espresso py-2" onclick="toggleMob()">공간</a>
+    <a href="#visit"  class="block text-[14px] font-medium text-espresso py-2" onclick="toggleMob()">방문 안내</a>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════
+     HERO  (editorial split)
+══════════════════════════════════════ -->
+<section class="min-h-[100dvh] flex items-stretch pt-[68px]" id="hero">
+  <div class="w-full grid lg:grid-cols-[52fr_48fr]">
+
+    <!-- Left: content -->
+    <div class="flex flex-col justify-center px-8 lg:px-14 xl:px-20 py-16 order-2 lg:order-1 bg-linen">
+
+      <p class="reveal d1 s-label mb-8">Seoul Seongsu — Specialty Coffee</p>
+
+      <div class="reveal d2 mb-7">
+        <h1 class="font-serif leading-[1.06] text-espresso"
+            style="font-size:clamp(3rem,5.5vw,5.2rem)">
+          천천히,<br/>
+          <em style="color:#C96A3A">제대로</em>
+        </h1>
+        <p class="font-serif italic text-dust mt-2" style="font-size:clamp(1.1rem,2vw,1.5rem)">
+          — 한 잔의 완성
+        </p>
+      </div>
+
+      <p class="reveal d3 text-dust text-[15px] leading-[1.9] mb-10 max-w-[360px]">
+        원두 산지부터 로스팅, 추출까지 모든 과정을 직접 관리합니다.
+        서두르지 않는 시간 속에서 커피 본연의 맛을 경험하세요.
+      </p>
+
+      <div class="reveal d4 flex flex-wrap gap-4 mb-12">
+        <a href="#menu"><button class="btn-espresso">
+          <span>메뉴 보기</span>
+          <iconify-icon icon="solar:arrow-right-linear" style="font-size:17px"></iconify-icon>
+        </button></a>
+        <a href="#story"><button class="btn-ghost">
+          <span>카페 소개</span>
+        </button></a>
+      </div>
+
+      <!-- Mini info -->
+      <div class="reveal d5 grid grid-cols-3 gap-5 pt-8 border-t border-linen-dark">
+        <div>
+          <p class="font-serif text-[1.8rem] font-medium text-espresso leading-none">07</p>
+          <p class="text-[11px] text-dust mt-1 tracking-wide">년째 운영</p>
+        </div>
+        <div>
+          <p class="font-serif text-[1.8rem] font-medium text-espresso leading-none">12</p>
+          <p class="text-[11px] text-dust mt-1 tracking-wide">가지 시그니처</p>
+        </div>
+        <div>
+          <p class="font-serif text-[1.8rem] font-medium text-espresso leading-none">4<span style="color:#C96A3A;font-size:1.2rem">곳</span></p>
+          <p class="text-[11px] text-dust mt-1 tracking-wide">원두 산지</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: hero image -->
+    <div class="relative overflow-hidden bg-linen-dark order-1 lg:order-2 h-[55vw] max-h-[600px] lg:h-auto lg:max-h-none">
+      <img
+        src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1100&q=80"
+        alt="커피 한 잔"
+        class="w-full h-full object-cover"
+        loading="eager"
+      />
+      <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-espresso/20 pointer-events-none"></div>
+
+      <!-- Float badge -->
+      <div class="absolute bottom-8 right-8 float-soft">
+        <div class="bg-linen/95 backdrop-blur-sm px-5 py-4 shadow-xl border border-linen-dark/70">
+          <p class="font-serif text-espresso text-[1.1rem] font-medium italic mb-0.5">"Roasted in-house"</p>
+          <p class="text-[11px] text-dust tracking-wider uppercase">직접 로스팅한 원두</p>
+        </div>
+      </div>
+
+      <!-- Season tag -->
+      <div class="absolute top-8 left-8">
+        <div class="flex items-center gap-2 bg-terra text-linen px-4 py-2">
+          <iconify-icon icon="solar:leaf-bold" style="font-size:13px"></iconify-icon>
+          <span class="text-[11px] font-semibold tracking-widest uppercase">Spring Menu</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     PHILOSOPHY STRIP
+══════════════════════════════════════ -->
+<section class="bg-espresso py-5 overflow-hidden">
+  <div class="overflow-hidden">
+    <div class="marquee-track">
+      <div class="flex items-center gap-10 px-5">
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">Single Origin</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">직접 로스팅</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">홈메이드 베이커리</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">Specialty Grade</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">No Rush, No Noise</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">매일 아침 신선한 원두</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">Slow Coffee Culture</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+      </div>
+      <div class="flex items-center gap-10 px-5" aria-hidden="true">
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">Single Origin</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">직접 로스팅</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">홈메이드 베이커리</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">Specialty Grade</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">No Rush, No Noise</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">매일 아침 신선한 원두</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+        <span class="font-serif italic text-linen/50 text-[14px] whitespace-nowrap">Slow Coffee Culture</span>
+        <iconify-icon icon="solar:coffee-bold" style="color:#C96A3A;font-size:13px;flex-shrink:0"></iconify-icon>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     MENU  (Bento Grid)
+══════════════════════════════════════ -->
+<section class="py-24 lg:py-32 px-6 lg:px-10 max-w-7xl mx-auto" id="menu">
+
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
+    <div class="reveal">
+      <p class="s-label mb-5">메뉴</p>
+      <h2 class="font-serif leading-[1.1] text-espresso"
+          style="font-size:clamp(2.2rem,4vw,3.6rem)">
+        매일 정성껏<br/>내리는 한 잔
+      </h2>
+    </div>
+    <p class="reveal d2 text-dust text-[14px] leading-relaxed max-w-[280px]">
+      에티오피아, 콜롬비아, 코스타리카, 케냐에서 엄선한 원두를 직접 로스팅합니다.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[280px] lg:auto-rows-[300px]">
+
+    <!-- 시그니처 라떼 (2-col) -->
+    <div class="reveal d1 menu-card md:col-span-2">
+      <img
+        src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=1100&q=80"
+        alt="시그니처 라떼"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div class="menu-card-body">
+        <div class="flex items-end justify-between">
+          <div>
+            <span class="inline-block bg-terra text-linen text-[10px] font-semibold tracking-widest uppercase px-3 py-1 mb-3">Signature</span>
+            <h3 class="font-serif text-linen text-[1.5rem] italic mb-1">모노 시그니처 라떼</h3>
+            <p class="text-linen/65 text-[13px]">흑당 카라멜 & 에스프레소의 조화</p>
+          </div>
+          <p class="font-serif text-linen text-[1.4rem] font-medium mb-1">6,500<span class="text-linen/60 text-sm">원</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 드립 커피 -->
+    <div class="reveal d2 menu-card">
+      <img
+        src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=80"
+        alt="핸드드립"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div class="menu-card-body">
+        <h3 class="font-serif text-linen text-[1.4rem] italic mb-1">오늘의 핸드드립</h3>
+        <p class="text-linen/60 text-[13px]">당일 추천 싱글 오리진</p>
+      </div>
+    </div>
+
+    <!-- 에스프레소 (light card) -->
+    <div class="reveal d3 bg-cream border border-linen-dark p-7 flex flex-col justify-between spring hover:border-terra/40">
+      <div class="w-10 h-10 flex items-center justify-center bg-terra/10 border border-terra/20 shrink-0">
+        <iconify-icon icon="solar:cup-hot-bold" style="color:#C96A3A;font-size:20px"></iconify-icon>
+      </div>
+      <div>
+        <h3 class="font-serif text-espresso text-[1.3rem] italic mb-2">에스프레소</h3>
+        <p class="text-dust text-[13px] leading-relaxed mb-4">원두 본연의 맛을 가장 진하게 느낄 수 있는 기본</p>
+        <p class="font-serif text-espresso font-medium text-[1.1rem]">4,000<span class="text-dust text-sm">원</span></p>
+      </div>
+    </div>
+
+    <!-- 크루아상 (light card) -->
+    <div class="reveal d4 bg-cream border border-linen-dark p-7 flex flex-col justify-between spring hover:border-terra/40">
+      <div class="w-10 h-10 flex items-center justify-center bg-terra/10 border border-terra/20 shrink-0">
+        <iconify-icon icon="solar:pie-chart-bold" style="color:#C96A3A;font-size:20px"></iconify-icon>
+      </div>
+      <div>
+        <h3 class="font-serif text-espresso text-[1.3rem] italic mb-2">버터 크루아상</h3>
+        <p class="text-dust text-[13px] leading-relaxed mb-4">매일 아침 직접 구운 결이 살아있는 크루아상</p>
+        <p class="font-serif text-espresso font-medium text-[1.1rem]">4,500<span class="text-dust text-sm">원</span></p>
+      </div>
+    </div>
+
+    <!-- 시즌 드링크 (image) -->
+    <div class="reveal d5 menu-card">
+      <img
+        src="https://images.unsplash.com/photo-1542444459-2beac0b15e67?auto=format&fit=crop&w=700&q=80"
+        alt="시즌 음료"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div class="menu-card-body">
+        <span class="inline-block border border-linen/40 text-linen/80 text-[10px] font-semibold tracking-widest uppercase px-3 py-1 mb-3">Season</span>
+        <h3 class="font-serif text-linen text-[1.4rem] italic mb-1">봄 시즌 드링크</h3>
+        <p class="text-linen/60 text-[13px]">벚꽃 라떼 & 말차 아포가토</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="reveal mt-10 flex justify-end">
+    <a href="#visit">
+      <button class="btn-ghost text-[11px] tracking-widest">
+        <span>전체 메뉴 보기</span>
+        <iconify-icon icon="solar:arrow-right-linear" style="font-size:14px"></iconify-icon>
+      </button>
+    </a>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     OUR STORY  (Z-axis editorial)
+══════════════════════════════════════ -->
+<section class="py-24 lg:py-32 bg-espresso" id="story">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center mb-20 lg:mb-28">
+
+      <!-- Text -->
+      <div class="reveal-x order-2 lg:order-1">
+        <p class="s-label mb-6" style="color:#C96A3A">카페 소개</p>
+        <h2 class="font-serif leading-[1.08] text-linen mb-8"
+            style="font-size:clamp(2.4rem,4.5vw,4rem)">
+          커피 한 잔에는<br/>
+          <em style="color:#C96A3A">이야기가</em><br/>
+          담겨 있습니다
+        </h2>
+        <div class="quote-line pl-6 mb-8">
+          <p class="text-linen/55 text-[15px] leading-[1.9]">
+            2017년, 단 하나의 원칙으로 문을 열었습니다. '좋은 커피는 서두르지 않는다.'
+            우리는 빠름보다 정확함을, 많음보다 깊음을 선택했습니다.
+          </p>
+        </div>
+        <p class="text-linen/45 text-[14px] leading-[1.85]">
+          에티오피아 예가체프의 플로럴 노트부터 콜롬비아 우일라의 균형 잡힌 바디감까지,
+          산지의 특성을 최대한 살린 로스팅으로 커피 본연의 맛을 담아냅니다.
+        </p>
+      </div>
+
+      <!-- Image -->
+      <div class="reveal-rx order-1 lg:order-2">
+        <div class="aspect-square overflow-hidden" style="border-radius:8px">
+          <img
+            src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=800&q=80"
+            alt="바리스타"
+            class="w-full h-full object-cover spring hover:scale-104"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Three pillars -->
+    <div class="reveal grid md:grid-cols-3 gap-8 border-t border-linen/[0.08] pt-16">
+
+      <div class="d1">
+        <div class="w-12 h-12 flex items-center justify-center bg-terra/10 border border-terra/20 mb-5">
+          <iconify-icon icon="solar:leaf-bold" style="color:#C96A3A;font-size:22px"></iconify-icon>
+        </div>
+        <h3 class="font-serif text-linen text-[1.25rem] italic mb-3">원두 산지 직거래</h3>
+        <p class="text-linen/45 text-[13px] leading-relaxed">
+          에티오피아, 콜롬비아, 코스타리카, 케냐 농장과 직접 거래해 최상급 원두만을 선별합니다.
+        </p>
+      </div>
+
+      <div class="d2">
+        <div class="w-12 h-12 flex items-center justify-center bg-terra/10 border border-terra/20 mb-5">
+          <iconify-icon icon="solar:fire-bold" style="color:#C96A3A;font-size:22px"></iconify-icon>
+        </div>
+        <h3 class="font-serif text-linen text-[1.25rem] italic mb-3">인하우스 로스팅</h3>
+        <p class="text-linen/45 text-[13px] leading-relaxed">
+          매주 소량씩 직접 로스팅합니다. 항상 최신 로스팅된 신선한 원두만을 사용합니다.
+        </p>
+      </div>
+
+      <div class="d3">
+        <div class="w-12 h-12 flex items-center justify-center bg-terra/10 border border-terra/20 mb-5">
+          <iconify-icon icon="solar:hand-heart-bold" style="color:#C96A3A;font-size:22px"></iconify-icon>
+        </div>
+        <h3 class="font-serif text-linen text-[1.25rem] italic mb-3">홈메이드 베이커리</h3>
+        <p class="text-linen/45 text-[13px] leading-relaxed">
+          매일 새벽 직접 구운 크루아상, 스콘, 마들렌을 커피와 함께 제공합니다.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SPACE  (full-bleed editorial)
+══════════════════════════════════════ -->
+<section class="py-24 lg:py-32 px-6 lg:px-10 max-w-7xl mx-auto" id="space">
+
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
+    <div class="reveal">
+      <p class="s-label mb-5">공간</p>
+      <h2 class="font-serif leading-[1.1] text-espresso"
+          style="font-size:clamp(2.2rem,4vw,3.6rem)">
+        머물고 싶은<br/>공간을 만듭니다
+      </h2>
+    </div>
+    <p class="reveal d2 text-dust text-[14px] leading-relaxed max-w-[280px]">
+      성수동 골목 안 조용한 3층 건물, 각 층마다 다른 분위기로 당신의 시간을 맞이합니다.
+    </p>
+  </div>
+
+  <!-- Asymmetric image grid -->
+  <div class="grid grid-cols-12 gap-4 mb-12">
+
+    <!-- Large left image -->
+    <div class="reveal col-span-12 lg:col-span-7 overflow-hidden bg-linen-dark" style="height:480px">
+      <img
+        src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1000&q=80"
+        alt="카페 내부"
+        class="w-full h-full object-cover spring hover:scale-103"
+        loading="lazy"
+      />
+    </div>
+
+    <!-- Right column: 2 stacked -->
+    <div class="col-span-12 lg:col-span-5 flex flex-col gap-4">
+      <div class="reveal d2 overflow-hidden bg-linen-dark flex-1" style="min-height:220px">
+        <img
+          src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=700&q=80"
+          alt="카페 창가 자리"
+          class="w-full h-full object-cover spring hover:scale-103"
+          loading="lazy"
+        />
+      </div>
+      <!-- Text card -->
+      <div class="reveal d3 bg-terra p-7 flex flex-col justify-between" style="min-height:220px">
+        <iconify-icon icon="solar:sun-bold" style="color:rgba(245,240,232,.5);font-size:28px"></iconify-icon>
+        <div>
+          <h3 class="font-serif italic text-linen text-[1.4rem] mb-2">채광이 좋은 공간</h3>
+          <p class="text-linen/70 text-[13px] leading-relaxed">오전 햇살이 가장 아름답게 드는 남향 창가 자리가 특히 인기입니다.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Space features -->
+  <div class="reveal grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-cream border border-linen-dark p-5 spring hover:border-terra/40">
+      <iconify-icon icon="solar:buildings-bold" style="color:#C96A3A;font-size:20px" class="mb-3 block"></iconify-icon>
+      <p class="text-espresso font-medium text-[13px] mb-1">3층 독립 공간</p>
+      <p class="text-dust text-[12px] leading-relaxed">층마다 다른 분위기</p>
+    </div>
+    <div class="bg-cream border border-linen-dark p-5 spring hover:border-terra/40">
+      <iconify-icon icon="solar:laptop-bold" style="color:#C96A3A;font-size:20px" class="mb-3 block"></iconify-icon>
+      <p class="text-espresso font-medium text-[13px] mb-1">무료 고속 와이파이</p>
+      <p class="text-dust text-[12px] leading-relaxed">작업하기 좋은 환경</p>
+    </div>
+    <div class="bg-cream border border-linen-dark p-5 spring hover:border-terra/40">
+      <iconify-icon icon="solar:book-2-bold" style="color:#C96A3A;font-size:20px" class="mb-3 block"></iconify-icon>
+      <p class="text-espresso font-medium text-[13px] mb-1">큐레이션 책장</p>
+      <p class="text-dust text-[12px] leading-relaxed">커피 & 아트 서적 구비</p>
+    </div>
+    <div class="bg-cream border border-linen-dark p-5 spring hover:border-terra/40">
+      <iconify-icon icon="solar:vinyl-record-bold" style="color:#C96A3A;font-size:20px" class="mb-3 block"></iconify-icon>
+      <p class="text-espresso font-medium text-[13px] mb-1">바이닐 플레이어</p>
+      <p class="text-dust text-[12px] leading-relaxed">매일 다른 재즈 음악</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     REVIEWS
+══════════════════════════════════════ -->
+<section class="py-24 lg:py-32 bg-linen-dark" id="reviews">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-6">
+      <div class="reveal">
+        <p class="s-label mb-5">손님 후기</p>
+        <h2 class="font-serif leading-[1.1] text-espresso"
+            style="font-size:clamp(2.2rem,4vw,3.4rem)">
+          이 공간에서<br/>느낀 것들
+        </h2>
+      </div>
+      <div class="reveal d2 flex items-center gap-3">
+        <div class="flex gap-0.5">
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:18px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:18px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:18px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:18px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:18px"></iconify-icon>
+        </div>
+        <span class="font-serif text-espresso text-[2.2rem] font-medium leading-none">4.9</span>
+        <span class="text-dust text-sm">/ 5.0</span>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      <div class="reveal d1 review-card p-7">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+        </div>
+        <p class="font-serif italic text-espresso-soft text-[1rem] leading-[1.8] mb-6">
+          "서울에서 이렇게 조용하고 좋은 커피를 마실 수 있는 곳이 있다는 게 신기해요.
+          모노 라떼는 단 것을 좋아하지 않아도 먹을 수 있을 만큼 은은하게 달고,
+          핸드드립은 정말 산지의 특성이 느껴져요."
+        </p>
+        <div class="flex items-center gap-3 border-t border-linen-dark pt-4">
+          <div class="w-9 h-9 rounded-full bg-linen-dark flex items-center justify-center text-dust font-serif italic text-sm shrink-0">박</div>
+          <div>
+            <p class="text-espresso font-medium text-[13px]">박하린</p>
+            <p class="text-dust text-[11px]">모노 시그니처 라떼</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d2 review-card p-7 md:mt-8">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+        </div>
+        <p class="font-serif italic text-espresso-soft text-[1rem] leading-[1.8] mb-6">
+          "재택근무할 때 자주 오는데, 분위기가 집중하기 딱 좋아요. 너무 조용하거나
+          너무 시끄럽지 않고, 와이파이도 빠르고 콘센트도 충분해요.
+          크루아상이랑 아메리카노 조합이 완벽합니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-linen-dark pt-4">
+          <div class="w-9 h-9 rounded-full bg-linen-dark flex items-center justify-center text-dust font-serif italic text-sm shrink-0">류</div>
+          <div>
+            <p class="text-espresso font-medium text-[13px]">류재현</p>
+            <p class="text-dust text-[11px]">작업 겸 방문</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d3 review-card p-7">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+        </div>
+        <p class="font-serif italic text-espresso-soft text-[1rem] leading-[1.8] mb-6">
+          "성수동에 카페가 정말 많은데 여기는 진짜 커피 맛으로 승부하는 곳이에요.
+          스페셜티 커피 처음 입문하시는 분들에게 강력 추천합니다.
+          바리스타분이 원두 설명도 친절하게 해주셔요."
+        </p>
+        <div class="flex items-center gap-3 border-t border-linen-dark pt-4">
+          <div class="w-9 h-9 rounded-full bg-linen-dark flex items-center justify-center text-dust font-serif italic text-sm shrink-0">송</div>
+          <div>
+            <p class="text-espresso font-medium text-[13px]">송지안</p>
+            <p class="text-dust text-[11px]">오늘의 핸드드립</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d4 review-card p-7 md:mt-8 lg:mt-0">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+        </div>
+        <p class="font-serif italic text-espresso-soft text-[1rem] leading-[1.8] mb-6">
+          "3층 창가 자리에 앉아서 바이닐 음악 들으면서 책 읽었는데 완벽한 오후였어요.
+          봄 시즌 벚꽃 라떼도 너무 예쁘고 맛있었고, 마들렌은 집에 가져가려고
+          포장까지 했습니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-linen-dark pt-4">
+          <div class="w-9 h-9 rounded-full bg-linen-dark flex items-center justify-center text-dust font-serif italic text-sm shrink-0">김</div>
+          <div>
+            <p class="text-espresso font-medium text-[13px]">김서율</p>
+            <p class="text-dust text-[11px]">봄 시즌 드링크</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d5 review-card p-7">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+        </div>
+        <p class="font-serif italic text-espresso-soft text-[1rem] leading-[1.8] mb-6">
+          "에스프레소 마시는 걸 좋아하는데 여기 에스프레소가 서울에서 탑5 안에 든다고
+          생각해요. 산미와 단맛의 밸런스가 정말 좋고, 추출 시간도 일정하게 유지되는
+          걸 보면 바리스타분의 실력이 느껴집니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-linen-dark pt-4">
+          <div class="w-9 h-9 rounded-full bg-linen-dark flex items-center justify-center text-dust font-serif italic text-sm shrink-0">이</div>
+          <div>
+            <p class="text-espresso font-medium text-[13px]">이준하</p>
+            <p class="text-dust text-[11px]">에스프레소 단골</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d6 review-card p-7 md:mt-8">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C96A3A;font-size:13px"></iconify-icon>
+        </div>
+        <p class="font-serif italic text-espresso-soft text-[1rem] leading-[1.8] mb-6">
+          "성수동 나들이 마지막에 항상 여기서 마무리해요. 원두 소분 판매도 하셔서
+          집에서도 모노의 맛을 즐길 수 있어요. 선물용으로도 정말 좋아서
+          지인들한테 많이 선물했습니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-linen-dark pt-4">
+          <div class="w-9 h-9 rounded-full bg-linen-dark flex items-center justify-center text-dust font-serif italic text-sm shrink-0">최</div>
+          <div>
+            <p class="text-espresso font-medium text-[13px]">최나은</p>
+            <p class="text-dust text-[11px]">원두 구매 &amp; 카페 이용</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     VISIT INFO  (dark full-bleed)
+══════════════════════════════════════ -->
+<section class="relative overflow-hidden" id="visit">
+  <img
+    src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1600&q=70"
+    alt=""
+    aria-hidden="true"
+    class="absolute inset-0 w-full h-full object-cover"
+    loading="lazy"
+  />
+  <div class="absolute inset-0 bg-espresso/88 pointer-events-none"></div>
+  <!-- Warm glow -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] pointer-events-none"
+       style="background:radial-gradient(ellipse, rgba(201,106,58,.12) 0%, transparent 70%)"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-10 py-24 lg:py-32">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+      <!-- Left -->
+      <div class="reveal">
+        <p class="s-label mb-6" style="color:#C96A3A">방문 안내</p>
+        <h2 class="font-serif leading-[1.08] text-linen mb-8"
+            style="font-size:clamp(2.4rem,4.5vw,4rem)">
+          언제든<br/>환영합니다
+        </h2>
+        <p class="text-linen/55 text-[15px] leading-[1.85] mb-10 max-w-[380px]">
+          성수역 2번 출구에서 도보 5분. 붉은 벽돌 건물 1층, 작은 테라스가 있는 곳입니다.
+          예약 없이 방문하셔도 됩니다.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="tel:02-499-7788">
+            <button class="btn-espresso" style="background:#C96A3A">
+              <iconify-icon icon="solar:phone-bold" style="font-size:16px"></iconify-icon>
+              <span>02-499-7788</span>
+            </button>
+          </a>
+          <a href="#">
+            <button class="btn-ghost" style="border-color:rgba(245,240,232,.2);color:#F5F0E8">
+              <span>인스타그램</span>
+              <iconify-icon icon="solar:arrow-right-up-linear" style="font-size:15px"></iconify-icon>
+            </button>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: hours table -->
+      <div class="reveal d2">
+        <h3 class="font-serif italic text-linen/70 text-[1.1rem] mb-6">영업 시간</h3>
+        <div class="space-y-0">
+          <div class="hours-row flex justify-between items-center py-4 px-2">
+            <span class="text-linen/60 text-[14px]">월요일 – 금요일</span>
+            <span class="text-linen font-medium text-[14px]">08:00 – 21:00</span>
+          </div>
+          <div class="hours-row flex justify-between items-center py-4 px-2">
+            <span class="text-linen/60 text-[14px]">토요일</span>
+            <span class="text-linen font-medium text-[14px]">09:00 – 22:00</span>
+          </div>
+          <div class="hours-row flex justify-between items-center py-4 px-2">
+            <span class="text-linen/60 text-[14px]">일요일 &amp; 공휴일</span>
+            <span class="text-linen font-medium text-[14px]">10:00 – 20:00</span>
+          </div>
+          <div class="hours-row flex justify-between items-center py-4 px-2">
+            <span class="text-linen/60 text-[14px]">라스트 오더</span>
+            <span class="text-terra font-medium text-[14px]">마감 30분 전</span>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="mt-8 p-5 border border-linen/[0.08] bg-linen/[0.03]">
+          <div class="flex items-start gap-3">
+            <iconify-icon icon="solar:map-point-bold" style="color:#C96A3A;font-size:18px;flex-shrink:0;margin-top:2px"></iconify-icon>
+            <div>
+              <p class="text-linen text-[14px] font-medium mb-1">서울특별시 성동구 성수동2가 289-12</p>
+              <p class="text-linen/45 text-[12px] leading-relaxed">서울숲역 3번 출구 도보 5분<br/>주차 불가 (성수역 공영주차장 이용)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer class="bg-espresso border-t border-linen/[0.06] pt-16 pb-10 px-6 lg:px-10">
+  <div class="max-w-7xl mx-auto">
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+
+      <!-- Brand -->
+      <div>
+        <div class="mb-5">
+          <span class="font-serif font-bold italic text-[26px] text-linen tracking-[.14em] block leading-none">MONO</span>
+          <span class="text-[9px] font-medium tracking-[.22em] text-dust uppercase mt-0.5 block">Specialty Coffee &amp; Bakery</span>
+        </div>
+        <p class="text-linen/35 text-[12px] leading-relaxed mb-6">
+          천천히, 제대로.<br/>성수동에서 한 잔의 완성을 경험하세요.
+        </p>
+        <div class="flex gap-2.5">
+          <a href="#" aria-label="인스타그램" class="w-8 h-8 flex items-center justify-center border border-linen/10 text-linen/35 spring hover:border-terra hover:text-terra">
+            <iconify-icon icon="solar:instagram-linear" style="font-size:15px"></iconify-icon>
+          </a>
+          <a href="#" aria-label="유튜브" class="w-8 h-8 flex items-center justify-center border border-linen/10 text-linen/35 spring hover:border-terra hover:text-terra">
+            <iconify-icon icon="solar:youtube-linear" style="font-size:15px"></iconify-icon>
+          </a>
+          <a href="#" aria-label="블로그" class="w-8 h-8 flex items-center justify-center border border-linen/10 text-linen/35 spring hover:border-terra hover:text-terra">
+            <iconify-icon icon="solar:blog-linear" style="font-size:15px"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- Menu links -->
+      <div>
+        <h4 class="text-linen/60 text-[10px] font-semibold tracking-[.16em] uppercase mb-5">메뉴</h4>
+        <ul class="space-y-3">
+          <li><a href="#" class="text-linen/35 text-[13px] spring hover:text-linen/70">에스프레소 &amp; 라떼</a></li>
+          <li><a href="#" class="text-linen/35 text-[13px] spring hover:text-linen/70">핸드드립</a></li>
+          <li><a href="#" class="text-linen/35 text-[13px] spring hover:text-linen/70">시즌 드링크</a></li>
+          <li><a href="#" class="text-linen/35 text-[13px] spring hover:text-linen/70">홈메이드 베이커리</a></li>
+          <li><a href="#" class="text-linen/35 text-[13px] spring hover:text-linen/70">원두 구매</a></li>
+        </ul>
+      </div>
+
+      <!-- About links -->
+      <div>
+        <h4 class="text-linen/60 text-[10px] font-semibold tracking-[.16em] uppercase mb-5">카페 정보</h4>
+        <ul class="space-y-3">
+          <li><a href="#story" class="text-linen/35 text-[13px] spring hover:text-linen/70">카페 소개</a></li>
+          <li><a href="#space" class="text-linen/35 text-[13px] spring hover:text-linen/70">공간 안내</a></li>
+          <li><a href="#"      class="text-linen/35 text-[13px] spring hover:text-linen/70">로스팅 이야기</a></li>
+          <li><a href="#"      class="text-linen/35 text-[13px] spring hover:text-linen/70">공지사항</a></li>
+          <li><a href="#visit" class="text-linen/35 text-[13px] spring hover:text-linen/70">오시는 길</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h4 class="text-linen/60 text-[10px] font-semibold tracking-[.16em] uppercase mb-5">위치 &amp; 연락</h4>
+        <div class="space-y-4">
+          <div class="flex items-start gap-3 text-linen/35">
+            <iconify-icon icon="solar:map-point-bold" style="color:#C96A3A;font-size:15px;flex-shrink:0;margin-top:1px"></iconify-icon>
+            <p class="text-[12px] leading-relaxed">서울 성동구 성수동2가 289-12<br/>서울숲역 3번 출구 5분</p>
+          </div>
+          <div class="flex items-center gap-3 text-linen/35">
+            <iconify-icon icon="solar:phone-bold" style="color:#C96A3A;font-size:15px;flex-shrink:0"></iconify-icon>
+            <p class="text-[12px]">02-499-7788</p>
+          </div>
+          <div class="flex items-start gap-3 text-linen/35">
+            <iconify-icon icon="solar:clock-bold" style="color:#C96A3A;font-size:15px;flex-shrink:0;margin-top:1px"></iconify-icon>
+            <div class="text-[12px] leading-relaxed">
+              <p>평일 08:00 – 21:00</p>
+              <p>주말·공휴일 09:00 – 22:00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="border-t border-linen/[0.06] pt-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <p class="text-linen/20 text-[11px]">
+        © 2024 MONO Specialty Coffee. All rights reserved. &nbsp;|&nbsp; 사업자등록번호: 321-98-45678 &nbsp;|&nbsp; 대표: 김지호
+      </p>
+      <div class="flex gap-6">
+        <a href="#" class="text-linen/20 text-[11px] spring hover:text-linen/45">개인정보처리방침</a>
+        <a href="#" class="text-linen/20 text-[11px] spring hover:text-linen/45">이용약관</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+<script>
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  function toggleMob() {
+    document.getElementById('mob-menu').classList.toggle('open');
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal, .reveal-x, .reveal-rx, .reveal-fade')
+    .forEach(el => io.observe(el));
+
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.querySelectorAll('#hero .reveal, #hero .reveal-x, #hero .reveal-rx').forEach(el => {
+        el.classList.add('in');
+      });
+    }, 100);
+  });
+</script>
+
+</body>
+</html>
