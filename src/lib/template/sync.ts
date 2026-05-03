@@ -107,9 +107,10 @@ export async function syncTemplates(
     let effectiveTemplateJson;
     try {
       effectiveTemplateJson = deriveTemplateJsonFromPreset(preset, themeModule);
-    } catch (err: any) {
+    } catch (err: unknown) {
       summary.errors++;
-      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [err.message] });
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [errorMessage] });
       continue;
     }
 

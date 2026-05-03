@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';

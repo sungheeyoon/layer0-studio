@@ -1,3 +1,5 @@
+'use client';
+
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ClockIcon, HeartIcon, MapIcon, PhoneIcon } from '../sections/icons';
