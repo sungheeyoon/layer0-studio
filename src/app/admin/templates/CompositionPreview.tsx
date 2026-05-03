@@ -45,8 +45,8 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
 
       <div className="space-y-2">
         {page.sections.map((section, index) => {
-          const component = library?.[section.type];
-          const meta = component?.meta;
+          const entry = library?.[section.type];
+          const meta = entry?.meta;
 
           return (
             <div 

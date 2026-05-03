@@ -1,4 +1,4 @@
-import { ThemeLibrary } from '../../types';
+import { ThemeLibrary, libEntry } from '../../types';
 import Nav from './Nav';
 import Hero from './Hero';
 import Marquee from './Marquee';
@@ -11,14 +11,14 @@ import Booking from './Booking';
 import Footer from './Footer';
 
 export const medicalLibrary: ThemeLibrary = {
-  nav: Nav,
-  hero: Hero,
-  marquee: Marquee,
-  services: Services,
-  space: Space,
-  why: Why,
-  team: Team,
-  testimonials: Testimonials,
-  booking: Booking,
-  footer: Footer,
+  nav: libEntry(Nav),
+  hero: libEntry(Hero),
+  marquee: libEntry(Marquee),
+  services: libEntry(Services),
+  space: libEntry(Space),
+  why: libEntry(Why),
+  team: libEntry(Team),
+  testimonials: libEntry(Testimonials),
+  booking: libEntry(Booking),
+  footer: libEntry(Footer),
 };

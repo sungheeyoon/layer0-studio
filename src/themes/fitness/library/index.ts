@@ -1,5 +1,6 @@
-import { ThemeLibrary } from '../../types';
+import { ThemeLibrary, libEntry } from '../../types';
 import Nav from './Nav';
+import { navMeta } from './Nav.meta';
 import Hero from './Hero';
 import Marquee from './Marquee';
 import Programs from './Programs';
@@ -10,13 +11,13 @@ import Join from './Join';
 import Footer from './Footer';
 
 export const fitnessLibrary: ThemeLibrary = {
-  nav: Nav,
-  hero: Hero,
-  marquee: Marquee,
-  programs: Programs,
-  facility: Facility,
-  trainers: Trainers,
-  testimonials: Testimonials,
-  join: Join,
-  footer: Footer,
+  nav: libEntry(Nav, navMeta),
+  hero: libEntry(Hero),
+  marquee: libEntry(Marquee),
+  programs: libEntry(Programs),
+  facility: libEntry(Facility),
+  trainers: libEntry(Trainers),
+  testimonials: libEntry(Testimonials),
+  join: libEntry(Join),
+  footer: libEntry(Footer),
 };

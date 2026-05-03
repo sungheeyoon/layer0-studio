@@ -21,17 +21,48 @@ export interface SectionDataSchema {
 }
 
 /**
- * A section component that carries its metadata
+ * A section component. Meta is optional here because client components
+ * (`'use client'`) cannot expose static metadata to the server — server-side
+ * imports of client modules are wrapped as client references and the module
+ * body never runs server-side. For those, meta is supplied via libEntry().
  */
 export type SectionComponent = ComponentType<ThemeSectionProps> & {
-  meta: SectionComponentMeta;
+  meta?: SectionComponentMeta;
 };
 
 /**
- * Library of components exported by a theme module
+ * One entry in a theme's library: the component plus its server-resolved metadata.
+ */
+export interface ThemeLibraryEntry {
+  Component: SectionComponent;
+  meta: SectionComponentMeta;
+}
+
+/**
+ * Library of components exported by a theme module, keyed by componentKey.
  */
 export interface ThemeLibrary {
-  [componentKey: string]: SectionComponent;
+  [componentKey: string]: ThemeLibraryEntry;
+}
+
+/**
+ * Helper for library/index.ts files. For server components, meta is read from
+ * `Component.meta` (set inside the .tsx). For client components, pass meta
+ * explicitly from a sibling `<Component>.meta.ts` file.
+ */
+export function libEntry(
+  Component: SectionComponent,
+  metaOverride?: SectionComponentMeta,
+): ThemeLibraryEntry {
+  const meta = metaOverride ?? Component.meta;
+  if (!meta) {
+    throw new Error(
+      `libEntry: component "${Component.displayName ?? Component.name}" is missing meta. ` +
+      `Server components: assign Component.meta = {...} inside the .tsx. ` +
+      `Client components ('use client'): pass meta from a sibling <Component>.meta.ts.`,
+    );
+  }
+  return { Component, meta };
 }
 
 /**
