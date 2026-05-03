@@ -1,7 +1,7 @@
 # Template Pipeline — 남은 작업
 
-_최초 작성: 2026-05-02 / 컴팩트화: 2026-05-02 / Phase 6a 완료: 2026-05-03_
-_상태: Phase 1~5 완료, Phase 6a 완료, Phase 6b~d 미착수_
+_최초 작성: 2026-05-02 / 컴팩트화: 2026-05-02 / Phase 6a 완료: 2026-05-03 / Step 1~2 완료: 2026-05-03_
+_상태: Phase 1~5 완료, Phase 6a 완료, Step 1~2 (6b-1·6b-2) 완료, Step 3~5 미착수_
 
 > Phase 1~4의 구현 세부와 시드 워크플로우 가이드는 `docs/TEMPLATE_AUTHORING_GUIDE.md`로 이전됨. 이 문서는 **남은 작업과 Phase 6 (Composition 모델) 설계**만 다룬다.
 
@@ -159,11 +159,15 @@ page.composition.map((section) => {
 
 → 해소: 6a 한계 ③ sync wiring 미연결
 
+#### 곁다리 정리 (Step 3 PR에 묻어가기 권장)
+
+- [x] `src/lib/template/__tests__/sync.test.ts:5-21` mock 보강 — Step 2 wiring 시 누락. 현재 `pnpm test` 2건 실패 (`No "themeMap" export is defined on the @/themes/_generated mock`). `sync.ts` 가 `themeMap` / `getAvailableThemeKeys` 도 import하므로 mock에 빈 `themeMap: {}` + `getAvailableThemeKeys: () => ['test']` 추가 필요.
+
 #### Step 3 — 6b-3: 나머지 6테마 컴포넌트 meta 이주 (2일)
 
-- [ ] corporate / fitness / interior / legal / medical / wedding 각 테마의 `sections/*` 컴포넌트에 `meta` export
-- [ ] 각 테마 `library/index.ts` 작성 후 `index.tsx`에서 어댑터 우회
-- [ ] 테마별 작은 PR 권장 — 회귀 영향 격리
+- [x] corporate / fitness / interior / legal / medical / wedding 각 테마의 `sections/*` 컴포넌트에 `meta` export
+- [x] 각 테마 `library/index.ts` 작성 후 `index.tsx`에서 어댑터 우회
+- [x] 테마별 작은 PR 권장 — 회귀 영향 격리
 
 #### Step 4 — 6c: preset 분화 (1~2일)
 

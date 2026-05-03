@@ -3,6 +3,8 @@ import { syncTemplates } from '../sync';
 
 // Mock presetMap and validateTemplateJson
 vi.mock('@/themes/_generated', () => ({
+  themeMap: {},
+  getAvailableThemeKeys: () => ['test'],
   presetMap: {
     'test/default': () => Promise.resolve({
       default: {
