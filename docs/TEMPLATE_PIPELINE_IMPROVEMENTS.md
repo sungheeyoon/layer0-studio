@@ -1,7 +1,7 @@
 # Template Pipeline — 남은 작업
 
-_최초 작성: 2026-05-02 / 컴팩트화: 2026-05-02 / Phase 6a 완료: 2026-05-03 / Step 1~2 완료: 2026-05-03_
-_상태: Phase 1~5 완료, Phase 6a 완료, Step 1~2 (6b-1·6b-2) 완료, Step 3~5 미착수_
+_최초 작성: 2026-05-02 / 컴팩트화: 2026-05-02 / Phase 6a 완료: 2026-05-03 / Step 1~4 완료: 2026-05-03_
+_상태: Phase 1~5 완료, Phase 6a 완료, Step 1~4 (6b-1·6b-2·6b-3·6c) 완료, Step 5 미착수_
 
 > Phase 1~4의 구현 세부와 시드 워크플로우 가이드는 `docs/TEMPLATE_AUTHORING_GUIDE.md`로 이전됨. 이 문서는 **남은 작업과 Phase 6 (Composition 모델) 설계**만 다룬다.
 
@@ -171,10 +171,10 @@ page.composition.map((section) => {
 
 #### Step 4 — 6c: preset 분화 (1~2일)
 
-- [ ] `cafe/presets/modern.preset.ts`, `cozy.preset.ts` 신규 — composition 배열이 서로 다른 것을 시연
-- [ ] `TemplatePreset` 인터페이스가 `composition: PresetSection[]` 채택 (legacy `templateJson` 도 호환 유지하다가 점진 제거)
-- [ ] `_generated.ts` codegen이 다중 preset 인식 (이미 `presetMap`은 다중 슬러그 지원함 — 새 슬러그만 등록)
-- [ ] DX 검증: 새 preset 추가 비용 측정, 검증 파이프라인 회귀 없음 확인
+- [x] `cafe/presets/modern.preset.ts`, `cozy.preset.ts` 신규 — composition 배열이 서로 다른 것을 시연
+- [x] `TemplatePreset` 인터페이스가 `composition: PresetSection[]` 채택 (legacy `templateJson` 도 호환 유지하다가 점진 제거)
+- [x] `_generated.ts` codegen이 다중 preset 인식 (이미 `presetMap`은 다중 슬러그 지원함 — 새 슬러그만 등록)
+- [x] DX 검증: 새 preset 추가 비용 측정, 검증 파이프라인 회귀 없음 확인
 
 → 해소: 6a 한계 ④ preset 형태가 `defaultTemplateJson.pages[].sections` 그대로
 

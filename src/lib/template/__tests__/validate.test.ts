@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateTemplateJson } from '../validate';
+import { deriveTemplateJsonFromPreset } from '../preset';
 import { TemplateJson } from '@/domain/entities/template.entity';
 import type { ThemeLibrary } from '@/themes/types';
 
@@ -18,6 +19,7 @@ import medicalPreset from '@/themes/medical/presets/default.preset';
 import { slots as medicalSlots } from '@/themes/medical/slots';
 import weddingPreset from '@/themes/wedding/presets/default.preset';
 import { slots as weddingSlots } from '@/themes/wedding/slots';
+import cafeModernPreset from '@/themes/cafe/presets/modern.preset';
 
 import { themeMap } from '@/themes/_generated';
 
@@ -248,6 +250,7 @@ describe('all presets — errors must be zero', () => {
     { name: 'legal-default',     preset: legalPreset,     slots: legalSlots,     themeKey: 'legal' },
     { name: 'medical-default',   preset: medicalPreset,   slots: medicalSlots,   themeKey: 'medical' },
     { name: 'wedding-default',   preset: weddingPreset,   slots: weddingSlots,   themeKey: 'wedding' },
+    { name: 'cafe-modern',      preset: cafeModernPreset, slots: [],            themeKey: 'cafe' },
   ];
 
   for (const { name, preset, slots, themeKey } of cases) {
@@ -256,7 +259,9 @@ describe('all presets — errors must be zero', () => {
       const themeModule = themeLoader ? await themeLoader() : null;
       const themeLibrary = themeModule?.library;
 
-      const result = validateTemplateJson(preset.templateJson, {
+      const templateJson = deriveTemplateJsonFromPreset(preset, themeModule);
+
+      const result = validateTemplateJson(templateJson, {
         availableThemeKeys: ALL_THEME_KEYS,
         themeSlots: themeLibrary ? undefined : slots,
         themeLibrary,

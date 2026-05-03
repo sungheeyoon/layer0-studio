@@ -118,7 +118,7 @@ HeroVideo.meta = {
     titleAccent: { type: 'text', label: '강조 타이틀' },
     subtitle: { type: 'text', label: '서브타이틀' },
     description: { type: 'textarea', label: '설명' },
-    videoUrl: { type: 'text', label: '배경 비디오 URL', required: true },
+    videoUrl: { type: 'url', label: '배경 비디오 URL', required: true },
     ctaPrimary: { type: 'text', label: '기본 CTA' },
     ctaSecondary: { type: 'text', label: '보조 CTA' },
     stat1Value: { type: 'text', label: '통계 1 수치' },

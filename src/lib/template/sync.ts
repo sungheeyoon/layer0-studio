@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { presetMap, themeMap, getAvailableThemeKeys } from '@/themes/_generated';
 import { validateTemplateJson } from './validate';
+import { deriveTemplateJsonFromPreset } from './preset';
 import type { TemplatePreset } from '@/themes/types';
 import fs from 'fs';
 import path from 'path';
@@ -90,12 +91,30 @@ export async function syncTemplates(
   const existingMap = new Map(existingTemplates?.map(t => [t.slug, t]));
 
   for (const preset of presets) {
-    // 1. Validate
-    const themeKey = preset.templateJson.themeKey;
+    // 1. Determine themeKey
+    const themeKey = preset.composition ? preset.themeKey : preset.templateJson?.themeKey;
+    
+    if (!themeKey) {
+      summary.errors++;
+      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [`Missing themeKey for preset ${preset.slug}`] });
+      continue;
+    }
+
     const themeModuleLoader = themeMap[themeKey];
     const themeModule = themeModuleLoader ? await themeModuleLoader() : null;
 
-    const validation = validateTemplateJson(preset.templateJson, {
+    // 2. Derive effective templateJson
+    let effectiveTemplateJson;
+    try {
+      effectiveTemplateJson = deriveTemplateJsonFromPreset(preset, themeModule);
+    } catch (err: any) {
+      summary.errors++;
+      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [err.message] });
+      continue;
+    }
+
+    // 3. Validate
+    const validation = validateTemplateJson(effectiveTemplateJson, {
       availableThemeKeys: getAvailableThemeKeys(),
       themeSlots: themeModule?.slots,
       themeLibrary: themeModule?.library
@@ -137,7 +156,7 @@ export async function syncTemplates(
           name: preset.defaults.name,
           description: preset.defaults.description,
           category: preset.defaults.category,
-          template_json: preset.templateJson,
+          template_json: effectiveTemplateJson,
           version: preset.version,
           thumbnail_url: thumbnailUrl,
           status: 'draft'
@@ -148,7 +167,7 @@ export async function syncTemplates(
       const changes: string[] = [];
       
       // Compare templateJson
-      if (JSON.stringify(existing.template_json) !== JSON.stringify(preset.templateJson)) {
+      if (JSON.stringify(existing.template_json) !== JSON.stringify(effectiveTemplateJson)) {
         changes.push('templateJson changed');
       }
       
@@ -169,7 +188,7 @@ export async function syncTemplates(
           await supabase
             .from('templates')
             .update({
-              template_json: preset.templateJson,
+              template_json: effectiveTemplateJson,
               version: preset.version,
               thumbnail_url: thumbnailUrl,
               updated_at: new Date().toISOString()

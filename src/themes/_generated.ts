@@ -13,7 +13,9 @@ export const themeMap: Record<string, () => Promise<ThemeModule>> = {
 } as const;
 
 export const presetMap: Record<string, () => Promise<{ default: TemplatePreset }>> = {
+  'cafe/cozy': () => import('./cafe/presets/cozy.preset'),
   'cafe/default': () => import('./cafe/presets/default.preset'),
+  'cafe/modern': () => import('./cafe/presets/modern.preset'),
   'corporate/default': () => import('./corporate/presets/default.preset'),
   'fitness/default': () => import('./fitness/presets/default.preset'),
   'interior/default': () => import('./interior/presets/default.preset'),
@@ -23,7 +25,9 @@ export const presetMap: Record<string, () => Promise<{ default: TemplatePreset }
 } as const;
 
 export const presetSlugs = [
+  'cafe-cozy',
   'cafe-default',
+  'cafe-modern',
   'corporate-default',
   'fitness-default',
   'interior-default',

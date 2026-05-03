@@ -1,4 +1,4 @@
-import { TemplateJson, TemplateSection, TemplateFieldType, TemplateField } from '@/domain/entities/template.entity';
+import { TemplateJson, TemplateSection, TemplateFieldType, TemplateField, TemplateGlobalStyles } from '@/domain/entities/template.entity';
 import { ComponentType } from 'react';
 
 /**
@@ -53,8 +53,24 @@ export interface TemplatePreset {
   /** DB row slug — upsert key. Never change after first publish. */
   slug: string;
 
-  /** The full template JSON seeded into the DB. Code is always authoritative. */
-  templateJson: TemplateJson;
+  /** 
+   * The composition of sections. If provided, templateJson is derived from this.
+   * If not provided, templateJson must be present.
+   */
+  composition?: PresetSection[];
+
+  /** Theme key (e.g. 'cafe', 'corporate'). Required if composition is used. */
+  themeKey?: string;
+
+  /** Global style overrides. Optional, merged with theme defaults if composition is used. */
+  globalStyles?: Partial<TemplateGlobalStyles>;
+
+  /** 
+   * The full template JSON seeded into the DB. 
+   * If composition is present, this is ignored/derived during sync.
+   */
+  templateJson?: TemplateJson;
+
   /** Relative path from project root, e.g. 'public/thumbnails/template-cafe.jpg' */
   thumbnailPath: string;
   /** Semver — sync only overwrites templateJson when this exceeds the DB version. */

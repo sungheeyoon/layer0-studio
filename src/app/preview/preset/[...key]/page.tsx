@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
-import { presetMap } from '@/themes/_generated';
+import { presetMap, themeMap } from '@/themes/_generated';
 import ThemeClientWrapper from '@/themes/ThemeClientWrapper';
+import { deriveTemplateJsonFromPreset } from '@/lib/template/preset';
 import React from 'react';
 
 interface Props {
@@ -18,7 +19,19 @@ export default async function PresetPreviewPage({ params }: Props) {
   }
 
   const preset = (await loader()).default;
-  const { templateJson } = preset;
+  
+  // Load theme module to provide base configuration if needed
+  const themeKey = preset.composition ? preset.themeKey : preset.templateJson?.themeKey;
+  const themeLoader = themeKey ? themeMap[themeKey as keyof typeof themeMap] : null;
+  const themeModule = themeLoader ? await themeLoader() : null;
+
+  let templateJson;
+  try {
+    templateJson = deriveTemplateJsonFromPreset(preset, themeModule);
+  } catch (err) {
+    console.error(`[PresetPreviewPage] Failed to derive templateJson:`, err);
+    notFound();
+  }
 
   const themeVariables = {
     '--theme-primary': templateJson.globalStyles.primaryColor,
@@ -33,10 +46,11 @@ export default async function PresetPreviewPage({ params }: Props) {
       style={themeVariables}
     >
       <ThemeClientWrapper
-        themeKey={templateJson.themeKey || 'corporate'}
+        themeKey={templateJson.themeKey}
         siteJson={templateJson}
         selectedSectionId={null}
       />
     </main>
   );
 }
+
