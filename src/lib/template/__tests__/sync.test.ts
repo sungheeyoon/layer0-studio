@@ -25,6 +25,7 @@ vi.mock('../validate', () => ({
 }));
 
 describe('syncTemplates', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mockSupabase: any = {
     from: vi.fn(),
     select: vi.fn(),

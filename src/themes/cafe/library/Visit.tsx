@@ -1,6 +1,6 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
-import { PhoneIcon, ArrowUpRightIcon, MapPointIcon, ClockIcon } from '../sections/icons';
+import { PhoneIcon, ArrowUpRightIcon, MapPointIcon } from '../sections/icons';
 
 const Visit: SectionComponent = function Visit({ section }: ThemeSectionProps) {
   const { data } = section;

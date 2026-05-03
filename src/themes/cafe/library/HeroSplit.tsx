@@ -18,8 +18,6 @@ const HeroSplit: SectionComponent = function HeroSplit({ section }: ThemeSection
     label: data[`stat${n}Label`]?.value,
   })).filter(s => s.value);
 
-  const badgeText = data['badgeText']?.value || '"Roasted in-house"';
-  const badgeSubtext = data['badgeSubtext']?.value || '직접 로스팅한 원두';
   const seasonTag = data['seasonTag']?.value || 'Spring Menu';
 
   return (

@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { presetMap } from '@/themes/_generated';
+import { presetMap, themeMap, getAvailableThemeKeys } from '@/themes/_generated';
 import { validateTemplateJson } from './validate';
 import type { TemplatePreset } from '@/themes/types';
 import fs from 'fs';
@@ -91,7 +91,15 @@ export async function syncTemplates(
 
   for (const preset of presets) {
     // 1. Validate
-    const validation = validateTemplateJson(preset.templateJson);
+    const themeKey = preset.templateJson.themeKey;
+    const themeModuleLoader = themeMap[themeKey];
+    const themeModule = themeModuleLoader ? await themeModuleLoader() : null;
+
+    const validation = validateTemplateJson(preset.templateJson, {
+      availableThemeKeys: getAvailableThemeKeys(),
+      themeSlots: themeModule?.slots,
+      themeLibrary: themeModule?.library
+    });
     if (validation.errors.length > 0) {
       summary.errors++;
       summary.details.push({

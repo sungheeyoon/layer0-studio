@@ -236,9 +236,9 @@ export async function syncTemplatesAction(dryRun: boolean) {
     }
 
     return { success: true, summary };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('syncTemplatesAction error:', err);
-    return { error: err.message || 'UNKNOWN' };
+    return { error: err instanceof Error ? err.message : 'UNKNOWN' };
   }
 }
 

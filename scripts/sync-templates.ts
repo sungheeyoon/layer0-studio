@@ -97,8 +97,8 @@ async function run() {
     console.log(`\n✅ Successfully synchronized ${finalSummary.affectedSlugs.length} templates.`);
     console.log('   Audit log written to template_sync_audit table.');
 
-  } catch (err: any) {
-    console.error('Fatal error during sync:', err.message);
+  } catch (err: unknown) {
+    console.error('Fatal error during sync:', err instanceof Error ? err.message : String(err));
     process.exit(1);
   }
 }

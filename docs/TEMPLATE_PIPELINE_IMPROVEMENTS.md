@@ -153,9 +153,9 @@ page.composition.map((section) => {
 
 #### Step 2 — 6b-2: sync 파이프라인 wiring (반나절)
 
-- [ ] `src/lib/template/sync.ts:94`의 `validateTemplateJson` 호출에 `themeMap`에서 로드한 `themeLibrary` 전달
-- [ ] cafe는 진짜 `dataSchema`로 검증, 나머지 6테마는 어댑터 산출물로 검증 — 둘 다 동작 확인
-- [ ] 어드민 카탈로그에 composition 다이어그램 표시 (componentKey 별 라벨/카테고리)
+- [x] `src/lib/template/sync.ts:94`의 `validateTemplateJson` 호출에 `themeMap`에서 로드한 `themeLibrary` 전달
+- [x] cafe는 진짜 `dataSchema`로 검증, 나머지 6테마는 어댑터 산출물로 검증 — 둘 다 동작 확인
+- [x] 어드민 카탈로그에 composition 다이어그램 표시 (componentKey 별 라벨/카테고리)
 
 → 해소: 6a 한계 ③ sync wiring 미연결
 

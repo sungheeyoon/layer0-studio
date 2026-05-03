@@ -69,7 +69,7 @@ const MenuBento: SectionComponent = function MenuBento({ section }: ThemeSection
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[280px] lg:auto-rows-[300px]">
-        {programs.map((p, i) => (
+        {programs.map((p) => (
           <div
             key={p.id}
             className={`${styles.reveal} ${styles.revealIn} ${styles.menuCard} ${p.colSpan || ''} ${p.image ? '' : 'bg-[var(--c-cream)] border border-[var(--c-linen-dark)] p-7 flex flex-col justify-between spring hover:border-[var(--c-terra)]/40'}`}

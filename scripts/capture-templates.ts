@@ -59,6 +59,7 @@ async function ensureDevServer() {
   throw new Error('Timeout waiting for dev server');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: any, isCheck: boolean): Promise<boolean> {
   const page = await browser.newPage();
   await page.setViewportSize(config.viewport);
@@ -101,6 +102,7 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
   const outputPath = join(ROOT, config.output);
   const tempPng = outputPath.replace('.webp', '.png');
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let captureOptions: any = { path: tempPng, type: 'png' };
   if (config.capture === 'fullpage') {
     captureOptions.fullPage = true;
@@ -152,7 +154,7 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
         } else {
           console.log(`  [${themeKey}] Visual change detected: ${diffPercent.toFixed(2)}%`);
         }
-      } catch (e) {
+      } catch {
         // Fallback to hasVisualChange = true if dimensions mismatch etc.
       }
     }

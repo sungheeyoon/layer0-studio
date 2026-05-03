@@ -10,6 +10,8 @@ import {
 } from './actions';
 import { getAvailableThemeKeys } from '@/themes/registry';
 import { isPresetSlug } from '@/themes/_generated';
+import CompositionPreview from './CompositionPreview';
+import { TemplateJson } from '@/domain/entities/template.entity';
 
 interface TemplateEditorPanelProps {
   /** Template to edit. If undefined, it is in create mode. */
@@ -129,7 +131,6 @@ export default function TemplateEditorPanel({
     }
 
     setIsSubmitting(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jsonError, templateJsonStr, thumbnailUrl, isEditing, template, onDone]);
 
   // Get current themeKey for select input
@@ -375,6 +376,36 @@ export default function TemplateEditorPanel({
               </div>
             </div>
           </div>
+
+          {/* Section 4: Composition */}
+          {(() => {
+            let parsed: TemplateJson | null = null;
+            try {
+              if (templateJsonStr) {
+                parsed = JSON.parse(templateJsonStr) as TemplateJson;
+              }
+            } catch {
+              return null;
+            }
+            
+            if (!parsed || !parsed.pages) return null;
+
+            return (
+              <div className="grid grid-cols-12 gap-8">
+                <div className="col-span-4">
+                  <h3 className="text-[11px] font-medium uppercase tracking-widest">
+                    04 / COMPOSITION
+                  </h3>
+                  <p className="text-[10px] text-neutral-400 mt-2 font-light">
+                    Visual breakdown of the sections included in this blueprint.
+                  </p>
+                </div>
+                <div className="col-span-8">
+                  <CompositionPreview templateJson={parsed} />
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Submit error */}
           {submitError && (

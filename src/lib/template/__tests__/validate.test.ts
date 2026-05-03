@@ -19,6 +19,8 @@ import { slots as medicalSlots } from '@/themes/medical/slots';
 import weddingPreset from '@/themes/wedding/presets/default.preset';
 import { slots as weddingSlots } from '@/themes/wedding/slots';
 
+import { themeMap } from '@/themes/_generated';
+
 const ALL_THEME_KEYS = ['cafe', 'corporate', 'fitness', 'interior', 'legal', 'medical', 'wedding'];
 
 function minimalJson(overrides: Partial<TemplateJson> = {}): TemplateJson {
@@ -84,16 +86,16 @@ describe('validateTemplateJson — structure', () => {
 
   it('errors when data field is missing value', () => {
     const json = minimalJson();
-    // @ts-expect-error intentional bad data
-    json.pages[0].sections[0].data.title.value = undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (json.pages[0].sections[0].data.title as any).value = undefined;
     const result = validateTemplateJson(json);
     expect(result.errors.some((e) => e.code === 'MISSING_FIELD_VALUE')).toBe(true);
   });
 
   it('errors when data field value is not a string', () => {
     const json = minimalJson();
-    // @ts-expect-error intentional bad data
-    json.pages[0].sections[0].data.title.value = 42;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (json.pages[0].sections[0].data.title as any).value = 42;
     const result = validateTemplateJson(json);
     expect(result.errors.some((e) => e.code === 'NON_STRING_FIELD_VALUE')).toBe(true);
   });
@@ -221,8 +223,8 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
 
   it('errors on field type mismatch', () => {
     const json = minimalJson();
-    // @ts-expect-error intentional bad data
-    json.pages[0].sections[0].data.title.type = 'image'; // expected text
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (json.pages[0].sections[0].data.title as any).type = 'image'; // expected text
     const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'FIELD_TYPE_MISMATCH')).toBe(true);
   });
@@ -239,21 +241,27 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
 
 describe('all presets — errors must be zero', () => {
   const cases = [
-    { name: 'corporate-default', preset: corporatePreset, slots: corporateSlots },
-    { name: 'cafe-default',      preset: cafePreset,      slots: cafeSlots },
-    { name: 'fitness-default',   preset: fitnessPreset,   slots: fitnessSlots },
-    { name: 'interior-default',  preset: interiorPreset,  slots: interiorSlots },
-    { name: 'legal-default',     preset: legalPreset,     slots: legalSlots },
-    { name: 'medical-default',   preset: medicalPreset,   slots: medicalSlots },
-    { name: 'wedding-default',   preset: weddingPreset,   slots: weddingSlots },
+    { name: 'corporate-default', preset: corporatePreset, slots: corporateSlots, themeKey: 'corporate' },
+    { name: 'cafe-default',      preset: cafePreset,      slots: cafeSlots,      themeKey: 'cafe' },
+    { name: 'fitness-default',   preset: fitnessPreset,   slots: fitnessSlots,   themeKey: 'fitness' },
+    { name: 'interior-default',  preset: interiorPreset,  slots: interiorSlots,  themeKey: 'interior' },
+    { name: 'legal-default',     preset: legalPreset,     slots: legalSlots,     themeKey: 'legal' },
+    { name: 'medical-default',   preset: medicalPreset,   slots: medicalSlots,   themeKey: 'medical' },
+    { name: 'wedding-default',   preset: weddingPreset,   slots: weddingSlots,   themeKey: 'wedding' },
   ];
 
-  for (const { name, preset, slots } of cases) {
-    it(`${name} validates with no errors`, () => {
+  for (const { name, preset, slots, themeKey } of cases) {
+    it(`${name} validates with no errors`, async () => {
+      const themeLoader = themeMap[themeKey];
+      const themeModule = themeLoader ? await themeLoader() : null;
+      const themeLibrary = themeModule?.library;
+
       const result = validateTemplateJson(preset.templateJson, {
         availableThemeKeys: ALL_THEME_KEYS,
-        themeSlots: slots,
+        themeSlots: themeLibrary ? undefined : slots,
+        themeLibrary,
       });
+      
       if (result.errors.length > 0) {
         console.error(`Errors in ${name}:`, result.errors);
       }
