@@ -1,5 +1,4 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
-import styles from '../interior.module.css';
 import { HomeIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, LetterIcon, ClockIcon } from '../sections/icons';
 
 const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
