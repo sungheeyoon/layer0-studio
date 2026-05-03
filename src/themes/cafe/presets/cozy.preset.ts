@@ -40,7 +40,7 @@ const preset: TemplatePreset = {
       id: 'visit-1',
       componentKey: 'visit',
       data: {
-        title: { value: 'Come Visit', type: 'text', label: '섹션 타이틀' },
+        title: { value: 'Come Visit', type: 'textarea', label: '섹션 타이틀' },
         address: { value: '123 Cozy Lane, Seoul', type: 'text', label: '주소' },
       },
     },
