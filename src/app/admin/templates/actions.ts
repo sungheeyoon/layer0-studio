@@ -11,6 +11,7 @@ import {
 import { TemplateJson } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';
+import { syncTemplates } from '@/lib/template/sync';
 
 async function checkAdmin() {
   const supabase = await createClient();
@@ -211,6 +212,33 @@ export async function revertToDraftAction(id: string) {
       return { error: err.code };
     }
     return { error: 'UNKNOWN' };
+  }
+}
+
+export async function syncTemplatesAction(dryRun: boolean) {
+  const user = await checkAdmin();
+  if (!user) return { error: 'FORBIDDEN' };
+
+  // For real apply, check canPublishTemplates
+  if (!dryRun && user.app_metadata?.canPublishTemplates !== true) {
+    return { error: 'UNAUTHORIZED_TO_APPLY_SYNC' };
+  }
+
+  try {
+    const adminSupabase = await createAdminClient();
+    const summary = await syncTemplates(adminSupabase, {
+      dryRun,
+      performedBy: user.id
+    });
+
+    if (!dryRun) {
+      revalidatePath('/admin/templates');
+    }
+
+    return { success: true, summary };
+  } catch (err: unknown) {
+    console.error('syncTemplatesAction error:', err);
+    return { error: err instanceof Error ? err.message : 'UNKNOWN' };
   }
 }
 

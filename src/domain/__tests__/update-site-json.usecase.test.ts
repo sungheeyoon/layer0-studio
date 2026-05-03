@@ -23,7 +23,6 @@ function makeTwoPageJson(): TemplateJson {
           {
             id: 'section-a',
             type: 'hero',
-            order: 0,
             visible: true,
             editable: true,
             data: {
@@ -41,7 +40,6 @@ function makeTwoPageJson(): TemplateJson {
           {
             id: 'section-b',
             type: 'text',
-            order: 0,
             visible: true,
             editable: true,
             data: {

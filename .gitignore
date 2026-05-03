@@ -43,6 +43,5 @@ next-env.d.ts
 # agent artifacts
 .gemini/
 
-# local scripts (migration helpers, one-off tooling)
-/scripts/
+# local scripts (migration helpers, one-off tooling — add to personal .git/info/exclude)
 .claude/

@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>오뜨르 웨딩 — 당신의 이야기를, 평생의 기억으로</title>
+  <meta name="description" content="풀 웨딩 플래닝부터 스몰 웨딩, 프러포즈 이벤트까지. 오뜨르가 당신의 가장 특별한 날을 완성합니다." />
+
+  <!-- Pretendard -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+
+  <!-- Cormorant Garamond (display) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Iconify Solar -->
+  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard Variable', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            display: ['Cormorant Garamond', 'Georgia', 'serif'],
+          },
+          colors: {
+            rose: {
+              blush: '#e8b4b8',
+              soft: '#f2d5d8',
+              muted: '#c9868b',
+              deep: '#a5565b',
+            },
+            warm: {
+              gold: '#d4a96a',
+              cream: '#f5f0eb',
+              ivory: '#faf7f4',
+            },
+            dark: {
+              900: '#0a0908',
+              800: '#13110f',
+              700: '#1e1b18',
+              600: '#2a2622',
+              500: '#3d3830',
+            },
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    :root {
+      --blush: #e8b4b8;
+      --blush-deep: #c9868b;
+      --gold: #d4a96a;
+      --cream: #f5f0eb;
+      --bg: #0a0908;
+      --surface: #13110f;
+      --surface-2: #1e1b18;
+      --border: rgba(232, 180, 184, 0.12);
+      --text: #f5f0eb;
+      --text-muted: rgba(245, 240, 235, 0.5);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--cream);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .word-keep { word-break: keep-all; }
+
+    /* Display font */
+    .font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    /* Reveal animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(1.25rem);
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.55s; }
+
+    /* Nav */
+    .nav-glass {
+      background: rgba(10, 9, 8, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(232, 180, 184, 0.1);
+    }
+
+    /* Hero */
+    .hero-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(10,9,8,0.45) 0%,
+        rgba(10,9,8,0.25) 40%,
+        rgba(10,9,8,0.75) 80%,
+        rgba(10,9,8,1) 100%
+      );
+    }
+
+    /* Blush divider */
+    .divider-blush {
+      display: block;
+      width: 2.5rem;
+      height: 1px;
+      background: linear-gradient(to right, var(--blush), var(--gold));
+    }
+
+    /* Buttons */
+    .btn-blush {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--blush);
+      color: #1a0f10;
+      padding: 1rem 2.25rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      letter-spacing: -0.01em;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+    .btn-blush:hover { background: var(--blush-deep); color: #fff; transform: scale(1.02); }
+    .btn-blush:active { transform: scale(0.98); }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      color: var(--cream);
+      padding: 1rem 2.25rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(245, 240, 235, 0.3);
+      font-weight: 600;
+      font-size: 0.9375rem;
+      letter-spacing: -0.01em;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+    .btn-ghost:hover { border-color: var(--blush); color: var(--blush); transform: scale(1.02); }
+
+    .btn-dark {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg);
+      color: var(--cream);
+      padding: 1rem 2.25rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      letter-spacing: -0.01em;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+    .btn-dark:hover { background: #1e1b18; transform: scale(1.02); }
+
+    /* Card hover */
+    .pkg-card {
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pkg-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+      border-color: rgba(232, 180, 184, 0.3) !important;
+    }
+
+    /* Gallery item */
+    .gallery-item img {
+      transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .gallery-item:hover img { transform: scale(1.06); }
+
+    /* Grain texture */
+    .grain::before {
+      content: '';
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Section bg pattern */
+    .dotted-bg {
+      background-image: radial-gradient(rgba(232, 180, 184, 0.07) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    /* Number counter */
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    /* Process line */
+    .process-connector {
+      position: absolute;
+      top: 1.5rem;
+      left: calc(50% + 1.5rem);
+      right: calc(-50% + 1.5rem);
+      height: 1px;
+      background: linear-gradient(to right, rgba(232,180,184,0.3), rgba(212,169,106,0.3));
+    }
+
+    /* FAQ */
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .faq-answer.open { max-height: 300px; }
+    .faq-icon { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    .faq-icon.rotated { transform: rotate(45deg); }
+
+    /* Mobile menu */
+    #mobile-menu {
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+    }
+    #mobile-menu.closed { opacity: 0; visibility: hidden; pointer-events: none; }
+    #mobile-menu:not(.closed) { opacity: 1; visibility: visible; }
+
+    /* Floating CTA */
+    #float-cta {
+      transition: opacity 0.4s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #float-cta.hidden-cta { opacity: 0; transform: translateY(1rem); pointer-events: none; }
+
+    /* Marquee */
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .marquee-track { animation: marquee 22s linear infinite; }
+    .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
+
+    /* Decorative line */
+    .line-ornament {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--blush);
+      opacity: 0.5;
+    }
+    .line-ornament::before, .line-ornament::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: currentColor;
+    }
+
+    /* Photo hover overlay */
+    .photo-overlay {
+      background: linear-gradient(to top, rgba(10,9,8,0.7) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .gallery-item:hover .photo-overlay { opacity: 1; }
+  </style>
+</head>
+
+<body class="grain">
+
+  <!-- ======================== NAV ======================== -->
+  <header class="fixed top-4 left-0 right-0 z-50 px-4">
+    <nav class="nav-glass max-w-6xl mx-auto rounded-2xl px-6 py-3.5 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="#" class="select-none flex items-center gap-3">
+        <div class="font-display text-xl font-light tracking-[0.12em] text-warm-cream leading-none">
+          HAUTRE
+        </div>
+        <div class="w-px h-4 bg-rose-blush/30"></div>
+        <div class="text-[10px] font-semibold tracking-[0.2em] text-rose-blush/70 uppercase">Wedding &amp; Event</div>
+      </a>
+
+      <!-- Desktop nav -->
+      <ul class="hidden md:flex items-center gap-1">
+        <li><a href="#services" class="px-3.5 py-2 text-sm font-medium text-warm-cream/60 hover:text-warm-cream rounded-lg transition-colors duration-200">서비스</a></li>
+        <li><a href="#gallery" class="px-3.5 py-2 text-sm font-medium text-warm-cream/60 hover:text-warm-cream rounded-lg transition-colors duration-200">갤러리</a></li>
+        <li><a href="#process" class="px-3.5 py-2 text-sm font-medium text-warm-cream/60 hover:text-warm-cream rounded-lg transition-colors duration-200">진행 방식</a></li>
+        <li><a href="#pricing" class="px-3.5 py-2 text-sm font-medium text-warm-cream/60 hover:text-warm-cream rounded-lg transition-colors duration-200">패키지</a></li>
+        <li><a href="#reviews" class="px-3.5 py-2 text-sm font-medium text-warm-cream/60 hover:text-warm-cream rounded-lg transition-colors duration-200">후기</a></li>
+      </ul>
+
+      <!-- CTA + mobile button -->
+      <div class="flex items-center gap-2">
+        <a href="#contact" class="hidden md:inline-flex btn-blush py-2.5 px-5 text-sm">
+          상담 예약
+          <iconify-icon icon="solar:arrow-right-linear" class="text-base"></iconify-icon>
+        </a>
+        <button id="menu-btn" class="md:hidden p-2 rounded-lg text-warm-cream/60 hover:text-warm-cream transition-colors" aria-label="메뉴">
+          <iconify-icon icon="solar:hamburger-menu-linear" class="text-xl"></iconify-icon>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="closed fixed inset-0 z-40 bg-dark-900/98 backdrop-blur-2xl flex flex-col justify-center px-8">
+    <button id="menu-close" class="absolute top-6 right-6 p-2 rounded-lg text-warm-cream/40 hover:text-warm-cream transition-colors">
+      <iconify-icon icon="solar:close-circle-linear" class="text-2xl"></iconify-icon>
+    </button>
+    <div class="font-display text-sm tracking-[0.3em] text-rose-blush/50 uppercase mb-8">Menu</div>
+    <ul class="space-y-2">
+      <li><a href="#services" class="mobile-nav block py-3 text-3xl font-display font-light text-warm-cream border-b border-white/5 tracking-wide">서비스</a></li>
+      <li><a href="#gallery" class="mobile-nav block py-3 text-3xl font-display font-light text-warm-cream border-b border-white/5 tracking-wide">갤러리</a></li>
+      <li><a href="#process" class="mobile-nav block py-3 text-3xl font-display font-light text-warm-cream border-b border-white/5 tracking-wide">진행 방식</a></li>
+      <li><a href="#pricing" class="mobile-nav block py-3 text-3xl font-display font-light text-warm-cream border-b border-white/5 tracking-wide">패키지</a></li>
+      <li><a href="#reviews" class="mobile-nav block py-3 text-3xl font-display font-light text-warm-cream border-b border-white/5 tracking-wide">후기</a></li>
+    </ul>
+    <div class="mt-10">
+      <a href="#contact" class="btn-blush w-full justify-center">상담 예약하기</a>
+    </div>
+  </div>
+
+  <!-- ======================== HERO ======================== -->
+  <section class="relative min-h-[100dvh] flex flex-col justify-end pb-20 overflow-hidden">
+    <!-- Background image -->
+    <div class="absolute inset-0 z-0">
+      <img
+        src="https://picsum.photos/seed/wedding_hero_main/1600/900"
+        alt="웨딩 배경"
+        class="w-full h-full object-cover object-center"
+        decoding="async"
+      />
+      <div class="hero-overlay absolute inset-0"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-6xl mx-auto px-4 w-full">
+      <div class="max-w-3xl">
+        <!-- Eyebrow -->
+        <div class="line-ornament text-xs tracking-[0.25em] font-semibold mb-8 max-w-xs reveal">
+          Wedding &amp; Event Planner
+        </div>
+
+        <!-- Headline -->
+        <h1 class="font-display font-light text-5xl md:text-7xl xl:text-8xl text-warm-cream leading-[1.05] tracking-tight word-keep mb-6 reveal reveal-delay-1">
+          당신의 이야기를,<br />
+          <em class="not-italic text-rose-blush">평생의 기억</em>으로
+        </h1>
+
+        <p class="text-base md:text-lg text-warm-cream/60 leading-relaxed max-w-[50ch] word-keep mb-10 reveal reveal-delay-2">
+          첫 만남부터 마지막 꽃잎이 떨어지는 순간까지 — 오뜨르의 웨딩 플래너가 오직 당신만을 위한 하루를 설계합니다.
+        </p>
+
+        <div class="flex flex-wrap gap-3 reveal reveal-delay-3">
+          <a href="#contact" class="btn-blush">
+            <iconify-icon icon="solar:heart-bold" class="text-base"></iconify-icon>
+            무료 상담 예약하기
+          </a>
+          <a href="#gallery" class="btn-ghost">
+            갤러리 보기
+            <iconify-icon icon="solar:arrow-down-linear" class="text-base"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="mt-16 pt-8 border-t border-white/10 grid grid-cols-3 gap-4 max-w-xl reveal reveal-delay-4">
+        <div>
+          <p class="stat-num text-3xl md:text-4xl font-light text-warm-cream">847<span class="text-rose-blush text-2xl">+</span></p>
+          <p class="text-xs text-warm-cream/40 mt-1 tracking-wide word-keep">누적 웨딩 연출</p>
+        </div>
+        <div>
+          <p class="stat-num text-3xl md:text-4xl font-light text-warm-cream">9.8<span class="text-rose-blush text-xl">/10</span></p>
+          <p class="text-xs text-warm-cream/40 mt-1 tracking-wide word-keep">평균 만족도</p>
+        </div>
+        <div>
+          <p class="stat-num text-3xl md:text-4xl font-light text-warm-cream">11<span class="text-rose-blush text-xl">년</span></p>
+          <p class="text-xs text-warm-cream/40 mt-1 tracking-wide word-keep">웨딩 플래닝 경력</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 right-8 hidden md:flex flex-col items-center gap-2 reveal reveal-delay-5">
+      <div class="w-px h-12 bg-gradient-to-b from-transparent to-rose-blush/50"></div>
+      <p class="text-[10px] tracking-[0.25em] text-warm-cream/30 uppercase rotate-90 origin-center translate-y-3">Scroll</p>
+    </div>
+  </section>
+
+  <!-- ======================== MARQUEE ======================== -->
+  <div class="py-5 border-y border-rose-blush/10 overflow-hidden marquee-wrap bg-dark-800">
+    <div class="marquee-track flex gap-12 w-max">
+      <template id="marquee-items">
+        <span class="font-display text-sm font-light tracking-[0.2em] text-rose-blush/40 uppercase whitespace-nowrap">Wedding Planning</span>
+        <iconify-icon icon="solar:star-linear" class="text-rose-blush/20 text-xs flex-shrink-0"></iconify-icon>
+        <span class="font-display text-sm font-light tracking-[0.2em] text-warm-gold/40 uppercase whitespace-nowrap">Event Direction</span>
+        <iconify-icon icon="solar:star-linear" class="text-rose-blush/20 text-xs flex-shrink-0"></iconify-icon>
+        <span class="font-display text-sm font-light tracking-[0.2em] text-rose-blush/40 uppercase whitespace-nowrap">Small Wedding</span>
+        <iconify-icon icon="solar:star-linear" class="text-rose-blush/20 text-xs flex-shrink-0"></iconify-icon>
+        <span class="font-display text-sm font-light tracking-[0.2em] text-warm-gold/40 uppercase whitespace-nowrap">Proposal Event</span>
+        <iconify-icon icon="solar:star-linear" class="text-rose-blush/20 text-xs flex-shrink-0"></iconify-icon>
+        <span class="font-display text-sm font-light tracking-[0.2em] text-rose-blush/40 uppercase whitespace-nowrap">Floral Design</span>
+        <iconify-icon icon="solar:star-linear" class="text-rose-blush/20 text-xs flex-shrink-0"></iconify-icon>
+        <span class="font-display text-sm font-light tracking-[0.2em] text-warm-gold/40 uppercase whitespace-nowrap">Venue Styling</span>
+        <iconify-icon icon="solar:star-linear" class="text-rose-blush/20 text-xs flex-shrink-0"></iconify-icon>
+      </template>
+    </div>
+  </div>
+
+  <!-- ======================== BRAND PROMISE ======================== -->
+  <section class="py-24 md:py-36 px-4 bg-dark-800">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="line-ornament text-xs tracking-[0.25em] font-semibold mb-10 reveal">Our Philosophy</div>
+      <h2 class="font-display font-light text-4xl md:text-5xl xl:text-6xl text-warm-cream leading-[1.1] tracking-tight word-keep mb-8 reveal reveal-delay-1">
+        "모든 결혼은 다릅니다.<br />
+        <em class="not-italic text-rose-blush">두 사람의 온도</em>로<br />
+        만들어져야 하니까요."
+      </h2>
+      <p class="text-warm-cream/50 leading-relaxed text-base md:text-lg word-keep max-w-2xl mx-auto reveal reveal-delay-2">
+        수백 건의 웨딩을 진행했지만, 오뜨르는 단 한 번도 같은 웨딩을 만든 적이 없습니다. 두 분이 처음 만났던 날의 감정, 함께 좋아하는 음악, 두 분만 아는 농담 — 그 모든 것이 당신의 웨딩에 녹아듭니다.
+      </p>
+      <div class="mt-10 reveal reveal-delay-3">
+        <a href="#contact" class="btn-blush">
+          우리의 이야기 시작하기
+          <iconify-icon icon="solar:arrow-right-linear" class="text-base"></iconify-icon>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== SERVICES ======================== -->
+  <section id="services" class="py-24 md:py-32 px-4 bg-dark-900 dotted-bg">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-14 reveal">
+        <div class="divider-blush mb-4"></div>
+        <p class="text-xs font-semibold text-rose-blush/60 uppercase tracking-widest mb-3">Services</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-warm-cream tracking-tight word-keep">
+          어떤 하루를 꿈꾸시나요
+        </h2>
+      </div>
+
+      <!-- Bento -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Full planning - large -->
+        <div class="md:col-span-2 relative overflow-hidden rounded-2xl group gallery-item reveal">
+          <img src="https://picsum.photos/seed/wedding_full/900/500" alt="풀 웨딩 플래닝" class="w-full h-72 object-cover" loading="lazy" decoding="async" />
+          <div class="photo-overlay absolute inset-0 rounded-2xl"></div>
+          <div class="absolute inset-0 flex flex-col justify-end p-7">
+            <span class="inline-block px-2.5 py-1 bg-rose-blush/20 text-rose-blush text-xs font-bold rounded-full border border-rose-blush/20 mb-3 w-fit">Most Popular</span>
+            <h3 class="text-xl font-bold text-warm-cream mb-1 word-keep">풀 웨딩 플래닝</h3>
+            <p class="text-sm text-warm-cream/60 word-keep">예식장 섭외부터 꽃장식, 당일 MC·연출까지 모든 과정을 오뜨르가 함께합니다.</p>
+          </div>
+          <div class="absolute inset-0 border border-rose-blush/0 group-hover:border-rose-blush/20 rounded-2xl transition-all duration-500"></div>
+        </div>
+
+        <!-- Small wedding - tall -->
+        <div class="relative overflow-hidden rounded-2xl group gallery-item reveal reveal-delay-1">
+          <img src="https://picsum.photos/seed/wedding_small/500/600" alt="스몰 웨딩" class="w-full h-72 md:h-full object-cover" loading="lazy" decoding="async" />
+          <div class="photo-overlay absolute inset-0 rounded-2xl"></div>
+          <div class="absolute inset-0 flex flex-col justify-end p-7">
+            <h3 class="text-xl font-bold text-warm-cream mb-1 word-keep">스몰 웨딩</h3>
+            <p class="text-sm text-warm-cream/60 word-keep">소규모 야외·공간 웨딩. 100인 이하, 더 깊은 감동.</p>
+          </div>
+          <div class="absolute inset-0 border border-rose-blush/0 group-hover:border-rose-blush/20 rounded-2xl transition-all duration-500"></div>
+        </div>
+
+        <!-- Proposal -->
+        <div class="bg-dark-700 border border-white/6 rounded-2xl p-7 reveal">
+          <div class="w-11 h-11 rounded-xl bg-rose-blush/10 flex items-center justify-center mb-5">
+            <iconify-icon icon="solar:heart-bold-duotone" class="text-rose-blush text-xl"></iconify-icon>
+          </div>
+          <h3 class="font-bold text-warm-cream mb-2 word-keep">프러포즈 이벤트</h3>
+          <p class="text-sm text-warm-cream/50 leading-relaxed word-keep">레스토랑 대관, 플라워 세팅, 현장 연출 — 그 순간을 완벽하게 준비합니다.</p>
+        </div>
+
+        <!-- Anniversary -->
+        <div class="bg-dark-700 border border-white/6 rounded-2xl p-7 reveal reveal-delay-1">
+          <div class="w-11 h-11 rounded-xl bg-warm-gold/10 flex items-center justify-center mb-5">
+            <iconify-icon icon="solar:gift-bold-duotone" class="text-warm-gold text-xl"></iconify-icon>
+          </div>
+          <h3 class="font-bold text-warm-cream mb-2 word-keep">기념일·파티 연출</h3>
+          <p class="text-sm text-warm-cream/50 leading-relaxed word-keep">돌잔치, 환갑, 생일 파티, 기업 행사까지. 규모와 예산에 맞춰 기획합니다.</p>
+        </div>
+
+        <!-- CTA card -->
+        <div class="bg-rose-blush rounded-2xl p-7 flex flex-col justify-between reveal reveal-delay-2">
+          <div>
+            <p class="font-display text-2xl font-light text-dark-900 leading-tight mb-3 word-keep">
+              어떤 서비스가<br />맞는지 모르겠다면?
+            </p>
+            <p class="text-sm text-dark-900/60 word-keep">무료 상담으로 두 분께 가장 잘 맞는 플랜을 찾아드립니다.</p>
+          </div>
+          <a href="#contact" class="btn-dark mt-6 w-fit">
+            상담 시작하기
+            <iconify-icon icon="solar:arrow-right-linear" class="text-base"></iconify-icon>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== GALLERY ======================== -->
+  <section id="gallery" class="py-24 md:py-32 px-4 bg-dark-800">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex items-end justify-between mb-12 reveal">
+        <div>
+          <div class="divider-blush mb-4"></div>
+          <p class="text-xs font-semibold text-rose-blush/60 uppercase tracking-widest mb-3">Gallery</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-warm-cream tracking-tight word-keep">
+            오뜨르가 만든 순간들
+          </h2>
+        </div>
+        <a href="#contact" class="hidden md:inline-flex items-center gap-2 text-sm text-rose-blush/70 hover:text-rose-blush font-medium transition-colors duration-200">
+          전체 보기
+          <iconify-icon icon="solar:arrow-right-linear" class="text-base"></iconify-icon>
+        </a>
+      </div>
+
+      <!-- Masonry-style grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="gallery-item rounded-xl overflow-hidden row-span-2 relative reveal">
+          <img src="https://picsum.photos/seed/wed_g1/400/600" alt="웨딩 사진 1" class="w-full h-full object-cover" loading="lazy" decoding="async" />
+          <div class="photo-overlay absolute inset-0"></div>
+        </div>
+        <div class="gallery-item rounded-xl overflow-hidden relative reveal reveal-delay-1">
+          <img src="https://picsum.photos/seed/wed_g2/400/300" alt="웨딩 사진 2" class="w-full h-48 object-cover" loading="lazy" decoding="async" />
+          <div class="photo-overlay absolute inset-0"></div>
+        </div>
+        <div class="gallery-item rounded-xl overflow-hidden relative reveal reveal-delay-2">
+          <img src="https://picsum.photos/seed/wed_g3/400/300" alt="웨딩 사진 3" class="w-full h-48 object-cover" loading="lazy" decoding="async" />
+          <div class="photo-overlay absolute inset-0"></div>
+        </div>
+        <div class="gallery-item rounded-xl overflow-hidden row-span-2 relative reveal reveal-delay-1">
+          <img src="https://picsum.photos/seed/wed_g4/400/600" alt="웨딩 사진 4" class="w-full h-full object-cover" loading="lazy" decoding="async" />
+          <div class="photo-overlay absolute inset-0"></div>
+        </div>
+        <div class="gallery-item rounded-xl overflow-hidden relative reveal reveal-delay-3">
+          <img src="https://picsum.photos/seed/wed_g5/400/300" alt="웨딩 사진 5" class="w-full h-48 object-cover" loading="lazy" decoding="async" />
+          <div class="photo-overlay absolute inset-0"></div>
+        </div>
+        <div class="gallery-item rounded-xl overflow-hidden relative reveal reveal-delay-4">
+          <img src="https://picsum.photos/seed/wed_g6/400/300" alt="웨딩 사진 6" class="w-full h-48 object-cover" loading="lazy" decoding="async" />
+          <div class="photo-overlay absolute inset-0"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== PROCESS ======================== -->
+  <section id="process" class="py-24 md:py-32 px-4 bg-dark-900">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 reveal">
+        <div class="line-ornament text-xs tracking-[0.25em] font-semibold mb-8">How We Work</div>
+        <h2 class="text-3xl md:text-4xl font-bold text-warm-cream tracking-tight word-keep">
+          처음부터 끝까지, 함께합니다
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Step 1 -->
+        <div class="text-center reveal">
+          <div class="relative inline-flex items-center justify-center">
+            <div class="w-14 h-14 rounded-full bg-rose-blush/10 border border-rose-blush/20 flex items-center justify-center mx-auto mb-5">
+              <iconify-icon icon="solar:chat-round-like-bold-duotone" class="text-rose-blush text-2xl"></iconify-icon>
+            </div>
+          </div>
+          <p class="font-display text-3xl font-light text-rose-blush/40 mb-2">01</p>
+          <h3 class="font-bold text-warm-cream mb-2 word-keep">첫 상담</h3>
+          <p class="text-sm text-warm-cream/40 leading-relaxed word-keep">두 분의 이야기와 날짜, 예산, 스타일을 여유 있게 나눕니다. 무료 진행.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="text-center reveal reveal-delay-1">
+          <div class="w-14 h-14 rounded-full bg-rose-blush/10 border border-rose-blush/20 flex items-center justify-center mx-auto mb-5">
+            <iconify-icon icon="solar:notebook-bold-duotone" class="text-rose-blush text-2xl"></iconify-icon>
+          </div>
+          <p class="font-display text-3xl font-light text-rose-blush/40 mb-2">02</p>
+          <h3 class="font-bold text-warm-cream mb-2 word-keep">맞춤 기획안</h3>
+          <p class="text-sm text-warm-cream/40 leading-relaxed word-keep">두 분만을 위한 컨셉, 공간, 플라워, 타임라인을 담은 기획안을 제안합니다.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="text-center reveal reveal-delay-2">
+          <div class="w-14 h-14 rounded-full bg-rose-blush/10 border border-rose-blush/20 flex items-center justify-center mx-auto mb-5">
+            <iconify-icon icon="solar:palette-bold-duotone" class="text-rose-blush text-2xl"></iconify-icon>
+          </div>
+          <p class="font-display text-3xl font-light text-rose-blush/40 mb-2">03</p>
+          <h3 class="font-bold text-warm-cream mb-2 word-keep">디테일 조율</h3>
+          <p class="text-sm text-warm-cream/40 leading-relaxed word-keep">드레스, 부케, 음악, 다이닝까지 — 모든 디테일을 함께 결정합니다.</p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="text-center reveal reveal-delay-3">
+          <div class="w-14 h-14 rounded-full bg-warm-gold/10 border border-warm-gold/20 flex items-center justify-center mx-auto mb-5">
+            <iconify-icon icon="solar:star-shine-bold-duotone" class="text-warm-gold text-2xl"></iconify-icon>
+          </div>
+          <p class="font-display text-3xl font-light text-warm-gold/40 mb-2">04</p>
+          <h3 class="font-bold text-warm-cream mb-2 word-keep">완벽한 D-Day</h3>
+          <p class="text-sm text-warm-cream/40 leading-relaxed word-keep">당일 전담 코디네이터 배치. 두 분은 오직 서로만 바라보시면 됩니다.</p>
+        </div>
+      </div>
+
+      <!-- Middle CTA -->
+      <div class="mt-16 text-center reveal">
+        <a href="#contact" class="btn-blush">
+          <iconify-icon icon="solar:calendar-bold" class="text-base"></iconify-icon>
+          첫 상담 예약하기 — 무료
+        </a>
+        <p class="text-xs text-warm-cream/30 mt-3">평균 응답 시간 2시간 이내</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== PRICING ======================== -->
+  <section id="pricing" class="py-24 md:py-32 px-4 bg-dark-800">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14 reveal">
+        <div class="line-ornament text-xs tracking-[0.25em] font-semibold mb-8">Packages</div>
+        <h2 class="text-3xl md:text-4xl font-bold text-warm-cream tracking-tight word-keep mb-3">패키지 안내</h2>
+        <p class="text-warm-cream/40 text-sm word-keep">모든 패키지는 상담 후 두 분에 맞게 조정 가능합니다.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Starter -->
+        <div class="pkg-card bg-dark-700 border border-white/8 rounded-2xl p-7 reveal">
+          <p class="text-xs font-bold text-warm-cream/30 uppercase tracking-widest mb-4">Essentials</p>
+          <h3 class="text-xl font-bold text-warm-cream mb-1 word-keep">당일 코디네이션</h3>
+          <p class="font-display text-4xl font-light text-rose-blush mt-4 mb-1">390<span class="text-xl text-warm-cream/40">만원~</span></p>
+          <p class="text-xs text-warm-cream/30 mb-6">부가세 별도</p>
+          <ul class="space-y-3 mb-7">
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              D-Day 전담 코디네이터 1인
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              타임라인·큐시트 제작
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              업체 컨펌·현장 점검
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              리허설 동행
+            </li>
+          </ul>
+          <a href="#contact" class="btn-ghost w-full justify-center text-sm py-3">상담 신청</a>
+        </div>
+
+        <!-- Standard - featured -->
+        <div class="pkg-card bg-dark-900 border border-rose-blush/25 rounded-2xl p-7 relative reveal reveal-delay-1 shadow-[0_0_60px_rgba(232,180,184,0.08)]">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-rose-blush text-dark-900 text-xs font-bold rounded-full">가장 많이 선택</div>
+          <p class="text-xs font-bold text-rose-blush/60 uppercase tracking-widest mb-4">Standard</p>
+          <h3 class="text-xl font-bold text-warm-cream mb-1 word-keep">세미 풀 플래닝</h3>
+          <p class="font-display text-4xl font-light text-rose-blush mt-4 mb-1">780<span class="text-xl text-warm-cream/40">만원~</span></p>
+          <p class="text-xs text-warm-cream/30 mb-6">부가세 별도</p>
+          <ul class="space-y-3 mb-7">
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/70 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              Essentials 전체 포함
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/70 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              컨셉·무드보드 기획
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/70 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              플라워·데코 디렉팅
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/70 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              업체 협상·계약 대행
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/70 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-rose-blush text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              무제한 상담 (카카오·전화)
+            </li>
+          </ul>
+          <a href="#contact" class="btn-blush w-full justify-center text-sm py-3">상담 신청</a>
+        </div>
+
+        <!-- Premium -->
+        <div class="pkg-card bg-dark-700 border border-white/8 rounded-2xl p-7 reveal reveal-delay-2">
+          <p class="text-xs font-bold text-warm-gold/50 uppercase tracking-widest mb-4">Premium</p>
+          <h3 class="text-xl font-bold text-warm-cream mb-1 word-keep">풀 웨딩 플래닝</h3>
+          <p class="font-display text-4xl font-light text-warm-gold mt-4 mb-1">문의<span class="text-xl text-warm-cream/40">~</span></p>
+          <p class="text-xs text-warm-cream/30 mb-6">규모·장소에 따라 상이</p>
+          <ul class="space-y-3 mb-7">
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-warm-gold/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              Standard 전체 포함
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-warm-gold/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              예식장 섭외·투어 동행
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-warm-gold/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              드레스·메이크업 동행
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-warm-gold/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              해외 웨딩 진행 가능
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-warm-cream/60 word-keep">
+              <iconify-icon icon="solar:check-circle-bold" class="text-warm-gold/70 text-base flex-shrink-0 mt-0.5"></iconify-icon>
+              전담 플래너 1:1 배정
+            </li>
+          </ul>
+          <a href="#contact" class="btn-ghost w-full justify-center text-sm py-3">문의하기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== TESTIMONIALS ======================== -->
+  <section id="reviews" class="py-24 md:py-32 px-4 bg-dark-900">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14 reveal">
+        <div class="line-ornament text-xs tracking-[0.25em] font-semibold mb-8">Reviews</div>
+        <h2 class="text-3xl md:text-4xl font-bold text-warm-cream tracking-tight word-keep">
+          두 분이 직접 전해주신 이야기
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Review 1 -->
+        <div class="bg-dark-700 border border-white/6 rounded-2xl p-7 reveal">
+          <div class="flex gap-0.5 mb-4">
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+          </div>
+          <p class="font-display text-4xl font-light text-rose-blush/30 leading-none mb-3">"</p>
+          <p class="text-sm text-warm-cream/60 leading-relaxed word-keep mb-6">처음엔 예산이 걱정됐는데, 플래너님이 우선순위를 같이 정해주시고 불필요한 지출을 줄여 오히려 절약했어요. 식장에 들어서는 순간 눈물이 났습니다. 정말 우리 웨딩이었어요.</p>
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/150?u=couple_jiyeon" alt="" class="w-9 h-9 rounded-full object-cover" loading="lazy" decoding="async" />
+            <div>
+              <p class="text-sm font-bold text-warm-cream">김지연 · 박재원</p>
+              <p class="text-xs text-warm-cream/30">세미 풀 플래닝 · 2024.05</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 2 - featured -->
+        <div class="bg-rose-blush/8 border border-rose-blush/15 rounded-2xl p-7 reveal reveal-delay-1">
+          <div class="flex gap-0.5 mb-4">
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+          </div>
+          <p class="font-display text-4xl font-light text-rose-blush/50 leading-none mb-3">"</p>
+          <p class="text-sm text-warm-cream/70 leading-relaxed word-keep mb-6">남자친구가 프러포즈 이벤트를 부탁했다고 하는데, 당일 레스토랑에 들어갔을 때 너무 예뻐서 실제로 소리를 질렀어요. 사소한 것 하나까지 우리 취향이었어요. 어떻게 알았는지 신기합니다.</p>
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/150?u=propose_soyeon" alt="" class="w-9 h-9 rounded-full object-cover" loading="lazy" decoding="async" />
+            <div>
+              <p class="text-sm font-bold text-warm-cream">이소연</p>
+              <p class="text-xs text-warm-cream/40">프러포즈 이벤트 · 2024.02</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 3 -->
+        <div class="bg-dark-700 border border-white/6 rounded-2xl p-7 reveal reveal-delay-2">
+          <div class="flex gap-0.5 mb-4">
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+          </div>
+          <p class="font-display text-4xl font-light text-rose-blush/30 leading-none mb-3">"</p>
+          <p class="text-sm text-warm-cream/60 leading-relaxed word-keep mb-6">해외 스몰 웨딩이라 걱정이 많았는데, 현지 업체 선정부터 비자 서류, 당일 통역까지 전부 해결해 주셨어요. 저희는 사랑하는 사람들과 그 순간에만 집중할 수 있었습니다.</p>
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/150?u=overseas_couple" alt="" class="w-9 h-9 rounded-full object-cover" loading="lazy" decoding="async" />
+            <div>
+              <p class="text-sm font-bold text-warm-cream">최하준 · 윤서아</p>
+              <p class="text-xs text-warm-cream/30">해외 스몰 웨딩 · 2023.10</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rating summary -->
+      <div class="mt-10 flex flex-col md:flex-row items-center justify-center gap-8 p-7 bg-dark-800 rounded-2xl border border-white/5 reveal">
+        <div class="text-center">
+          <p class="stat-num text-5xl font-light text-rose-blush">9.8</p>
+          <div class="flex gap-0.5 justify-center mt-2 mb-1">
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-rose-blush text-sm"></iconify-icon>
+          </div>
+          <p class="text-xs text-warm-cream/30">평균 만족도</p>
+        </div>
+        <div class="w-px h-12 bg-white/10 hidden md:block"></div>
+        <p class="text-warm-cream/50 text-sm word-keep text-center md:text-left max-w-xs">847쌍의 커플이 남긴 후기를 바탕으로 산출된 오뜨르의 평균 만족도 점수입니다. (네이버 예약 기준)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== FAQ ======================== -->
+  <section class="py-24 md:py-32 px-4 bg-dark-800">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-14 reveal">
+        <div class="line-ornament text-xs tracking-[0.25em] font-semibold mb-8">FAQ</div>
+        <h2 class="text-3xl md:text-4xl font-bold text-warm-cream tracking-tight word-keep">자주 묻는 질문</h2>
+      </div>
+
+      <div class="space-y-3">
+        <div class="faq-item bg-dark-700 border border-white/6 rounded-xl overflow-hidden reveal">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="font-semibold text-warm-cream text-sm md:text-base word-keep">예식까지 얼마나 여유가 있어야 하나요?</span>
+            <iconify-icon icon="solar:add-circle-linear" class="faq-icon text-rose-blush/50 text-xl flex-shrink-0 ml-4"></iconify-icon>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="text-sm text-warm-cream/40 leading-relaxed word-keep pb-5">풀 플래닝은 최소 6개월 전, 당일 코디네이션은 2개월 전을 권장합니다. 단, 예식장이 이미 확정되어 있는 경우 더 촉박해도 가능한 경우가 많으니 우선 연락 주세요.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-dark-700 border border-white/6 rounded-xl overflow-hidden reveal reveal-delay-1">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="font-semibold text-warm-cream text-sm md:text-base word-keep">예산이 많지 않아도 괜찮을까요?</span>
+            <iconify-icon icon="solar:add-circle-linear" class="faq-icon text-rose-blush/50 text-xl flex-shrink-0 ml-4"></iconify-icon>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="text-sm text-warm-cream/40 leading-relaxed word-keep pb-5">물론입니다. 오뜨르는 예산 안에서 두 분이 가장 원하는 것에 집중합니다. 상담 시 예산을 솔직하게 알려주시면, 불필요한 지출을 줄이고 의미 있는 곳에 집중하는 플랜을 제안드립니다.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-dark-700 border border-white/6 rounded-xl overflow-hidden reveal reveal-delay-2">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="font-semibold text-warm-cream text-sm md:text-base word-keep">플래너가 중간에 바뀌지 않나요?</span>
+            <iconify-icon icon="solar:add-circle-linear" class="faq-icon text-rose-blush/50 text-xl flex-shrink-0 ml-4"></iconify-icon>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="text-sm text-warm-cream/40 leading-relaxed word-keep pb-5">첫 상담부터 D-Day까지 동일한 플래너가 담당합니다. 오뜨르는 팀 내 업무 배분이 아닌, 1:1 전담제를 운영하고 있어 두 분과 처음부터 끝까지 같이 합니다.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-dark-700 border border-white/6 rounded-xl overflow-hidden reveal reveal-delay-3">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="font-semibold text-warm-cream text-sm md:text-base word-keep">야외 또는 해외 웨딩도 가능한가요?</span>
+            <iconify-icon icon="solar:add-circle-linear" class="faq-icon text-rose-blush/50 text-xl flex-shrink-0 ml-4"></iconify-icon>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="text-sm text-warm-cream/40 leading-relaxed word-keep pb-5">네, 가능합니다. 국내 야외 웨딩 및 제주·강원 지역 웨딩, 해외(발리, 프라하, 파리 등)도 진행한 경험이 있습니다. 위치에 따른 추가 비용은 상담 시 안내드립니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== CTA / CONTACT ======================== -->
+  <section id="contact" class="py-24 md:py-32 px-4 relative overflow-hidden">
+    <!-- Background -->
+    <div class="absolute inset-0 z-0">
+      <img src="https://picsum.photos/seed/wedding_cta_bg/1600/700" alt="" class="w-full h-full object-cover object-center" loading="lazy" decoding="async" />
+      <div class="absolute inset-0 bg-dark-900/88"></div>
+    </div>
+
+    <div class="relative z-10 max-w-5xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        <!-- Left -->
+        <div class="reveal">
+          <div class="line-ornament text-xs tracking-[0.25em] font-semibold mb-8 max-w-xs">Start Your Story</div>
+          <h2 class="font-display font-light text-4xl md:text-5xl text-warm-cream leading-tight tracking-tight word-keep mb-5">
+            두 분의 날짜를<br />
+            <em class="not-italic text-rose-blush">함께 잡아보세요.</em>
+          </h2>
+          <p class="text-warm-cream/50 leading-relaxed word-keep mb-8 text-sm md:text-base">
+            아직 아무것도 정해지지 않아도 괜찮습니다. 날짜도, 장소도, 예산도 — 모든 것은 상담 이후에 결정해도 충분합니다.
+          </p>
+
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-rose-blush/10 flex items-center justify-center flex-shrink-0">
+                <iconify-icon icon="solar:phone-bold" class="text-rose-blush text-base"></iconify-icon>
+              </div>
+              <div>
+                <p class="text-xs text-warm-cream/30">전화 상담</p>
+                <p class="font-bold text-warm-cream">02-5678-9012</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-rose-blush/10 flex items-center justify-center flex-shrink-0">
+                <iconify-icon icon="solar:clock-circle-bold" class="text-rose-blush text-base"></iconify-icon>
+              </div>
+              <div>
+                <p class="text-xs text-warm-cream/30">운영 시간</p>
+                <p class="font-bold text-warm-cream">평일 10:00–19:00 · 주말 예약제</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-rose-blush/10 flex items-center justify-center flex-shrink-0">
+                <iconify-icon icon="solar:map-point-bold" class="text-rose-blush text-base"></iconify-icon>
+              </div>
+              <div>
+                <p class="text-xs text-warm-cream/30">쇼룸</p>
+                <p class="font-bold text-warm-cream">서울 성수동 · 예약 후 방문 가능</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Form -->
+        <div class="bg-dark-800/80 backdrop-blur-xl border border-rose-blush/10 rounded-2xl p-8 reveal reveal-delay-1">
+          <h3 class="text-lg font-bold text-warm-cream mb-6 word-keep">무료 상담 신청</h3>
+
+          <form class="space-y-4" onsubmit="handleFormSubmit(event)">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-warm-cream/30 mb-1.5 uppercase tracking-wide">신랑 성함</label>
+                <input type="text" placeholder="홍길동" class="w-full px-4 py-3 bg-dark-700 border border-white/8 rounded-xl text-sm text-warm-cream placeholder:text-warm-cream/20 focus:outline-none focus:ring-1 focus:ring-rose-blush/40 focus:border-rose-blush/30 transition-all" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-warm-cream/30 mb-1.5 uppercase tracking-wide">신부 성함</label>
+                <input type="text" placeholder="김지연" class="w-full px-4 py-3 bg-dark-700 border border-white/8 rounded-xl text-sm text-warm-cream placeholder:text-warm-cream/20 focus:outline-none focus:ring-1 focus:ring-rose-blush/40 focus:border-rose-blush/30 transition-all" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-warm-cream/30 mb-1.5 uppercase tracking-wide">연락처</label>
+              <input type="tel" placeholder="010-0000-0000" class="w-full px-4 py-3 bg-dark-700 border border-white/8 rounded-xl text-sm text-warm-cream placeholder:text-warm-cream/20 focus:outline-none focus:ring-1 focus:ring-rose-blush/40 focus:border-rose-blush/30 transition-all" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-warm-cream/30 mb-1.5 uppercase tracking-wide">예상 예식 시기</label>
+              <select class="w-full px-4 py-3 bg-dark-700 border border-white/8 rounded-xl text-sm text-warm-cream focus:outline-none focus:ring-1 focus:ring-rose-blush/40 focus:border-rose-blush/30 transition-all">
+                <option value="" class="bg-dark-700">선택해 주세요</option>
+                <option class="bg-dark-700">3개월 이내</option>
+                <option class="bg-dark-700">3–6개월</option>
+                <option class="bg-dark-700">6–12개월</option>
+                <option class="bg-dark-700">1년 이상</option>
+                <option class="bg-dark-700">아직 미정</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-warm-cream/30 mb-1.5 uppercase tracking-wide">관심 서비스</label>
+              <select class="w-full px-4 py-3 bg-dark-700 border border-white/8 rounded-xl text-sm text-warm-cream focus:outline-none focus:ring-1 focus:ring-rose-blush/40 focus:border-rose-blush/30 transition-all">
+                <option value="" class="bg-dark-700">선택해 주세요</option>
+                <option class="bg-dark-700">풀 웨딩 플래닝</option>
+                <option class="bg-dark-700">세미 풀 플래닝</option>
+                <option class="bg-dark-700">당일 코디네이션</option>
+                <option class="bg-dark-700">스몰 웨딩</option>
+                <option class="bg-dark-700">프러포즈 이벤트</option>
+                <option class="bg-dark-700">기타 이벤트</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-warm-cream/30 mb-1.5 uppercase tracking-wide">전하고 싶은 말</label>
+              <textarea rows="3" placeholder="두 분의 이야기를 자유롭게 적어주세요." class="w-full px-4 py-3 bg-dark-700 border border-white/8 rounded-xl text-sm text-warm-cream placeholder:text-warm-cream/20 focus:outline-none focus:ring-1 focus:ring-rose-blush/40 focus:border-rose-blush/30 transition-all resize-none"></textarea>
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn-blush w-full justify-center py-3.5 text-base rounded-xl">
+              <iconify-icon icon="solar:heart-bold" class="text-lg"></iconify-icon>
+              상담 신청하기
+            </button>
+          </form>
+
+          <p class="text-xs text-warm-cream/20 text-center mt-4 word-keep">첫 상담은 무료입니다 · 평균 응답 2시간 이내</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== FOOTER ======================== -->
+  <footer class="bg-dark-900 border-t border-white/5 py-16 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-10 border-b border-white/5">
+        <!-- Brand -->
+        <div class="md:col-span-2">
+          <div class="font-display text-2xl font-light tracking-[0.15em] text-warm-cream mb-2">HAUTRE</div>
+          <p class="text-xs text-warm-cream/20 tracking-widest uppercase mb-5">Wedding &amp; Event Planner · Seoul</p>
+          <p class="text-sm text-warm-cream/30 leading-relaxed word-keep max-w-xs">
+            2013년부터 847쌍의 커플과 함께해 온 오뜨르. 당신의 이야기가 가장 아름다운 하루가 될 수 있도록 함께하겠습니다.
+          </p>
+          <div class="flex gap-3 mt-6">
+            <a href="#" aria-label="인스타그램" class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-warm-cream/30 hover:text-rose-blush hover:bg-rose-blush/10 transition-all duration-200">
+              <iconify-icon icon="solar:instagram-linear" class="text-base"></iconify-icon>
+            </a>
+            <a href="#" aria-label="유튜브" class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-warm-cream/30 hover:text-rose-blush hover:bg-rose-blush/10 transition-all duration-200">
+              <iconify-icon icon="solar:play-circle-linear" class="text-base"></iconify-icon>
+            </a>
+            <a href="#" aria-label="카카오" class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-warm-cream/30 hover:text-rose-blush hover:bg-rose-blush/10 transition-all duration-200">
+              <iconify-icon icon="solar:chat-square-linear" class="text-base"></iconify-icon>
+            </a>
+            <a href="#" aria-label="핀터레스트" class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-warm-cream/30 hover:text-rose-blush hover:bg-rose-blush/10 transition-all duration-200">
+              <iconify-icon icon="solar:bookmark-circle-linear" class="text-base"></iconify-icon>
+            </a>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div>
+          <p class="text-xs font-bold text-warm-cream/20 uppercase tracking-widest mb-4">서비스</p>
+          <ul class="space-y-2.5">
+            <li><a href="#services" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">풀 웨딩 플래닝</a></li>
+            <li><a href="#services" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">스몰 웨딩</a></li>
+            <li><a href="#services" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">프러포즈 이벤트</a></li>
+            <li><a href="#services" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">기념일 이벤트</a></li>
+            <li><a href="#services" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">해외 웨딩</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div>
+          <p class="text-xs font-bold text-warm-cream/20 uppercase tracking-widest mb-4">오뜨르</p>
+          <ul class="space-y-2.5">
+            <li><a href="#gallery" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">갤러리</a></li>
+            <li><a href="#pricing" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">패키지 안내</a></li>
+            <li><a href="#reviews" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">후기</a></li>
+            <li><a href="#contact" class="text-sm text-warm-cream/30 hover:text-rose-blush transition-colors duration-200">상담 신청</a></li>
+          </ul>
+          <div class="mt-5 pt-5 border-t border-white/5">
+            <p class="text-xs text-warm-cream/20 leading-relaxed">
+              서울 성동구 성수이로 · 오뜨르 쇼룸<br />
+              TEL. 02-5678-9012<br />
+              평일 10:00–19:00
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <p class="text-xs text-warm-cream/15">© 2024 오뜨르 웨딩 &amp; 이벤트. All rights reserved.</p>
+        <div class="flex gap-5">
+          <a href="#" class="text-xs text-warm-cream/15 hover:text-warm-cream/40 transition-colors">개인정보처리방침</a>
+          <a href="#" class="text-xs text-warm-cream/15 hover:text-warm-cream/40 transition-colors">이용약관</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating CTA -->
+  <div id="float-cta" class="hidden-cta fixed bottom-6 right-6 z-40">
+    <a href="#contact" class="btn-blush shadow-2xl shadow-rose-blush/20">
+      <iconify-icon icon="solar:heart-bold" class="text-base"></iconify-icon>
+      상담 예약
+    </a>
+  </div>
+
+  <!-- ======================== SCRIPTS ======================== -->
+  <script>
+    // Marquee duplicate
+    const track = document.querySelector('.marquee-track');
+    const tmpl = document.getElementById('marquee-items');
+    const content = tmpl.innerHTML;
+    track.innerHTML = content + content;
+
+    // Mobile menu
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuClose = document.getElementById('menu-close');
+    document.querySelectorAll('.mobile-nav').forEach(l => l.addEventListener('click', () => mobileMenu.classList.add('closed')));
+    menuBtn.addEventListener('click', () => mobileMenu.classList.remove('closed'));
+    menuClose.addEventListener('click', () => mobileMenu.classList.add('closed'));
+
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    revealEls.forEach(el => io.observe(el));
+
+    // Float CTA on scroll
+    const floatCta = document.getElementById('float-cta');
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (y > 600) {
+        floatCta.classList.remove('hidden-cta');
+      } else {
+        floatCta.classList.add('hidden-cta');
+      }
+      lastScroll = y;
+    }, { passive: true });
+
+    // FAQ
+    document.querySelectorAll('.faq-trigger').forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const answer = trigger.nextElementSibling;
+        const icon = trigger.querySelector('.faq-icon');
+        const isOpen = answer.classList.contains('open');
+        document.querySelectorAll('.faq-answer.open').forEach(a => a.classList.remove('open'));
+        document.querySelectorAll('.faq-icon.rotated').forEach(i => i.classList.remove('rotated'));
+        document.querySelectorAll('.faq-trigger').forEach(t => t.setAttribute('aria-expanded', 'false'));
+        if (!isOpen) {
+          answer.classList.add('open');
+          icon.classList.add('rotated');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    // Form submit
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.innerHTML = '<iconify-icon icon="solar:check-circle-bold" class="text-lg"></iconify-icon> 신청 완료! 곧 연락드릴게요';
+      btn.disabled = true;
+      btn.style.background = '#059669';
+    }
+  </script>
+</body>
+</html>

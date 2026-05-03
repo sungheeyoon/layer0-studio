@@ -64,18 +64,20 @@ src/types/database.ts ← Generated Supabase DB types
 
 ### Theme system
 
-Themes live in `src/themes/`. Each theme directory exports a default renderer component, a `slots` array (section definitions), and a `defaultTemplateJson`. The registry (`src/themes/registry.ts`) maps theme keys to dynamic imports; add new themes there.
+> **Any work touching templates / themes / presets / sync / validate / thumbnail capture: read `docs/TEMPLATE_SYSTEM.md` FIRST.** That doc is the single source of truth — concepts, data model, sync pipeline, validate rules, extension scenarios, gotchas, and code map. The summary here is just a pointer.
 
-The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer. It has:
+Themes live in `src/themes/<key>/`. Each theme is **visual tokens (`tokens.ts`) + a library of self-describing section components (`library/*.tsx` with `.meta.dataSchema`) + presets (`presets/*.preset.ts`)**. The registry is auto-generated (`src/themes/_generated.ts` via `pnpm generate:themes`, hooked into predev/prebuild) — adding a directory is enough to register.
+
+The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer:
 - `themeKey`: selects the renderer
-- `globalStyles`: CSS custom properties (`--theme-primary`, etc.) applied at the root
-- `pages`: array of pages, each with `sections` — always use `pages[].sections`; top-level `sections` was removed (2026-04-24, `docs/migrations/migrate-sections-to-pages.sql`)
+- `globalStyles`: CSS custom properties applied at the root
+- `pages[].sections[]`: each section's `type` matches a `componentKey` in the theme's library; **array order = render order** (the deprecated `section.order` field was removed in Phase 6d / migration 012)
+
+**Code is source of truth, sync reflects to DB.** `pnpm template:sync` (default dry-run, `--apply` to commit) reads presets, validates against each component's `dataSchema`, and upserts `templates` rows. Admin UI mirrors this with a 2-step Preview → Apply gated on `app_metadata.canPublishTemplates`.
 
 The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the theme renderer at runtime via `loadTheme()`. Clicking a section in the preview panel selects it in the left panel for inline editing.
 
 **Auto-save + optimistic concurrency:** Edits debounce-save after 4s idle, with a `beforeunload` guard for in-flight changes. Saves carry the row's `expectedUpdatedAt`; the `save_site_template_with_lock` RPC (migration 010) returns `'STALE_VERSION'` if another tab/device wrote in the meantime, which surfaces a Conflict modal in the editor. When adding new save paths, always thread `expectedUpdatedAt` through — never bypass the RPC.
-
-Authoring new themes: see `docs/TEMPLATE_AUTHORING_GUIDE.md`.
 
 ### Asset upload flow
 
@@ -106,9 +108,11 @@ Production builds **hard-fail** if `NEXT_PUBLIC_SITE_URL` is missing (`next.conf
 
 ### Database migrations
 
-SQL migrations live in `docs/migrations/` (001–010). Apply manually via the Supabase dashboard SQL editor or `supabase db push`. All migrations through 010 are applied to production:
+SQL migrations live in `docs/migrations/` (001–012). Apply manually via the Supabase dashboard SQL editor or `supabase db push`. All migrations through 012 are applied to production. Notable:
 - `009_storage_bucket_hardening.sql` — bucket-level MIME/size on `user_assets` and admin-only writes on `template-thumbnails`
 - `010_optimistic_concurrency.sql` — replaces `save_site_template_with_lock` to accept `p_expected_updated_at` and return `'OK' | 'STALE_VERSION'` (powers editor Conflict modal)
+- `011_template_sync_audit.sql` — `template_sync_audit` table for `pnpm template:sync` audit trail
+- `012_remove_section_order.sql` — strips deprecated `section.order` from `templates.template_json`, `user_sites.site_json`, and `user_sites.template_snapshot` JSONB (Phase 6d cleanup)
 
 ### Deployment
 

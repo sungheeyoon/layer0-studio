@@ -9,66 +9,9 @@ import {
   uploadThumbnailAction,
 } from './actions';
 import { getAvailableThemeKeys } from '@/themes/registry';
-
-const DEFAULT_JSON = JSON.stringify(
-  {
-    themeKey: 'corporate',
-    globalStyles: {
-      primaryColor: '#000000',
-      secondaryColor: '#7d000c',
-      fontFamily: 'Inter',
-      fontSize: '16px',
-      layout: 'asymmetric',
-    },
-    pages: [
-      {
-        id: 'home',
-        title: 'Home',
-        slug: '/',
-        order: 0,
-        sections: [
-          {
-            id: 'hero_01',
-            type: 'hero',
-            order: 1,
-            visible: true,
-            editable: true,
-            data: {
-              title: { value: 'Welcome', type: 'text', label: 'Hero Title', editable: true },
-              subtitle: {
-                value: 'Your subtitle here',
-                type: 'text',
-                label: 'Subtitle',
-                editable: true
-              },
-              backgroundImage: {
-                value: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000',
-                type: 'image',
-                label: 'Background Image',
-                editable: true
-              },
-              ctaText: { value: 'Explore More', type: 'text', label: 'CTA Text', editable: true },
-              ctaUrl: { value: '#', type: 'url', label: 'CTA URL', editable: true }
-            },
-          },
-          {
-            id: 'about_01',
-            type: 'about',
-            order: 2,
-            visible: true,
-            editable: true,
-            data: {
-              title: { value: 'Our Mission', type: 'text', label: 'Section Title', editable: true },
-              body: { value: 'We provide high-precision solutions for global enterprises.', type: 'textarea', label: 'Body Text', editable: true }
-            }
-          }
-        ]
-      }
-    ]
-  },
-  null,
-  2,
-);
+import { isPresetSlug } from '@/themes/_generated';
+import CompositionPreview from './CompositionPreview';
+import { TemplateJson } from '@/domain/entities/template.entity';
 
 interface TemplateEditorPanelProps {
   /** Template to edit. If undefined, it is in create mode. */
@@ -81,13 +24,16 @@ export default function TemplateEditorPanel({
   onDone,
 }: TemplateEditorPanelProps) {
   const isEditing = !!template;
+  const isCodePreset = template ? isPresetSlug(template.slug) : false;
   const availableThemes = getAvailableThemeKeys();
 
   // JSON state
   const [templateJsonStr, setTemplateJsonStr] = useState(
-    template ? JSON.stringify(template.templateJson, null, 2) : DEFAULT_JSON,
+    template ? JSON.stringify(template.templateJson, null, 2) : '',
   );
-  const [jsonError, setJsonError] = useState<string | null>(null);
+  const [jsonError, setJsonError] = useState<string | null>(
+    template ? null : 'JSON is required'
+  );
 
   // Thumbnail state
   const [thumbnailUrl, setThumbnailUrl] = useState<string>(
@@ -108,8 +54,13 @@ export default function TemplateEditorPanel({
 
   // Handlers
   const handleJsonChange = (value: string) => {
+    if (isCodePreset) return; // Read-only for presets
     setTemplateJsonStr(value);
     try {
+      if (value.trim() === '') {
+        setJsonError('JSON is required');
+        return;
+      }
       JSON.parse(value);
       setJsonError(null);
     } catch {
@@ -118,12 +69,13 @@ export default function TemplateEditorPanel({
   };
 
   const handleThemeChange = (themeKey: string) => {
+    if (isCodePreset) return;
     try {
-      const currentJson = JSON.parse(templateJsonStr);
+      const currentJson = templateJsonStr ? JSON.parse(templateJsonStr) : { themeKey: '' };
       currentJson.themeKey = themeKey;
       setTemplateJsonStr(JSON.stringify(currentJson, null, 2));
     } catch {
-      // If JSON is invalid, just update it if we can
+      // If JSON is invalid, we can't safely update themeKey
     }
   };
 
@@ -179,7 +131,6 @@ export default function TemplateEditorPanel({
     }
 
     setIsSubmitting(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jsonError, templateJsonStr, thumbnailUrl, isEditing, template, onDone]);
 
   // Get current themeKey for select input
@@ -425,6 +376,36 @@ export default function TemplateEditorPanel({
               </div>
             </div>
           </div>
+
+          {/* Section 4: Composition */}
+          {(() => {
+            let parsed: TemplateJson | null = null;
+            try {
+              if (templateJsonStr) {
+                parsed = JSON.parse(templateJsonStr) as TemplateJson;
+              }
+            } catch {
+              return null;
+            }
+            
+            if (!parsed || !parsed.pages) return null;
+
+            return (
+              <div className="grid grid-cols-12 gap-8">
+                <div className="col-span-4">
+                  <h3 className="text-[11px] font-medium uppercase tracking-widest">
+                    04 / COMPOSITION
+                  </h3>
+                  <p className="text-[10px] text-neutral-400 mt-2 font-light">
+                    Visual breakdown of the sections included in this blueprint.
+                  </p>
+                </div>
+                <div className="col-span-8">
+                  <CompositionPreview templateJson={parsed} />
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Submit error */}
           {submitError && (

@@ -1,17 +1,8 @@
 import { ThemeModule } from './types';
-
-const themeMap: Record<string, () => Promise<ThemeModule>> = {
-  corporate: () => import('./corporate'),
-  wedding: () => import('./wedding'),
-  legal: () => import('./legal'),
-  medical: () => import('./medical'),
-  fitness: () => import('./fitness'),
-  cafe: () => import('./cafe'),
-  interior: () => import('./interior'),
-};
+import { themeMap, getAvailableThemeKeys as getGeneratedKeys } from './_generated';
 
 export function getAvailableThemeKeys(): string[] {
-  return Object.keys(themeMap);
+  return getGeneratedKeys();
 }
 
 export async function loadTheme(themeKey: string): Promise<ThemeModule | null> {

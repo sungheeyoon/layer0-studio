@@ -7,10 +7,12 @@ import TemplateEditorPanel from './TemplateEditorPanel';
 
 interface TemplatesClientWrapperProps {
   templates: Template[];
+  canPublish?: boolean;
 }
 
 export default function TemplatesClientWrapper({
   templates,
+  canPublish = false,
 }: TemplatesClientWrapperProps) {
   const [editingTemplate, setEditingTemplate] = useState<
     Template | undefined
@@ -20,6 +22,7 @@ export default function TemplatesClientWrapper({
     <>
       <TemplateListPanel
         templates={templates}
+        canPublish={canPublish}
         onEdit={(t) => setEditingTemplate(t)}
         onDelete={(id) => {
           if (editingTemplate?.id === id) {

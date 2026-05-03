@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="아르크 클리닉 — 15년 임상 경험의 전문의가 직접 설계하는 맞춤 피부 케어. 서울 강남구 청담동 프리미엄 피부과 & 성형외과." />
+  <title>아르크 클리닉 — 당신만의 아름다움을 설계합니다</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream:        '#F9F7F3',
+            'cream-dark': '#F0EBE1',
+            charcoal:     '#1C1917',
+            'charcoal-mid':'#3C3835',
+            gold:         '#C8A97E',
+            'gold-dark':  '#A08050',
+            'warm-gray':  '#9C9189',
+            'warm-light': '#E5DDD4',
+          },
+          fontFamily: {
+            sans:    ['Pretendard', 'Apple SD Gothic Neo', 'sans-serif'],
+            display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    html  { scroll-behavior: smooth; }
+    body  {
+      font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: #F9F7F3;
+      color: #1C1917;
+      word-break: keep-all;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Typography helpers ── */
+    .font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    /* ── Spring easing ── */
+    .spring { transition: all 0.65s cubic-bezier(0.16,1,0.3,1); }
+
+    /* ── Scroll reveal ── */
+    .reveal        { opacity:0; transform:translateY(40px); }
+    .reveal-x      { opacity:0; transform:translateX(-40px); }
+    .reveal-rx     { opacity:0; transform:translateX(40px); }
+    .reveal-scale  { opacity:0; transform:scale(0.94); }
+    .reveal.in,
+    .reveal-x.in,
+    .reveal-rx.in,
+    .reveal-scale.in {
+      opacity:1;
+      transform:none;
+      transition: opacity .9s cubic-bezier(0.16,1,0.3,1),
+                  transform .9s cubic-bezier(0.16,1,0.3,1);
+    }
+    .d1 { transition-delay:.05s!important }
+    .d2 { transition-delay:.15s!important }
+    .d3 { transition-delay:.25s!important }
+    .d4 { transition-delay:.35s!important }
+    .d5 { transition-delay:.45s!important }
+    .d6 { transition-delay:.55s!important }
+
+    /* ── Navbar ── */
+    .navbar {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      transition: background-color .4s ease, box-shadow .4s ease;
+    }
+    .navbar.scrolled {
+      background: rgba(249,247,243,.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 1px 0 rgba(28,25,23,.08);
+    }
+
+    /* ── Buttons ── */
+    .btn-dark {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:14px 28px;
+      background:#1C1917; color:#F9F7F3;
+      font-size:13px; font-weight:500; letter-spacing:.06em;
+      border:none; cursor:pointer;
+      position:relative; overflow:hidden;
+      text-decoration:none;
+    }
+    .btn-dark::after {
+      content:''; position:absolute; inset:0;
+      background:#C8A97E;
+      transform:translateX(-101%);
+      transition:transform .55s cubic-bezier(0.16,1,0.3,1);
+    }
+    .btn-dark:hover::after { transform:translateX(0); }
+    .btn-dark > * { position:relative; z-index:1; }
+
+    .btn-light {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:13px 27px;
+      background:transparent; color:#1C1917;
+      font-size:13px; font-weight:500; letter-spacing:.06em;
+      border:1.5px solid rgba(28,25,23,.28); cursor:pointer;
+      position:relative; overflow:hidden;
+      text-decoration:none;
+    }
+    .btn-light::after {
+      content:''; position:absolute; inset:0;
+      background:#1C1917;
+      transform:translateX(-101%);
+      transition:transform .55s cubic-bezier(0.16,1,0.3,1);
+    }
+    .btn-light:hover::after { transform:translateX(0); }
+    .btn-light:hover { color:#F9F7F3; border-color:#1C1917; }
+    .btn-light > * { position:relative; z-index:1; transition:color .55s cubic-bezier(0.16,1,0.3,1); }
+
+    /* ── Marquee ── */
+    .marquee-track {
+      display:flex; width:max-content;
+      animation: marquee-run 32s linear infinite;
+    }
+    @keyframes marquee-run {
+      0%   { transform:translateX(0); }
+      100% { transform:translateX(-50%); }
+    }
+
+    /* ── Bento card ── */
+    .bento-card { position:relative; overflow:hidden; cursor:pointer; }
+    .bento-card img { transition:transform .8s cubic-bezier(0.16,1,0.3,1); }
+    .bento-card:hover img { transform:scale(1.04); }
+    .bento-info {
+      position:absolute; bottom:0; left:0; right:0;
+      padding:24px;
+      background:linear-gradient(to top, rgba(28,25,23,.88) 0%, transparent 100%);
+    }
+
+    /* ── Team card ── */
+    .team-card img { transition:transform .8s cubic-bezier(0.16,1,0.3,1); }
+    .team-card:hover img { transform:scale(1.03); }
+
+    /* ── Testimonial card ── */
+    .testimonial-card {
+      background:#fff;
+      border:1px solid rgba(28,25,23,.07);
+      transition:transform .5s cubic-bezier(0.16,1,0.3,1),
+                 box-shadow .5s cubic-bezier(0.16,1,0.3,1);
+    }
+    .testimonial-card:hover {
+      transform:translateY(-4px);
+      box-shadow:0 24px 64px rgba(28,25,23,.12);
+    }
+
+    /* ── Floating badge ── */
+    @keyframes float-badge {
+      0%,100% { transform:translateY(0); }
+      50%      { transform:translateY(-9px); }
+    }
+    .float-badge { animation:float-badge 4.5s ease-in-out infinite; }
+
+    /* ── Pill tag ── */
+    .pill {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 12px; border-radius:100px;
+      font-size:11px; font-weight:500; letter-spacing:.06em;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      display:inline-flex; align-items:center; gap:12px;
+      font-size:11px; font-weight:600;
+      letter-spacing:.16em; text-transform:uppercase; color:#C8A97E;
+    }
+    .section-label::before {
+      content:''; display:inline-block;
+      width:32px; height:1.5px; background:#C8A97E;
+    }
+
+    /* ── Mobile menu ── */
+    .mobile-menu {
+      opacity:0; transform:translateY(-8px);
+      pointer-events:none;
+      transition:all .4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .mobile-menu.open {
+      opacity:1; transform:none; pointer-events:all;
+    }
+
+    /* ── Custom scrollbar ── */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#C8A97E; border-radius:2px; }
+  </style>
+</head>
+
+<body>
+
+<!-- ══════════════════════════════════════
+     NAVIGATION
+══════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="flex items-center justify-between h-[72px]">
+
+      <!-- Logo -->
+      <a href="#" class="flex flex-col spring hover:opacity-60" aria-label="아르크 클리닉 홈">
+        <span class="font-display text-[22px] font-light tracking-[.14em] text-charcoal leading-none">ARRC</span>
+        <span class="text-[9px] font-medium tracking-[.22em] text-warm-gray uppercase mt-0.5">Clinic</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <div class="hidden lg:flex items-center gap-10">
+        <a href="#services" class="text-[13px] font-medium text-charcoal-mid tracking-wide spring hover:text-charcoal">진료 안내</a>
+        <a href="#space"    class="text-[13px] font-medium text-charcoal-mid tracking-wide spring hover:text-charcoal">클리닉 소개</a>
+        <a href="#team"     class="text-[13px] font-medium text-charcoal-mid tracking-wide spring hover:text-charcoal">의료진</a>
+        <a href="#reviews"  class="text-[13px] font-medium text-charcoal-mid tracking-wide spring hover:text-charcoal">후기</a>
+      </div>
+
+      <!-- Right cluster -->
+      <div class="flex items-center gap-4">
+        <a href="#booking" class="hidden sm:inline-flex">
+          <button class="btn-dark text-[11px] tracking-widest px-5 py-3">
+            <span>예약하기</span>
+            <iconify-icon icon="solar:arrow-right-linear" style="font-size:15px"></iconify-icon>
+          </button>
+        </a>
+        <button id="menu-btn" class="lg:hidden p-2 spring hover:opacity-60" onclick="toggleMenu()" aria-label="메뉴">
+          <iconify-icon icon="solar:hamburger-menu-linear" style="font-size:22px"></iconify-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu lg:hidden bg-cream border-t border-warm-light px-6 py-6 space-y-4" id="mobile-menu">
+    <a href="#services" class="block text-sm font-medium text-charcoal py-2" onclick="toggleMenu()">진료 안내</a>
+    <a href="#space"    class="block text-sm font-medium text-charcoal py-2" onclick="toggleMenu()">클리닉 소개</a>
+    <a href="#team"     class="block text-sm font-medium text-charcoal py-2" onclick="toggleMenu()">의료진</a>
+    <a href="#reviews"  class="block text-sm font-medium text-charcoal py-2" onclick="toggleMenu()">후기</a>
+    <a href="#booking" onclick="toggleMenu()">
+      <button class="btn-dark w-full justify-center mt-2 text-[11px] tracking-widest py-3">
+        <span>진료 예약</span>
+      </button>
+    </a>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════
+     HERO  (asymmetric split)
+══════════════════════════════════════ -->
+<section class="min-h-[100dvh] flex items-stretch pt-[72px]" id="hero">
+  <div class="w-full grid lg:grid-cols-[58fr_42fr]">
+
+    <!-- Left: hero image -->
+    <div class="relative overflow-hidden bg-cream-dark order-2 lg:order-1 h-[55vw] max-h-[680px] lg:h-auto lg:max-h-none">
+      <img
+        src="https://images.unsplash.com/photo-1629909615184-74f495363b67?auto=format&fit=crop&w=1200&q=80"
+        alt="아르크 클리닉 내부 공간"
+        class="w-full h-full object-cover"
+        loading="eager"
+      />
+      <div class="absolute inset-0 bg-gradient-to-br from-charcoal/30 via-charcoal/5 to-transparent pointer-events-none"></div>
+
+      <!-- Floating stat badge -->
+      <div class="absolute bottom-8 left-8 float-badge">
+        <div class="bg-cream/95 backdrop-blur-sm px-6 py-5 shadow-2xl border border-warm-light/70">
+          <div class="flex items-baseline gap-1.5 mb-1">
+            <span class="font-display text-4xl font-light text-charcoal">4,800</span>
+            <span class="text-gold font-semibold text-base">+</span>
+          </div>
+          <p class="text-[11px] text-warm-gray tracking-wider uppercase">누적 시술 건수</p>
+        </div>
+      </div>
+
+      <!-- Since badge -->
+      <div class="absolute top-8 right-8">
+        <div class="pill bg-cream/90 backdrop-blur-sm text-charcoal border border-warm-light/60">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          Since 2011
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: content -->
+    <div class="flex flex-col justify-center px-8 lg:px-14 xl:px-20 py-16 order-1 lg:order-2 bg-cream">
+      <p class="reveal d1 section-label mb-8">ARRC Clinic &nbsp;—&nbsp; 서울 강남구 청담동</p>
+
+      <div class="reveal d2 mb-6">
+        <h1 class="font-display text-[clamp(2.6rem,5vw,4.4rem)] font-light leading-[1.06] text-charcoal">
+          당신만의<br/>
+          <em class="not-italic text-gold">아름다움</em>을<br/>
+          설계합니다
+        </h1>
+      </div>
+
+      <p class="reveal d3 text-warm-gray text-[15px] leading-[1.8] mb-10 max-w-[340px]">
+        15년 이상의 임상 경험과 데이터 기반 진료로,<br/>단순한 시술이 아닌 당신의 고유한 아름다움을<br/>이끌어내는 1:1 맞춤 케어를 제공합니다.
+      </p>
+
+      <div class="reveal d4 flex flex-wrap gap-4 mb-12">
+        <a href="#booking"><button class="btn-dark">
+          <span>진료 예약하기</span>
+          <iconify-icon icon="solar:arrow-right-linear" style="font-size:18px"></iconify-icon>
+        </button></a>
+        <a href="#space"><button class="btn-light">
+          <span>클리닉 둘러보기</span>
+        </button></a>
+      </div>
+
+      <!-- Mini stats -->
+      <div class="reveal d5 grid grid-cols-3 gap-6 pt-8 border-t border-warm-light">
+        <div>
+          <p class="font-display text-[2rem] font-light text-charcoal">15<span class="text-gold text-xl">+</span></p>
+          <p class="text-[11px] text-warm-gray mt-1 tracking-wide">년 임상 경험</p>
+        </div>
+        <div>
+          <p class="font-display text-[2rem] font-light text-charcoal">3<span class="text-gold text-xl">인</span></p>
+          <p class="text-[11px] text-warm-gray mt-1 tracking-wide">전문의 상주</p>
+        </div>
+        <div>
+          <p class="font-display text-[2rem] font-light text-charcoal">98<span class="text-gold text-xl">%</span></p>
+          <p class="text-[11px] text-warm-gray mt-1 tracking-wide">재방문율</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     CERTIFICATION MARQUEE
+══════════════════════════════════════ -->
+<section class="bg-charcoal py-5 overflow-hidden">
+  <div class="overflow-hidden">
+    <div class="marquee-track">
+      <!-- Segment A -->
+      <div class="flex items-center gap-12 px-6" aria-hidden="false">
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:verified-check-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          대한피부과학회 인정의
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:medal-star-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          국제심미의학학회 인증
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:shield-check-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          의료기관 인증원 인증
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          2024 뷰티어워드 대상
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:diploma-verified-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          서울대학교병원 협진 클리닉
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:health-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          FDA 승인 레이저 도입
+        </span>
+        <span class="text-cream/15">|</span>
+      </div>
+      <!-- Segment B (duplicate for seamless loop) -->
+      <div class="flex items-center gap-12 px-6" aria-hidden="true">
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:verified-check-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          대한피부과학회 인정의
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:medal-star-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          국제심미의학학회 인증
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:shield-check-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          의료기관 인증원 인증
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          2024 뷰티어워드 대상
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:diploma-verified-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          서울대학교병원 협진 클리닉
+        </span>
+        <span class="text-cream/15">|</span>
+        <span class="flex items-center gap-2.5 whitespace-nowrap text-cream/50 text-[11px] tracking-[.18em] uppercase font-medium">
+          <iconify-icon icon="solar:health-bold" style="color:#C8A97E;font-size:14px"></iconify-icon>
+          FDA 승인 레이저 도입
+        </span>
+        <span class="text-cream/15">|</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SERVICES  (Bento Grid)
+══════════════════════════════════════ -->
+<section class="py-24 lg:py-32 px-6 lg:px-10 max-w-7xl mx-auto" id="services">
+
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-6">
+    <div class="reveal">
+      <p class="section-label mb-5">진료 안내</p>
+      <h2 class="font-display text-[clamp(2rem,3.5vw,3.2rem)] font-light text-charcoal leading-[1.12]">
+        당신의 피부에<br/>맞는 솔루션
+      </h2>
+    </div>
+    <p class="reveal d2 text-warm-gray text-[14px] leading-relaxed max-w-[280px]">
+      단일 시술이 아닌 피부 전체를 바라보는<br/>통합적 접근으로 최적의 결과를 제공합니다.
+    </p>
+  </div>
+
+  <!-- Bento: 3-col grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[280px] lg:auto-rows-[320px]">
+
+    <!-- Large card (2-col) — 리프팅 & 탄력 -->
+    <div class="reveal d1 bento-card md:col-span-2">
+      <img
+        src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1000&q=80"
+        alt="리프팅 & 탄력 시술"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div class="bento-info">
+        <div class="pill bg-gold/20 text-gold border border-gold/30 mb-3">
+          <iconify-icon icon="solar:magic-stick-3-bold" style="font-size:12px"></iconify-icon>
+          인기 No.1
+        </div>
+        <h3 class="text-cream font-semibold text-lg mb-1">리프팅 &amp; 탄력</h3>
+        <p class="text-cream/65 text-sm">처짐과 탄력을 동시에 개선하는 고강도 리프팅 케어</p>
+      </div>
+    </div>
+
+    <!-- Card — 레이저 토닝 -->
+    <div class="reveal d2 bento-card">
+      <img
+        src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=600&q=80"
+        alt="레이저 토닝"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div class="bento-info">
+        <h3 class="text-cream font-semibold text-lg mb-1">레이저 토닝</h3>
+        <p class="text-cream/65 text-sm">피부 톤과 결을 섬세하게 개선</p>
+      </div>
+    </div>
+
+    <!-- Dark card — 보톡스 & 필러 -->
+    <div class="reveal d3 bento-card bg-charcoal p-8 flex flex-col justify-between">
+      <div class="w-11 h-11 flex items-center justify-center bg-gold/10 border border-gold/20 shrink-0">
+        <iconify-icon icon="solar:syringe-bold" style="color:#C8A97E;font-size:22px"></iconify-icon>
+      </div>
+      <div>
+        <h3 class="text-cream font-semibold text-xl mb-2">보톡스 &amp; 필러</h3>
+        <p class="text-cream/50 text-sm leading-relaxed">자연스러운 볼륨과 라인을 완성하는 정밀 시술</p>
+      </div>
+    </div>
+
+    <!-- Light card — 피부 재생 -->
+    <div class="reveal d4 bento-card bg-cream-dark p-8 flex flex-col justify-between">
+      <div class="w-11 h-11 flex items-center justify-center bg-charcoal/5 border border-charcoal/10 shrink-0">
+        <iconify-icon icon="solar:leaf-bold" style="font-size:22px"></iconify-icon>
+      </div>
+      <div>
+        <h3 class="text-charcoal font-semibold text-xl mb-2">피부 재생</h3>
+        <p class="text-warm-gray text-sm leading-relaxed">손상된 피부 장벽을 회복하는 재생 프로그램</p>
+      </div>
+    </div>
+
+    <!-- Image card — 안티에이징 -->
+    <div class="reveal d5 bento-card">
+      <img
+        src="https://images.unsplash.com/photo-1519824145371-296894a0daa9?auto=format&fit=crop&w=600&q=80"
+        alt="안티에이징"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div class="bento-info">
+        <h3 class="text-cream font-semibold text-xl mb-1">안티에이징</h3>
+        <p class="text-cream/65 text-sm">노화를 선제적으로 관리하는 통합 솔루션</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="reveal mt-10 flex justify-end">
+    <a href="#booking">
+      <button class="btn-light text-[11px] tracking-widest">
+        <span>전체 진료 보기</span>
+        <iconify-icon icon="solar:arrow-right-linear" style="font-size:14px"></iconify-icon>
+      </button>
+    </a>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     CLINIC SPACE  (dark editorial)
+══════════════════════════════════════ -->
+<section class="bg-charcoal overflow-hidden" id="space">
+  <div class="grid lg:grid-cols-2 min-h-[80vh]">
+
+    <!-- Left: text + feature grid -->
+    <div class="flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-20 order-2 lg:order-1">
+      <div class="reveal">
+        <p class="section-label" style="color:#C8A97E">클리닉 소개</p>
+        <h2 class="font-display text-[clamp(2.4rem,4vw,3.8rem)] font-light text-cream leading-[1.08] mt-6 mb-8">
+          공간이<br/>치유의<br/>시작입니다
+        </h2>
+        <p class="text-cream/55 text-[15px] leading-[1.85] max-w-[360px] mb-12">
+          아르크 클리닉은 의료 공간의 고정관념을 넘어, 방문 그 자체가 치유의 경험이 되도록 설계된 공간입니다.
+          청담동 한복판에 자리한 4층 규모의 클리닉은 편안함과 프라이버시를 최우선으로 합니다.
+        </p>
+      </div>
+
+      <div class="reveal d2 grid grid-cols-2 gap-4">
+        <div class="border border-cream/10 p-5 spring hover:border-gold/40">
+          <iconify-icon icon="solar:buildings-2-bold" style="color:#C8A97E;font-size:22px" class="mb-3 block"></iconify-icon>
+          <p class="text-cream text-sm font-medium mb-1">4층 독립 공간</p>
+          <p class="text-cream/40 text-xs leading-relaxed">층별 독립 구성으로 완벽한 프라이버시</p>
+        </div>
+        <div class="border border-cream/10 p-5 spring hover:border-gold/40">
+          <iconify-icon icon="solar:sofa-bold" style="color:#C8A97E;font-size:22px" class="mb-3 block"></iconify-icon>
+          <p class="text-cream text-sm font-medium mb-1">프리미엄 라운지</p>
+          <p class="text-cream/40 text-xs leading-relaxed">시술 전후 휴식을 위한 전용 라운지</p>
+        </div>
+        <div class="border border-cream/10 p-5 spring hover:border-gold/40">
+          <iconify-icon icon="solar:shield-minimalistic-bold" style="color:#C8A97E;font-size:22px" class="mb-3 block"></iconify-icon>
+          <p class="text-cream text-sm font-medium mb-1">1:1 전담 케어룸</p>
+          <p class="text-cream/40 text-xs leading-relaxed">모든 시술은 전담 케어룸에서 진행</p>
+        </div>
+        <div class="border border-cream/10 p-5 spring hover:border-gold/40">
+          <iconify-icon icon="solar:parking-bold" style="color:#C8A97E;font-size:22px" class="mb-3 block"></iconify-icon>
+          <p class="text-cream text-sm font-medium mb-1">전용 주차장</p>
+          <p class="text-cream/40 text-xs leading-relaxed">건물 내 전용 주차 공간 제공</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: image collage -->
+    <div class="relative order-1 lg:order-2 h-[60vw] max-h-[600px] lg:h-auto lg:max-h-none">
+      <img
+        src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=900&q=80"
+        alt="아르크 클리닉 시술실"
+        class="w-full h-full object-cover opacity-75"
+        loading="lazy"
+      />
+      <!-- Inset smaller image -->
+      <div class="absolute bottom-8 -left-6 lg:-left-12 w-44 lg:w-60 shadow-2xl border-[3px] border-charcoal">
+        <img
+          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=400&q=80"
+          alt="클리닉 라운지"
+          class="w-full h-28 lg:h-40 object-cover"
+          loading="lazy"
+        />
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     WHY ARRC  (Z-axis feature cascade)
+══════════════════════════════════════ -->
+<section class="py-24 lg:py-36 bg-cream-dark" id="why">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="text-center mb-20 reveal">
+      <p class="section-label justify-center mb-5">아르크가 다른 이유</p>
+      <h2 class="font-display text-[clamp(2rem,3.5vw,3.2rem)] font-light text-charcoal">
+        차이는 디테일에서 만들어집니다
+      </h2>
+    </div>
+
+    <div class="space-y-20 lg:space-y-28">
+
+      <!-- Feature 1 -->
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div class="reveal-x">
+          <div class="aspect-[4/3] overflow-hidden bg-cream">
+            <img
+              src="https://images.unsplash.com/photo-1551190822-a9333d879b1f?auto=format&fit=crop&w=900&q=80"
+              alt="데이터 기반 피부 분석"
+              class="w-full h-full object-cover spring hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        <div class="reveal-rx lg:pl-8">
+          <span class="font-display text-[5rem] font-light text-gold/25 leading-none">01</span>
+          <h3 class="font-display text-[clamp(1.6rem,2.5vw,2.2rem)] font-light text-charcoal mt-2 mb-5 leading-tight">
+            데이터 기반<br/>피부 진단 시스템
+          </h3>
+          <p class="text-warm-gray text-[15px] leading-[1.85] mb-7">
+            AI 피부 분석 시스템과 15년 임상 데이터를 결합해, 육안으로 파악하기 어려운 피부 속 상태까지
+            정밀하게 진단합니다. 매 방문마다 데이터가 축적되어 당신의 피부 변화를 장기적으로 관리합니다.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">AI 피부 분석</span>
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">15년 임상 DB</span>
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">개인 맞춤 리포트</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div class="reveal-rx order-1 lg:order-2">
+          <div class="aspect-[4/3] overflow-hidden bg-cream">
+            <img
+              src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=900&q=80"
+              alt="전문의 1:1 진료"
+              class="w-full h-full object-cover spring hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        <div class="reveal-x order-2 lg:order-1 lg:pr-8">
+          <span class="font-display text-[5rem] font-light text-gold/25 leading-none">02</span>
+          <h3 class="font-display text-[clamp(1.6rem,2.5vw,2.2rem)] font-light text-charcoal mt-2 mb-5 leading-tight">
+            전문의만이<br/>직접 시술합니다
+          </h3>
+          <p class="text-warm-gray text-[15px] leading-[1.85] mb-7">
+            아르크 클리닉의 모든 시술은 전문의가 처음부터 끝까지 직접 진행합니다. 상담도, 시술도,
+            사후 관리도 같은 전문의가 담당합니다. 일관된 케어로 당신의 피부 히스토리를 완전히 이해하는 주치의가 됩니다.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">전문의 직접 시술</span>
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">1:1 전담 케어</span>
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">사후 관리 포함</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div class="reveal-x">
+          <div class="aspect-[4/3] overflow-hidden bg-cream">
+            <img
+              src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=900&q=80"
+              alt="FDA 인증 장비"
+              class="w-full h-full object-cover spring hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        <div class="reveal-rx lg:pl-8">
+          <span class="font-display text-[5rem] font-light text-gold/25 leading-none">03</span>
+          <h3 class="font-display text-[clamp(1.6rem,2.5vw,2.2rem)] font-light text-charcoal mt-2 mb-5 leading-tight">
+            FDA 인증<br/>최신 장비 운용
+          </h3>
+          <p class="text-warm-gray text-[15px] leading-[1.85] mb-7">
+            국내 최초로 도입된 차세대 레이저 플랫폼을 포함, 모든 장비는 FDA 승인을 받은 최신 의료기기로
+            구성되어 있습니다. 정기적인 장비 업데이트로 항상 최고 수준의 시술 결과를 보장합니다.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">FDA 인증 장비</span>
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">국내 최초 도입</span>
+            <span class="pill bg-cream border border-warm-light text-charcoal/65 text-[11px]">정기 업데이트</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     TEAM
+══════════════════════════════════════ -->
+<section class="py-24 lg:py-32 px-6 lg:px-10 max-w-7xl mx-auto" id="team">
+
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-6">
+    <div class="reveal">
+      <p class="section-label mb-5">의료진 소개</p>
+      <h2 class="font-display text-[clamp(2rem,3.5vw,3.2rem)] font-light text-charcoal leading-[1.12]">
+        당신의 피부를<br/>책임지는 전문가
+      </h2>
+    </div>
+    <p class="reveal d2 text-warm-gray text-[14px] leading-relaxed max-w-[280px]">
+      서울대·연세대·고려대 의대 출신의<br/>전문의들이 모든 진료를 직접 담당합니다.
+    </p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-6 lg:gap-10">
+
+    <!-- Dr 1 -->
+    <div class="reveal d1 team-card">
+      <div class="aspect-[3/4] overflow-hidden bg-cream-dark">
+        <img
+          src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=80"
+          alt="이지수 원장"
+          class="w-full h-full object-cover object-top"
+          loading="lazy"
+        />
+      </div>
+      <div class="pt-6">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+          <h3 class="text-charcoal font-semibold text-lg">이지수 원장</h3>
+          <span class="pill bg-cream-dark text-warm-gray border border-warm-light text-[11px]">피부과 전문의</span>
+        </div>
+        <div class="space-y-2">
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:graduation-cap-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            서울대학교 의과대학 졸업
+          </p>
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:hospital-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            서울대학교병원 피부과 전공의
+          </p>
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:clock-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            임상 경력 17년
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dr 2 -->
+    <div class="reveal d2 team-card lg:mt-10">
+      <div class="aspect-[3/4] overflow-hidden bg-cream-dark">
+        <img
+          src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=600&q=80"
+          alt="박민아 부원장"
+          class="w-full h-full object-cover object-top"
+          loading="lazy"
+        />
+      </div>
+      <div class="pt-6">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+          <h3 class="text-charcoal font-semibold text-lg">박민아 부원장</h3>
+          <span class="pill bg-cream-dark text-warm-gray border border-warm-light text-[11px]">피부과 전문의</span>
+        </div>
+        <div class="space-y-2">
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:graduation-cap-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            연세대학교 의과대학 졸업
+          </p>
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:hospital-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            세브란스병원 피부과 전공의
+          </p>
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:clock-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            임상 경력 12년
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dr 3 -->
+    <div class="reveal d3 team-card">
+      <div class="aspect-[3/4] overflow-hidden bg-cream-dark">
+        <img
+          src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=600&q=80"
+          alt="김태영 원장"
+          class="w-full h-full object-cover object-top"
+          loading="lazy"
+        />
+      </div>
+      <div class="pt-6">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+          <h3 class="text-charcoal font-semibold text-lg">김태영 원장</h3>
+          <span class="pill bg-cream-dark text-warm-gray border border-warm-light text-[11px]">성형외과 전문의</span>
+        </div>
+        <div class="space-y-2">
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:graduation-cap-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            고려대학교 의과대학 졸업
+          </p>
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:hospital-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            고려대학교병원 성형외과 전공의
+          </p>
+          <p class="flex items-center gap-2 text-warm-gray text-[12px]">
+            <iconify-icon icon="solar:clock-bold" style="color:#C8A97E;font-size:14px;flex-shrink:0"></iconify-icon>
+            임상 경력 15년
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     TESTIMONIALS  (masonry grid)
+══════════════════════════════════════ -->
+<section class="py-24 lg:py-32 bg-charcoal" id="reviews">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-6">
+      <div class="reveal">
+        <p class="section-label mb-5" style="color:#C8A97E">환자 후기</p>
+        <h2 class="font-display text-[clamp(2rem,3.5vw,3.2rem)] font-light text-cream leading-[1.12]">
+          직접 경험한<br/>변화의 이야기
+        </h2>
+      </div>
+      <div class="reveal d2 flex items-center gap-3">
+        <div class="flex gap-0.5">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:18px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:18px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:18px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:18px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:18px"></iconify-icon>
+        </div>
+        <span class="font-display text-3xl font-light text-cream">4.9</span>
+        <span class="text-cream/35 text-sm">/ 5.0</span>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      <div class="reveal d1 testimonial-card p-7">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+        </div>
+        <p class="text-charcoal-mid text-[14px] leading-[1.85] mb-6">
+          "3년 전부터 다니고 있는데, 이지수 원장님이 항상 제 피부 히스토리를 정확히 파악하고
+          계셔서 놀랐어요. 단순히 트러블을 고치는 게 아니라 근본 원인을 찾아 케어해 주신 덕분에
+          피부가 완전히 달라졌습니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-warm-light pt-4">
+          <div class="w-9 h-9 rounded-full bg-cream-dark flex items-center justify-center text-warm-gray font-medium text-sm shrink-0">하</div>
+          <div>
+            <p class="text-charcoal font-medium text-sm">하윤서</p>
+            <p class="text-warm-gray text-xs">리프팅 &amp; 레이저 토닝</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d2 testimonial-card p-7 md:mt-10">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+        </div>
+        <p class="text-charcoal-mid text-[14px] leading-[1.85] mb-6">
+          "다른 피부과에서 해결 못했던 색소 문제를 아르크에서 해결했어요. 처음 상담할 때부터
+          명확한 진단과 치료 계획을 제시해 주셔서 믿음이 갔습니다. 공간도 너무 프라이빗하고
+          고급스러워서 매번 방문이 기대됩니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-warm-light pt-4">
+          <div class="w-9 h-9 rounded-full bg-cream-dark flex items-center justify-center text-warm-gray font-medium text-sm shrink-0">정</div>
+          <div>
+            <p class="text-charcoal font-medium text-sm">정서연</p>
+            <p class="text-warm-gray text-xs">레이저 토닝 &amp; 피부 재생</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d3 testimonial-card p-7">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+        </div>
+        <p class="text-charcoal-mid text-[14px] leading-[1.85] mb-6">
+          "보톡스 시술을 받았는데 정말 자연스럽게 나왔어요. 박민아 원장님이 얼굴 구조를 정밀하게
+          분석한 후 최소한의 양으로 최대 효과를 내는 방식으로 해주셨어요. 티가 나지 않으면서도
+          확실한 변화가 있어 만족합니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-warm-light pt-4">
+          <div class="w-9 h-9 rounded-full bg-cream-dark flex items-center justify-center text-warm-gray font-medium text-sm shrink-0">최</div>
+          <div>
+            <p class="text-charcoal font-medium text-sm">최은지</p>
+            <p class="text-warm-gray text-xs">보톡스 &amp; 필러</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d4 testimonial-card p-7 md:mt-10 lg:mt-0">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+        </div>
+        <p class="text-charcoal-mid text-[14px] leading-[1.85] mb-6">
+          "40대에 접어들면서 피부 탄력이 걱정됐는데, 아르크의 안티에이징 케어 플랜을 받으며
+          확실한 변화를 느꼈습니다. 6개월 전 사진과 비교하면 놀라울 정도예요.
+          주변에서 나이보다 어려 보인다는 말을 자주 듣게 됐어요."
+        </p>
+        <div class="flex items-center gap-3 border-t border-warm-light pt-4">
+          <div class="w-9 h-9 rounded-full bg-cream-dark flex items-center justify-center text-warm-gray font-medium text-sm shrink-0">이</div>
+          <div>
+            <p class="text-charcoal font-medium text-sm">이수빈</p>
+            <p class="text-warm-gray text-xs">안티에이징 케어 플랜</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d5 testimonial-card p-7">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+        </div>
+        <p class="text-charcoal-mid text-[14px] leading-[1.85] mb-6">
+          "피부 재생 프로그램을 통해 오랜 흉터를 많이 개선할 수 있었어요. 여러 클리닉을 전전했지만
+          아르크에서 처음으로 뚜렷한 결과를 봤습니다. 의료진 모두 친절하고 전문적이어서
+          신뢰가 갑니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-warm-light pt-4">
+          <div class="w-9 h-9 rounded-full bg-cream-dark flex items-center justify-center text-warm-gray font-medium text-sm shrink-0">강</div>
+          <div>
+            <p class="text-charcoal font-medium text-sm">강민준</p>
+            <p class="text-warm-gray text-xs">피부 재생 &amp; 흉터 케어</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal d6 testimonial-card p-7 md:mt-10">
+        <div class="flex gap-0.5 mb-5">
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+          <iconify-icon icon="solar:star-bold" style="color:#C8A97E;font-size:13px"></iconify-icon>
+        </div>
+        <p class="text-charcoal-mid text-[14px] leading-[1.85] mb-6">
+          "상담부터 시술, 사후관리까지 전담 원장님이 직접 해주시는 게 가장 큰 장점이에요.
+          시술 후 케어 방법도 꼼꼼하게 알려주시고, 사소한 질문도 빠르게 답변해 주셔서
+          항상 믿음이 갑니다."
+        </p>
+        <div class="flex items-center gap-3 border-t border-warm-light pt-4">
+          <div class="w-9 h-9 rounded-full bg-cream-dark flex items-center justify-center text-warm-gray font-medium text-sm shrink-0">윤</div>
+          <div>
+            <p class="text-charcoal font-medium text-sm">윤지영</p>
+            <p class="text-warm-gray text-xs">리프팅 &amp; 보톡스</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     BOOKING CTA  (full-bleed dark)
+══════════════════════════════════════ -->
+<section class="relative overflow-hidden py-28 lg:py-44" id="booking">
+  <img
+    src="https://images.unsplash.com/photo-1629909615184-74f495363b67?auto=format&fit=crop&w=1600&q=70"
+    alt=""
+    aria-hidden="true"
+    class="absolute inset-0 w-full h-full object-cover"
+    loading="lazy"
+  />
+  <div class="absolute inset-0 bg-charcoal/82 pointer-events-none"></div>
+
+  <div class="relative max-w-2xl mx-auto px-6 text-center">
+    <div class="reveal">
+      <p class="section-label justify-center mb-6" style="color:#C8A97E">진료 예약</p>
+      <h2 class="font-display text-[clamp(2.4rem,5vw,4rem)] font-light text-cream leading-[1.1] mb-6">
+        첫 상담은<br/>무료입니다
+      </h2>
+      <p class="text-cream/55 text-[15px] leading-[1.85] mb-10 max-w-lg mx-auto">
+        전문의와의 1:1 피부 상담을 통해 당신의 피부 상태를 정밀 진단하고, 최적의 케어 플랜을 설계해 드립니다.
+      </p>
+
+      <!-- Contact row -->
+      <div class="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-10 text-cream/70 text-[13px]">
+        <span class="flex items-center gap-2">
+          <iconify-icon icon="solar:phone-bold" style="color:#C8A97E;font-size:15px"></iconify-icon>
+          02-512-1234
+        </span>
+        <span class="flex items-center gap-2">
+          <iconify-icon icon="solar:clock-bold" style="color:#C8A97E;font-size:15px"></iconify-icon>
+          평일 10:00–19:00 &nbsp;/&nbsp; 토 10:00–17:00
+        </span>
+      </div>
+
+      <!-- CTA buttons -->
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="tel:02-512-1234">
+          <button class="btn-dark px-8 py-4 text-[13px] tracking-widest">
+            <iconify-icon icon="solar:phone-bold" style="font-size:17px"></iconify-icon>
+            <span>전화 예약</span>
+          </button>
+        </a>
+        <button
+          class="inline-flex items-center gap-2.5 px-8 py-4 bg-[#FEE500] text-[#391D1D] font-semibold text-[13px] tracking-wide cursor-pointer spring hover:bg-[#F5DC00]"
+        >
+          <iconify-icon icon="solar:chat-round-bold" style="font-size:17px"></iconify-icon>
+          카카오로 상담
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer class="bg-charcoal border-t border-cream/[0.06] pt-16 pb-10 px-6 lg:px-10">
+  <div class="max-w-7xl mx-auto">
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+
+      <!-- Brand col -->
+      <div>
+        <div class="mb-5">
+          <span class="font-display text-[26px] font-light tracking-[.14em] text-cream block leading-none">ARRC</span>
+          <span class="text-[9px] font-medium tracking-[.22em] text-warm-gray uppercase">Clinic</span>
+        </div>
+        <p class="text-cream/35 text-[12px] leading-relaxed mb-6">
+          당신만의 아름다움을 설계하는<br/>프리미엄 피부과 &amp; 성형외과
+        </p>
+        <div class="flex gap-2.5">
+          <a href="#" aria-label="인스타그램" class="w-8 h-8 flex items-center justify-center border border-cream/10 text-cream/35 spring hover:border-gold hover:text-gold">
+            <iconify-icon icon="solar:instagram-linear" style="font-size:15px"></iconify-icon>
+          </a>
+          <a href="#" aria-label="유튜브" class="w-8 h-8 flex items-center justify-center border border-cream/10 text-cream/35 spring hover:border-gold hover:text-gold">
+            <iconify-icon icon="solar:youtube-linear" style="font-size:15px"></iconify-icon>
+          </a>
+          <a href="#" aria-label="블로그" class="w-8 h-8 flex items-center justify-center border border-cream/10 text-cream/35 spring hover:border-gold hover:text-gold">
+            <iconify-icon icon="solar:blog-linear" style="font-size:15px"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- Links col -->
+      <div>
+        <h4 class="text-cream/65 text-[10px] font-semibold tracking-[.16em] uppercase mb-5">진료 안내</h4>
+        <ul class="space-y-3">
+          <li><a href="#" class="text-cream/35 text-[13px] spring hover:text-cream/70">리프팅 &amp; 탄력</a></li>
+          <li><a href="#" class="text-cream/35 text-[13px] spring hover:text-cream/70">레이저 토닝</a></li>
+          <li><a href="#" class="text-cream/35 text-[13px] spring hover:text-cream/70">보톡스 &amp; 필러</a></li>
+          <li><a href="#" class="text-cream/35 text-[13px] spring hover:text-cream/70">피부 재생</a></li>
+          <li><a href="#" class="text-cream/35 text-[13px] spring hover:text-cream/70">안티에이징</a></li>
+        </ul>
+      </div>
+
+      <!-- Clinic col -->
+      <div>
+        <h4 class="text-cream/65 text-[10px] font-semibold tracking-[.16em] uppercase mb-5">클리닉 정보</h4>
+        <ul class="space-y-3">
+          <li><a href="#space"  class="text-cream/35 text-[13px] spring hover:text-cream/70">클리닉 소개</a></li>
+          <li><a href="#team"   class="text-cream/35 text-[13px] spring hover:text-cream/70">의료진</a></li>
+          <li><a href="#"       class="text-cream/35 text-[13px] spring hover:text-cream/70">오시는 길</a></li>
+          <li><a href="#"       class="text-cream/35 text-[13px] spring hover:text-cream/70">공지사항</a></li>
+          <li><a href="#booking"class="text-cream/35 text-[13px] spring hover:text-cream/70">예약 안내</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact col -->
+      <div>
+        <h4 class="text-cream/65 text-[10px] font-semibold tracking-[.16em] uppercase mb-5">위치 &amp; 연락처</h4>
+        <div class="space-y-4">
+          <div class="flex items-start gap-3 text-cream/35">
+            <iconify-icon icon="solar:map-point-bold" style="color:#C8A97E;font-size:15px;flex-shrink:0;margin-top:1px"></iconify-icon>
+            <p class="text-[12px] leading-relaxed">서울 강남구 청담동 147-15<br/>아르크빌딩 2–5층</p>
+          </div>
+          <div class="flex items-center gap-3 text-cream/35">
+            <iconify-icon icon="solar:phone-bold" style="color:#C8A97E;font-size:15px;flex-shrink:0"></iconify-icon>
+            <p class="text-[12px]">02-512-1234</p>
+          </div>
+          <div class="flex items-start gap-3 text-cream/35">
+            <iconify-icon icon="solar:clock-bold" style="color:#C8A97E;font-size:15px;flex-shrink:0;margin-top:1px"></iconify-icon>
+            <div class="text-[12px] leading-relaxed">
+              <p>평일 10:00 – 19:00</p>
+              <p>토요일 10:00 – 17:00</p>
+              <p>일요일 · 공휴일 휴진</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="border-t border-cream/[0.06] pt-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <p class="text-cream/20 text-[11px]">
+        © 2024 ARRC Clinic. All rights reserved. &nbsp;|&nbsp; 사업자등록번호: 123-45-67890 &nbsp;|&nbsp; 대표자: 이지수
+      </p>
+      <div class="flex gap-6">
+        <a href="#" class="text-cream/20 text-[11px] spring hover:text-cream/45">개인정보처리방침</a>
+        <a href="#" class="text-cream/20 text-[11px] spring hover:text-cream/45">이용약관</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+<script>
+  /* Nav scroll glass effect */
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  /* Mobile menu */
+  function toggleMenu() {
+    document.getElementById('mobile-menu').classList.toggle('open');
+  }
+
+  /* IntersectionObserver — scroll reveals */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal, .reveal-x, .reveal-rx, .reveal-scale')
+    .forEach(el => io.observe(el));
+
+  /* Fire hero reveals immediately after paint */
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.querySelectorAll('#hero .reveal, #hero .reveal-x, #hero .reveal-rx').forEach(el => {
+        el.classList.add('in');
+      });
+    }, 120);
+  });
+</script>
+
+</body>
+</html>
