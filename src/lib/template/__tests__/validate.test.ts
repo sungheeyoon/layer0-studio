@@ -4,21 +4,14 @@ import { deriveTemplateJsonFromPreset } from '../preset';
 import { TemplateJson } from '@/domain/entities/template.entity';
 import type { ThemeLibrary } from '@/themes/types';
 
-// -- All 7 presets + their slots --
+// -- All 7 presets --
 import corporatePreset from '@/themes/corporate/presets/default.preset';
-import { slots as corporateSlots } from '@/themes/corporate/slots';
 import cafePreset from '@/themes/cafe/presets/default.preset';
-import { slots as cafeSlots } from '@/themes/cafe/slots';
 import fitnessPreset from '@/themes/fitness/presets/default.preset';
-import { slots as fitnessSlots } from '@/themes/fitness/slots';
 import interiorPreset from '@/themes/interior/presets/default.preset';
-import { slots as interiorSlots } from '@/themes/interior/slots';
 import legalPreset from '@/themes/legal/presets/default.preset';
-import { slots as legalSlots } from '@/themes/legal/slots';
 import medicalPreset from '@/themes/medical/presets/default.preset';
-import { slots as medicalSlots } from '@/themes/medical/slots';
 import weddingPreset from '@/themes/wedding/presets/default.preset';
-import { slots as weddingSlots } from '@/themes/wedding/slots';
 import cafeModernPreset from '@/themes/cafe/presets/modern.preset';
 
 import { themeMap } from '@/themes/_generated';
@@ -45,7 +38,6 @@ function minimalJson(overrides: Partial<TemplateJson> = {}): TemplateJson {
           {
             id: 'hero-001',
             type: 'hero',
-            order: 0,
             visible: true,
             editable: true,
             data: {
@@ -74,9 +66,13 @@ describe('validateTemplateJson — structure', () => {
 
   it('errors on duplicate page slugs', () => {
     const json = minimalJson();
-    json.pages.push({ ...json.pages[0], id: 'home-2' }); // same slug
+    json.pages.push({ ...json.pages[0], id: 'home-2', slug: '/about' });
     const result = validateTemplateJson(json);
-    expect(result.errors.some((e) => e.code === 'DUPLICATE_PAGE_SLUG')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'DUPLICATE_PAGE_SLUG')).toBe(false); // slug is unique now
+
+    json.pages[1].slug = '/'; // duplicate slug
+    const result2 = validateTemplateJson(json);
+    expect(result2.errors.some((e) => e.code === 'DUPLICATE_PAGE_SLUG')).toBe(true);
   });
 
   it('errors on duplicate section ids within a page', () => {
@@ -152,48 +148,6 @@ describe('validateTemplateJson — globalStyles', () => {
   });
 });
 
-describe('validateTemplateJson — slot rules (with themeSlots)', () => {
-  const slots = [
-    { type: 'hero', required: true },
-    { type: 'about', required: false },
-  ];
-
-  it('errors when section.type is unknown', () => {
-    const json = minimalJson();
-    json.pages[0].sections[0].type = 'unicorn';
-    const result = validateTemplateJson(json, { themeSlots: slots });
-    expect(result.errors.some((e) => e.code === 'UNKNOWN_SECTION_TYPE')).toBe(true);
-  });
-
-  it('errors when required slot is absent from a page', () => {
-    const json = minimalJson();
-    json.pages[0].sections[0].type = 'about'; // hero is required but missing now
-    const result = validateTemplateJson(json, { themeSlots: slots });
-    expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_SLOT')).toBe(true);
-  });
-});
-
-describe('validateTemplateJson — warnings', () => {
-  it('warns when image field uses http://', () => {
-    const json = minimalJson();
-    json.pages[0].sections[0].data.title = {
-      type: 'image',
-      label: 'Image',
-      value: 'http://example.com/img.jpg',
-      editable: true,
-    };
-    const result = validateTemplateJson(json);
-    expect(result.warnings.some((w) => w.code === 'INSECURE_URL')).toBe(true);
-  });
-
-  it('warns when section has an order field (deprecated)', () => {
-    const json = minimalJson();
-    json.pages[0].sections[0].order = 1;
-    const result = validateTemplateJson(json);
-    expect(result.warnings.some((w) => w.code === 'DEPRECATED_SECTION_ORDER')).toBe(true);
-  });
-});
-
 describe('validateTemplateJson — library rules (Phase 6)', () => {
   const mockLibrary = {
     hero: {
@@ -239,21 +193,35 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
   });
 });
 
+describe('validateTemplateJson — warnings', () => {
+  it('warns when image field uses http://', () => {
+    const json = minimalJson();
+    json.pages[0].sections[0].data.title = {
+      type: 'image',
+      label: 'Image',
+      value: 'http://example.com/img.jpg',
+      editable: true,
+    };
+    const result = validateTemplateJson(json);
+    expect(result.warnings.some((w) => w.code === 'INSECURE_URL')).toBe(true);
+  });
+});
+
 // ─── Integration: all 7 presets must have zero errors ──────────────
 
 describe('all presets — errors must be zero', () => {
   const cases = [
-    { name: 'corporate-default', preset: corporatePreset, slots: corporateSlots, themeKey: 'corporate' },
-    { name: 'cafe-default',      preset: cafePreset,      slots: cafeSlots,      themeKey: 'cafe' },
-    { name: 'fitness-default',   preset: fitnessPreset,   slots: fitnessSlots,   themeKey: 'fitness' },
-    { name: 'interior-default',  preset: interiorPreset,  slots: interiorSlots,  themeKey: 'interior' },
-    { name: 'legal-default',     preset: legalPreset,     slots: legalSlots,     themeKey: 'legal' },
-    { name: 'medical-default',   preset: medicalPreset,   slots: medicalSlots,   themeKey: 'medical' },
-    { name: 'wedding-default',   preset: weddingPreset,   slots: weddingSlots,   themeKey: 'wedding' },
-    { name: 'cafe-modern',      preset: cafeModernPreset, slots: [],            themeKey: 'cafe' },
+    { name: 'corporate-default', preset: corporatePreset, themeKey: 'corporate' },
+    { name: 'cafe-default',      preset: cafePreset,      themeKey: 'cafe' },
+    { name: 'fitness-default',   preset: fitnessPreset,   themeKey: 'fitness' },
+    { name: 'interior-default',  preset: interiorPreset,  themeKey: 'interior' },
+    { name: 'legal-default',     preset: legalPreset,     themeKey: 'legal' },
+    { name: 'medical-default',   preset: medicalPreset,   themeKey: 'medical' },
+    { name: 'wedding-default',   preset: weddingPreset,   themeKey: 'wedding' },
+    { name: 'cafe-modern',      preset: cafeModernPreset, themeKey: 'cafe' },
   ];
 
-  for (const { name, preset, slots, themeKey } of cases) {
+  for (const { name, preset, themeKey } of cases) {
     it(`${name} validates with no errors`, async () => {
       const themeLoader = themeMap[themeKey];
       const themeModule = themeLoader ? await themeLoader() : null;
@@ -263,7 +231,6 @@ describe('all presets — errors must be zero', () => {
 
       const result = validateTemplateJson(templateJson, {
         availableThemeKeys: ALL_THEME_KEYS,
-        themeSlots: themeLibrary ? undefined : slots,
         themeLibrary,
       });
       

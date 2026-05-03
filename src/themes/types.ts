@@ -99,16 +99,8 @@ export interface ThemeSectionProps {
   onClick?: () => void;
 }
 
-/** Definition of a slot supported by a theme */
-export interface ThemeSlotDefinition {
-  type: string;       // Matches section.type (e.g. 'hero')
-  label: string;      // For display in editor (e.g. 'Hero Section')
-  required: boolean;  // Whether it's a required slot
-}
-
 export interface ThemeModule {
   default: ComponentType<ThemeRendererProps>;
-  slots: ThemeSlotDefinition[];
   defaultTemplateJson: TemplateJson;
-  library?: ThemeLibrary; // 6a: Optional, 6d: Required
+  library: ThemeLibrary;
 }

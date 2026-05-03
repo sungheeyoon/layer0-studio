@@ -117,7 +117,6 @@ export async function syncTemplates(
     // 3. Validate
     const validation = validateTemplateJson(effectiveTemplateJson, {
       availableThemeKeys: getAvailableThemeKeys(),
-      themeSlots: themeModule?.slots,
       themeLibrary: themeModule?.library
     });
     if (validation.errors.length > 0) {

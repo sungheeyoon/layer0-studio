@@ -6,10 +6,9 @@ import { TemplateSection } from '@/domain/entities/template.entity';
  * Automatically manages 'order' based on array index.
  */
 export function createComposition(sections: PresetSection[]): TemplateSection[] {
-  return sections.map((s, index) => ({
+  return sections.map((s) => ({
     id: s.id,
     type: s.componentKey,
-    order: index, // Composition index is the truth for order
     visible: s.visible ?? true,
     editable: true,
     data: s.data,

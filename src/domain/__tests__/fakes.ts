@@ -22,7 +22,6 @@ export function makeTemplateJson(overrides: Partial<TemplateJson> = {}): Templat
           {
             id: 'section-1',
             type: 'hero',
-            order: 0,
             visible: true,
             editable: true,
             data: {

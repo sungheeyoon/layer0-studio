@@ -20,8 +20,6 @@ export interface SlotDefinition {
 export interface ValidateOptions {
   /** When provided, themeKey must be in this list. */
   availableThemeKeys?: string[];
-  /** @deprecated Phase 1-5 legacy. Use themeLibrary for Phase 6. */
-  themeSlots?: SlotDefinition[];
   /** Phase 6: Provides component library and their data schemas for deep validation. */
   themeLibrary?: ThemeLibrary;
 }
@@ -89,31 +87,8 @@ export function validateTemplateJson(
     pageSlugs.add(page.slug);
   }
 
-  // Legacy slots support
-  const slotTypeSet = options.themeSlots
-    ? new Set(options.themeSlots.map((s) => s.type))
-    : null;
-  const requiredSlotTypes = options.themeSlots
-    ? options.themeSlots.filter((s) => s.required).map((s) => s.type)
-    : [];
-
   for (const page of json.pages) {
     const pageRef = `pages[slug=${page.slug}]`;
-
-    // Rule 3: required slots must appear in every page (Legacy)
-    if (requiredSlotTypes.length > 0) {
-      const presentTypes = new Set(page.sections.map((s) => s.type));
-      for (const reqType of requiredSlotTypes) {
-        if (!presentTypes.has(reqType)) {
-          err(
-            'MISSING_REQUIRED_SLOT',
-            `Page "${page.slug}" is missing required section type "${reqType}"`,
-            `${pageRef}.sections`,
-          );
-        }
-      }
-    }
-
     const sectionIds = new Set<string>();
 
     for (const section of page.sections) {
@@ -125,7 +100,7 @@ export function validateTemplateJson(
       }
       sectionIds.add(section.id);
 
-      // Rule 2: section.type must be in themeSlots (Legacy) or themeLibrary (Phase 6)
+      // Rule 2: section.type must be in themeLibrary (Phase 6)
       if (options.themeLibrary) {
         const component = options.themeLibrary[section.type];
         if (!component) {
@@ -165,21 +140,6 @@ export function validateTemplateJson(
             }
           }
         }
-      } else if (slotTypeSet && !slotTypeSet.has(section.type)) {
-        err(
-          'UNKNOWN_SECTION_TYPE',
-          `section type "${section.type}" is not defined in theme slots for "${json.themeKey}"`,
-          `${secRef}.type`,
-        );
-      }
-
-      // Rule 9: section.order is deprecated — renderer ignores it (warn only)
-      if (section.order !== undefined) {
-        warn(
-          'DEPRECATED_SECTION_ORDER',
-          `section "${section.id}" has an order field — render order is determined by array position`,
-          `${secRef}.order`,
-        );
       }
 
       // Rules 5 & 8: basic data integrity

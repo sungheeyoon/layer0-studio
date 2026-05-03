@@ -27,7 +27,6 @@ export type TemplateField = TextTemplateField | SelectTemplateField | ImageTempl
 export interface TemplateSection {
   id: string;
   type: string;
-  order: number;
   visible: boolean;
   editable: boolean;
   data: Record<string, TemplateField>;

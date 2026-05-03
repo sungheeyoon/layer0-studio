@@ -40,6 +40,7 @@ async function run() {
   ensureDir(themeDir);
   ensureDir(presetsDir);
   ensureDir(join(themeDir, 'sections'));
+  ensureDir(join(themeDir, 'library'));
 
   let meta = { title: key, description: '' };
   if (htmlPath && existsSync(join(ROOT, htmlPath))) {
@@ -48,96 +49,71 @@ async function run() {
     console.log(`📄 Extracted meta from ${htmlPath}`);
   }
 
-  // 1. slots.ts
-  const slotsPath = join(themeDir, 'slots.ts');
-  if (!existsSync(slotsPath)) {
-    const content = `import { ThemeSlotDefinition } from '../types';
+  // 1. tokens.ts
+  const tokensPath = join(themeDir, 'tokens.ts');
+  if (!existsSync(tokensPath)) {
+    const content = `import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
+
+export const defaultGlobalStyles: TemplateGlobalStyles = {
+  primaryColor: '#000000',
+  secondaryColor: '#ffffff',
+  fontFamily: 'sans-serif',
+  fontSize: '16px',
+  layout: 'wide',
+};
+`;
+    writeFileSync(tokensPath, content);
+    console.log(`✅ Created tokens.ts`);
+  }
+
+  // 2. library/index.ts
+  const libraryIndexPath = join(themeDir, 'library', 'index.ts');
+  if (!existsSync(libraryIndexPath)) {
+    const content = `import { ThemeLibrary } from '../../types';
+
+export const ${key}Library: ThemeLibrary = {
+  // Add components here
+};
+`;
+    writeFileSync(libraryIndexPath, content);
+    console.log(`✅ Created library/index.ts`);
+  }
+
+  // 3. index.tsx
+  const indexPath = join(themeDir, 'index.tsx');
+  if (!existsSync(indexPath)) {
+    const content = `import React from 'react';
+import { ThemeRendererProps, ThemeLibrary } from '../types';
+import styles from './${key}.module.css';
+import { ${key}Library } from './library';
+import { RenderComposition } from '../renderComposition';
+import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
-export const slots: ThemeSlotDefinition[] = [
-  { type: 'hero', label: 'Hero Section', required: true },
-  { type: 'footer', label: 'Footer', required: false },
-];
+export const library: ThemeLibrary = ${key}Library;
 
 export const defaultTemplateJson: TemplateJson = {
   themeKey: '${key}',
-  globalStyles: {
-    primaryColor: '#000000',
-    secondaryColor: '#ffffff',
-    fontFamily: 'sans-serif',
-    fontSize: '16px',
-    layout: 'wide',
-  },
+  globalStyles: defaultGlobalStyles,
   pages: [
     {
       id: 'home',
       title: 'Home',
       slug: '/',
       order: 0,
-      sections: [
-        {
-          id: 'hero-001',
-          type: 'hero',
-          order: 0,
-          visible: true,
-          editable: true,
-          data: {
-            title: { value: '${meta.title}', type: 'text', label: '타이틀', editable: true },
-          },
-        },
-        {
-          id: 'footer-001',
-          type: 'footer',
-          order: 1,
-          visible: true,
-          editable: true,
-          data: {
-            text: { value: '© 2026 ${meta.title}', type: 'text', label: '카피라이트', editable: true },
-          },
-        },
-      ],
+      sections: [], // Filled by presets/composition
     },
   ],
 };
-`;
-    writeFileSync(slotsPath, content);
-    console.log(`✅ Created slots.ts`);
-  }
 
-  // 2. index.tsx
-  const indexPath = join(themeDir, 'index.tsx');
-  if (!existsSync(indexPath)) {
-    const content = `import React from 'react';
-import { ThemeRendererProps } from '../types';
-import { slots, defaultTemplateJson } from './slots';
-
-export { slots, defaultTemplateJson };
-
-export default function ${key.charAt(0).toUpperCase() + key.slice(1)}Theme({ siteJson, selectedSectionId, onSectionClick }: ThemeRendererProps) {
-  const sections = siteJson.pages[0]?.sections || [];
-
+export default function ${key.charAt(0).toUpperCase() + key.slice(1)}Theme(props: ThemeRendererProps) {
   return (
-    <div>
-      {slots.map((slot) => {
-        const section = sections.find((s) => s.type === slot.type);
-        if (!section || !section.visible) return null;
-
-        return (
-          <div 
-            key={section.id}
-            onClick={() => onSectionClick?.(section.id)}
-            style={{ 
-              outline: selectedSectionId === section.id ? '2px solid blue' : 'none',
-              padding: '40px',
-              borderBottom: '1px solid #eee'
-            }}
-          >
-            <h2>{section.type.toUpperCase()}</h2>
-            <pre>{JSON.stringify(section.data, null, 2)}</pre>
-          </div>
-        );
-      })}
-    </div>
+    <RenderComposition
+      {...props}
+      library={library}
+      className={styles.themeRoot}
+      itemClassName={(id) => props.selectedSectionId === id ? styles.selectedSlot : ''}
+    />
   );
 }
 `;
@@ -145,15 +121,30 @@ export default function ${key.charAt(0).toUpperCase() + key.slice(1)}Theme({ sit
     console.log(`✅ Created index.tsx`);
   }
 
-  // 3. default.preset.ts
+  // 4. default.preset.ts
   const presetPath = join(presetsDir, 'default.preset.ts');
   if (!existsSync(presetPath)) {
     const content = `import { TemplatePreset } from '../../types';
-import { defaultTemplateJson } from '../slots';
 
 const preset: TemplatePreset = {
   slug: '${key}-default',
-  templateJson: defaultTemplateJson,
+  themeKey: '${key}',
+  composition: [
+    {
+      id: 'hero-001',
+      componentKey: 'hero',
+      data: {
+        title: { value: '${meta.title}', type: 'text', label: '타이틀', editable: true },
+      },
+    },
+    {
+      id: 'footer-001',
+      componentKey: 'footer',
+      data: {
+        text: { value: '© 2026 ${meta.title}', type: 'text', label: '카피라이트', editable: true },
+      },
+    },
+  ],
   thumbnailPath: 'public/thumbnails/template-${key}.webp',
   version: '1.0.0',
   defaults: {
@@ -169,7 +160,7 @@ export default preset;
     console.log(`✅ Created presets/default.preset.ts`);
   }
 
-  // 4. thumbnail.config.ts
+  // 5. thumbnail.config.ts
   const thumbPath = join(themeDir, 'thumbnail.config.ts');
   if (!existsSync(thumbPath)) {
     const content = `export default {

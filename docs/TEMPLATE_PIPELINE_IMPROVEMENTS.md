@@ -180,13 +180,13 @@ page.composition.map((section) => {
 
 #### Step 5 — 6d: 정리 (1일)
 
-- [ ] `src/themes/*/slots.ts` 7개 파일 완전 제거
-- [ ] `src/themes/library/buildLibraryFromSlots.ts` 어댑터 삭제
-- [ ] `ThemeSlotDefinition`, `ThemeModule.slots` 타입 제거 (`ThemeModule.library` 필수화)
-- [ ] `section.order` 필드를 `TemplateSection` 타입에서 제거
-- [ ] `DEPRECATED_SECTION_ORDER` 검증 룰 삭제
-- [ ] `MISSING_REQUIRED_SLOT` / `UNKNOWN_SECTION_TYPE` 검증 룰 (legacy `themeSlots` 옵션) 정리
-- [ ] DB JSONB 정리 마이그레이션 — 기존 `user_sites` / `templates` JSONB의 `section.order` 필드 삭제
+- [x] `src/themes/*/slots.ts` 7개 파일 완전 제거
+- [x] `src/themes/library/buildLibraryFromSlots.ts` 어댑터 삭제
+- [x] `ThemeSlotDefinition`, `ThemeModule.slots` 타입 제거 (`ThemeModule.library` 필수화)
+- [x] `section.order` 필드를 `TemplateSection` 타입에서 제거
+- [x] `DEPRECATED_SECTION_ORDER` 검증 룰 삭제
+- [x] `MISSING_REQUIRED_SLOT` / `UNKNOWN_SECTION_TYPE` 검증 룰 (legacy `themeSlots` 옵션) 정리
+- [x] DB JSONB 정리 마이그레이션 — 기존 `user_sites` / `templates` JSONB의 `section.order` 필드 삭제
 
 ---
 

@@ -35,10 +35,9 @@ export function deriveTemplateJsonFromPreset(
         title: 'Home',
         slug: 'home',
         order: 0,
-        sections: preset.composition.map((ps, index) => ({
+        sections: preset.composition.map((ps) => ({
           id: ps.id,
           type: ps.componentKey,
-          order: index,
           visible: ps.visible ?? true,
           editable: true,
           data: ps.data,
