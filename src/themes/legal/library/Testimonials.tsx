@@ -1,17 +1,18 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { StarIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const reviews = [1, 2, 3].map(n => ({
-    body: data[`review${n}Body`]?.value || '',
-    author: data[`review${n}Author`]?.value || '',
-    meta: data[`review${n}Meta`]?.value || '',
+    body: getFieldValue(data, `review${n}Body`) || '',
+    author: getFieldValue(data, `review${n}Author`) || '',
+    meta: getFieldValue(data, `review${n}Meta`) || '',
     featured: n === 2,
-    avatar: data[`review${n}Avatar`]?.value || `https://i.pravatar.cc/150?u=legal_review_${n}`,
+    avatar: getFieldValue(data, `review${n}Avatar`) || `https://i.pravatar.cc/150?u=legal_review_${n}`,
   }));
 
   return (

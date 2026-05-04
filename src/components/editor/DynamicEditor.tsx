@@ -2,21 +2,26 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { UserSite } from '@/domain/entities/user-site.entity';
-import { TemplateJson, TemplateGlobalStyles, ImageTemplateField } from '@/domain/entities/template.entity';
-import { saveSiteJsonAction, publishSiteAction } from '@/app/dashboard/editor/actions';
+import {
+  TemplateJson,
+  TemplateGlobalStyles,
+  TemplateField,
+  ArrayTemplateField,
+} from '@/domain/entities/template.entity';
+import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTheme } from '@/themes/registry';
-import { ThemeRendererProps } from '@/themes/types';
+import { SectionDataSchema, ThemeModule } from '@/themes/types';
 import { createClient } from '@/utils/supabase/client';
 import { getSiteError } from '@/lib/errors/messages';
-import { initUploadAction, confirmUploadAction } from '@/app/dashboard/editor/actions';
+import { injectKeys, stripKeys } from '@/lib/template/keys';
 
 interface DynamicEditorProps {
   site: UserSite;
 }
 
 export default function DynamicEditor({ site }: DynamicEditorProps) {
-  const [siteJson, setSiteJson] = useState<TemplateJson>(site.siteJson);
+  const [siteJson, setSiteJson] = useState<TemplateJson>(() => injectKeys(site.siteJson));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
   const [activePageId, setActivePageId] = useState<string>(
@@ -73,7 +78,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setAutoSaveStatus('idle');
     autoSaveTimerRef.current = setTimeout(async () => {
       setAutoSaveStatus('saving');
-      const result = await saveSiteJsonAction(site.id, siteJsonRef.current, knownUpdatedAtRef.current);
+      const result = await saveSiteJsonAction(site.id, stripKeys(siteJsonRef.current), knownUpdatedAtRef.current);
       if (result && 'error' in result) {
         if (result.error === 'STALE_VERSION') {
           setConflictDetected(true);
@@ -86,8 +91,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     }, 4000);
   }, [site.id, applySuccessfulSave]);
 
-  // Theme Renderer loading
-  const [ThemeRenderer, setThemeRenderer] = useState<React.ComponentType<ThemeRendererProps> | null>(null);
+  const [themeModule, setThemeModule] = useState<ThemeModule | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -95,7 +99,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     let loaded = false;
     const fetchTheme = async () => {
       setLoadingError(null);
-      setThemeRenderer(null);
+      setThemeModule(null);
 
       const timeoutId = setTimeout(() => {
         if (mounted && !loaded) {
@@ -104,12 +108,12 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       }, 10000);
 
       try {
-        const themeModule = await loadTheme(siteJson.themeKey || 'corporate');
+        const mod = await loadTheme(siteJson.themeKey || 'corporate');
         clearTimeout(timeoutId);
         if (mounted) {
-          if (themeModule) {
+          if (mod) {
             loaded = true;
-            setThemeRenderer(() => themeModule.default);
+            setThemeModule(mod);
           } else {
             setLoadingError(`Theme "${siteJson.themeKey}" not found.`);
           }
@@ -126,41 +130,47 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     return () => { mounted = false; };
   }, [siteJson.themeKey]);
 
+  const ThemeRenderer = themeModule?.default;
+
   const selectedSection = activePage.sections.find((s) => s.id === selectedSectionId) ?? null;
 
+  const updateSiteJson = useCallback((updater: (json: TemplateJson) => void) => {
+    setSiteJson((prev) => {
+      const updated = structuredClone(prev);
+      updater(updated);
+      return updated;
+    });
+    scheduleAutoSave();
+  }, [scheduleAutoSave]);
+
   const handleFieldChange = useCallback(
-    (sectionId: string, fieldKey: string, value: string, assetId?: string) => {
-      setSiteJson((prev) => {
-        const updated = structuredClone(prev);
-
-        const page = updated.pages.find(p => p.id === activePageId);
+    (sectionId: string, fieldKey: string, value: string | ArrayTemplateField['items'], assetId?: string) => {
+      updateSiteJson((json) => {
+        const page = json.pages.find(p => p.id === activePageId);
         const section = page?.sections.find(s => s.id === sectionId);
-
         if (section && section.data[fieldKey]) {
-          section.data[fieldKey].value = value;
-          if (assetId !== undefined) {
-            (section.data[fieldKey] as ImageTemplateField).assetId = assetId;
+          const field = section.data[fieldKey];
+          if (field.type === 'array' && Array.isArray(value)) {
+            field.items = value;
+          } else if (field.type !== 'array' && typeof value === 'string') {
+            field.value = value;
+            if (assetId !== undefined && field.type === 'image') {
+              field.assetId = assetId;
+            }
           }
         }
-        return updated;
       });
-      scheduleAutoSave();
     },
-    [activePageId, scheduleAutoSave]
+    [activePageId, updateSiteJson]
   );
 
   const handleGlobalStyleChange = useCallback(
     (key: keyof TemplateGlobalStyles, value: string) => {
-      setSiteJson((prev) => ({
-        ...prev,
-        globalStyles: {
-          ...prev.globalStyles,
-          [key]: value,
-        },
-      }));
-      scheduleAutoSave();
+      updateSiteJson((json) => {
+        json.globalStyles[key] = value;
+      });
     },
-    [scheduleAutoSave]
+    [updateSiteJson]
   );
 
   const handleSave = async () => {
@@ -171,7 +181,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     setActionError(null);
     setSaving(true);
-    const result = await saveSiteJsonAction(site.id, siteJson, knownUpdatedAtRef.current);
+    const result = await saveSiteJsonAction(site.id, stripKeys(siteJson), knownUpdatedAtRef.current);
     if (result && 'error' in result) {
       if (result.error === 'STALE_VERSION') {
         setConflictDetected(true);
@@ -188,7 +198,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     setActionError(null);
     setSaving(true);
-    const saveResult = await saveSiteJsonAction(site.id, siteJson, knownUpdatedAtRef.current);
+    const saveResult = await saveSiteJsonAction(site.id, stripKeys(siteJson), knownUpdatedAtRef.current);
     if (saveResult && 'error' in saveResult) {
       if (saveResult.error === 'STALE_VERSION') {
         setConflictDetected(true);
@@ -352,16 +362,20 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                   <div className="space-y-8">
                     {Object.entries(selectedSection.data)
                       .filter(([, field]) => field.editable !== false)
-                      .map(([fieldKey, field]) => (
-                        <DynamicField
-                          key={`${selectedSection.id}-${fieldKey}`}
-                          sectionId={selectedSection.id}
-                          fieldKey={fieldKey}
-                          field={field}
-                          onChange={handleFieldChange}
-                          onError={setActionError}
-                        />
-                      ))}
+                      .map(([fieldKey, field]) => {
+                        const schema = themeModule?.library[selectedSection.type]?.meta.dataSchema[fieldKey];
+                        return (
+                          <DynamicField
+                            key={`${selectedSection.id}-${fieldKey}`}
+                            field={field}
+                            itemSchema={schema?.itemSchema}
+                            minItems={schema?.minItems}
+                            maxItems={schema?.maxItems}
+                            onChange={(val, aid) => handleFieldChange(selectedSection.id, fieldKey, val, aid)}
+                            onError={setActionError}
+                          />
+                        );
+                      })}
                   </div>
                 </div>
               )}
@@ -473,14 +487,15 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 // ─── Dynamic Field Input ──────────────────────────────────────────────────
 
 interface DynamicFieldProps {
-  sectionId: string;
-  fieldKey: string;
-  field: { value: string; type: string; label: string; options?: string[] };
-  onChange: (sectionId: string, fieldKey: string, value: string, assetId?: string) => void;
+  field: TemplateField;
+  itemSchema?: SectionDataSchema;
+  minItems?: number;
+  maxItems?: number;
+  onChange: (value: string | ArrayTemplateField['items'], assetId?: string) => void;
   onError: (msg: string) => void;
 }
 
-function DynamicField({ sectionId, fieldKey, field, onChange, onError }: DynamicFieldProps) {
+function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError }: DynamicFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
   const baseInputClass =
     "w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 pb-1 font-['Inter'] font-light text-xs transition-colors";
@@ -491,13 +506,9 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
 
     setIsUploading(true);
     try {
-      // 1. Initial pending DB record via Server Action
       const initRes = await initUploadAction(file.name, file.type, file.size);
-      if ('error' in initRes) {
-        throw new Error(initRes.error || 'Failed to initialize upload');
-      }
+      if ('error' in initRes) throw new Error(initRes.error || 'Failed to initialize upload');
 
-      // 2. Upload physically via Supabase Storage Client
       const supabase = createClient();
       const { error: uploadError } = await supabase.storage
         .from('user_assets')
@@ -505,14 +516,10 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
 
       if (uploadError) throw new Error(uploadError.message);
 
-      // 3. Confirm and transition to active
       const confirmRes = await confirmUploadAction(initRes.assetId, initRes.uploadPath);
-      if ('error' in confirmRes) {
-        throw new Error(confirmRes.error || 'Failed to confirm upload');
-      }
+      if ('error' in confirmRes) throw new Error(confirmRes.error || 'Failed to confirm upload');
 
-      // 4. Update the state
-      onChange(sectionId, fieldKey, confirmRes.publicUrl, initRes.assetId);
+      onChange(confirmRes.publicUrl, initRes.assetId);
     } catch (err: unknown) {
       onError(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       console.error('[ASSET_UPLOAD_ERROR]', err);
@@ -520,6 +527,21 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
       setIsUploading(false);
     }
   };
+
+  if (field.type === 'array') {
+    return (
+      <ArrayField
+        field={field}
+        itemSchema={itemSchema}
+        minItems={minItems}
+        maxItems={maxItems}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+  }
+
+  const value = field.value || '';
 
   return (
     <div className="relative group">
@@ -531,36 +553,36 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
         <textarea
           className={`${baseInputClass} resize-none`}
           rows={3}
-          value={field.value}
-          onChange={(e) => onChange(sectionId, fieldKey, e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
         />
       ) : field.type === 'color' ? (
         <div className="flex items-center gap-2">
           <div
             className="w-6 h-6 border border-outline-variant overflow-hidden"
-            style={{ backgroundColor: field.value }}
+            style={{ backgroundColor: value }}
           >
             <input
               type="color"
-              value={field.value}
-              onChange={(e) => onChange(sectionId, fieldKey, e.target.value)}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
               className="w-12 h-12 -ml-3 -mt-3 cursor-pointer opacity-0"
             />
           </div>
           <input
             type="text"
             className={baseInputClass}
-            value={field.value}
-            onChange={(e) => onChange(sectionId, fieldKey, e.target.value)}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
           />
         </div>
-      ) : field.type === 'select' && field.options ? (
+      ) : field.type === 'select' ? (
         <select
           className={baseInputClass}
-          value={field.value}
-          onChange={(e) => onChange(sectionId, fieldKey, e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
         >
-          {field.options.map((opt) => (
+          {field.options.map((opt: string) => (
             <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>
@@ -569,8 +591,8 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
           <input
             type="text"
             className={baseInputClass}
-            value={field.value}
-            onChange={(e) => onChange(sectionId, fieldKey, e.target.value, undefined)}
+            value={value}
+            onChange={(e) => onChange(e.target.value, undefined)}
             placeholder="https://images.unsplash.com/..."
             disabled={isUploading}
           />
@@ -586,10 +608,10 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
           {isUploading && (
             <div className="text-xs text-primary animate-pulse mt-1">Uploading...</div>
           )}
-          {field.value && (
+          {value && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={field.value}
+              src={value}
               alt={field.label}
               className="mt-3 w-full h-24 object-cover grayscale opacity-60 border border-outline-variant hover:grayscale-0 hover:opacity-100 transition-all duration-500"
             />
@@ -599,10 +621,169 @@ function DynamicField({ sectionId, fieldKey, field, onChange, onError }: Dynamic
         <input
           type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'}
           className={baseInputClass}
-          value={field.value}
-          onChange={(e) => onChange(sectionId, fieldKey, e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
         />
       )}
+    </div>
+  );
+}
+
+function ArrayField({
+  field,
+  itemSchema,
+  minItems,
+  maxItems,
+  onChange,
+  onError,
+}: {
+  field: ArrayTemplateField;
+  itemSchema?: SectionDataSchema;
+  minItems?: number;
+  maxItems?: number;
+  onChange: (value: ArrayTemplateField['items']) => void;
+  onError: (msg: string) => void;
+}) {
+  const items = field.items || [];
+
+  const handleAddItem = () => {
+    if (!itemSchema) return;
+    if (maxItems !== undefined && items.length >= maxItems) {
+      onError(`Maximum ${maxItems} items allowed`);
+      return;
+    }
+
+    const newItem: Record<string, TemplateField> = {
+      _key: { type: 'text', value: Math.random().toString(36).slice(2), label: '_key', editable: false },
+    };
+
+    // Initialize fields based on itemSchema
+    Object.entries(itemSchema).forEach(([key, schema]) => {
+      if (schema.type === 'array') {
+        newItem[key] = { type: 'array', label: schema.label, items: [] };
+      } else if (schema.type === 'image') {
+        newItem[key] = { type: 'image', label: schema.label, value: '' };
+      } else if (schema.type === 'select') {
+        newItem[key] = { type: 'select', label: schema.label, value: schema.options?.[0] || '', options: schema.options || [] };
+      } else {
+        newItem[key] = { type: schema.type as 'text' | 'textarea' | 'url' | 'color' | 'number', label: schema.label, value: '' };
+      }
+    });
+
+    onChange([...items, newItem]);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    if (minItems !== undefined && items.length <= minItems) {
+      onError(`Minimum ${minItems} items required`);
+      return;
+    }
+    const next = [...items];
+    next.splice(index, 1);
+    onChange(next);
+  };
+
+  const handleMoveItem = (index: number, direction: 'up' | 'down') => {
+    const next = [...items];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+
+    const [moved] = next.splice(index, 1);
+    next.splice(targetIndex, 0, moved);
+    onChange(next);
+  };
+
+  const handleItemFieldChange = (index: number, fieldKey: string, value: string | ArrayTemplateField['items'], assetId?: string) => {
+    const next = structuredClone(items);
+    const field = next[index][fieldKey];
+    if (field.type === 'array' && Array.isArray(value)) {
+      field.items = value;
+    } else if (field.type !== 'array' && typeof value === 'string') {
+      field.value = value;
+      if (assetId !== undefined && field.type === 'image') {
+        field.assetId = assetId;
+      }
+    }
+    onChange(next);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <label className="block font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary">
+          {field.label} ({items.length}{maxItems !== undefined ? ` / ${maxItems}` : ''})
+        </label>
+        <button
+          onClick={handleAddItem}
+          disabled={maxItems !== undefined && items.length >= maxItems}
+          className="text-primary hover:text-primary/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          title={maxItems !== undefined && items.length >= maxItems ? `Max ${maxItems} reached` : 'Add Item'}
+        >
+          <span className="material-symbols-outlined text-lg">add_circle</span>
+        </button>
+      </div>
+
+      <div className="space-y-6">
+        {items.map((item, index) => (
+          <div
+            key={item._key.type !== 'array' ? item._key.value : index}
+            className="p-4 bg-surface-container-low border border-outline-variant relative group/item"
+          >
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+              <button
+                disabled={index === 0}
+                onClick={() => handleMoveItem(index, 'up')}
+                className="text-outline hover:text-primary disabled:opacity-30"
+              >
+                <span className="material-symbols-outlined text-sm">arrow_upward</span>
+              </button>
+              <button
+                disabled={index === items.length - 1}
+                onClick={() => handleMoveItem(index, 'down')}
+                className="text-outline hover:text-primary disabled:opacity-30"
+              >
+                <span className="material-symbols-outlined text-sm">arrow_downward</span>
+              </button>
+              <button
+                onClick={() => handleRemoveItem(index)}
+                disabled={minItems !== undefined && items.length <= minItems}
+                className="text-outline hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title={minItems !== undefined && items.length <= minItems ? `Min ${minItems} required` : 'Delete'}
+              >
+                <span className="material-symbols-outlined text-sm">delete</span>
+              </button>
+            </div>
+
+            <div className="space-y-6 pt-2">
+              {Object.entries(item)
+                .filter(([key, f]) => key !== '_key' && f.editable !== false)
+                .map(([fKey, f]) => (
+                  <DynamicField
+                    key={fKey}
+                    field={f}
+                    itemSchema={itemSchema?.[fKey]?.itemSchema}
+                    minItems={itemSchema?.[fKey]?.minItems}
+                    maxItems={itemSchema?.[fKey]?.maxItems}
+                    onChange={(val, aid) => handleItemFieldChange(index, fKey, val, aid)}
+                    onError={onError}
+                  />
+                ))}
+            </div>
+          </div>
+        ))}
+
+        {items.length === 0 && (
+          <div className="py-8 border border-dashed border-outline-variant text-center">
+            <p className="text-[10px] uppercase tracking-widest text-outline">No items yet</p>
+            <button
+              onClick={handleAddItem}
+              className="mt-2 text-primary text-[10px] uppercase tracking-widest font-medium hover:underline"
+            >
+              + Add first item
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

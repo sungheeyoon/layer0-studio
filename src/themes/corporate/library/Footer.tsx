@@ -1,9 +1,10 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
   const { data } = section;
-  const copyright = data['copyright']?.value || `© ${new Date().getFullYear()} Layer0 Studio`;
-  const companyName = data['companyName']?.value || 'LAYER0';
+  const copyright = getFieldValue(data, 'copyright') || `© ${new Date().getFullYear()} Layer0 Studio`;
+  const companyName = getFieldValue(data, 'companyName') || 'LAYER0';
 
   return (
     <footer className="py-20 px-8 border-t border-outline-variant bg-surface">

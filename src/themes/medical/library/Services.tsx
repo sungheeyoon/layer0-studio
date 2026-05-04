@@ -1,42 +1,43 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon, MagicStickIcon, SyringeIcon, LeafIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
+  const label = getFieldValue(data, 'label') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
 
   const services = [
     {
-      title: data['service1Title']?.value,
-      desc: data['service1Desc']?.value,
-      image: data['service1Image']?.value,
+      title: getFieldValue(data, 'service1Title'),
+      desc: getFieldValue(data, 'service1Desc'),
+      image: getFieldValue(data, 'service1Image'),
       badge: '인기 No.1',
       colSpan: 'md:col-span-2',
     },
     {
-      title: data['service2Title']?.value,
-      desc: data['service2Desc']?.value,
-      image: data['service2Image']?.value,
+      title: getFieldValue(data, 'service2Title'),
+      desc: getFieldValue(data, 'service2Desc'),
+      image: getFieldValue(data, 'service2Image'),
     },
     {
-      title: data['service3Title']?.value,
-      desc: data['service3Desc']?.value,
+      title: getFieldValue(data, 'service3Title'),
+      desc: getFieldValue(data, 'service3Desc'),
       dark: true,
       icon: <SyringeIcon size={22} className="text-[#C8A97E]" />,
     },
     {
-      title: data['service4Title']?.value,
-      desc: data['service4Desc']?.value,
+      title: getFieldValue(data, 'service4Title'),
+      desc: getFieldValue(data, 'service4Desc'),
       light: true,
       icon: <LeafIcon size={22} />,
     },
     {
-      title: data['service5Title']?.value,
-      desc: data['service5Desc']?.value,
-      image: data['service5Image']?.value,
+      title: getFieldValue(data, 'service5Title'),
+      desc: getFieldValue(data, 'service5Desc'),
+      image: getFieldValue(data, 'service5Image'),
     },
   ].filter(s => s.title);
 

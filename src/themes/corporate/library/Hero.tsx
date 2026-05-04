@@ -1,13 +1,14 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../corporate.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || '';
-  const subtitle = data['subtitle']?.value || '';
-  const bgImage = data['backgroundImage']?.value || '';
-  const ctaText = data['ctaText']?.value || '';
-  const ctaUrl = data['ctaUrl']?.value || '#';
+  const title = getFieldValue(data, 'title') || '';
+  const subtitle = getFieldValue(data, 'subtitle') || '';
+  const bgImage = getFieldValue(data, 'backgroundImage') || '';
+  const ctaText = getFieldValue(data, 'ctaText') || '';
+  const ctaUrl = getFieldValue(data, 'ctaUrl') || '#';
 
   return (
     <div

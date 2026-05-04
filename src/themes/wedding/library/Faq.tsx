@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { PlusIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Faq: SectionComponent = function Faq({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const items = [1, 2, 3, 4, 5, 6]
     .map((n) => ({
-      q: data[`q${n}`]?.value || '',
-      a: data[`a${n}`]?.value || '',
+      q: getFieldValue(data, `q${n}`) || '',
+      a: getFieldValue(data, `a${n}`) || '',
     }))
     .filter((it) => it.q);
 

@@ -1,18 +1,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { PenIcon, DiamondIcon, ClockIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const About: SectionComponent = function About({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'About Espacio';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
-  const projectTitle = data['projectTitle']?.value || '한남동 타운하우스 — 주방 리노베이션';
+  const label = getFieldValue(data, 'label') || 'About Espacio';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
+  const projectTitle = getFieldValue(data, 'projectTitle') || '한남동 타운하우스 — 주방 리노베이션';
 
   const values = [
-    { title: data['v1Title']?.value, desc: data['v1Desc']?.value, icon: <PenIcon size={18} className="text-[var(--i-gold)]" /> },
-    { title: data['v2Title']?.value, desc: data['v2Desc']?.value, icon: <DiamondIcon size={18} className="text-[var(--i-gold)]" /> },
-    { title: data['v3Title']?.value, desc: data['v3Desc']?.value, icon: <ClockIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(data, 'v1Title'), desc: getFieldValue(data, 'v1Desc'), icon: <PenIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(data, 'v2Title'), desc: getFieldValue(data, 'v2Desc'), icon: <DiamondIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(data, 'v3Title'), desc: getFieldValue(data, 'v3Desc'), icon: <ClockIcon size={18} className="text-[var(--i-gold)]" /> },
   ].filter(v => v.title);
 
   return (

@@ -26,6 +26,7 @@ export const ADMIN_ACTION_ERRORS: Record<string, string> = {
   SITE_NOT_FOUND: 'Site not found',
   SITE_ACCESS_DENIED: 'Access denied',
   FORBIDDEN: 'Admin permission required',
+  UNSUPPORTED_FIELD_TYPE: 'This field type does not support partial updates',
 };
 
 export function getAuthError(code: string | undefined): string {

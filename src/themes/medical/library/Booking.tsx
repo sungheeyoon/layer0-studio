@@ -1,15 +1,16 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { PhoneIcon, ChatIcon, ClockIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Booking: SectionComponent = function Booking({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
-  const phone = data['phone']?.value || '';
-  const hours = data['hours']?.value || '';
-  const image = data['image']?.value || '';
+  const label = getFieldValue(data, 'label') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const hours = getFieldValue(data, 'hours') || '';
+  const image = getFieldValue(data, 'image') || '';
 
   return (
     <section className="relative overflow-hidden py-28 lg:py-44" id="booking">

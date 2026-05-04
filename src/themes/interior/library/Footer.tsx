@@ -1,14 +1,15 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import { HomeIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, LetterIcon, ClockIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
   const { data } = section;
-  const description = data['description']?.value || '';
-  const address = data['address']?.value || '';
-  const phone = data['phone']?.value || '';
-  const email = data['email']?.value || '';
-  const hours = data['hours']?.value || '';
-  const copyright = data['copyright']?.value || '';
+  const description = getFieldValue(data, 'description') || '';
+  const address = getFieldValue(data, 'address') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const email = getFieldValue(data, 'email') || '';
+  const hours = getFieldValue(data, 'hours') || '';
+  const copyright = getFieldValue(data, 'copyright') || '';
 
   return (
     <footer style={{ background: '#080704', borderTop: '1px solid rgba(255,255,255,.05)' }}>

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validateTemplateJson } from '../validate';
 import { deriveTemplateJsonFromPreset } from '../preset';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { TemplateJson, ArrayTemplateField } from '@/domain/entities/template.entity';
 import type { ThemeLibrary } from '@/themes/types';
 
 // -- All 7 presets --
@@ -190,6 +190,123 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
     json.pages[0].sections[0].data.extra = { type: 'text', label: 'Extra', value: '...', editable: true };
     const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
     expect(result.warnings.some((w) => w.code === 'UNKNOWN_DATA_FIELD')).toBe(true);
+  });
+});
+
+describe('validateTemplateJson — array fields', () => {
+  const mockLibrary = {
+    'menu-list': {
+      meta: {
+        componentKey: 'menu-list',
+        category: 'menu',
+        label: 'Menu List',
+        dataSchema: {
+          items: {
+            type: 'array',
+            label: 'Items',
+            itemSchema: {
+              title: { type: 'text', label: 'Title', required: true },
+              price: { type: 'text', label: 'Price', required: false },
+            },
+            minItems: 1,
+            maxItems: 2,
+          },
+        },
+      },
+    },
+  } as unknown as ThemeLibrary;
+
+  it('passes when array items are valid', () => {
+    const json = minimalJson();
+    json.pages[0].sections[0].type = 'menu-list';
+    json.pages[0].sections[0].data = {
+      items: {
+        type: 'array',
+        label: 'Items',
+        items: [
+          { title: { type: 'text', label: 'Title', value: 'Coffee' } },
+        ],
+      },
+    };
+    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('errors when items is not an array', () => {
+    const json = minimalJson();
+    json.pages[0].sections[0].type = 'menu-list';
+    json.pages[0].sections[0].data = {
+      items: {
+        type: 'array',
+        label: 'Items',
+        // @ts-expect-error intentional
+        items: 'not-an-array',
+      },
+    };
+    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(result.errors.some((e) => e.code === 'NON_ARRAY_FIELD_VALUE')).toBe(true);
+  });
+
+  it('errors when array item fails nested validation', () => {
+    const json = minimalJson();
+    json.pages[0].sections[0].type = 'menu-list';
+    json.pages[0].sections[0].data = {
+      items: {
+        type: 'array',
+        label: 'Items',
+        items: [
+          { title: { type: 'text', label: 'Title', value: '' } }, // Title is required but value is empty - wait, MISSING_REQUIRED_FIELD checks if field exists
+        ],
+      },
+    };
+    // Let's test missing field
+    (json.pages[0].sections[0].data.items as ArrayTemplateField).items[0] = {}; // title missing
+    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
+    expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path).toContain('items.items[0].data.title');
+  });
+
+  it('errors on minItems / maxItems violation', () => {
+    const json = minimalJson();
+    json.pages[0].sections[0].type = 'menu-list';
+    json.pages[0].sections[0].data = {
+      items: {
+        type: 'array',
+        label: 'Items',
+        items: [], // minItems is 1
+      },
+    };
+    const resultMin = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(resultMin.errors.some((e) => e.code === 'ARRAY_ITEMS_BELOW_MIN')).toBe(true);
+
+    (json.pages[0].sections[0].data.items as ArrayTemplateField).items = [
+      { title: { type: 'text', label: 'T', value: '1' } },
+      { title: { type: 'text', label: 'T', value: '2' } },
+      { title: { type: 'text', label: 'T', value: '3' } }, // maxItems is 2
+    ];
+    const resultMax = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    expect(resultMax.errors.some((e) => e.code === 'ARRAY_ITEMS_ABOVE_MAX')).toBe(true);
+  });
+
+  it('errors when itemSchema is missing in schema', () => {
+    const brokenLibrary = {
+      'broken-array': {
+        meta: {
+          componentKey: 'broken-array',
+          dataSchema: {
+            items: { type: 'array', label: 'Items' }, // missing itemSchema
+          },
+        },
+      },
+    } as unknown as ThemeLibrary;
+
+    const json = minimalJson();
+    json.pages[0].sections[0].type = 'broken-array';
+    json.pages[0].sections[0].data = {
+      items: { type: 'array', label: 'Items', items: [] },
+    };
+    const result = validateTemplateJson(json, { themeLibrary: brokenLibrary });
+    expect(result.errors.some((e) => e.code === 'MISSING_ITEM_SCHEMA')).toBe(true);
   });
 });
 

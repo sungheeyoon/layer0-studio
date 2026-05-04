@@ -1,18 +1,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brand = data['brand']?.value || 'HAUTRE';
-  const tagline = data['tagline']?.value || '';
-  const ctaText = data['ctaText']?.value || '';
-  const ctaUrl = data['ctaUrl']?.value || '#contact';
+  const brand = getFieldValue(data, 'brand') || 'HAUTRE';
+  const tagline = getFieldValue(data, 'tagline') || '';
+  const ctaText = getFieldValue(data, 'ctaText') || '';
+  const ctaUrl = getFieldValue(data, 'ctaUrl') || '#contact';
 
   const menuItems = [1, 2, 3, 4, 5]
     .map((n) => ({
-      label: data[`menu${n}`]?.value || '',
-      href: data[`menu${n}Url`]?.value || '#',
+      label: getFieldValue(data, `menu${n}`) || '',
+      href: getFieldValue(data, `menu${n}Url`) || '#',
     }))
     .filter((m) => m.label);
 

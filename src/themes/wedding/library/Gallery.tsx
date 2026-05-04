@@ -1,13 +1,14 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Gallery: SectionComponent = function Gallery({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const images = [1, 2, 3, 4, 5, 6]
-    .map((n) => data[`image${n}`]?.value || '')
+    .map((n) => getFieldValue(data, `image${n}`) || '')
     .filter((src) => src);
 
   // Spans for masonry effect: 1st & 4th are tall (row-span-2)

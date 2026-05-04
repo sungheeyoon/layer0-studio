@@ -1,15 +1,16 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Why: SectionComponent = function Why({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '';
-  const title = data['title']?.value || '';
+  const label = getFieldValue(data, 'label') || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const features = [
-    { title: data['f1Title']?.value, desc: data['f1Desc']?.value, image: data['f1Image']?.value, num: '01' },
-    { title: data['f2Title']?.value, desc: data['f2Desc']?.value, image: data['f2Image']?.value, num: '02', reverse: true },
-    { title: data['f3Title']?.value, desc: data['f3Desc']?.value, image: data['f3Image']?.value, num: '03' },
+    { title: getFieldValue(data, 'f1Title'), desc: getFieldValue(data, 'f1Desc'), image: getFieldValue(data, 'f1Image'), num: '01' },
+    { title: getFieldValue(data, 'f2Title'), desc: getFieldValue(data, 'f2Desc'), image: getFieldValue(data, 'f2Image'), num: '02', reverse: true },
+    { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), image: getFieldValue(data, 'f3Image'), num: '03' },
   ].filter(f => f.title);
 
   return (

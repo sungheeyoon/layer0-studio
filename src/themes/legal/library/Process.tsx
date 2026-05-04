@@ -1,13 +1,14 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Process: SectionComponent = function Process({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const steps = [1, 2, 3, 4, 5].map(n => ({
-    title: data[`step${n}Title`]?.value || '',
-    body: data[`step${n}Body`]?.value || '',
+    title: getFieldValue(data, `step${n}Title`) || '',
+    body: getFieldValue(data, `step${n}Body`) || '',
   }));
 
   return (

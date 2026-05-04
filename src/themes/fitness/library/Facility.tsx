@@ -1,24 +1,25 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { RulerIcon, DumbbellIcon, ShowerIcon, ClockIcon, ParkingIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Facility: SectionComponent = function Facility({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '시설 안내';
-  const title = data['title']?.value || '장비가\n결과를\n만듭니다';
-  const description = data['description']?.value || '';
+  const label = getFieldValue(data, 'label') || '시설 안내';
+  const title = getFieldValue(data, 'title') || '장비가\n결과를\n만듭니다';
+  const description = getFieldValue(data, 'description') || '';
 
   const features = [
-    { title: data['f1Title']?.value, label: data['f1Label']?.value, icon: <RulerIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: data['f2Title']?.value, label: data['f2Label']?.value, icon: <DumbbellIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: data['f3Title']?.value, label: data['f3Label']?.value, icon: <ShowerIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: data['f4Title']?.value, label: data['f4Label']?.value, icon: <ClockIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: data['f5Title']?.value, label: data['f5Label']?.value, icon: <ParkingIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(data, 'f1Title'), label: getFieldValue(data, 'f1Label'), icon: <RulerIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(data, 'f2Title'), label: getFieldValue(data, 'f2Label'), icon: <DumbbellIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(data, 'f3Title'), label: getFieldValue(data, 'f3Label'), icon: <ShowerIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(data, 'f4Title'), label: getFieldValue(data, 'f4Label'), icon: <ClockIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(data, 'f5Title'), label: getFieldValue(data, 'f5Label'), icon: <ParkingIcon size={18} className="text-[var(--f-lime)]" /> },
   ].filter(f => f.title);
 
-  const images = [1, 2, 3].map(n => data[`image${n}`]?.value).filter(Boolean);
-  const trustValue = data['trustValue']?.value || '14';
-  const trustLabel = data['trustLabel']?.value || 'Years\nof Trust';
+  const images = [1, 2, 3].map(n => getFieldValue(data, `image${n}`)).filter(Boolean);
+  const trustValue = getFieldValue(data, 'trustValue') || '14';
+  const trustLabel = getFieldValue(data, 'trustLabel') || 'Years\nof Trust';
 
   return (
     <section className="bg-[var(--f-surface)] border-y border-[var(--f-border)] overflow-hidden" id="facility">

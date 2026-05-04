@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncTemplates } from '../sync';
+import { deriveTemplateJsonFromPreset } from '../preset';
+import { TemplatePreset } from '@/themes/types';
+import { ArrayTemplateField, TextTemplateField } from '@/domain/entities/template.entity';
 
 // Mock presetMap and validateTemplateJson
 vi.mock('@/themes/_generated', () => ({
@@ -9,7 +12,11 @@ vi.mock('@/themes/_generated', () => ({
     'test/default': () => Promise.resolve({
       default: {
         slug: 'test-default',
-        templateJson: { themeKey: 'test', pages: [{ slug: 'index', sections: [] }], globalStyles: { primaryColor: '#000', secondaryColor: '#fff' } },
+        templateJson: { 
+          themeKey: 'test', 
+          pages: [{ id: 'index', title: 'Index', slug: 'index', sections: [], order: 0 }], 
+          globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' } 
+        },
         thumbnailPath: 'test.jpg',
         version: '1.1.0',
         defaults: {
@@ -26,25 +33,71 @@ vi.mock('../validate', () => ({
   validateTemplateJson: vi.fn(() => ({ errors: [], warnings: [] }))
 }));
 
+describe('deriveTemplateJsonFromPreset — array fields', () => {
+  it('should preserve array fields during derivation', () => {
+    const preset: TemplatePreset = {
+      slug: 'test-array',
+      version: '1.0.0',
+      thumbnailPath: 't.jpg',
+      defaults: { name: 'N', description: 'D', category: 'C' },
+      templateJson: {
+        themeKey: 'test',
+        globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' },
+        pages: [{
+          id: 'p1',
+          title: 'P1',
+          slug: '/',
+          order: 0,
+          sections: [{
+            id: 's1',
+            type: 'menu',
+            visible: true,
+            editable: true,
+            data: {
+              items: {
+                type: 'array',
+                label: 'Items',
+                items: [
+                  { title: { type: 'text', label: 'T', value: 'V' } }
+                ]
+              }
+            }
+          }]
+        }]
+      }
+    };
+
+    const result = deriveTemplateJsonFromPreset(preset, null);
+    const itemsField = result.pages[0].sections[0].data.items as ArrayTemplateField;
+    expect(itemsField.type).toBe('array');
+    expect(itemsField.items).toHaveLength(1);
+    expect((itemsField.items[0].title as TextTemplateField).value).toBe('V');
+  });
+});
+
 describe('syncTemplates', () => {
+  // Use any to bypass SupabaseClient's complex internal types in tests
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mockSupabase: any = {
-    from: vi.fn(),
-    select: vi.fn(),
-    in: vi.fn(),
-    insert: vi.fn(),
-    update: vi.fn(),
-    eq: vi.fn(),
-  };
+  let mockSupabase: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSupabase.from.mockReturnValue(mockSupabase);
-    mockSupabase.select.mockReturnValue(mockSupabase);
-    mockSupabase.in.mockReturnValue(mockSupabase);
-    mockSupabase.insert.mockReturnValue(mockSupabase);
-    mockSupabase.update.mockReturnValue(mockSupabase);
-    mockSupabase.eq.mockReturnValue(mockSupabase);
+    
+    mockSupabase = {
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      storage: {
+        from: vi.fn().mockReturnValue({
+          list: vi.fn().mockResolvedValue({ data: [], error: null }),
+          getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: 'http://example.com/t.jpg' } }),
+          upload: vi.fn().mockResolvedValue({ data: {}, error: null }),
+        })
+      }
+    };
   });
 
   it('should preserve existing meta-data on update', async () => {

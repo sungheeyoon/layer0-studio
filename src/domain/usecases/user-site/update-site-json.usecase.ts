@@ -82,7 +82,13 @@ export class UpdateSiteJsonUseCase {
       throw new TemplateError('UNKNOWN');
     }
 
-    section.data[fieldKey].value = value;
+    const field = section.data[fieldKey];
+    if (field.type === 'array') {
+      // For now, we don't support partial array updates via this method
+      throw new TemplateError('UNSUPPORTED_FIELD_TYPE');
+    }
+
+    field.value = value;
 
     return this.userSiteRepository.updateSiteJson(siteId, updatedJson);
   }

@@ -1,18 +1,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { StarIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '멤버 후기';
-  const title = data['title']?.value || '결과가\n모든 걸\n말합니다';
-  const ratingValue = data['ratingValue']?.value || '4.9';
-  const ratingLabel = data['ratingLabel']?.value || 'Google 리뷰 기준 • 894개 후기';
+  const label = getFieldValue(data, 'label') || '멤버 후기';
+  const title = getFieldValue(data, 'title') || '결과가\n모든 걸\n말합니다';
+  const ratingValue = getFieldValue(data, 'ratingValue') || '4.9';
+  const ratingLabel = getFieldValue(data, 'ratingLabel') || 'Google 리뷰 기준 • 894개 후기';
 
   const reviews = [1, 2, 3, 4, 5, 6].map(n => ({
-    body: data[`r${n}Body`]?.value,
-    author: data[`r${n}Author`]?.value,
-    meta: data[`r${n}Meta`]?.value,
+    body: getFieldValue(data, `r${n}Body`),
+    author: getFieldValue(data, `r${n}Author`),
+    meta: getFieldValue(data, `r${n}Meta`),
     mt: n % 2 === 0 ? 'md:mt-8' : '',
   })).filter(r => r.body);
 

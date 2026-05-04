@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/container';
 import { loadTheme } from '@/themes/registry';
 import { SITE_URL } from '@/lib/seo/base-url';
+import { getFieldValue } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
 
@@ -32,8 +33,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const homePage = siteJson.pages.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages[0];
     const heroSection = homePage?.sections.find(s => s.type === 'hero');
-    const heroTitle = heroSection?.data['title']?.value || heroSection?.data['heading']?.value || '';
-    const heroSubtitle = heroSection?.data['subtitle']?.value || '';
+    const heroTitle = getFieldValue(heroSection?.data['title']) || getFieldValue(heroSection?.data['heading']) || '';
+    const heroSubtitle = getFieldValue(heroSection?.data['subtitle']) || '';
     const description = buildDescription(site.siteName, homePage?.title, heroTitle, heroSubtitle);
 
     const canonical = `${SITE_URL}/site/${domain}`;

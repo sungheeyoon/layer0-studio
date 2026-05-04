@@ -1,6 +1,7 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { ChatIcon, RulerIcon, PenIcon, LetterIcon, HammerIcon, KeyIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const STEP_ICONS = [
   <ChatIcon key="1" size={22} className="text-[var(--i-gold)]" />,
@@ -13,12 +14,12 @@ const STEP_ICONS = [
 
 const Process: SectionComponent = function Process({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'How We Work';
-  const title = data['title']?.value || '';
+  const label = getFieldValue(data, 'label') || 'How We Work';
+  const title = getFieldValue(data, 'title') || '';
 
   const steps = [1, 2, 3, 4, 5, 6].map(n => ({
-    title: data[`step${n}Title`]?.value,
-    desc: data[`step${n}Desc`]?.value,
+    title: getFieldValue(data, `step${n}Title`),
+    desc: getFieldValue(data, `step${n}Desc`),
   })).filter(s => s.title);
 
   return (

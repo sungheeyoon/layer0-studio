@@ -3,14 +3,15 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { PhoneIcon, ClockIcon, MapPinIcon, ChatIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || '';
-  const body = data['body']?.value || '';
-  const phone = data['phone']?.value || '';
-  const hours = data['hours']?.value || '';
-  const location = data['location']?.value || '';
+  const title = getFieldValue(data, 'title') || '';
+  const body = getFieldValue(data, 'body') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const hours = getFieldValue(data, 'hours') || '';
+  const location = getFieldValue(data, 'location') || '';
 
   return (
     <section id="contact" className="py-24 md:py-32 px-4 bg-[#0f172a] relative overflow-hidden">

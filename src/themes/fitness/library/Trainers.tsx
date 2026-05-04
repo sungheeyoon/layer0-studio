@@ -1,21 +1,22 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { CupIcon, DiplomaIcon, ClockIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Trainers: SectionComponent = function Trainers({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '트레이너';
-  const title = data['title']?.value || '당신 옆에서\n함께 싸웁니다';
-  const description = data['description']?.value || '';
+  const label = getFieldValue(data, 'label') || '트레이너';
+  const title = getFieldValue(data, 'title') || '당신 옆에서\n함께 싸웁니다';
+  const description = getFieldValue(data, 'description') || '';
 
   const trainers = [1, 2, 3].map(n => ({
-    name: data[`m${n}Name`]?.value,
-    role: data[`m${n}Role`]?.value,
-    badge: data[`m${n}Badge`]?.value,
-    image: data[`m${n}Image`]?.value,
-    info1: data[`m${n}Info1`]?.value,
-    info2: data[`m${n}Info2`]?.value,
-    info3: data[`m${n}Info3`]?.value,
+    name: getFieldValue(data, `m${n}Name`),
+    role: getFieldValue(data, `m${n}Role`),
+    badge: getFieldValue(data, `m${n}Badge`),
+    image: getFieldValue(data, `m${n}Image`),
+    info1: getFieldValue(data, `m${n}Info1`),
+    info2: getFieldValue(data, `m${n}Info2`),
+    info3: getFieldValue(data, `m${n}Info3`),
     mt: n === 2 ? 'lg:mt-10' : '',
   })).filter(m => m.name);
 

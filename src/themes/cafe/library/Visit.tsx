@@ -1,23 +1,24 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { PhoneIcon, ArrowUpRightIcon, MapPointIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Visit: SectionComponent = function Visit({ section }: ThemeSectionProps) {
   const { data } = section;
-  const bgImage = data['backgroundImage']?.value || '';
-  const label = data['label']?.value || '방문 안내';
-  const title = data['title']?.value || '언제든\n환영합니다';
-  const description = data['description']?.value || '';
-  const phone = data['phone']?.value || '';
-  const instagram = data['instagram']?.value || '#';
+  const bgImage = getFieldValue(data, 'backgroundImage') || '';
+  const label = getFieldValue(data, 'label') || '방문 안내';
+  const title = getFieldValue(data, 'title') || '언제든\n환영합니다';
+  const description = getFieldValue(data, 'description') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const instagram = getFieldValue(data, 'instagram') || '#';
 
   const hours = [1, 2, 3, 4].map(n => ({
-    label: data[`h${n}Label`]?.value,
-    value: data[`h${n}Value`]?.value,
+    label: getFieldValue(data, `h${n}Label`),
+    value: getFieldValue(data, `h${n}Value`),
   })).filter(h => h.label);
 
-  const address = data['address']?.value || '';
-  const addressDetail = data['addressDetail']?.value || '';
+  const address = getFieldValue(data, 'address') || '';
+  const addressDetail = getFieldValue(data, 'addressDetail') || '';
 
   return (
     <section className="relative overflow-hidden" id="visit">

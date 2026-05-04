@@ -1,17 +1,18 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { StarIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '';
-  const title = data['title']?.value || '';
-  const rating = data['rating']?.value || '4.9';
+  const label = getFieldValue(data, 'label') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const rating = getFieldValue(data, 'rating') || '4.9';
 
   const reviews = [1, 2, 3].map(n => ({
-    body: data[`review${n}Body`]?.value,
-    author: data[`review${n}Author`]?.value,
-    meta: data[`review${n}Meta`]?.value,
+    body: getFieldValue(data, `review${n}Body`),
+    author: getFieldValue(data, `review${n}Author`),
+    meta: getFieldValue(data, `review${n}Meta`),
     mt: n === 2 ? 'md:mt-10' : '',
   })).filter(r => r.body);
 

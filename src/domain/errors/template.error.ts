@@ -8,6 +8,7 @@ export type TemplateErrorCode =
   | 'INVALID_DOMAIN'
   | 'DOMAIN_TAKEN'
   | 'NAME_TAKEN'
+  | 'UNSUPPORTED_FIELD_TYPE'
   | 'UNKNOWN';
 
 export class TemplateError extends Error {

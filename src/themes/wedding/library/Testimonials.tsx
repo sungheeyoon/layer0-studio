@@ -1,20 +1,21 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { StarIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
-  const ratingScore = data['ratingScore']?.value || '';
-  const ratingNote = data['ratingNote']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const ratingScore = getFieldValue(data, 'ratingScore') || '';
+  const ratingNote = getFieldValue(data, 'ratingNote') || '';
 
   const reviews = [1, 2, 3]
     .map((n) => ({
-      body: data[`review${n}Body`]?.value || '',
-      author: data[`review${n}Author`]?.value || '',
-      meta: data[`review${n}Meta`]?.value || '',
-      avatar: data[`review${n}Avatar`]?.value || '',
+      body: getFieldValue(data, `review${n}Body`) || '',
+      author: getFieldValue(data, `review${n}Author`) || '',
+      meta: getFieldValue(data, `review${n}Meta`) || '',
+      avatar: getFieldValue(data, `review${n}Avatar`) || '',
       featured: n === 2,
     }))
     .filter((r) => r.body);

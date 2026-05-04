@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { DumbbellIcon, HamburgerIcon, ArrowRightIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = data['brandName']?.value || 'APEX';
-  const ctaText = data['ctaText']?.value || '무료 체험';
+  const brandName = getFieldValue(data, 'brandName') || 'APEX';
+  const ctaText = getFieldValue(data, 'ctaText') || '무료 체험';
 
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen] = useState(false);
@@ -20,10 +21,10 @@ const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
   }, []);
 
   const menuItems = [
-    { label: data['menu1']?.value, href: '#programs' },
-    { label: data['menu2']?.value, href: '#facility' },
-    { label: data['menu3']?.value, href: '#trainers' },
-    { label: data['menu4']?.value, href: '#reviews' },
+    { label: getFieldValue(data, 'menu1'), href: '#programs' },
+    { label: getFieldValue(data, 'menu2'), href: '#facility' },
+    { label: getFieldValue(data, 'menu3'), href: '#trainers' },
+    { label: getFieldValue(data, 'menu4'), href: '#reviews' },
   ].filter(m => m.label);
 
   return (

@@ -4,14 +4,15 @@ import { useState } from 'react';
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { PlusIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Faq: SectionComponent = function Faq({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const items = [1, 2, 3, 4, 5].map(n => ({
-    q: data[`q${n}`]?.value || '',
-    a: data[`a${n}`]?.value || '',
+    q: getFieldValue(data, `q${n}`) || '',
+    a: getFieldValue(data, `a${n}`) || '',
   })).filter(it => it.q);
 
   const [openIdx, setOpenIdx] = useState<number | null>(null);

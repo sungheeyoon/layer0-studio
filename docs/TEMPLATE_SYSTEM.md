@@ -103,6 +103,7 @@ TemplateJson = {
 | `text` / `textarea` / `url` / `color` / `number` | 자명 | 모든 `value`는 string (number도) |
 | `select` | dropdown | `options: string[]` 필요 |
 | `image` | URL + 업로드 | 업로드 시 `assetId` 자동 부여 (orphan 정리용) |
+| `array` | repeated items CRUD | `itemSchema` (Recursive SectionDataSchema) 필수 |
 
 ### 2.2 `TemplatePreset` (코드의 시드 형태) — `src/themes/types.ts`
 
@@ -140,7 +141,15 @@ interface SectionComponentMeta {
 }
 
 interface SectionDataSchema {
-  [fieldKey: string]: { type: TemplateFieldType; label: string; required?: boolean };
+  [fieldKey: string]: {
+    type: TemplateFieldType;
+    label: string;
+    required?: boolean;
+    itemSchema?: SectionDataSchema; // ★ type: 'array'일 때 필수 (재귀 구조)
+    minItems?: number; // (선택) 최소 항목 수
+    maxItems?: number; // (선택) 최대 항목 수
+    options?: string[]; // type: 'select'일 때 사용
+  };
 }
 
 type SectionComponent = ComponentType<ThemeSectionProps> & { meta?: SectionComponentMeta };
@@ -321,7 +330,10 @@ pnpm template:sync cafe             # 슬러그 또는 테마 prefix로 필터
 | `MISSING_REQUIRED_FIELD` | `dataSchema[field].required === true` 인데 누락 |
 | `FIELD_TYPE_MISMATCH` | `field.type !== schema[field].type` |
 | `MISSING_FIELD_TYPE` / `MISSING_FIELD_LABEL` / `MISSING_FIELD_VALUE` | 필수 메타 누락 |
-| `NON_STRING_FIELD_VALUE` | `value`가 string 아님 |
+| `NON_STRING_FIELD_VALUE` | `value`가 string 아님 (array 타입 제외) |
+| `NON_ARRAY_FIELD_VALUE` | `type: 'array'` 인데 `items` 가 배열이 아니거나 누락 |
+| `MISSING_ITEM_SCHEMA` | schema에서 `type: 'array'` 인데 `itemSchema` 가 정의 안 됨 |
+| `ARRAY_ITEMS_BELOW_MIN` / `ARRAY_ITEMS_ABOVE_MAX` | minItems/maxItems 제약 위반 |
 
 ### 6.2 Warnings (통과하지만 stderr)
 
@@ -474,6 +486,24 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 
 후자는 별도 작업 — 공개 사이트 네비게이션, 에디터 페이지 탭, validate `DUPLICATE_PAGE_SLUG` 룰까지 함께 손봐야 함.
 
+### G. 반복 항목을 위한 `array` 필드 추가
+
+메뉴, 공지사항, 리뷰 등 반복되는 데이터는 `type: 'array'`를 사용.
+1. **meta 정의**: `itemSchema`를 필수로 포함. `minItems`/`maxItems`로 제약 가능.
+   ```ts
+   items: {
+     type: 'array',
+     label: '메뉴 항목',
+     itemSchema: {
+       title: { type: 'text', label: '제목', required: true },
+       price: { type: 'text', label: '가격' }
+     },
+     minItems: 1
+   }
+   ```
+2. **Preset 데이터**: `items` 배열 안에 각 item 객체 배치.
+3. **컴포넌트 렌더**: `(data.items as ArrayTemplateField).items.map(...)`으로 렌더. `item.title.value` 대신 `getFieldValue(item.title)` 사용 권장.
+
 ---
 
 ## 10. 자주 빠지는 함정
@@ -487,31 +517,39 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 3. **모든 `value`는 string**
    `type: 'number'`도 `value: '42'`. 컴포넌트에서 `Number(field.value)` 필요. validate가 `NON_STRING_FIELD_VALUE`로 잡음.
 
-4. **`required: true`를 dataSchema에 안 적으면 silent**
+4. **items의 React key (Array Field)**
+   에디터에서 `array` 필드의 각 항목은 stable한 `_key`가 필요함. 에디터 내부적으로 `injectKeys` / `stripKeys` 헬퍼가 임시 키를 관리하며, DB 저장 시에는 최적화를 위해 제거됨. 렌더러에서는 `item._key || index`를 키로 사용하되, 가급적 데이터 고유값을 조합할 것.
+
+5. **Lazy Migration & Graceful Fallback**
+   기존 테마 컴포넌트에 `array` 필드를 추가한 경우, 기존 사용자 사이트 JSON에는 해당 필드나 `items` 배열이 없을 수 있음. 컴포넌트 구현 시 `data.items?.items ?? []` 처럼 항상 빈 배열 fallback을 갖추어야 런타임 에러를 방지할 수 있음. (에디터에서 한 번 저장하면 스키마에 맞춰 채워짐)
+
+6. **`required: true`를 dataSchema에 안 적으면 silent**
    필수 필드를 빠뜨려도 sync 통과하고 런타임에 빈 값. `dataSchema`에 명시할 것.
 
-5. **`themeKey` 누락 → `'corporate'` 폴백**
+7. **`themeKey` 누락 → `'corporate'` 폴백**
    `site/[domain]/page.tsx`, `DynamicEditor.tsx`. 의도된 동작이지만 디버깅 시간 낭비 흔함.
 
-6. **`editable: false`는 UI만 숨김**
+8. **`editable: false`는 UI만 숨김**
    서버 가드 없음. 사용자가 JSON 직접 수정하면 변경 가능 — 진짜 잠금이 필요하면 use case 레이어에 추가해야 함.
 
-7. **Sync는 user_sites를 안 건드린다**
+9. **Sync는 user_sites를 안 건드린다**
    `templates`만 update. 이미 발행된 사용자 사이트는 옛 데이터 그대로. 강제 마이그가 필요하면 별도 SQL (참고: `docs/migrations/012_remove_section_order.sql`).
 
-8. **`_generated.ts` 수정 금지**
-   수동 편집해도 다음 `predev`/`prebuild`에서 덮어씀. 새 테마/preset 추가는 디렉터리/파일만 만들면 됨.
+10. **`_generated.ts` 수정 금지**
+    수동 편집해도 다음 `predev`/`prebuild`에서 덮어씀. 새 테마/preset 추가는 디렉터리/파일만 만들면 됨.
 
-9. **`globalStyles` 머지 규칙**
-   `composition` 사용 시 sync는 `themeModule.defaultTemplateJson.globalStyles` (= `tokens.ts` 시드) ◀ `preset.globalStyles` 순서로 spread. preset에서 `Partial`로 일부만 덮을 것.
+11. **`globalStyles` 머지 규칙**
+    `composition` 사용 시 sync는 `themeModule.defaultTemplateJson.globalStyles` (= `tokens.ts` 시드) ◀ `preset.globalStyles` 순서로 spread. preset에서 `Partial`로 일부만 덮을 것.
 
-10. **`'use client'` 컴포넌트의 `Component.meta = {...}` 는 서버에서 안 보임** ⚠️
+12. **`'use client'` 컴포넌트의 `Component.meta = {...}` 는 서버에서 안 보임** ⚠️
     Next.js는 `'use client'` 모듈을 server-side import 시 client reference로 wrapping하고 모듈 본문을 서버에서 실행하지 않는다. 그래서 `.tsx` 파일 끝에서 한 `Component.meta = {...}` side-effect는 server에는 보이지 않고 → `library['nav'].meta` 가 undefined → sync/validate 시 `Cannot read properties of undefined (reading 'dataSchema')` 폭발.
     **해법**: client 컴포넌트의 meta는 항상 sibling `<Component>.meta.ts` 에 named export 로 정의하고, library/index.ts 에서 `libEntry(Component, componentMeta)` 로 명시 전달. server 컴포넌트는 종전대로 `.meta = {...}` 그대로 OK.
     현재 client 컴포넌트 9개 (cafe/Navigation, corporate/Contact, fitness/Nav, interior/{Contact,Nav}, legal/{Contact,Faq}, wedding/{Contact,Faq}) 가 이 패턴을 따른다.
 
-11. **Capture는 dev server를 띄움**
+13. **Capture는 dev server를 띄움**
     `thumbnail.config.ts`의 `source`가 `preview://`로 시작하면 `capture-templates.ts`가 자동으로 `pnpm dev`를 백그라운드로 실행. CI에서는 `templates-ui/*.html` 파일 source를 쓰면 server-less.
+14. **인덱스 기반 스타일링의 한계 (Array Field)**
+    `Array Field` 항목을 렌더링할 때 `idx === 0` 처럼 인덱스에 따라 스타일(예: 넓은 카드, 특정 아이콘)을 다르게 주면, 사용자가 에디터에서 항목 순서를 바꿀 때 디자인 요소가 항목을 따라가지 않고 '슬롯'에 고정되는 현상이 발생함. "항목에 종속된 디자인"이 필요하다면 `itemSchema`에 `style`이나 `icon` 같은 `select` 필드를 추가하여 사용자가 직접 지정하게 하는 것이 좋음.
 
 ---
 

@@ -1,17 +1,18 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { PhoneIcon, MapPinIcon, ClockIcon, ChatIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Join: SectionComponent = function Join({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '무료 체험';
-  const titleLine1 = data['title1']?.value || '지금 시작하면';
-  const titleLine2 = data['title2']?.value || '첫 주가 무료';
-  const description = data['description']?.value || '';
-  const bgImage = data['backgroundImage']?.value || '';
-  const phone = data['phone']?.value || '02-555-9876';
-  const address = data['address']?.value || '';
-  const hours = data['hours']?.value || '';
+  const label = getFieldValue(data, 'label') || '무료 체험';
+  const titleLine1 = getFieldValue(data, 'title1') || '지금 시작하면';
+  const titleLine2 = getFieldValue(data, 'title2') || '첫 주가 무료';
+  const description = getFieldValue(data, 'description') || '';
+  const bgImage = getFieldValue(data, 'backgroundImage') || '';
+  const phone = getFieldValue(data, 'phone') || '02-555-9876';
+  const address = getFieldValue(data, 'address') || '';
+  const hours = getFieldValue(data, 'hours') || '';
 
   return (
     <section className="relative overflow-hidden py-32 lg:py-52" id="join">
