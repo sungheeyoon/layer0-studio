@@ -502,7 +502,7 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
    }
    ```
 2. **Preset 데이터**: `items` 배열 안에 각 item 객체 배치.
-3. **컴포넌트 렌더**: `data.items.items.map(...)`으로 렌더. `item.title.value` 대신 `getFieldValue(item.title)` 사용 권장.
+3. **컴포넌트 렌더**: `(data.items as ArrayTemplateField).items.map(...)`으로 렌더. `item.title.value` 대신 `getFieldValue(item.title)` 사용 권장.
 
 ---
 
@@ -548,6 +548,9 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 
 13. **Capture는 dev server를 띄움**
     `thumbnail.config.ts`의 `source`가 `preview://`로 시작하면 `capture-templates.ts`가 자동으로 `pnpm dev`를 백그라운드로 실행. CI에서는 `templates-ui/*.html` 파일 source를 쓰면 server-less.
+14. **인덱스 기반 스타일링의 한계 (Array Field)**
+    `Array Field` 항목을 렌더링할 때 `idx === 0` 처럼 인덱스에 따라 스타일(예: 넓은 카드, 특정 아이콘)을 다르게 주면, 사용자가 에디터에서 항목 순서를 바꿀 때 디자인 요소가 항목을 따라가지 않고 '슬롯'에 고정되는 현상이 발생함. "항목에 종속된 디자인"이 필요하다면 `itemSchema`에 `style`이나 `icon` 같은 `select` 필드를 추가하여 사용자가 직접 지정하게 하는 것이 좋음.
+
 ---
 
 ## 11. 코드 위치 맵

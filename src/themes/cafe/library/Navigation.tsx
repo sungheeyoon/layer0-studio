@@ -8,9 +8,9 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Navigation: SectionComponent = function Navigation({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = getFieldValue(data['brandName']) || 'MONO';
-  const brandSubtext = getFieldValue(data['brandSubtext']) || 'Specialty Coffee';
-  const ctaText = getFieldValue(data['ctaText']) || '오시는 길';
+  const brandName = getFieldValue(data, 'brandName') || 'MONO';
+  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Specialty Coffee';
+  const ctaText = getFieldValue(data, 'ctaText') || '오시는 길';
 
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen] = useState(false);
@@ -22,10 +22,10 @@ const Navigation: SectionComponent = function Navigation({ section }: ThemeSecti
   }, []);
 
   const menuItems = [
-    { label: getFieldValue(data['menu1']), href: '#menu' },
-    { label: getFieldValue(data['menu2']), href: '#story' },
-    { label: getFieldValue(data['menu3']), href: '#space' },
-    { label: getFieldValue(data['menu4']), href: '#visit' },
+    { label: getFieldValue(data, 'menu1'), href: '#menu' },
+    { label: getFieldValue(data, 'menu2'), href: '#story' },
+    { label: getFieldValue(data, 'menu3'), href: '#space' },
+    { label: getFieldValue(data, 'menu4'), href: '#visit' },
   ].filter(m => m.label);
 
   return (

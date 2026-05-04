@@ -5,15 +5,15 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = getFieldValue(data['brandName']) || 'MONO';
-  const brandSubtext = getFieldValue(data['brandSubtext']) || 'Specialty Coffee & Bakery';
-  const description = getFieldValue(data['description']) || '';
-  const phone = getFieldValue(data['phone']) || '';
-  const address = getFieldValue(data['address']) || '';
-  const weekdayHours = getFieldValue(data['weekdayHours']) || '';
-  const weekendHours = getFieldValue(data['weekendHours']) || '';
-  const copyright = getFieldValue(data['copyright']) || '';
-  const businessInfo = getFieldValue(data['businessInfo']) || '';
+  const brandName = getFieldValue(data, 'brandName') || 'MONO';
+  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Specialty Coffee & Bakery';
+  const description = getFieldValue(data, 'description') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const address = getFieldValue(data, 'address') || '';
+  const weekdayHours = getFieldValue(data, 'weekdayHours') || '';
+  const weekendHours = getFieldValue(data, 'weekendHours') || '';
+  const copyright = getFieldValue(data, 'copyright') || '';
+  const businessInfo = getFieldValue(data, 'businessInfo') || '';
 
   return (
     <footer className="bg-[var(--c-espresso)] border-t border-[var(--c-linen)] border-opacity-5 pt-16 pb-10 px-6 lg:px-10">

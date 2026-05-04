@@ -125,13 +125,13 @@ export interface SectionDataSchema {
 
 #### 🟡 문서 정리
 - [x] **`docs/TEMPLATE_SYSTEM.md` §10 번호 재번호** — 1~13으로 정리 완료
-- [ ] (선택) §9-G "컴포넌트 렌더" 줄 — `data.items.items.map(...)` 표기를 `(data.items as ArrayTemplateField).items.map(...)` 로 풀어 쓰면 가독성 ↑
+- [x] (선택) §9-G "컴포넌트 렌더" 줄 — `data.items.items.map(...)` 표기를 `(data.items as ArrayTemplateField).items.map(...)` 로 풀어 쓰면 가독성 ↑ 완료
 
 #### 🟢 코드 품질 (정보)
-- [ ] **`getFieldValue` 호출 형태 일관성** — `getFieldValue(data['key'])` (cafe/Footer 등)와 `getFieldValue(data, 'key')` (legal/Hero, Nav 등)가 혼재. 한 형태(짧은 두 인자 형태 추천)로 통일
-- [ ] **`MenuBento.tsx`의 인덱스 기반 시각적 차별화 검토** — `idx === 0 ? 'md:col-span-2' : ''`, `idx === 2 ? CupIcon : idx === 3 ? PieChartIcon : null`. 사용자가 항목 순서를 바꾸면 "넓은 카드"·"아이콘 카드" 위치도 다른 메뉴로 이동. "디자인 잠금" 의도와 충돌. 의도된 거면 §10 함정에 추가, 아니면 itemSchema의 select 필드로 빼기
-- [ ] **`data['items'] as ArrayTemplateField`** (MenuBento.tsx:14) — 타입 가드 없는 단언. `itemsField?.type === 'array' ? itemsField.items : []` 형태가 더 안전 (lazy migration 케이스 대비)
-- [ ] (선택) `getFieldValue`의 2-arg 오버로드가 `template.entity.ts`에 정의되어 있지만 도메인 레이어 헬퍼가 UI 관심사라는 위치 부조화. 그대로 둬도 무방하지만 `src/lib/template/` 쪽이 더 자연스러울 수도
+- [x] **`getFieldValue` 호출 형태 일관성** — `getFieldValue(data, 'key')` (짧은 두 인자 형태)로 전 테마 통일 완료
+- [x] **`MenuBento.tsx`의 인덱스 기반 시각적 차별화 검토** — §10.14 함정에 인덱스 기반 스타일링의 한계 문서화 완료
+- [x] **`data['items'] as ArrayTemplateField`** (MenuBento.tsx:14) — `itemsField?.type === 'array' ? itemsField.items : []` 형태로 타입 가드 보강 완료
+- [x] (선택) `getFieldValue`의 2-arg 오버로드가 `template.entity.ts`에 정의되어 있지만 도메인 레이어 헬퍼가 UI 관심사라는 위치 부조화. 그대로 둬도 무방하지만 src/lib/template/ 쪽이 더 자연스러울 수도 — 현 위치 유지(결정)
 
 #### ✅ 재확인 (계획에 미흡으로 적혔으나 실제 완료된 것)
 - [x] `validate.ts` import 누락 → 해결

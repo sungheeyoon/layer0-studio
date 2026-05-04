@@ -5,12 +5,12 @@ import { ArrowRightIcon, CupIcon, PieChartIcon } from '../sections/icons';
 
 const MenuBento: SectionComponent = function MenuBento({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data['label']) || '메뉴';
-  const title = getFieldValue(data['title']) || '매일 정성껏\n내리는 한 잔';
-  const description = getFieldValue(data['description']) || '';
+  const label = getFieldValue(data, 'label') || '메뉴';
+  const title = getFieldValue(data, 'title') || '매일 정성껏\n내리는 한 잔';
+  const description = getFieldValue(data, 'description') || '';
 
-  const itemsField = data['items'] as ArrayTemplateField;
-  const items = itemsField?.items || [];
+  const itemsField = data['items'];
+  const items = itemsField?.type === 'array' ? itemsField.items : [];
 
   const programs = items.map((item, idx) => {
     const pTitle = getFieldValue(item.title);

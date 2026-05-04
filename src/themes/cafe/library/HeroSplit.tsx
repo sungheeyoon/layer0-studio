@@ -5,21 +5,21 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const HeroSplit: SectionComponent = function HeroSplit({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data['label']) || 'Seoul Seongsu — Specialty Coffee';
-  const title1 = getFieldValue(data['title1']) || '천천히,';
-  const titleAccent = getFieldValue(data['titleAccent']) || '제대로';
-  const subtitle = getFieldValue(data['subtitle']) || '— 한 잔의 완성';
-  const description = getFieldValue(data['description']) || '';
-  const image = getFieldValue(data['image']) || '';
-  const ctaPrimary = getFieldValue(data['ctaPrimary']) || '메뉴 보기';
-  const ctaSecondary = getFieldValue(data['ctaSecondary']) || '카페 소개';
+  const label = getFieldValue(data, 'label') || 'Seoul Seongsu — Specialty Coffee';
+  const title1 = getFieldValue(data, 'title1') || '천천히,';
+  const titleAccent = getFieldValue(data, 'titleAccent') || '제대로';
+  const subtitle = getFieldValue(data, 'subtitle') || '— 한 잔의 완성';
+  const description = getFieldValue(data, 'description') || '';
+  const image = getFieldValue(data, 'image') || '';
+  const ctaPrimary = getFieldValue(data, 'ctaPrimary') || '메뉴 보기';
+  const ctaSecondary = getFieldValue(data, 'ctaSecondary') || '카페 소개';
 
   const stats = [1, 2, 3].map(n => ({
-    value: getFieldValue(data[`stat${n}Value`]),
-    label: getFieldValue(data[`stat${n}Label`]),
+    value: getFieldValue(data, `stat${n}Value`),
+    label: getFieldValue(data, `stat${n}Label`),
   })).filter(s => s.value);
 
-  const seasonTag = getFieldValue(data['seasonTag']) || 'Spring Menu';
+  const seasonTag = getFieldValue(data, 'seasonTag') || 'Spring Menu';
 
   return (
     <section className="min-h-[100dvh] flex items-stretch pt-[68px]" id="hero">
