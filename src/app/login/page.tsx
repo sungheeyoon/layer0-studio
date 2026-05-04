@@ -49,44 +49,44 @@ export default function LoginPage() {
           <form className="space-y-12" action={handleSubmit}>
             {/* Email Field */}
             <div className="group relative">
-              <label 
-                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors" 
+              <label
+                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
                 htmlFor="email"
               >
                 USER_EMAIL
               </label>
               <div className="relative flex items-center">
-                <input 
-                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200" 
-                  id="email" 
-                  name="email" 
-                  placeholder="user@example.com" 
-                  type="email" 
+                <input
+                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200 px-2"
+                  id="email"
+                  name="email"
+                  placeholder="user@example.com"
+                  type="email"
                   required
                 />
                 {/* Tertiary Square Status Dot on Focus */}
-                <div className="absolute right-0 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                <div className="absolute right-2 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
               </div>
             </div>
 
             {/* Password Field */}
             <div className="group relative">
-              <label 
-                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors" 
+              <label
+                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
                 htmlFor="password"
               >
                 SECURE_KEY
               </label>
               <div className="relative flex items-center">
-                <input 
-                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200" 
-                  id="password" 
-                  name="password" 
-                  placeholder="••••••••••••" 
-                  type="password" 
+                <input
+                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200 px-2"
+                  id="password"
+                  name="password"
+                  placeholder="••••••••••••"
+                  type="password"
                   required
                 />
-                <div className="absolute right-0 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                <div className="absolute right-2 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
               </div>
             </div>
 

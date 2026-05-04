@@ -86,13 +86,13 @@ export default function SignupPage() {
             <form className="space-y-10" action={handleSubmit}>
               {/* Field: Full Name */}
               <div className="relative group">
-                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors" htmlFor="full_name">FULL NAME</label>
-                <input 
-                  className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 transition-all duration-300 placeholder:text-outline/30" 
-                  id="full_name" 
-                  name="full_name" 
-                  placeholder="SURNAME_FORENAME" 
-                  type="text" 
+                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="full_name">FULL NAME</label>
+                <input
+                  className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 px-2 transition-all duration-300 placeholder:text-outline/30"
+                  id="full_name"
+                  name="full_name"
+                  placeholder="SURNAME_FORENAME"
+                  type="text"
                   required
                 />
                 <div className="absolute top-0 right-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
@@ -100,13 +100,13 @@ export default function SignupPage() {
 
               {/* Field: Email Address */}
               <div className="relative group">
-                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors" htmlFor="email">EMAIL ADDRESS</label>
-                <input 
-                  className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 transition-all duration-300 placeholder:text-outline/30" 
-                  id="email" 
-                  name="email" 
-                  placeholder="USER@LAYER0.STUDIO" 
-                  type="email" 
+                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="email">EMAIL ADDRESS</label>
+                <input
+                  className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 px-2 transition-all duration-300 placeholder:text-outline/30"
+                  id="email"
+                  name="email"
+                  placeholder="USER@LAYER0.STUDIO"
+                  type="email"
                   required
                 />
                 <div className="absolute top-0 right-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
@@ -114,11 +114,11 @@ export default function SignupPage() {
 
               {/* Field: Secure Password */}
               <div className="relative group">
-                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors" htmlFor="password">SECURE PASSWORD</label>
-                <input 
-                  className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 transition-all duration-300 placeholder:text-outline/30" 
-                  id="password" 
-                  name="password" 
+                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="password">SECURE PASSWORD</label>
+                <input
+                  className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 px-2 transition-all duration-300 placeholder:text-outline/30"
+                  id="password"
+                  name="password"
                   placeholder="••••••••••"
                   type="password"
                   required
@@ -128,14 +128,14 @@ export default function SignupPage() {
 
               {/* Field: Workspace ID */}
               <div className="relative group">
-                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors" htmlFor="workspace_id">WORKSPACE ID</label>
+                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="workspace_id">WORKSPACE ID</label>
                 <div className="relative flex items-center">
-                  <input 
-                    className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 transition-all duration-300 placeholder:text-outline/30" 
-                    id="workspace_id" 
-                    name="workspace_id" 
-                    placeholder="WORKSPACE_NAME" 
-                    type="text" 
+                  <input
+                    className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 px-2 transition-all duration-300 placeholder:text-outline/30"
+                    id="workspace_id"
+                    name="workspace_id"
+                    placeholder="WORKSPACE_NAME"
+                    type="text"
                     required
                   />
                   <span className="absolute right-0 bottom-2 font-label text-[0.6rem] font-medium text-outline/50 uppercase">.L0</span>
