@@ -452,12 +452,12 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       </section>
 
       {/* Right Panel: Live Preview */}
-      <section className="flex-grow bg-surface-container-lowest relative blueprint-grid border border-outline-variant overflow-hidden flex flex-col">
+      <section className="flex-grow bg-surface-container-lowest relative blueprint-grid border border-outline-variant overflow-hidden flex flex-col p-6">
         <div className="absolute top-0 left-0 bg-primary text-on-primary px-3 py-1.5 text-[10px] font-medium tracking-[0.15em] z-50">
           LIVE PREVIEW
         </div>
 
-        <div className="flex-grow overflow-y-auto custom-scrollbar p-6">
+        <div className="flex-grow overflow-y-auto custom-scrollbar transform-gpu">
           <div style={themeVariables} className="min-h-full bg-white shadow-2xl">
             {loadingError ? (
               <div className="flex flex-col items-center justify-center h-[50vh] p-8 text-center">
