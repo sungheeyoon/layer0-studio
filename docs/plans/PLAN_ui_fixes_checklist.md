@@ -70,14 +70,14 @@ owner: layer0-studio
 
 ---
 
-## 2. 로그인 입력 폼 — 좌우 패딩 부재로 글자 밀착
+## 2. 로그인 입력 폼 — 좌우 패딩 부재로 글자 밀착 ✅ 해결됨
 
 > 증상: `/login` 의 이메일·비밀번호 인풋에 좌우 패딩이 없어 placeholder/입력 글자가 좌측 경계에 딱 붙는다.
 
 ### 진단
-- [ ] `src/app/login/page.tsx:60` — email 인풋: `w-full h-10 bg-transparent border-0 border-b ... font-body text-sm font-light tracking-widest` — *수평 패딩 클래스 없음*
-- [ ] `src/app/login/page.tsx:82` — password 인풋: 동일 패턴, 동일 문제
-- [ ] 라벨(line 53, 75)도 인풋과 동일한 좌측 정렬, 별도 패딩 없음
+- [x] `src/app/login/page.tsx:60` — email 인풋: `w-full h-10 bg-transparent border-0 border-b ... font-body text-sm font-light tracking-widest` — *수평 패딩 클래스 없음*
+- [x] `src/app/login/page.tsx:82` — password 인풋: 동일 패턴, 동일 문제
+- [x] 라벨(line 53, 75)도 인풋과 동일한 좌측 정렬, 별도 패딩 없음
 
 ### 원인
 - 디자인 의도는 "border-bottom 만 있는 미니멀 인풋" 인데, 시각 균형을 위한 최소 좌측 인셋이 빠져 있어 placeholder 의 첫 글자가 라벨/외곽과 충돌하는 인상.
@@ -87,16 +87,16 @@ owner: layer0-studio
 
 **전략: 인풋의 의미적 구조(border-bottom only)를 유지하면서 좌우 인셋만 부여한다.**
 
-- [ ] email 인풋(60)에 `px-2` 추가 → `... border-b border-outline-variant px-2 focus:ring-0 focus:border-primary ...`
-- [ ] password 인풋(82)에 동일하게 `px-2` 추가
-- [ ] 라벨 정렬도 인풋과 어긋나지 않도록 라벨에 `pl-2` 추가 (line 53, 75)
-- [ ] 우측 status dot (line 68, 89) 위치가 `right-0` 인데 인풋 내부 `pr-2` 와 겹치지 않도록 dot 을 `right-2` 로 이동
-- [ ] 동일 패턴이 `/signup`, `/forgot-password`, `/update-password` 에 있는지 확인 후 일괄 수정
+- [x] email 인풋(60)에 `px-2` 추가 → `... border-b border-outline-variant px-2 focus:ring-0 focus:border-primary ...`
+- [x] password 인풋(82)에 동일하게 `px-2` 추가
+- [x] 라벨 정렬도 인풋과 어긋나지 않도록 라벨에 `pl-2` 추가 (line 53, 75)
+- [x] 우측 status dot (line 68, 89) 위치가 `right-0` 인데 인풋 내부 `pr-2` 와 겹치지 않도록 dot 을 `right-2` 로 이동
+- [x] 동일 패턴이 `/signup`, `/forgot-password`, `/update-password` 에 있는지 확인 후 일괄 수정
 
 ### 검증
-- [ ] `pnpm dev` 후 `/login` 진입 → 이메일/비밀번호 placeholder 가 라벨과 같은 들여쓰기에서 시작하는지 확인
-- [ ] 한국어 IME 입력 시에도 첫 글자가 시각적으로 충분한 여백을 갖는지 확인
-- [ ] 포커스 시 우측 dot 이 인풋 내부 텍스트 위로 침범하지 않는지 확인
+- [x] `pnpm dev` 후 `/login` 진입 → 이메일/비밀번호 placeholder 가 라벨과 같은 들여쓰기에서 시작하는지 확인
+- [x] 한국어 IME 입력 시에도 첫 글자가 시각적으로 충분한 여백을 갖는지 확인
+- [x] 포커스 시 우측 dot 이 인풋 내부 텍스트 위로 침범하지 않는지 확인
 
 ---
 

@@ -85,14 +85,14 @@ export default function UpdatePasswordPage() {
           <form className="space-y-12" onSubmit={handleSubmit}>
             <div className="group relative">
               <label
-                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors"
+                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
                 htmlFor="password"
               >
                 NEW_PASSWORD
               </label>
               <div className="relative flex items-center">
                 <input
-                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200"
+                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200 px-2"
                   id="password"
                   name="password"
                   placeholder="••••••••••••"
@@ -101,20 +101,20 @@ export default function UpdatePasswordPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <div className="absolute right-0 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                <div className="absolute right-2 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
               </div>
             </div>
 
             <div className="group relative">
               <label
-                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors"
+                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
                 htmlFor="confirm"
               >
                 CONFIRM_KEY
               </label>
               <div className="relative flex items-center">
                 <input
-                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200"
+                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200 px-2"
                   id="confirm"
                   name="confirm"
                   placeholder="••••••••••••"
@@ -123,7 +123,7 @@ export default function UpdatePasswordPage() {
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                 />
-                <div className="absolute right-0 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                <div className="absolute right-2 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
               </div>
             </div>
 
