@@ -116,4 +116,4 @@ SQL migrations live in `docs/migrations/` (001–012). Apply manually via the Su
 
 ### Deployment
 
-Production: https://layer0-studio.vercel.app (Vercel). Pre-launch review and remaining items: `docs/PRE_LAUNCH_REVIEW.md`. Post-launch backlog and recently shipped follow-ups: `docs/POST_LAUNCH_IMPROVEMENTS.md`.
+Production: https://layer0-studio.vercel.app (Vercel).

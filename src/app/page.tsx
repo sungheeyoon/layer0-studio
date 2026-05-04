@@ -108,7 +108,6 @@ export default async function Home() {
                     <span className="w-1.5 h-1.5 bg-tertiary"></span> Fully responsive
                   </li>
                 </ul>
-                {/* TODO(post-launch): link directly to /dashboard/projects/create?templateId=<corporate-id> once the template is seeded — see POST_LAUNCH_IMPROVEMENTS.md */}
                 <Link
                   href="/templates"
                   className="w-max border border-outline px-10 py-4 text-[0.6875rem] font-medium uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all"
