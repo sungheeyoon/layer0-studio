@@ -7,13 +7,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-pnpm dev        # Start dev server
-pnpm build      # Production build
-pnpm start      # Start production server
-pnpm lint       # Run ESLint (eslint config: eslint-config-next)
+pnpm dev                # Start dev server (predev runs generate:themes)
+pnpm build              # Production build (prebuild runs generate:themes)
+pnpm start              # Start production server
+pnpm lint               # Run ESLint (eslint config: eslint-config-next)
+pnpm test               # Vitest run (domain layer only)
+pnpm test:watch         # Vitest watch mode
+
+pnpm generate:themes    # Regenerate src/themes/_generated.ts from theme dirs
+pnpm template:sync      # Reflect code presets → DB (dry-run by default; pass --apply to commit)
+pnpm template:capture   # Playwright thumbnail capture for templates
+pnpm template:scaffold  # Scaffold a new theme directory skeleton
 ```
 
-Test runner: `pnpm test` (vitest v2, domain layer only — `src/domain/__tests__/`). TypeScript checking: `pnpm tsc --noEmit`.
+TypeScript checking: `pnpm tsc --noEmit`. Tests live in `src/domain/__tests__/` and use in-memory fakes — no DB required.
 
 ## Architecture
 
@@ -66,12 +73,14 @@ src/types/database.ts ← Generated Supabase DB types
 
 > **Any work touching templates / themes / presets / sync / validate / thumbnail capture: read `docs/TEMPLATE_SYSTEM.md` FIRST.** That doc is the single source of truth — concepts, data model, sync pipeline, validate rules, extension scenarios, gotchas, and code map. The summary here is just a pointer.
 
-Themes live in `src/themes/<key>/`. Each theme is **visual tokens (`tokens.ts`) + a library of self-describing section components (`library/*.tsx` with `.meta.dataSchema`) + presets (`presets/*.preset.ts`)**. The registry is auto-generated (`src/themes/_generated.ts` via `pnpm generate:themes`, hooked into predev/prebuild) — adding a directory is enough to register.
+Themes live in `src/themes/<key>/`. Each theme is **visual tokens (`tokens.ts`) + a library of self-describing section components (`library/*.tsx` with `.meta.dataSchema`) + presets (`presets/*.preset.ts`)**. The registry is auto-generated (`src/themes/_generated.ts` via `pnpm generate:themes`, hooked into predev/prebuild) — adding a directory is enough to register. Currently 7 themes ship: `corporate`, `cafe`, `fitness`, `interior`, `legal`, `medical`, `wedding`.
 
 The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer:
 - `themeKey`: selects the renderer
 - `globalStyles`: CSS custom properties applied at the root
 - `pages[].sections[]`: each section's `type` matches a `componentKey` in the theme's library; **array order = render order** (the deprecated `section.order` field was removed in Phase 6d / migration 012)
+
+**`array` field type** (Phase 1, merged): components can declare repeating-item fields in their `dataSchema` (e.g. menu items, FAQ entries). The editor renders add/remove/reorder UI and recursively validates each item against its `itemSchema`. Phase 2 (Collections — separate table + RLS for blogs/notices) is intentionally deferred — see `docs/plans/PLAN_crud_array_field.md` for trigger conditions before opening that work.
 
 **Code is source of truth, sync reflects to DB.** `pnpm template:sync` (default dry-run, `--apply` to commit) reads presets, validates against each component's `dataSchema`, and upserts `templates` rows. Admin UI mirrors this with a 2-step Preview → Apply gated on `app_metadata.canPublishTemplates`.
 
