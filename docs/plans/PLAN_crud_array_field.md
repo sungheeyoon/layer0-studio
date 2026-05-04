@@ -1,7 +1,7 @@
 # Plan — Array Field (Phase 1) + Collections (Phase 2)
 
 _의도: 템플릿은 잠긴 디자인 단위, 데이터(텍스트/이미지)만 변경. 단, 메뉴/공지/리뷰 같은 **반복 항목**은 사용자가 추가·삭제·순서변경 가능해야 함._
-_관련: `docs/TEMPLATE_SYSTEM.md` (특히 §2.1 TemplateField, §6 validate, §9-D dataSchema 변경)_
+_관련: `docs/TEMPLATE_SYSTEM.md` (특히 §2.1 TemplateField, §6 validate, §9-G dataSchema 변경)_
 
 ---
 
@@ -14,140 +14,31 @@ _관련: `docs/TEMPLATE_SYSTEM.md` (특히 §2.1 TemplateField, §6 validate, §
 
 ---
 
-## Phase 1 — Array Field 추가
+## Phase 1 — 잔여 작업 (리뷰 발견)
 
-### 데이터 모델 설계
+> Phase 1 본 구현·문서·테스트는 완료. 리뷰 중 발견된 회귀/누락만 남김.
 
-```ts
-// src/domain/entities/template.entity.ts
+### 🔴 버그 — autosave가 `_key` 임시 필드를 DB에 영구화
+- [ ] **`DynamicEditor.tsx:120` `scheduleAutoSave`가 `stripKeys`를 호출하지 않음**
+  - 현재: `await saveSiteJsonAction(site.id, siteJsonRef.current, ...)` — raw JSON 그대로 전송
+  - 명시 저장(`handleSave:223`, `handlePublish:240`)은 `stripKeys(siteJson)`로 감쌈 → 일관성 깨짐
+  - 결과:
+    1) 4초 idle 자동저장이 한 번이라도 발동하면 `_key` random text 필드가 DB에 박힘
+    2) validate가 `UNKNOWN_DATA_FIELD` warning 누적
+    3) MenuBento 등 렌더러에서 `getFieldValue(item._key)`가 명시저장/자동저장에 따라 다른 값을 돌려줌 → React key 비결정적
+  - 수정: `scheduleAutoSave` 안에서도 `stripKeys(siteJsonRef.current)`로 전송 + 가능하면 `stripKeys`를 단일 헬퍼화하여 3곳에서 공통 사용
 
-export type TemplateFieldType =
-  | 'text' | 'textarea' | 'image' | 'url' | 'color' | 'number' | 'select'
-  | 'array';                                        // ★ 신규
+### 🟡 렌더러의 `_key` 의존 제거
+- [ ] **`MenuBento.tsx:23` `getFieldValue(item._key) || String(idx)`** — `_key`는 에디터 in-memory only로 설계됨(저장 직전 strip). 위 autosave 버그 수정 후에는 항상 `String(idx)`로 떨어지므로 `_key` 참조 자체를 제거하거나, _key를 정식 데이터 필드로 정의하고 strip 로직을 제거하는 방향 중 하나로 정리 (현재는 두 모드가 섞여 있음).
 
-export interface ArrayTemplateField extends BaseTemplateField {
-  type: 'array';
-  items: Array<Record<string, TemplateField>>;     // 각 item = mini-section.data와 같은 모양
-}
+### 🟡 회귀 테스트 보강
+- [ ] **`UpdateSiteJsonUseCase.execute` array round-trip 테스트** — 에디터의 array CRUD 저장은 `execute` 경로(전체 교체)로 흐른다. 현재 `update-site-json.usecase.test.ts`는 `executeFieldUpdate`만 7개 테스트. array 필드를 포함한 `execute` 호출 후 `userSiteRepository.updateSiteJson`에 array가 그대로 통과되는지 검증 케이스 1개 추가.
+- [ ] **`executeFieldUpdate` array 분기 테스트** — `update-site-json.usecase.ts:88`이 `TemplateError('UNSUPPORTED_FIELD_TYPE')`을 throw하지만 회귀 테스트가 없음. 1줄짜리 케이스 추가.
 
-export type TemplateField =
-  | TextTemplateField | SelectTemplateField | ImageTemplateField
-  | ArrayTemplateField;                             // ★ union에 추가
-```
-
-```ts
-// src/themes/types.ts — SectionDataSchema 확장
-
-export interface SectionDataSchema {
-  [fieldKey: string]: {
-    type: TemplateFieldType;
-    label: string;
-    required?: boolean;
-    options?: string[];              // (select용, 이미 사실상 사용 중)
-    itemSchema?: SectionDataSchema;  // ★ type: 'array'일 때 필수
-    minItems?: number;               // ★ optional 제약
-    maxItems?: number;               // ★ optional 제약
-  };
-}
-```
-
-> **왜 item이 `Record<string, TemplateField>`?** section.data와 동일한 shape이라 렌더러·에디터·validate가 재귀 호출만으로 동작. 새 추상화 안 만들어도 됨.
-
-> **item 순서**: `items` 배열의 인덱스 순서 = 렌더 순서 (§4 컨벤션과 일치). 별도 `order` 필드 없음.
-
-### 체크리스트
-
-#### 타입 / 도메인 (`src/domain/`)
-- [x] `template.entity.ts` — `TemplateFieldType`에 `'array'` 추가, `ArrayTemplateField` 인터페이스 추가, `TemplateField` union에 포함 (line 9, 33-36, 42)
-- [ ] (선택) `__tests__/` 에 ArrayTemplateField 타입 가드 테스트 — 미추가 (선택사항이라 보류)
-
-#### 테마 메타 (`src/themes/types.ts`)
-- [x] `SectionDataSchema`에 `itemSchema`/`minItems`/`maxItems` 필드 추가 (line 22-24)
-- [x] `options` 타입 선언 정리 (line 20)
-
-#### Validate (`src/lib/template/validate.ts`)
-- [x] `field.value` string-only 체크에서 array 케이스 분기 (line 209-225)
-- [x] 새 에러 코드 추가 (`NON_ARRAY_FIELD_VALUE`, `ARRAY_ITEMS_BELOW_MIN`, `ARRAY_ITEMS_ABOVE_MAX`, `MISSING_ITEM_SCHEMA` 모두 구현)
-- [x] schema 매칭 루프 재귀 검증 (line 138-178, `validateSchemaRecursively` 도입)
-- [x] `__tests__/validate.test.ts` 케이스 5종 추가 (line 196-311) — 정상 통과 / NON_ARRAY_FIELD_VALUE / 중첩 MISSING_REQUIRED_FIELD / minItems·maxItems / MISSING_ITEM_SCHEMA
-- [x] `SectionDataSchema` / `TemplateField` import 추가 — tsc 0 에러로 해결 (validate.ts:1-2)
-
-#### Sync / Preset (`src/lib/template/`)
-- [x] `preset.ts` `deriveTemplateJsonFromPreset` — array field 그대로 통과 (변경 불필요 확인됨)
-- [x] `sync.ts` — JSON.stringify 비교 기반, 변경 불필요 확인
-- [x] `__tests__/sync.test.ts` — array field round-trip 테스트 추가 (`deriveTemplateJsonFromPreset — array fields` describe 블록, line 31-69)
-
-#### 에디터 UI (`src/components/editor/DynamicEditor.tsx`)
-- [x] `field.type === 'array'` 분기 추가 (`DynamicField` line 567-576)
-- [x] 각 item을 카드 형태로 렌더 + 내부 필드 재귀 (`ArrayField` line 666-806)
-- [x] `+ 항목 추가` 버튼 — itemSchema 기준 빈 item seed (`handleAddItem` line 679-700)
-- [x] `삭제` 버튼 per item (`handleRemoveItem` line 702-706)
-- [x] 순서 변경 ↑/↓ 버튼 (`handleMoveItem` line 708-716)
-- [x] React key용 안정적 `_key` 부여 + 저장 직전 strip (`injectKeys`/`stripKeys` line 28-60)
-- [x] minItems / maxItems 위반 시 버튼 비활성화 + 메시지 — Add 버튼 (line 757-762), Delete 버튼 (line 781-784), `handleAddItem`/`handleRemoveItem` 가드까지 3중 적용됨
-- [x] `ThemeModule` import 추가 (line 14) — tsc 통과
-
-#### 라이브러리 컴포넌트 변경 (예시 1개로 PoC)
-- [x] `src/themes/cafe/library/MenuBento.tsx` — `data.items: ArrayTemplateField` 패턴으로 리팩터 (line 12-14)
-- [x] `meta.dataSchema.items` array schema 정의 (line 132-144) — title/desc/price/image/badge, minItems 1 / maxItems 6
-- [x] cafe-default preset 마이그 (`default.preset.ts` line 63-96, 5개 시드 항목)
-- [x] `pnpm template:sync` dry-run/apply — `scripts/sync-templates.ts` 및 `src/lib/template/sync.ts` 로직 검증 완료
-
-#### 사용자 사이트 영향
-- [x] `field?.items ?? []` graceful fallback 적용 (MenuBento line 14)
-- [x] lazy migration 동작 — 사용자가 에디터 저장 시 items가 채워지는 구조 유지
-
-#### 문서 갱신
-- [x] `docs/TEMPLATE_SYSTEM.md` §2.1 TemplateField 표에 `array` 행 추가 (line 106)
-- [x] `docs/TEMPLATE_SYSTEM.md` `SectionDataSchema` 정의에 itemSchema/minItems/maxItems 추가 (line 143-153)
-- [x] `docs/TEMPLATE_SYSTEM.md` §6.1 에러 코드 4종 추가 (line 334-336)
-- [x] §9-G "반복 항목을 위한 array 필드 추가" 시나리오 추가 (line 489-505)
-- [x] §10 함정에 "items의 React key" / "Lazy Migration & Graceful Fallback" 추가 (line 520-524)
-- [x] **§10 번호 깨짐** — 1~13까지 연속적으로 재번호 완료됨을 확인 (line 510-600)
-
-### 완료 기준 (Definition of Done)
-- [x] cafe-default preset의 `menu-001` 섹션이 array 필드로 메뉴 운영
-- [x] 사용자가 에디터에서 메뉴 항목 추가/삭제/순서변경 후 저장 → 새로고침 보존 — 유스케이스 테스트(`update-site-json.usecase.test.ts`) 및 에디터 컴포넌트(`ArrayField`) 구현으로 검증
-- [x] **`pnpm tsc --noEmit` → 0 에러** (이전 579 에러 모두 해결됨). `getFieldValue` 헬퍼 도입 + 7개 테마 ~50개 컴포넌트에 일괄 적용으로 narrowing 문제 정리
-- [x] `pnpm test` 68/68 통과 — `update-site-json.usecase.test.ts` 회귀 테스트 3개 복구 및 전체 통과 확인
-- [x] `pnpm template:sync` dry-run/apply 정상 확인
-
-### 잔여 작업 (후속 PR 권장)
-
-#### 🔴 즉시 고쳐야 할 것 (리뷰 발견)
-- [x] **AI 스크래치패드 텍스트가 코드에 그대로 커밋됨**
-  - `src/themes/legal/library/Nav.tsx` — 제거 완료
-  - `src/themes/cafe/library/Story.tsx` — 제거 완료
-- [x] **`update-site-json.usecase.test.ts`의 삭제된 테스트 3개 복구**
-  - 복구 완료 및 68개 테스트 통과 확인
-- [x] **`update-site-json.usecase.ts:88` typed error 패턴 위반**
-  - `TemplateError('UNSUPPORTED_FIELD_TYPE')`로 수정 완료
-
-#### 🟡 문서 정리
-- [x] **`docs/TEMPLATE_SYSTEM.md` §10 번호 재번호** — 1~13으로 정리 완료
-- [x] (선택) §9-G "컴포넌트 렌더" 줄 — `data.items.items.map(...)` 표기를 `(data.items as ArrayTemplateField).items.map(...)` 로 풀어 쓰면 가독성 ↑ 완료
-
-#### 🟢 코드 품질 (정보)
-- [x] **`getFieldValue` 호출 형태 일관성** — `getFieldValue(data, 'key')` (짧은 두 인자 형태)로 전 테마 통일 완료
-- [x] **`MenuBento.tsx`의 인덱스 기반 시각적 차별화 검토** — §10.14 함정에 인덱스 기반 스타일링의 한계 문서화 완료
-- [x] **`data['items'] as ArrayTemplateField`** (MenuBento.tsx:14) — `itemsField?.type === 'array' ? itemsField.items : []` 형태로 타입 가드 보강 완료
-- [x] (선택) `getFieldValue`의 2-arg 오버로드가 `template.entity.ts`에 정의되어 있지만 도메인 레이어 헬퍼가 UI 관심사라는 위치 부조화. 그대로 둬도 무방하지만 src/lib/template/ 쪽이 더 자연스러울 수도 — 현 위치 유지(결정)
-
-#### ✅ 재확인 (계획에 미흡으로 적혔으나 실제 완료된 것)
-- [x] `validate.ts` import 누락 → 해결
-- [x] `DynamicEditor.tsx` `ThemeModule` import 누락 → 해결
-- [x] `getFieldValue` 헬퍼 도입 → `template.entity.ts:50-65` + 전 테마 적용 완료
-- [x] `sync.test.ts` array round-trip → 추가됨
-- [x] 에디터 minItems/maxItems UI 가드 → 3중 가드 (Add 버튼 disable + Delete 버튼 disable + handler 안에서 onError 메시지)
-- [x] 문서 §9 / §10 보강 → 추가됨
-- [x] tsc 579 에러 → 0 에러로 전부 해결
-
-#### 미확인
-- [x] `pnpm template:sync` dry-run/apply 직접 확인 — 검증 완료
-- [x] 사용자 에디터 E2E — 유스케이스 및 컴포넌트 로직으로 간접 검증 완료
-
-### 추정 작업량
-타입·validate·sync 검증: 1~2일 / 에디터 UI: 2~3일 / 1개 컴포넌트 마이그 + 문서: 1일. 합 **약 1주**.
+### 완료 기준 (재정의)
+- [ ] autosave 경로에서도 `_key`가 DB에 들어가지 않음 (수동 검증: 에디터에서 4초 대기 → DB row의 `data.items.items[*]._key` 부재 확인)
+- [ ] `pnpm test` 통과 (위 2개 테스트 추가 후 70/70)
+- [ ] 렌더러의 `_key` 의존 제거 또는 정식화 결정 반영
 
 ---
 
