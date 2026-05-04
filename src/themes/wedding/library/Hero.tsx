@@ -2,22 +2,23 @@ import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ArrowDownIcon, HeartIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
-  const subtitle = data['subtitle']?.value || '';
-  const ctaPrimaryText = data['ctaPrimaryText']?.value || '';
-  const ctaPrimaryUrl = data['ctaPrimaryUrl']?.value || '#';
-  const ctaSecondaryText = data['ctaSecondaryText']?.value || '';
-  const ctaSecondaryUrl = data['ctaSecondaryUrl']?.value || '#';
-  const bgImage = data['backgroundImage']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const subtitle = getFieldValue(data, 'subtitle') || '';
+  const ctaPrimaryText = getFieldValue(data, 'ctaPrimaryText') || '';
+  const ctaPrimaryUrl = getFieldValue(data, 'ctaPrimaryUrl') || '#';
+  const ctaSecondaryText = getFieldValue(data, 'ctaSecondaryText') || '';
+  const ctaSecondaryUrl = getFieldValue(data, 'ctaSecondaryUrl') || '#';
+  const bgImage = getFieldValue(data, 'backgroundImage') || '';
 
   const stats = [1, 2, 3]
     .map((n) => ({
-      value: data[`stat${n}Value`]?.value || '',
-      label: data[`stat${n}Label`]?.value || '',
+      value: getFieldValue(data, `stat${n}Value`) || '',
+      label: getFieldValue(data, `stat${n}Label`) || '',
     }))
     .filter((s) => s.value || s.label);
 

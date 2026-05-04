@@ -1,11 +1,12 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Stats: SectionComponent = function Stats({ section }: ThemeSectionProps) {
   const { data } = section;
   const stats = [1, 2, 3, 4].map(n => ({
-    value: data[`s${n}Value`]?.value,
-    label: data[`s${n}Label`]?.value,
+    value: getFieldValue(data, `s${n}Value`),
+    label: getFieldValue(data, `s${n}Label`),
   })).filter(s => s.value);
 
   return (

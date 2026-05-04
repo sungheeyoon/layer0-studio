@@ -17,6 +17,10 @@ export interface SectionDataSchema {
     type: TemplateFieldType;
     label: string;
     required?: boolean;
+    options?: string[]; // (select용, 이미 사실상 사용 중)
+    itemSchema?: SectionDataSchema; // ★ type: 'array'일 때 필수
+    minItems?: number; // ★ optional 제약
+    maxItems?: number; // ★ optional 제약
   };
 }
 

@@ -1,53 +1,36 @@
+import { ArrayTemplateField, getFieldValue } from '@/domain/entities/template.entity';
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { ArrowRightIcon, CupIcon, PieChartIcon } from '../sections/icons';
 
 const MenuBento: SectionComponent = function MenuBento({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '메뉴';
-  const title = data['title']?.value || '매일 정성껏\n내리는 한 잔';
-  const description = data['description']?.value || '';
+  const label = getFieldValue(data['label']) || '메뉴';
+  const title = getFieldValue(data['title']) || '매일 정성껏\n내리는 한 잔';
+  const description = getFieldValue(data['description']) || '';
 
-  const programs = [
-    {
-      id: 'p1',
-      title: data['p1Title']?.value,
-      desc: data['p1Desc']?.value,
-      price: data['p1Price']?.value,
-      image: data['p1Image']?.value,
-      badge: data['p1Badge']?.value,
-      colSpan: 'md:col-span-2',
-    },
-    {
-      id: 'p2',
-      title: data['p2Title']?.value,
-      desc: data['p2Desc']?.value,
-      image: data['p2Image']?.value,
-    },
-    {
-      id: 'p3',
-      title: data['p3Title']?.value,
-      desc: data['p3Desc']?.value,
-      price: data['p3Price']?.value,
-      icon: <CupIcon size={20} className="text-[var(--c-terra)] fill-current" />,
-      bg: styles.bgCream,
-    },
-    {
-      id: 'p4',
-      title: data['p4Title']?.value,
-      desc: data['p4Desc']?.value,
-      price: data['p4Price']?.value,
-      icon: <PieChartIcon size={20} className="text-[var(--c-terra)] fill-current" />,
-      bg: styles.bgCream,
-    },
-    {
-      id: 'p5',
-      title: data['p5Title']?.value,
-      desc: data['p5Desc']?.value,
-      image: data['p5Image']?.value,
-      badge: data['p5Badge']?.value,
-    },
-  ].filter(p => p.title);
+  const itemsField = data['items'] as ArrayTemplateField;
+  const items = itemsField?.items || [];
+
+  const programs = items.map((item, idx) => {
+    const pTitle = getFieldValue(item.title);
+    const pDesc = getFieldValue(item.desc);
+    const pPrice = getFieldValue(item.price);
+    const pImage = getFieldValue(item.image);
+    const pBadge = getFieldValue(item.badge);
+
+    return {
+      id: getFieldValue(item._key) || String(idx),
+      title: pTitle,
+      desc: pDesc,
+      price: pPrice,
+      image: pImage,
+      badge: pBadge,
+      colSpan: idx === 0 ? 'md:col-span-2' : '',
+      icon: idx === 2 ? <CupIcon size={20} className="text-[var(--c-terra)] fill-current" /> :
+        idx === 3 ? <PieChartIcon size={20} className="text-[var(--c-terra)] fill-current" /> : null,
+    };
+  }).filter(p => p.title);
 
   return (
     <section className="py-24 lg:py-32 px-6 lg:px-10 max-w-7xl mx-auto" id="menu">
@@ -146,24 +129,19 @@ MenuBento.meta = {
     label: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀' },
     description: { type: 'textarea', label: '섹션 설명' },
-    p1Badge: { type: 'text', label: 'P1 배지' },
-    p1Title: { type: 'text', label: 'P1 제목', required: true },
-    p1Desc: { type: 'text', label: 'P1 설명' },
-    p1Price: { type: 'text', label: 'P1 가격' },
-    p1Image: { type: 'image', label: 'P1 이미지' },
-    p2Title: { type: 'text', label: 'P2 제목' },
-    p2Desc: { type: 'text', label: 'P2 설명' },
-    p2Image: { type: 'image', label: 'P2 이미지' },
-    p3Title: { type: 'text', label: 'P3 제목' },
-    p3Desc: { type: 'text', label: 'P3 설명' },
-    p3Price: { type: 'text', label: 'P3 가격' },
-    p4Title: { type: 'text', label: 'P4 제목' },
-    p4Desc: { type: 'text', label: 'P4 설명' },
-    p4Price: { type: 'text', label: 'P4 가격' },
-    p5Badge: { type: 'text', label: 'P5 배지' },
-    p5Title: { type: 'text', label: 'P5 제목' },
-    p5Desc: { type: 'text', label: 'P5 설명' },
-    p5Image: { type: 'image', label: 'P5 이미지' },
+    items: {
+      type: 'array',
+      label: '메뉴 항목',
+      itemSchema: {
+        title: { type: 'text', label: '제목', required: true },
+        desc: { type: 'text', label: '설명' },
+        price: { type: 'text', label: '가격' },
+        image: { type: 'image', label: '이미지' },
+        badge: { type: 'text', label: '배지' },
+      },
+      minItems: 1,
+      maxItems: 6,
+    },
   },
   previewImage: '/component-previews/cafe/menu-bento.webp',
 };

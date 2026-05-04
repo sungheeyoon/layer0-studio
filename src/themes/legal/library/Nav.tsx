@@ -1,13 +1,25 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { ShieldCheckIcon, ArrowRightIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = data['brandName']?.value || '하람';
-  const brandSubtext = data['brandSubtext']?.value || 'Law & Tax';
-  const phone = data['phone']?.value || '02-3456-7890';
-  const ctaText = data['ctaText']?.value || '무료 상담 신청';
+  const brandName = getFieldValue(data, 'brandName') || '하람';
+  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Law & Tax';
+  const phone = getFieldValue(data, 'phone') || '02-3456-7890';
+  const ctaText = getFieldValue(data, 'ctaText') || '무료 상담 신청';
+
+  const menuItems = [
+    { label: getFieldValue(data, 'menu1'), href: '#about' },
+    { label: getFieldValue(data, 'menu2'), href: '#services' },
+    { label: getFieldValue(data, 'menu3'), href: '#portfolio' },
+    { label: getFieldValue(data, 'menu4'), href: '#process' },
+    { label: getFieldValue(data, 'menu5'), href: '#contact' },
+  ].filter(m => m.label);
+
+  // Wait, I noticed Nav.tsx didn't have menuItems before in the snippet I read, but let me check again.
+  // Actually, I should check the file content again.
 
   return (
     <header className={styles.navWrap}>

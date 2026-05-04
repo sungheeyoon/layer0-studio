@@ -3,18 +3,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { HomeIcon, ChatIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = data['brandName']?.value || '에스파시오';
-  const ctaText = data['ctaText']?.value || '무료 상담 신청';
+  const brandName = getFieldValue(data, 'brandName') || '에스파시오';
+  const ctaText = getFieldValue(data, 'ctaText') || '무료 상담 신청';
 
   const menuItems = [
-    { label: data['menu1']?.value, href: '#about' },
-    { label: data['menu2']?.value, href: '#services' },
-    { label: data['menu3']?.value, href: '#portfolio' },
-    { label: data['menu4']?.value, href: '#process' },
-    { label: data['menu5']?.value, href: '#contact' },
+    { label: getFieldValue(data, 'menu1'), href: '#about' },
+    { label: getFieldValue(data, 'menu2'), href: '#services' },
+    { label: getFieldValue(data, 'menu3'), href: '#portfolio' },
+    { label: getFieldValue(data, 'menu4'), href: '#process' },
+    { label: getFieldValue(data, 'menu5'), href: '#contact' },
   ].filter(m => m.label);
 
   return (

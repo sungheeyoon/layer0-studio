@@ -1,22 +1,23 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { ArrowRightIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'Seoul Gangnam — Since 2010';
-  const titleLine1 = data['title1']?.value || '한계를';
-  const titleLine2 = data['title2']?.value || '다시';
-  const titleLine3 = data['title3']?.value || '정의합니다';
-  const description = data['description']?.value || '';
-  const bgImage = data['backgroundImage']?.value || '';
-  const ctaPrimary = data['ctaPrimary']?.value || '무료 체험 신청';
-  const ctaSecondary = data['ctaSecondary']?.value || '프로그램 보기';
+  const label = getFieldValue(data, 'label') || 'Seoul Gangnam — Since 2010';
+  const titleLine1 = getFieldValue(data, 'title1') || '한계를';
+  const titleLine2 = getFieldValue(data, 'title2') || '다시';
+  const titleLine3 = getFieldValue(data, 'title3') || '정의합니다';
+  const description = getFieldValue(data, 'description') || '';
+  const bgImage = getFieldValue(data, 'backgroundImage') || '';
+  const ctaPrimary = getFieldValue(data, 'ctaPrimary') || '무료 체험 신청';
+  const ctaSecondary = getFieldValue(data, 'ctaSecondary') || '프로그램 보기';
 
   const stats = [1, 2, 3, 4].map(n => ({
-    value: data[`stat${n}Value`]?.value,
-    label: data[`stat${n}Label`]?.value,
-    suffix: data[`stat${n}Suffix`]?.value,
+    value: getFieldValue(data, `stat${n}Value`),
+    label: getFieldValue(data, `stat${n}Label`),
+    suffix: getFieldValue(data, `stat${n}Suffix`),
   })).filter(s => s.value);
 
   return (

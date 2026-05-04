@@ -1,53 +1,54 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { ArrowUpRightIcon, BoxingIcon, YogaIcon, ChefHatIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Programs: SectionComponent = function Programs({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '프로그램';
-  const title = data['title']?.value || '당신의 목표에 맞는 프로그램';
-  const description = data['description']?.value || '';
+  const label = getFieldValue(data, 'label') || '프로그램';
+  const title = getFieldValue(data, 'title') || '당신의 목표에 맞는 프로그램';
+  const description = getFieldValue(data, 'description') || '';
 
   const programs = [
     {
       id: 'p1',
-      title: data['p1Title']?.value,
-      desc: data['p1Desc']?.value,
-      image: data['p1Image']?.value,
+      title: getFieldValue(data, 'p1Title'),
+      desc: getFieldValue(data, 'p1Desc'),
+      image: getFieldValue(data, 'p1Image'),
       badge: 'Most Popular',
       colSpan: 'md:col-span-2',
       showArrow: true,
     },
     {
       id: 'p2',
-      title: data['p2Title']?.value,
-      desc: data['p2Desc']?.value,
-      image: data['p2Image']?.value,
+      title: getFieldValue(data, 'p2Title'),
+      desc: getFieldValue(data, 'p2Desc'),
+      image: getFieldValue(data, 'p2Image'),
     },
     {
       id: 'p3',
-      title: data['p3Title']?.value,
-      desc: data['p3Desc']?.value,
+      title: getFieldValue(data, 'p3Title'),
+      desc: getFieldValue(data, 'p3Desc'),
       icon: <BoxingIcon size={22} className="text-[var(--f-lime)]" />,
       bg: styles.bgSurface,
     },
     {
       id: 'p4',
-      title: data['p4Title']?.value,
-      desc: data['p4Desc']?.value,
+      title: getFieldValue(data, 'p4Title'),
+      desc: getFieldValue(data, 'p4Desc'),
       icon: <YogaIcon size={22} className="text-[var(--f-lime)]" />,
       bg: styles.bgSurface,
     },
     {
       id: 'p5',
-      title: data['p5Title']?.value,
-      desc: data['p5Desc']?.value,
-      image: data['p5Image']?.value,
+      title: getFieldValue(data, 'p5Title'),
+      desc: getFieldValue(data, 'p5Desc'),
+      image: getFieldValue(data, 'p5Image'),
     },
     {
       id: 'p6',
-      title: data['p6Title']?.value,
-      desc: data['p6Desc']?.value,
+      title: getFieldValue(data, 'p6Title'),
+      desc: getFieldValue(data, 'p6Desc'),
       icon: <ChefHatIcon size={22} className="text-[var(--f-lime)]" />,
       bg: 'rgba(205, 255, 0, 0.07)',
       borderColor: 'rgba(205, 255, 0, 0.15)',

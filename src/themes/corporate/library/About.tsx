@@ -1,12 +1,13 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../corporate.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const About: SectionComponent = function About({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || 'About Us';
-  const subtitle = data['subtitle']?.value || '';
-  const body = data['body']?.value || '';
-  const image = data['image']?.value;
+  const title = getFieldValue(data, 'title') || 'About Us';
+  const subtitle = getFieldValue(data, 'subtitle') || '';
+  const body = getFieldValue(data, 'body') || '';
+  const image = getFieldValue(data, 'image');
 
   return (
     <div className={`${styles.section} ${styles.genericSection}`}>

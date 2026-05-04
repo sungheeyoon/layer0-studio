@@ -1,13 +1,14 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { BuildingsIcon, DocumentTextIcon, HomeIcon, UserHandsIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const TrustStrip: SectionComponent = function TrustStrip({ section }: ThemeSectionProps) {
   const { data } = section;
   
   const stats = [1, 2, 3, 4].map(n => ({
-    value: data[`stat${n}Value`]?.value || '',
-    label: data[`stat${n}Label`]?.value || '',
+    value: getFieldValue(data, `stat${n}Value`) || '',
+    label: getFieldValue(data, `stat${n}Label`) || '',
   }));
 
   const icons = [

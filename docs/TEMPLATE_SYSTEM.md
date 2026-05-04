@@ -103,6 +103,7 @@ TemplateJson = {
 | `text` / `textarea` / `url` / `color` / `number` | 자명 | 모든 `value`는 string (number도) |
 | `select` | dropdown | `options: string[]` 필요 |
 | `image` | URL + 업로드 | 업로드 시 `assetId` 자동 부여 (orphan 정리용) |
+| `array` | repeated items CRUD | `itemSchema` (Recursive SectionDataSchema) 필수 |
 
 ### 2.2 `TemplatePreset` (코드의 시드 형태) — `src/themes/types.ts`
 
@@ -140,7 +141,15 @@ interface SectionComponentMeta {
 }
 
 interface SectionDataSchema {
-  [fieldKey: string]: { type: TemplateFieldType; label: string; required?: boolean };
+  [fieldKey: string]: {
+    type: TemplateFieldType;
+    label: string;
+    required?: boolean;
+    itemSchema?: SectionDataSchema; // ★ type: 'array'일 때 필수 (재귀 구조)
+    minItems?: number; // (선택) 최소 항목 수
+    maxItems?: number; // (선택) 최대 항목 수
+    options?: string[]; // type: 'select'일 때 사용
+  };
 }
 
 type SectionComponent = ComponentType<ThemeSectionProps> & { meta?: SectionComponentMeta };
@@ -321,7 +330,10 @@ pnpm template:sync cafe             # 슬러그 또는 테마 prefix로 필터
 | `MISSING_REQUIRED_FIELD` | `dataSchema[field].required === true` 인데 누락 |
 | `FIELD_TYPE_MISMATCH` | `field.type !== schema[field].type` |
 | `MISSING_FIELD_TYPE` / `MISSING_FIELD_LABEL` / `MISSING_FIELD_VALUE` | 필수 메타 누락 |
-| `NON_STRING_FIELD_VALUE` | `value`가 string 아님 |
+| `NON_STRING_FIELD_VALUE` | `value`가 string 아님 (array 타입 제외) |
+| `NON_ARRAY_FIELD_VALUE` | `type: 'array'` 인데 `items` 가 배열이 아니거나 누락 |
+| `MISSING_ITEM_SCHEMA` | schema에서 `type: 'array'` 인데 `itemSchema` 가 정의 안 됨 |
+| `ARRAY_ITEMS_BELOW_MIN` / `ARRAY_ITEMS_ABOVE_MAX` | minItems/maxItems 제약 위반 |
 
 ### 6.2 Warnings (통과하지만 stderr)
 
@@ -474,6 +486,24 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 
 후자는 별도 작업 — 공개 사이트 네비게이션, 에디터 페이지 탭, validate `DUPLICATE_PAGE_SLUG` 룰까지 함께 손봐야 함.
 
+### G. 반복 항목을 위한 `array` 필드 추가
+
+메뉴, 공지사항, 리뷰 등 반복되는 데이터는 `type: 'array'`를 사용.
+1. **meta 정의**: `itemSchema`를 필수로 포함. `minItems`/`maxItems`로 제약 가능.
+   ```ts
+   items: {
+     type: 'array',
+     label: '메뉴 항목',
+     itemSchema: {
+       title: { type: 'text', label: '제목', required: true },
+       price: { type: 'text', label: '가격' }
+     },
+     minItems: 1
+   }
+   ```
+2. **Preset 데이터**: `items` 배열 안에 각 item 객체 배치.
+3. **컴포넌트 렌더**: `data.items.items.map(...)`으로 렌더. `item.title.value` 대신 `getFieldValue(item.title)` 사용 권장.
+
 ---
 
 ## 10. 자주 빠지는 함정
@@ -486,6 +516,12 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 
 3. **모든 `value`는 string**
    `type: 'number'`도 `value: '42'`. 컴포넌트에서 `Number(field.value)` 필요. validate가 `NON_STRING_FIELD_VALUE`로 잡음.
+
+4. **items의 React key (Array Field)**
+   에디터에서 `array` 필드의 각 항목은 stable한 `_key`가 필요함. 에디터 내부적으로 `injectKeys` / `stripKeys` 헬퍼가 임시 키를 관리하며, DB 저장 시에는 최적화를 위해 제거됨. 렌더러에서는 `item._key || index`를 키로 사용하되, 가급적 데이터 고유값을 조합할 것.
+
+5. **Lazy Migration & Graceful Fallback**
+   기존 테마 컴포넌트에 `array` 필드를 추가한 경우, 기존 사용자 사이트 JSON에는 해당 필드나 `items` 배열이 없을 수 있음. 컴포넌트 구현 시 `data.items?.items ?? []` 처럼 항상 빈 배열 fallback을 갖추어야 런타임 에러를 방지할 수 있음. (에디터에서 한 번 저장하면 스키마에 맞춰 채워짐)
 
 4. **`required: true`를 dataSchema에 안 적으면 silent**
    필수 필드를 빠뜨려도 sync 통과하고 런타임에 빈 값. `dataSchema`에 명시할 것.

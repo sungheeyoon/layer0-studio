@@ -4,18 +4,19 @@ import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ClockIcon, HeartIcon, MapIcon, PhoneIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
-  const body = data['body']?.value || '';
-  const phone = data['phone']?.value || '';
-  const hours = data['hours']?.value || '';
-  const location = data['location']?.value || '';
-  const bgImage = data['backgroundImage']?.value || '';
-  const formTitle = data['formTitle']?.value || '무료 상담 신청';
-  const formNote = data['formNote']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const body = getFieldValue(data, 'body') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const hours = getFieldValue(data, 'hours') || '';
+  const location = getFieldValue(data, 'location') || '';
+  const bgImage = getFieldValue(data, 'backgroundImage') || '';
+  const formTitle = getFieldValue(data, 'formTitle') || '무료 상담 신청';
+  const formNote = getFieldValue(data, 'formNote') || '';
 
   return (
     <section

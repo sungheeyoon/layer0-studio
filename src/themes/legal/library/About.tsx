@@ -1,16 +1,17 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { UserHandsIcon, DocumentTextIcon, LockIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const About: SectionComponent = function About({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || '';
-  const body = data['body']?.value || '';
+  const title = getFieldValue(data, 'title') || '';
+  const body = getFieldValue(data, 'body') || '';
 
   const reasons = [
-    { title: data['reason1Title']?.value, body: data['reason1Body']?.value, icon: <UserHandsIcon size={20} className="text-amber-400" /> },
-    { title: data['reason2Title']?.value, body: data['reason2Body']?.value, icon: <DocumentTextIcon size={20} className="text-amber-400" /> },
-    { title: data['reason3Title']?.value, body: data['reason3Body']?.value, icon: <LockIcon size={20} className="text-amber-400" /> },
+    { title: getFieldValue(data, 'reason1Title'), body: getFieldValue(data, 'reason1Body'), icon: <UserHandsIcon size={20} className="text-amber-400" /> },
+    { title: getFieldValue(data, 'reason2Title'), body: getFieldValue(data, 'reason2Body'), icon: <DocumentTextIcon size={20} className="text-amber-400" /> },
+    { title: getFieldValue(data, 'reason3Title'), body: getFieldValue(data, 'reason3Body'), icon: <LockIcon size={20} className="text-amber-400" /> },
   ];
 
   return (

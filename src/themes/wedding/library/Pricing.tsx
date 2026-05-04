@@ -1,6 +1,7 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { CheckCircleIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 interface Pkg {
   badge?: string;
@@ -17,27 +18,27 @@ interface Pkg {
 
 const Pricing: SectionComponent = function Pricing({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
-  const subtitle = data['subtitle']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const subtitle = getFieldValue(data, 'subtitle') || '';
 
   const buildPkg = (n: number, opts: { featured?: boolean; premium?: boolean } = {}): Pkg | null => {
-    const name = data[`pkg${n}Name`]?.value;
+    const name = getFieldValue(data, `pkg${n}Name`);
     if (!name) return null;
     const features: string[] = [];
     for (let i = 1; i <= 6; i++) {
-      const f = data[`pkg${n}Feature${i}`]?.value;
+      const f = getFieldValue(data, `pkg${n}Feature${i}`);
       if (f) features.push(f);
     }
     return {
-      badge: data[`pkg${n}Badge`]?.value || undefined,
-      tier: data[`pkg${n}Tier`]?.value || '',
+      badge: getFieldValue(data, `pkg${n}Badge`) || undefined,
+      tier: getFieldValue(data, `pkg${n}Tier`) || '',
       name,
-      price: data[`pkg${n}Price`]?.value || '',
-      priceSuffix: data[`pkg${n}PriceSuffix`]?.value || '',
-      note: data[`pkg${n}Note`]?.value || '',
+      price: getFieldValue(data, `pkg${n}Price`) || '',
+      priceSuffix: getFieldValue(data, `pkg${n}PriceSuffix`) || '',
+      note: getFieldValue(data, `pkg${n}Note`) || '',
       features,
-      ctaText: data[`pkg${n}CtaText`]?.value || '상담 신청',
+      ctaText: getFieldValue(data, `pkg${n}CtaText`) || '상담 신청',
       featured: opts.featured,
       premium: opts.premium,
     };

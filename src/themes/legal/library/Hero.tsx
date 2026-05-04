@@ -1,23 +1,24 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { VerifiedCheckIcon, ChatIcon, ArrowDownIcon, DiplomaIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
-  const subtitle = data['subtitle']?.value || '';
-  const ctaPrimaryText = data['ctaPrimaryText']?.value || '';
-  const ctaSecondaryText = data['ctaSecondaryText']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const subtitle = getFieldValue(data, 'subtitle') || '';
+  const ctaPrimaryText = getFieldValue(data, 'ctaPrimaryText') || '';
+  const ctaSecondaryText = getFieldValue(data, 'ctaSecondaryText') || '';
 
-  const stat1Value = data['stat1Value']?.value || '';
-  const stat1Label = data['stat1Label']?.value || '';
-  const stat2Value = data['stat2Value']?.value || '';
-  const stat2Label = data['stat2Label']?.value || '';
-  const stat3Value = data['stat3Value']?.value || '';
-  const stat3Label = data['stat3Label']?.value || '';
-  const stat4Value = data['stat4Value']?.value || '';
-  const stat4Label = data['stat4Label']?.value || '';
+  const stat1Value = getFieldValue(data, 'stat1Value') || '';
+  const stat1Label = getFieldValue(data, 'stat1Label') || '';
+  const stat2Value = getFieldValue(data, 'stat2Value') || '';
+  const stat2Label = getFieldValue(data, 'stat2Label') || '';
+  const stat3Value = getFieldValue(data, 'stat3Value') || '';
+  const stat3Label = getFieldValue(data, 'stat3Label') || '';
+  const stat4Value = getFieldValue(data, 'stat4Value') || '';
+  const stat4Label = getFieldValue(data, 'stat4Label') || '';
 
   return (
     <section className="bg-gradient-to-br from-[#fafaf9] via-[#f8f7f4] to-[#f0ece4] min-h-[100dvh] flex flex-col justify-center pt-28 pb-20 px-4 relative overflow-hidden">

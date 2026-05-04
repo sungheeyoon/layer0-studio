@@ -1,18 +1,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = data['brandName']?.value || 'ARRC';
-  const brandSubtext = data['brandSubtext']?.value || 'Clinic';
-  const description = data['description']?.value || '';
-  const address = data['address']?.value || '';
-  const phone = data['phone']?.value || '';
-  const hours = data['hours']?.value || '';
-  const copyright = data['copyright']?.value || '';
-  const businessNum = data['businessNum']?.value || '';
-  const representative = data['representative']?.value || '';
+  const brandName = getFieldValue(data, 'brandName') || 'ARRC';
+  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Clinic';
+  const description = getFieldValue(data, 'description') || '';
+  const address = getFieldValue(data, 'address') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const hours = getFieldValue(data, 'hours') || '';
+  const copyright = getFieldValue(data, 'copyright') || '';
+  const businessNum = getFieldValue(data, 'businessNum') || '';
+  const representative = getFieldValue(data, 'representative') || '';
 
   return (
     <footer className="bg-[#1C1917] border-t border-[#F9F7F3]/[0.06] pt-16 pb-10 px-6 lg:px-10">

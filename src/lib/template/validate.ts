@@ -1,5 +1,5 @@
-import { TemplateJson } from '@/domain/entities/template.entity';
-import { ThemeLibrary } from '@/themes/types';
+import { TemplateJson, TemplateField } from '@/domain/entities/template.entity';
+import { ThemeLibrary, SectionDataSchema } from '@/themes/types';
 
 export interface ValidationIssue {
   code: string;
@@ -111,34 +111,87 @@ export function validateTemplateJson(
           );
         } else {
           // Rule 2-bis: data schema validation
-          const schema = entry.meta.dataSchema;
-          for (const [fieldKey, fieldSchema] of Object.entries(schema)) {
-            const field = section.data[fieldKey];
-            if (!field && fieldSchema.required) {
-              err(
-                'MISSING_REQUIRED_FIELD',
-                `required field "${fieldKey}" is missing in section "${section.id}"`,
-                `${secRef}.data.${fieldKey}`,
-              );
-            } else if (field && field.type !== fieldSchema.type) {
-              err(
-                'FIELD_TYPE_MISMATCH',
-                `field "${fieldKey}" type mismatch: expected ${fieldSchema.type}, got ${field.type}`,
-                `${secRef}.data.${fieldKey}`,
-              );
-            }
-          }
+          const validateSchemaRecursively = (
+            schema: SectionDataSchema,
+            data: Record<string, TemplateField>,
+            ref: string,
+          ) => {
+            for (const [fieldKey, fieldSchema] of Object.entries(schema)) {
+              const field = data[fieldKey];
+              const fieldRef = `${ref}.data.${fieldKey}`;
 
-          // Warn on unknown fields
-          for (const fieldKey of Object.keys(section.data)) {
-            if (!schema[fieldKey]) {
-              warn(
-                'UNKNOWN_DATA_FIELD',
-                `field "${fieldKey}" is not defined in component schema`,
-                `${secRef}.data.${fieldKey}`,
-              );
+              if (!field && fieldSchema.required) {
+                err(
+                  'MISSING_REQUIRED_FIELD',
+                  `required field "${fieldKey}" is missing`,
+                  fieldRef,
+                );
+              } else if (field) {
+                if (field.type !== fieldSchema.type) {
+                  err(
+                    'FIELD_TYPE_MISMATCH',
+                    `field "${fieldKey}" type mismatch: expected ${fieldSchema.type}, got ${field.type}`,
+                    fieldRef,
+                  );
+                }
+
+                if (fieldSchema.type === 'array') {
+                  if (!fieldSchema.itemSchema) {
+                    err(
+                      'MISSING_ITEM_SCHEMA',
+                      `schema for array field "${fieldKey}" is missing itemSchema`,
+                      fieldRef,
+                    );
+                  } else if (field.type === 'array') {
+                    if (!Array.isArray(field.items)) {
+                      err(
+                        'NON_ARRAY_FIELD_VALUE',
+                        `field "${fieldKey}" value must be an array of items`,
+                        fieldRef,
+                      );
+                    } else {
+                      if (fieldSchema.minItems !== undefined && field.items.length < fieldSchema.minItems) {
+                        err(
+                          'ARRAY_ITEMS_BELOW_MIN',
+                          `field "${fieldKey}" must have at least ${fieldSchema.minItems} items`,
+                          fieldRef,
+                        );
+                      }
+                      if (fieldSchema.maxItems !== undefined && field.items.length > fieldSchema.maxItems) {
+                        err(
+                          'ARRAY_ITEMS_ABOVE_MAX',
+                          `field "${fieldKey}" must have no more than ${fieldSchema.maxItems} items`,
+                          fieldRef,
+                        );
+                      }
+
+                      // Recursive validation of items
+                      field.items.forEach((item, index) => {
+                        validateSchemaRecursively(
+                          fieldSchema.itemSchema!,
+                          item,
+                          `${fieldRef}.items[${index}]`,
+                        );
+                      });
+                    }
+                  }
+                }
+              }
             }
-          }
+
+            // Warn on unknown fields
+            for (const fieldKey of Object.keys(data)) {
+              if (!schema[fieldKey]) {
+                warn(
+                  'UNKNOWN_DATA_FIELD',
+                  `field "${fieldKey}" is not defined in component schema`,
+                  `${ref}.data.${fieldKey}`,
+                );
+              }
+            }
+          };
+
+          validateSchemaRecursively(entry.meta.dataSchema, section.data, secRef);
         }
       }
 
@@ -152,20 +205,34 @@ export function validateTemplateJson(
         if (field.label === undefined || field.label === null) {
           err('MISSING_FIELD_LABEL', `data field "${fieldKey}" is missing label`, fieldRef);
         }
-        if (field.value === undefined || field.value === null) {
-          err('MISSING_FIELD_VALUE', `data field "${fieldKey}" is missing value`, fieldRef);
-        } else if (typeof field.value !== 'string') {
-          err('NON_STRING_FIELD_VALUE', `data field "${fieldKey}" value must be a string (got ${typeof field.value})`, fieldRef);
-        }
 
-        // Rule 10: image/url fields should use https (warn only)
-        if ((field.type === 'image' || field.type === 'url') && typeof field.value === 'string') {
-          if (field.value.startsWith('http://')) {
-            warn(
-              'INSECURE_URL',
-              `data field "${fieldKey}" uses http:// — prefer https to avoid mixed-content issues`,
+        if (field.type === 'array') {
+          // Array fields don't have a 'value' property, they have 'items'
+          if (field.items === undefined || field.items === null) {
+            err('NON_ARRAY_FIELD_VALUE', `array field "${fieldKey}" is missing items`, fieldRef);
+          } else if (!Array.isArray(field.items)) {
+            err('NON_ARRAY_FIELD_VALUE', `array field "${fieldKey}" items must be an array`, fieldRef);
+          }
+        } else {
+          if (field.value === undefined || field.value === null) {
+            err('MISSING_FIELD_VALUE', `data field "${fieldKey}" is missing value`, fieldRef);
+          } else if (typeof field.value !== 'string') {
+            err(
+              'NON_STRING_FIELD_VALUE',
+              `data field "${fieldKey}" value must be a string (got ${typeof field.value})`,
               fieldRef,
             );
+          }
+
+          // Rule 10: image/url fields should use https (warn only)
+          if ((field.type === 'image' || field.type === 'url') && typeof field.value === 'string') {
+            if (field.value.startsWith('http://')) {
+              warn(
+                'INSECURE_URL',
+                `data field "${fieldKey}" uses http:// — prefer https to avoid mixed-content issues`,
+                fieldRef,
+              );
+            }
           }
         }
       }

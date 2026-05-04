@@ -1,10 +1,11 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { CoffeeIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Marquee: SectionComponent = function Marquee({ section }: ThemeSectionProps) {
   const { data } = section;
-  const items = [1, 2, 3, 4, 5, 6, 7, 8].map(n => data[`item${n}`]?.value).filter(Boolean);
+  const items = [1, 2, 3, 4, 5, 6, 7, 8].map(n => getFieldValue(data[`item${n}`])).filter(Boolean);
 
   return (
     <section className="bg-[var(--c-espresso)] py-5 overflow-hidden">

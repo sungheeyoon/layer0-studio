@@ -1,21 +1,22 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { LeafIcon, FireIcon, HandHeartIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Story: SectionComponent = function Story({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '카페 소개';
-  const title1 = data['title1']?.value || '커피 한 잔에는';
-  const titleAccent = data['titleAccent']?.value || '이야기가';
-  const title2 = data['title2']?.value || '담겨 있습니다';
-  const quote = data['quote']?.value || '';
-  const description = data['description']?.value || '';
-  const image = data['image']?.value || '';
+  const label = getFieldValue(data, 'label') || '카페 소개';
+  const title1 = getFieldValue(data, 'title1') || '커피 한 잔에는';
+  const titleAccent = getFieldValue(data, 'titleAccent') || '이야기가';
+  const title2 = getFieldValue(data, 'title2') || '담겨 있습니다';
+  const quote = getFieldValue(data, 'quote') || '';
+  const description = getFieldValue(data, 'description') || '';
+  const image = getFieldValue(data, 'image') || '';
 
   const pillars = [
-    { title: data['f1Title']?.value, desc: data['f1Desc']?.value, icon: <LeafIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
-    { title: data['f2Title']?.value, desc: data['f2Desc']?.value, icon: <FireIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
-    { title: data['f3Title']?.value, desc: data['f3Desc']?.value, icon: <HandHeartIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(data, 'f1Title'), desc: getFieldValue(data, 'f1Desc'), icon: <LeafIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(data, 'f2Title'), desc: getFieldValue(data, 'f2Desc'), icon: <FireIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), icon: <HandHeartIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
   ].filter(p => p.title);
 
   // Wait, I should check the field names in slots.ts for Story

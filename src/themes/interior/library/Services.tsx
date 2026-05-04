@@ -1,23 +1,24 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { HomeIcon, BuildingsIcon, MonitorIcon, PaletteIcon, ShieldCheckIcon, ArrowRightIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'Our Services';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
+  const label = getFieldValue(data, 'label') || 'Our Services';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
 
-  const s1Title = data['s1Title']?.value;
-  const s1Desc = data['s1Desc']?.value;
-  const s1Badge = data['s1Badge']?.value;
-  const s1Price = data['s1Price']?.value;
+  const s1Title = getFieldValue(data, 's1Title');
+  const s1Desc = getFieldValue(data, 's1Desc');
+  const s1Badge = getFieldValue(data, 's1Badge');
+  const s1Price = getFieldValue(data, 's1Price');
 
   const services = [
-    { title: data['s2Title']?.value, desc: data['s2Desc']?.value, icon: <BuildingsIcon size={22} className="text-[var(--i-gold)]" /> },
-    { title: data['s3Title']?.value, desc: data['s3Desc']?.value, icon: <MonitorIcon size={22} className="text-[var(--i-gold)]" /> },
-    { title: data['s4Title']?.value, desc: data['s4Desc']?.value, icon: <PaletteIcon size={22} className="text-[var(--i-gold)]" />, isConsulting: true },
-    { title: data['s5Title']?.value, desc: data['s5Desc']?.value, icon: <ShieldCheckIcon size={22} className="text-[var(--i-gold)]" />, isAS: true },
+    { title: getFieldValue(data, 's2Title'), desc: getFieldValue(data, 's2Desc'), icon: <BuildingsIcon size={22} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(data, 's3Title'), desc: getFieldValue(data, 's3Desc'), icon: <MonitorIcon size={22} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(data, 's4Title'), desc: getFieldValue(data, 's4Desc'), icon: <PaletteIcon size={22} className="text-[var(--i-gold)]" />, isConsulting: true },
+    { title: getFieldValue(data, 's5Title'), desc: getFieldValue(data, 's5Desc'), icon: <ShieldCheckIcon size={22} className="text-[var(--i-gold)]" />, isAS: true },
   ].filter(s => s.title);
 
   return (

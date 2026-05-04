@@ -1,10 +1,11 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../corporate.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Features: SectionComponent = function Features({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || 'Core Features';
-  const subtitle = data['subtitle']?.value || '';
+  const title = getFieldValue(data, 'title') || 'Core Features';
+  const subtitle = getFieldValue(data, 'subtitle') || '';
 
   // Filter out non-feature items
   const features = Object.entries(data).filter(([key]) => !['title', 'subtitle', 'heading'].includes(key));
@@ -28,7 +29,7 @@ const Features: SectionComponent = function Features({ section }: ThemeSectionPr
                 {field.label}
               </h3>
               <p className="text-xs font-light leading-relaxed opacity-60 group-hover:text-on-primary group-hover:opacity-80 transition-all">
-                {field.value}
+                {getFieldValue(data, key)}
               </p>
             </div>
           ))}

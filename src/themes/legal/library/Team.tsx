@@ -1,15 +1,16 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Team: SectionComponent = function Team({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const members = [1, 2, 3].map(n => ({
-    name: data[`member${n}Name`]?.value || '',
-    role: data[`member${n}Role`]?.value || '',
-    body: data[`member${n}Body`]?.value || '',
-    image: data[`member${n}Image`]?.value || `https://picsum.photos/seed/legal_team_${n}/600/450`,
+    name: getFieldValue(data, `member${n}Name`) || '',
+    role: getFieldValue(data, `member${n}Role`) || '',
+    body: getFieldValue(data, `member${n}Body`) || '',
+    image: getFieldValue(data, `member${n}Image`) || `https://picsum.photos/seed/legal_team_${n}/600/450`,
     badge: n === 1 ? '대표 변호사' : n === 2 ? '수석 세무사' : '파트너 변호사',
     badgeBg: n === 1 ? 'bg-amber-500' : 'bg-[#1e2b5e]',
   }));

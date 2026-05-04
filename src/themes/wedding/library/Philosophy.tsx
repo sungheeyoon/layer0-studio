@@ -2,14 +2,15 @@ import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Philosophy: SectionComponent = function Philosophy({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
-  const body = data['body']?.value || '';
-  const ctaText = data['ctaText']?.value || '';
-  const ctaUrl = data['ctaUrl']?.value || '#';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const body = getFieldValue(data, 'body') || '';
+  const ctaText = getFieldValue(data, 'ctaText') || '';
+  const ctaUrl = getFieldValue(data, 'ctaUrl') || '#';
 
   return (
     <section className={`${styles.section} ${styles.bgDark800}`}>

@@ -2,13 +2,14 @@
 
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../corporate.module.css';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || 'Get in Touch';
-  const email = data['email']?.value || '';
-  const phone = data['phone']?.value || '';
-  const address = data['address']?.value || '';
+  const title = getFieldValue(data, 'title') || 'Get in Touch';
+  const email = getFieldValue(data, 'email') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const address = getFieldValue(data, 'address') || '';
 
   return (
     <div className={`${styles.section} ${styles.genericSection}`}>

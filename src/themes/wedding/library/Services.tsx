@@ -1,35 +1,36 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon, HeartIcon, GiftIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const service1 = {
-    badge: data['service1Badge']?.value || '',
-    title: data['service1Title']?.value || '',
-    body: data['service1Body']?.value || '',
-    image: data['service1Image']?.value || '',
+    badge: getFieldValue(data, 'service1Badge') || '',
+    title: getFieldValue(data, 'service1Title') || '',
+    body: getFieldValue(data, 'service1Body') || '',
+    image: getFieldValue(data, 'service1Image') || '',
   };
   const service2 = {
-    title: data['service2Title']?.value || '',
-    body: data['service2Body']?.value || '',
-    image: data['service2Image']?.value || '',
+    title: getFieldValue(data, 'service2Title') || '',
+    body: getFieldValue(data, 'service2Body') || '',
+    image: getFieldValue(data, 'service2Image') || '',
   };
   const service3 = {
-    title: data['service3Title']?.value || '',
-    body: data['service3Body']?.value || '',
+    title: getFieldValue(data, 'service3Title') || '',
+    body: getFieldValue(data, 'service3Body') || '',
   };
   const service4 = {
-    title: data['service4Title']?.value || '',
-    body: data['service4Body']?.value || '',
+    title: getFieldValue(data, 'service4Title') || '',
+    body: getFieldValue(data, 'service4Body') || '',
   };
-  const ctaCardTitle = data['ctaCardTitle']?.value || '';
-  const ctaCardBody = data['ctaCardBody']?.value || '';
-  const ctaCardButton = data['ctaCardButton']?.value || '';
-  const ctaCardUrl = data['ctaCardUrl']?.value || '#';
+  const ctaCardTitle = getFieldValue(data, 'ctaCardTitle') || '';
+  const ctaCardBody = getFieldValue(data, 'ctaCardBody') || '';
+  const ctaCardButton = getFieldValue(data, 'ctaCardButton') || '';
+  const ctaCardUrl = getFieldValue(data, 'ctaCardUrl') || '#';
 
   return (
     <section className={`${styles.section} ${styles.bgDark900} ${styles.dottedBg}`}>

@@ -1,18 +1,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = data['brandName']?.value || 'MONO';
-  const brandSubtext = data['brandSubtext']?.value || 'Specialty Coffee & Bakery';
-  const description = data['description']?.value || '';
-  const phone = data['phone']?.value || '';
-  const address = data['address']?.value || '';
-  const weekdayHours = data['weekdayHours']?.value || '';
-  const weekendHours = data['weekendHours']?.value || '';
-  const copyright = data['copyright']?.value || '';
-  const businessInfo = data['businessInfo']?.value || '';
+  const brandName = getFieldValue(data['brandName']) || 'MONO';
+  const brandSubtext = getFieldValue(data['brandSubtext']) || 'Specialty Coffee & Bakery';
+  const description = getFieldValue(data['description']) || '';
+  const phone = getFieldValue(data['phone']) || '';
+  const address = getFieldValue(data['address']) || '';
+  const weekdayHours = getFieldValue(data['weekdayHours']) || '';
+  const weekendHours = getFieldValue(data['weekendHours']) || '';
+  const copyright = getFieldValue(data['copyright']) || '';
+  const businessInfo = getFieldValue(data['businessInfo']) || '';
 
   return (
     <footer className="bg-[var(--c-espresso)] border-t border-[var(--c-linen)] border-opacity-5 pt-16 pb-10 px-6 lg:px-10">

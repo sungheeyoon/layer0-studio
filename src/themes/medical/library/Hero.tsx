@@ -2,22 +2,23 @@ import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon, StarIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
-  const image = data['image']?.value || '';
-  const statValue = data['statValue']?.value || '';
-  const statLabel = data['statLabel']?.value || '';
-  const sinceLabel = data['sinceLabel']?.value || '';
-  const ctaPrimary = data['ctaPrimary']?.value || '';
-  const ctaSecondary = data['ctaSecondary']?.value || '';
+  const label = getFieldValue(data, 'label') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
+  const image = getFieldValue(data, 'image') || '';
+  const statValue = getFieldValue(data, 'statValue') || '';
+  const statLabel = getFieldValue(data, 'statLabel') || '';
+  const sinceLabel = getFieldValue(data, 'sinceLabel') || '';
+  const ctaPrimary = getFieldValue(data, 'ctaPrimary') || '';
+  const ctaSecondary = getFieldValue(data, 'ctaSecondary') || '';
 
   const stats = [1, 2, 3].map(n => ({
-    value: data[`stat${n}Value`]?.value,
-    label: data[`stat${n}Label`]?.value,
+    value: getFieldValue(data, `stat${n}Value`),
+    label: getFieldValue(data, `stat${n}Label`),
   })).filter(s => s.value);
 
   return (

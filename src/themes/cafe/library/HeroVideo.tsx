@@ -1,26 +1,27 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { ArrowRightIcon, LeafIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const HeroVideo: SectionComponent = function HeroVideo({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'Seoul Seongsu — Specialty Coffee';
-  const title1 = data['title1']?.value || '천천히,';
-  const titleAccent = data['titleAccent']?.value || '제대로';
-  const subtitle = data['subtitle']?.value || '— 한 잔의 완성';
-  const description = data['description']?.value || '';
-  const videoUrl = data['videoUrl']?.value || '';
-  const ctaPrimary = data['ctaPrimary']?.value || '메뉴 보기';
-  const ctaSecondary = data['ctaSecondary']?.value || '카페 소개';
+  const label = getFieldValue(data['label']) || 'Seoul Seongsu — Specialty Coffee';
+  const title1 = getFieldValue(data['title1']) || '천천히,';
+  const titleAccent = getFieldValue(data['titleAccent']) || '제대로';
+  const subtitle = getFieldValue(data['subtitle']) || '— 한 잔의 완성';
+  const description = getFieldValue(data['description']) || '';
+  const videoUrl = getFieldValue(data['videoUrl']) || '';
+  const ctaPrimary = getFieldValue(data['ctaPrimary']) || '메뉴 보기';
+  const ctaSecondary = getFieldValue(data['ctaSecondary']) || '카페 소개';
 
   const stats = [1, 2, 3].map(n => ({
-    value: data[`stat${n}Value`]?.value,
-    label: data[`stat${n}Label`]?.value,
+    value: getFieldValue(data[`stat${n}Value`]),
+    label: getFieldValue(data[`stat${n}Label`]),
   })).filter(s => s.value);
 
-  const badgeText = data['badgeText']?.value || '"Roasted in-house"';
-  const badgeSubtext = data['badgeSubtext']?.value || '직접 로스팅한 원두';
-  const seasonTag = data['seasonTag']?.value || 'Spring Menu';
+  const badgeText = getFieldValue(data['badgeText']) || '"Roasted in-house"';
+  const badgeSubtext = getFieldValue(data['badgeSubtext']) || '직접 로스팅한 원두';
+  const seasonTag = getFieldValue(data['seasonTag']) || 'Spring Menu';
 
   return (
     <section className="min-h-[100dvh] flex items-stretch pt-[68px]" id="hero">

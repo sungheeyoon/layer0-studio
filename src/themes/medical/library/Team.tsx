@@ -1,20 +1,21 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { GraduationCapIcon, HospitalIcon, ClockIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Team: SectionComponent = function Team({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
+  const label = getFieldValue(data, 'label') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
 
   const members = [1, 2, 3].map(n => ({
-    name: data[`member${n}Name`]?.value,
-    role: data[`member${n}Role`]?.value,
-    info1: data[`member${n}Info1`]?.value,
-    info2: data[`member${n}Info2`]?.value,
-    info3: data[`member${n}Info3`]?.value,
-    image: data[`member${n}Image`]?.value,
+    name: getFieldValue(data, `member${n}Name`),
+    role: getFieldValue(data, `member${n}Role`),
+    info1: getFieldValue(data, `member${n}Info1`),
+    info2: getFieldValue(data, `member${n}Info2`),
+    info3: getFieldValue(data, `member${n}Info3`),
+    image: getFieldValue(data, `member${n}Image`),
     mt: n === 2 ? 'lg:mt-10' : '',
   })).filter(m => m.name);
 

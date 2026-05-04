@@ -1,21 +1,22 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { ArrowRightIcon, BuildingsIcon, CalculatorIcon, HomeIcon, GraphIcon, UserHandsIcon, LawIcon, CheckCircleIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: ThemeSectionProps) {
   const { data } = section;
-  const title = data['title']?.value || '';
+  const title = getFieldValue(data, 'title') || '';
 
   const services = [
-    { title: data['service1Title']?.value, body: data['service1Body']?.value, icon: <BuildingsIcon size={40} className="text-amber-400 mb-5" />, large: true },
-    { title: data['service2Title']?.value, body: data['service2Body']?.value, icon: <CalculatorIcon size={32} className="text-amber-600 mb-4" />, bg: 'bg-amber-50 border-amber-100' },
-    { title: data['service3Title']?.value, body: data['service3Body']?.value, icon: <HomeIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
-    { title: data['service4Title']?.value, body: data['service4Body']?.value, icon: <GraphIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
-    { title: data['service5Title']?.value, body: data['service5Body']?.value, icon: <UserHandsIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(data, 'service1Title'), body: getFieldValue(data, 'service1Body'), icon: <BuildingsIcon size={40} className="text-amber-400 mb-5" />, large: true },
+    { title: getFieldValue(data, 'service2Title'), body: getFieldValue(data, 'service2Body'), icon: <CalculatorIcon size={32} className="text-amber-600 mb-4" />, bg: 'bg-amber-50 border-amber-100' },
+    { title: getFieldValue(data, 'service3Title'), body: getFieldValue(data, 'service3Body'), icon: <HomeIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(data, 'service4Title'), body: getFieldValue(data, 'service4Body'), icon: <GraphIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(data, 'service5Title'), body: getFieldValue(data, 'service5Body'), icon: <UserHandsIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
   ];
 
-  const mainCtaTitle = data['service6Title']?.value || '';
-  const mainCtaBody = data['service6Body']?.value || '';
+  const mainCtaTitle = getFieldValue(data, 'service6Title') || '';
+  const mainCtaBody = getFieldValue(data, 'service6Body') || '';
 
   return (
     <section id="services" className="py-24 md:py-32 px-4 bg-white">

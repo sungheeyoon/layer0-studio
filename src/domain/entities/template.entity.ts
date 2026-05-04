@@ -1,4 +1,12 @@
-export type TemplateFieldType = 'text' | 'textarea' | 'image' | 'url' | 'color' | 'number' | 'select';
+export type TemplateFieldType =
+  | 'text'
+  | 'textarea'
+  | 'image'
+  | 'url'
+  | 'color'
+  | 'number'
+  | 'select'
+  | 'array';
 
 interface BaseTemplateField {
   label: string;
@@ -22,7 +30,39 @@ export interface ImageTemplateField extends BaseTemplateField {
   assetId?: string | null; // UUID of physical asset for reference counting
 }
 
-export type TemplateField = TextTemplateField | SelectTemplateField | ImageTemplateField;
+export interface ArrayTemplateField extends BaseTemplateField {
+  type: 'array';
+  items: Array<Record<string, TemplateField>>;
+}
+
+export type TemplateField =
+  | TextTemplateField
+  | SelectTemplateField
+  | ImageTemplateField
+  | ArrayTemplateField;
+
+/**
+ * Safely get the string value of a field.
+ * Returns empty string for 'array' type or missing value.
+ * 
+ * Usage:
+ * 1. getFieldValue(field)
+ * 2. getFieldValue(data, 'key')
+ */
+export function getFieldValue(fieldOrData: TemplateField | Record<string, TemplateField> | undefined, key?: string): string {
+  if (!fieldOrData) return '';
+
+  if (key !== undefined) {
+    const data = fieldOrData as Record<string, TemplateField>;
+    const field = data[key];
+    if (!field || field.type === 'array') return '';
+    return field.value ?? '';
+  }
+
+  const field = fieldOrData as TemplateField;
+  if (field.type === 'array') return '';
+  return field.value ?? '';
+}
 
 export interface TemplateSection {
   id: string;

@@ -1,21 +1,22 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon, PhoneIcon, MedalIcon, ShieldCheckIcon, StarIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'Seoul Premium Interior Studio';
-  const estLabel = data['estLabel']?.value || 'Est. 2015';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
-  const ctaPrimary = data['ctaPrimary']?.value || '포트폴리오 보기';
-  const ctaSecondary = data['ctaSecondary']?.value || '무료 상담 예약';
-  const trust1 = data['trust1']?.value || '한국 인테리어 대상 2023';
-  const trust2 = data['trust2']?.value || '건설업 면허 보유';
-  const trust3 = data['trust3']?.value || '고객 만족도 4.9/5.0';
-  const statValue = data['statValue']?.value || '280';
-  const statLabel = data['statLabel']?.value || '완성된 프로젝트';
-  const projectTitle = data['projectTitle']?.value || '성북동 단독주택 — 거실 리모델링';
+  const label = getFieldValue(data, 'label') || 'Seoul Premium Interior Studio';
+  const estLabel = getFieldValue(data, 'estLabel') || 'Est. 2015';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
+  const ctaPrimary = getFieldValue(data, 'ctaPrimary') || '포트폴리오 보기';
+  const ctaSecondary = getFieldValue(data, 'ctaSecondary') || '무료 상담 예약';
+  const trust1 = getFieldValue(data, 'trust1') || '한국 인테리어 대상 2023';
+  const trust2 = getFieldValue(data, 'trust2') || '건설업 면허 보유';
+  const trust3 = getFieldValue(data, 'trust3') || '고객 만족도 4.9/5.0';
+  const statValue = getFieldValue(data, 'statValue') || '280';
+  const statLabel = getFieldValue(data, 'statLabel') || '완성된 프로젝트';
+  const projectTitle = getFieldValue(data, 'projectTitle') || '성북동 단독주택 — 거실 리모델링';
 
   return (
     <section className={`${styles.heroArt} relative min-h-screen flex items-center pt-16 overflow-hidden`}>

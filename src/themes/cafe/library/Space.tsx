@@ -1,23 +1,24 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { SunIcon, BuildingsIcon, LaptopIcon, BookIcon, VinylIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Space: SectionComponent = function Space({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '공간';
-  const title = data['title']?.value || '머물고 싶은\n공간을 만듭니다';
-  const description = data['description']?.value || '';
+  const label = getFieldValue(data, 'label') || '공간';
+  const title = getFieldValue(data, 'title') || '머물고 싶은\n공간을 만듭니다';
+  const description = getFieldValue(data, 'description') || '';
 
-  const imageLarge = data['imageLarge']?.value || '';
-  const imageSmall = data['imageSmall']?.value || '';
-  const cardTitle = data['cardTitle']?.value || '채광이 좋은 공간';
-  const cardDesc = data['cardDesc']?.value || '';
+  const imageLarge = getFieldValue(data, 'imageLarge') || '';
+  const imageSmall = getFieldValue(data, 'imageSmall') || '';
+  const cardTitle = getFieldValue(data, 'cardTitle') || '채광이 좋은 공간';
+  const cardDesc = getFieldValue(data, 'cardDesc') || '';
 
   const features = [
-    { title: data['f1Title']?.value, desc: data['f1Desc']?.value, icon: <BuildingsIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
-    { title: data['f2Title']?.value, desc: data['f2Desc']?.value, icon: <LaptopIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
-    { title: data['f3Title']?.value, desc: data['f3Desc']?.value, icon: <BookIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
-    { title: data['f4Title']?.value, desc: data['f4Desc']?.value, icon: <VinylIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(data, 'f1Title'), desc: getFieldValue(data, 'f1Desc'), icon: <BuildingsIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(data, 'f2Title'), desc: getFieldValue(data, 'f2Desc'), icon: <LaptopIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), icon: <BookIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(data, 'f4Title'), desc: getFieldValue(data, 'f4Desc'), icon: <VinylIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
   ].filter(f => f.title);
 
   return (

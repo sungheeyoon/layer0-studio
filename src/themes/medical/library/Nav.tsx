@@ -1,18 +1,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = data['brandName']?.value || 'ARRC';
-  const brandSubtext = data['brandSubtext']?.value || 'Clinic';
-  const ctaText = data['ctaText']?.value || '예약하기';
+  const brandName = getFieldValue(data, 'brandName') || 'ARRC';
+  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Clinic';
+  const ctaText = getFieldValue(data, 'ctaText') || '예약하기';
 
   const menuItems = [
-    { label: data['menu1']?.value, href: '#services' },
-    { label: data['menu2']?.value, href: '#space' },
-    { label: data['menu3']?.value, href: '#team' },
-    { label: data['menu4']?.value, href: '#reviews' },
+    { label: getFieldValue(data, 'menu1'), href: '#services' },
+    { label: getFieldValue(data, 'menu2'), href: '#space' },
+    { label: getFieldValue(data, 'menu3'), href: '#team' },
+    { label: getFieldValue(data, 'menu4'), href: '#reviews' },
   ].filter(m => m.label);
 
   return (

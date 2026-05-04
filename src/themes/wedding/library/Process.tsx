@@ -1,6 +1,7 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ChatIcon, NotebookIcon, PaletteIcon, SparkleIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const STEP_ICONS = [
   <ChatIcon key="1" size={24} />,
@@ -11,16 +12,16 @@ const STEP_ICONS = [
 
 const Process: SectionComponent = function Process({ section }: ThemeSectionProps) {
   const { data } = section;
-  const eyebrow = data['eyebrow']?.value || '';
-  const title = data['title']?.value || '';
-  const ctaText = data['ctaText']?.value || '';
-  const ctaUrl = data['ctaUrl']?.value || '#';
-  const ctaNote = data['ctaNote']?.value || '';
+  const eyebrow = getFieldValue(data, 'eyebrow') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const ctaText = getFieldValue(data, 'ctaText') || '';
+  const ctaUrl = getFieldValue(data, 'ctaUrl') || '#';
+  const ctaNote = getFieldValue(data, 'ctaNote') || '';
 
   const steps = [1, 2, 3, 4]
     .map((n) => ({
-      title: data[`step${n}Title`]?.value || '',
-      body: data[`step${n}Body`]?.value || '',
+      title: getFieldValue(data, `step${n}Title`) || '',
+      body: getFieldValue(data, `step${n}Body`) || '',
     }))
     .filter((s) => s.title);
 

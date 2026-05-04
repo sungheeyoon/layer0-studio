@@ -3,15 +3,16 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon, PhoneIcon, LetterIcon, MapPinIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'Get Started';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
-  const phone = data['phone']?.value || '';
-  const email = data['email']?.value || '';
-  const address = data['address']?.value || '';
+  const label = getFieldValue(data, 'label') || 'Get Started';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const email = getFieldValue(data, 'email') || '';
+  const address = getFieldValue(data, 'address') || '';
 
   return (
     <section id="contact" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: 'linear-gradient(150deg, #161008 0%, #0C0A08 60%, #120E06 100%)' }}>

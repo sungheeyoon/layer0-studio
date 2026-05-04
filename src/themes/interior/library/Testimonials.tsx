@@ -1,16 +1,17 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { StarIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'Client Reviews';
-  const title = data['title']?.value || '';
+  const label = getFieldValue(data, 'label') || 'Client Reviews';
+  const title = getFieldValue(data, 'title') || '';
 
   const reviews = [1, 2, 3].map(n => ({
-    body: data[`r${n}Body`]?.value,
-    author: data[`r${n}Author`]?.value,
-    meta: data[`r${n}Meta`]?.value,
+    body: getFieldValue(data, `r${n}Body`),
+    author: getFieldValue(data, `r${n}Author`),
+    meta: getFieldValue(data, `r${n}Meta`),
   })).filter(r => r.body);
 
   return (

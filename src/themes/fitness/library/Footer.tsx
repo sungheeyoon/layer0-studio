@@ -1,18 +1,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { DumbbellIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, ClockIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = data['brandName']?.value || 'APEX';
-  const brandSubtext = data['brandSubtext']?.value || 'Fitness';
-  const description = data['description']?.value || '';
-  const copyright = data['copyright']?.value || `© ${new Date().getFullYear()} APEX FITNESS. All rights reserved.`;
-  const businessInfo = data['businessInfo']?.value || '';
+  const brandName = getFieldValue(data, 'brandName') || 'APEX';
+  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Fitness';
+  const description = getFieldValue(data, 'description') || '';
+  const copyright = getFieldValue(data, 'copyright') || `© ${new Date().getFullYear()} APEX FITNESS. All rights reserved.`;
+  const businessInfo = getFieldValue(data, 'businessInfo') || '';
   
-  const address = data['address']?.value || '';
-  const phone = data['phone']?.value || '';
-  const hours = data['hours']?.value || '';
+  const address = getFieldValue(data, 'address') || '';
+  const phone = getFieldValue(data, 'phone') || '';
+  const hours = getFieldValue(data, 'hours') || '';
 
   return (
     <footer className="bg-[#080808] border-t border-[var(--f-border)] pt-16 pb-10 px-6 lg:px-10">

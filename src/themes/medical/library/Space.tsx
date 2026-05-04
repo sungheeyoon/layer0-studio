@@ -1,20 +1,21 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { BuildingsIcon, SofaIcon, ShieldCheckIcon, MapPointIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Space: SectionComponent = function Space({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || '';
-  const title = data['title']?.value || '';
-  const description = data['description']?.value || '';
-  const mainImage = data['mainImage']?.value || '';
-  const subImage = data['subImage']?.value || '';
+  const label = getFieldValue(data, 'label') || '';
+  const title = getFieldValue(data, 'title') || '';
+  const description = getFieldValue(data, 'description') || '';
+  const mainImage = getFieldValue(data, 'mainImage') || '';
+  const subImage = getFieldValue(data, 'subImage') || '';
 
   const features = [
-    { title: data['feature1Title']?.value, desc: data['feature1Desc']?.value, icon: <BuildingsIcon size={22} className="text-[#C8A97E]" /> },
-    { title: data['feature2Title']?.value, desc: data['feature2Desc']?.value, icon: <SofaIcon size={22} className="text-[#C8A97E]" /> },
-    { title: data['feature3Title']?.value, desc: data['feature3Desc']?.value, icon: <ShieldCheckIcon size={22} className="text-[#C8A97E]" /> },
-    { title: data['feature4Title']?.value, desc: data['feature4Desc']?.value, icon: <MapPointIcon size={22} className="text-[#C8A97E]" /> },
+    { title: getFieldValue(data, 'feature1Title'), desc: getFieldValue(data, 'feature1Desc'), icon: <BuildingsIcon size={22} className="text-[#C8A97E]" /> },
+    { title: getFieldValue(data, 'feature2Title'), desc: getFieldValue(data, 'feature2Desc'), icon: <SofaIcon size={22} className="text-[#C8A97E]" /> },
+    { title: getFieldValue(data, 'feature3Title'), desc: getFieldValue(data, 'feature3Desc'), icon: <ShieldCheckIcon size={22} className="text-[#C8A97E]" /> },
+    { title: getFieldValue(data, 'feature4Title'), desc: getFieldValue(data, 'feature4Desc'), icon: <MapPointIcon size={22} className="text-[#C8A97E]" /> },
   ].filter(f => f.title);
 
   return (

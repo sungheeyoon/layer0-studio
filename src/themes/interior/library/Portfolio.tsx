@@ -1,18 +1,19 @@
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Portfolio: SectionComponent = function Portfolio({ section }: ThemeSectionProps) {
   const { data } = section;
-  const label = data['label']?.value || 'Portfolio';
-  const title = data['title']?.value || '';
+  const label = getFieldValue(data, 'label') || 'Portfolio';
+  const title = getFieldValue(data, 'title') || '';
 
   const projects = [
     {
       id: 'p1',
-      meta: data['p1Meta']?.value,
-      title: data['p1Title']?.value,
-      desc: data['p1Desc']?.value,
+      meta: getFieldValue(data, 'p1Meta'),
+      title: getFieldValue(data, 'p1Title'),
+      desc: getFieldValue(data, 'p1Desc'),
       height: '520px',
       rowSpan: 'md:row-span-2',
       bg: 'linear-gradient(150deg, #211810 0%, #160F09 50%, #1D1308 100%)',
@@ -34,8 +35,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: ThemeSection
     },
     {
       id: 'p2',
-      meta: data['p2Meta']?.value,
-      title: data['p2Title']?.value,
+      meta: getFieldValue(data, 'p2Meta'),
+      title: getFieldValue(data, 'p2Title'),
       height: '250px',
       colSpan: 'md:col-span-2',
       bg: 'linear-gradient(135deg, #161B1E 0%, #111518 100%)',
@@ -55,8 +56,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: ThemeSection
     },
     {
       id: 'p3',
-      meta: data['p3Meta']?.value,
-      title: data['p3Title']?.value,
+      meta: getFieldValue(data, 'p3Meta'),
+      title: getFieldValue(data, 'p3Title'),
       height: '255px',
       bg: 'linear-gradient(145deg, #181C18 0%, #111411 100%)',
       svg: (
@@ -75,8 +76,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: ThemeSection
     },
     {
       id: 'p4',
-      meta: data['p4Meta']?.value,
-      title: data['p4Title']?.value,
+      meta: getFieldValue(data, 'p4Meta'),
+      title: getFieldValue(data, 'p4Title'),
       height: '255px',
       bg: 'linear-gradient(145deg, #16181E 0%, #101218 100%)',
       svg: (

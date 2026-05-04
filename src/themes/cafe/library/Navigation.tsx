@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { MapPointIcon, HamburgerIcon } from '../sections/icons';
+import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Navigation: SectionComponent = function Navigation({ section }: ThemeSectionProps) {
   const { data } = section;
-  const brandName = data['brandName']?.value || 'MONO';
-  const brandSubtext = data['brandSubtext']?.value || 'Specialty Coffee';
-  const ctaText = data['ctaText']?.value || '오시는 길';
+  const brandName = getFieldValue(data['brandName']) || 'MONO';
+  const brandSubtext = getFieldValue(data['brandSubtext']) || 'Specialty Coffee';
+  const ctaText = getFieldValue(data['ctaText']) || '오시는 길';
 
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen] = useState(false);
@@ -21,10 +22,10 @@ const Navigation: SectionComponent = function Navigation({ section }: ThemeSecti
   }, []);
 
   const menuItems = [
-    { label: data['menu1']?.value, href: '#menu' },
-    { label: data['menu2']?.value, href: '#story' },
-    { label: data['menu3']?.value, href: '#space' },
-    { label: data['menu4']?.value, href: '#visit' },
+    { label: getFieldValue(data['menu1']), href: '#menu' },
+    { label: getFieldValue(data['menu2']), href: '#story' },
+    { label: getFieldValue(data['menu3']), href: '#space' },
+    { label: getFieldValue(data['menu4']), href: '#visit' },
   ].filter(m => m.label);
 
   return (
