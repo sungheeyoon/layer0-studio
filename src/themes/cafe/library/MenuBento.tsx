@@ -1,4 +1,4 @@
-import { ArrayTemplateField, getFieldValue } from '@/domain/entities/template.entity';
+import { getFieldValue } from '@/domain/entities/template.entity';
 import { ThemeSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { ArrowRightIcon, CupIcon, PieChartIcon } from '../sections/icons';

@@ -5,7 +5,6 @@ import { UserSite } from '@/domain/entities/user-site.entity';
 import {
   TemplateJson,
   TemplateGlobalStyles,
-  ImageTemplateField,
   TemplateField,
   ArrayTemplateField,
 } from '@/domain/entities/template.entity';
@@ -145,16 +144,16 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   }, [scheduleAutoSave]);
 
   const handleFieldChange = useCallback(
-    (sectionId: string, fieldKey: string, value: any, assetId?: string) => {
+    (sectionId: string, fieldKey: string, value: string | ArrayTemplateField['items'], assetId?: string) => {
       updateSiteJson((json) => {
         const page = json.pages.find(p => p.id === activePageId);
         const section = page?.sections.find(s => s.id === sectionId);
         if (section && section.data[fieldKey]) {
           const field = section.data[fieldKey];
-          if (field.type === 'array') {
+          if (field.type === 'array' && Array.isArray(value)) {
             field.items = value;
-          } else {
-            (field as any).value = value;
+          } else if (field.type !== 'array' && typeof value === 'string') {
+            field.value = value;
             if (assetId !== undefined && field.type === 'image') {
               field.assetId = assetId;
             }
@@ -492,7 +491,7 @@ interface DynamicFieldProps {
   itemSchema?: SectionDataSchema;
   minItems?: number;
   maxItems?: number;
-  onChange: (value: any, assetId?: string) => void;
+  onChange: (value: string | ArrayTemplateField['items'], assetId?: string) => void;
   onError: (msg: string) => void;
 }
 
@@ -542,7 +541,7 @@ function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError
     );
   }
 
-  const value = (field as any).value || '';
+  const value = field.value || '';
 
   return (
     <div className="relative group">
@@ -577,13 +576,13 @@ function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError
             onChange={(e) => onChange(e.target.value)}
           />
         </div>
-      ) : field.type === 'select' && (field as any).options ? (
+      ) : field.type === 'select' ? (
         <select
           className={baseInputClass}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         >
-          {(field as any).options.map((opt: string) => (
+          {field.options.map((opt: string) => (
             <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>
@@ -642,7 +641,7 @@ function ArrayField({
   itemSchema?: SectionDataSchema;
   minItems?: number;
   maxItems?: number;
-  onChange: (value: any) => void;
+  onChange: (value: ArrayTemplateField['items']) => void;
   onError: (msg: string) => void;
 }) {
   const items = field.items || [];
@@ -667,7 +666,7 @@ function ArrayField({
       } else if (schema.type === 'select') {
         newItem[key] = { type: 'select', label: schema.label, value: schema.options?.[0] || '', options: schema.options || [] };
       } else {
-        newItem[key] = { type: schema.type as any, label: schema.label, value: '' };
+        newItem[key] = { type: schema.type as 'text' | 'textarea' | 'url' | 'color' | 'number', label: schema.label, value: '' };
       }
     });
 
@@ -694,13 +693,13 @@ function ArrayField({
     onChange(next);
   };
 
-  const handleItemFieldChange = (index: number, fieldKey: string, value: any, assetId?: string) => {
+  const handleItemFieldChange = (index: number, fieldKey: string, value: string | ArrayTemplateField['items'], assetId?: string) => {
     const next = structuredClone(items);
     const field = next[index][fieldKey];
-    if (field.type === 'array') {
+    if (field.type === 'array' && Array.isArray(value)) {
       field.items = value;
-    } else {
-      (field as any).value = value;
+    } else if (field.type !== 'array' && typeof value === 'string') {
+      field.value = value;
       if (assetId !== undefined && field.type === 'image') {
         field.assetId = assetId;
       }
@@ -727,7 +726,7 @@ function ArrayField({
       <div className="space-y-6">
         {items.map((item, index) => (
           <div
-            key={(item._key as any)?.value || index}
+            key={item._key.type !== 'array' ? item._key.value : index}
             className="p-4 bg-surface-container-low border border-outline-variant relative group/item"
           >
             <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">

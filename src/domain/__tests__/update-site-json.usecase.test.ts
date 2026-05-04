@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { UpdateSiteJsonUseCase } from '../usecases/user-site/update-site-json.usecase';
 import { FakeUserSiteRepo, makeSite, makeTemplateJson } from './fakes';
-import { TemplateJson, TextTemplateField } from '../entities/template.entity';
+import { TemplateJson, TextTemplateField, ArrayTemplateField } from '../entities/template.entity';
 
 function makeTwoPageJson(): TemplateJson {
   return {
@@ -179,7 +179,7 @@ describe('UpdateSiteJsonUseCase.execute', () => {
     const result = await uc.execute('site-1', siteJsonWithArray, 'user-1');
 
     expect(result.siteJson).toEqual(siteJsonWithArray);
-    const itemsField = result.siteJson.pages[0].sections[0].data.items as any;
+    const itemsField = result.siteJson.pages[0].sections[0].data.items as ArrayTemplateField;
     expect(itemsField.type).toBe('array');
     expect(itemsField.items).toHaveLength(1);
   });
