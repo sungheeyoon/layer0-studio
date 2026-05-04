@@ -115,22 +115,22 @@ export interface SectionDataSchema {
 ### 잔여 작업 (후속 PR 권장)
 
 #### 🔴 즉시 고쳐야 할 것 (리뷰 발견)
-- [ ] **AI 스크래치패드 텍스트가 코드에 그대로 커밋됨**
+- [x] **AI 스크래치패드 텍스트가 코드에 그대로 커밋됨**
   - `src/themes/legal/library/Nav.tsx:13-22` — 사용 안 하는 `menuItems` 배열 + `// Wait, I noticed...` / `// Actually, I should check...` 주석. JSX는 기존 하드코딩 한국어 메뉴를 그대로 쓰고 있어 dead code
   - `src/themes/cafe/library/Story.tsx:22-23` — `// Wait, I should check the field names in slots.ts for Story` 등 LLM 혼잣말 주석
-- [ ] **`update-site-json.usecase.test.ts`의 삭제된 테스트 3개 복구** (line 84의 `// ...` 자리)
+- [x] **`update-site-json.usecase.test.ts`의 삭제된 테스트 3개 복구** (line 84의 `// ...` 자리)
   - `throws UNKNOWN when section is not found on the specified page`
   - `throws UNKNOWN when section is not found (no pageId, cross-page scan)`
   - `throws UNKNOWN when field key does not exist in section data`
   - usecase 코드(line 77-83)는 여전히 해당 throw를 하고 있는데 회귀 테스트만 사라짐. 67→65 테스트 수 감소 원인
-- [ ] **`update-site-json.usecase.ts:88` typed error 패턴 위반**
+- [x] **`update-site-json.usecase.ts:88` typed error 패턴 위반**
   ```ts
   throw new Error('Partial updates for array fields not supported');
   ```
   프로젝트 패턴은 `TemplateError(<code>)` + `src/lib/errors/messages.ts` 매핑 (CLAUDE.md). bare `Error`는 클라이언트에서 `UNKNOWN` 취급됨. `TemplateError('UNSUPPORTED_FIELD_TYPE')` 등 코드 추가 또는 단순 `'UNKNOWN'` 던지기
 
 #### 🟡 문서 정리
-- [ ] **`docs/TEMPLATE_SYSTEM.md` §10 번호 재번호** — `1,2,3,4,5,4,5,6,7,8` → `1~10`으로 정리 (기존 4·5(required, themeKey)를 6·7로)
+- [x] **`docs/TEMPLATE_SYSTEM.md` §10 번호 재번호** — `1,2,3,4,5,4,5,6,7,8` → `1~10`으로 정리 (기존 4·5(required, themeKey)를 6·7로)
 - [ ] (선택) §9-G "컴포넌트 렌더" 줄 — `data.items.items.map(...)` 표기를 `(data.items as ArrayTemplateField).items.map(...)` 로 풀어 쓰면 가독성 ↑
 
 #### 🟢 코드 품질 (정보)

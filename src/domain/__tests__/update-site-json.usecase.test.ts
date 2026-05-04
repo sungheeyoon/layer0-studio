@@ -81,7 +81,29 @@ describe('UpdateSiteJsonUseCase.executeFieldUpdate', () => {
     expect((result.siteJson.pages[1].sections[0].data.body as TextTemplateField).value).toBe('Updated Body');
   });
 
-// ...
+  it('throws UNKNOWN when section is not found on the specified page', async () => {
+    const siteJson = makeTwoPageJson();
+    const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
+    const uc = new UpdateSiteJsonUseCase(repo);
+    await expect(uc.executeFieldUpdate('site-1', 'section-b', 'body', 'New', 'user-1', 'page-1'))
+      .rejects.toMatchObject({ code: 'UNKNOWN' });
+  });
+
+  it('throws UNKNOWN when section is not found (no pageId, cross-page scan)', async () => {
+    const siteJson = makeTwoPageJson();
+    const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
+    const uc = new UpdateSiteJsonUseCase(repo);
+    await expect(uc.executeFieldUpdate('site-1', 'missing-section', 'body', 'New', 'user-1'))
+      .rejects.toMatchObject({ code: 'UNKNOWN' });
+  });
+
+  it('throws UNKNOWN when field key does not exist in section data', async () => {
+    const siteJson = makeTwoPageJson();
+    const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
+    const uc = new UpdateSiteJsonUseCase(repo);
+    await expect(uc.executeFieldUpdate('site-1', 'section-a', 'missing-field', 'New', 'user-1'))
+      .rejects.toMatchObject({ code: 'UNKNOWN' });
+  });
 
   it('does not mutate the original siteJson object (structuredClone guard)', async () => {
     const siteJson = makeTemplateJson();

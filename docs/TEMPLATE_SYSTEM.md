@@ -523,32 +523,31 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 5. **Lazy Migration & Graceful Fallback**
    기존 테마 컴포넌트에 `array` 필드를 추가한 경우, 기존 사용자 사이트 JSON에는 해당 필드나 `items` 배열이 없을 수 있음. 컴포넌트 구현 시 `data.items?.items ?? []` 처럼 항상 빈 배열 fallback을 갖추어야 런타임 에러를 방지할 수 있음. (에디터에서 한 번 저장하면 스키마에 맞춰 채워짐)
 
-4. **`required: true`를 dataSchema에 안 적으면 silent**
+6. **`required: true`를 dataSchema에 안 적으면 silent**
    필수 필드를 빠뜨려도 sync 통과하고 런타임에 빈 값. `dataSchema`에 명시할 것.
 
-5. **`themeKey` 누락 → `'corporate'` 폴백**
+7. **`themeKey` 누락 → `'corporate'` 폴백**
    `site/[domain]/page.tsx`, `DynamicEditor.tsx`. 의도된 동작이지만 디버깅 시간 낭비 흔함.
 
-6. **`editable: false`는 UI만 숨김**
+8. **`editable: false`는 UI만 숨김**
    서버 가드 없음. 사용자가 JSON 직접 수정하면 변경 가능 — 진짜 잠금이 필요하면 use case 레이어에 추가해야 함.
 
-7. **Sync는 user_sites를 안 건드린다**
+9. **Sync는 user_sites를 안 건드린다**
    `templates`만 update. 이미 발행된 사용자 사이트는 옛 데이터 그대로. 강제 마이그가 필요하면 별도 SQL (참고: `docs/migrations/012_remove_section_order.sql`).
 
-8. **`_generated.ts` 수정 금지**
-   수동 편집해도 다음 `predev`/`prebuild`에서 덮어씀. 새 테마/preset 추가는 디렉터리/파일만 만들면 됨.
+10. **`_generated.ts` 수정 금지**
+    수동 편집해도 다음 `predev`/`prebuild`에서 덮어씀. 새 테마/preset 추가는 디렉터리/파일만 만들면 됨.
 
-9. **`globalStyles` 머지 규칙**
-   `composition` 사용 시 sync는 `themeModule.defaultTemplateJson.globalStyles` (= `tokens.ts` 시드) ◀ `preset.globalStyles` 순서로 spread. preset에서 `Partial`로 일부만 덮을 것.
+11. **`globalStyles` 머지 규칙**
+    `composition` 사용 시 sync는 `themeModule.defaultTemplateJson.globalStyles` (= `tokens.ts` 시드) ◀ `preset.globalStyles` 순서로 spread. preset에서 `Partial`로 일부만 덮을 것.
 
-10. **`'use client'` 컴포넌트의 `Component.meta = {...}` 는 서버에서 안 보임** ⚠️
+12. **`'use client'` 컴포넌트의 `Component.meta = {...}` 는 서버에서 안 보임** ⚠️
     Next.js는 `'use client'` 모듈을 server-side import 시 client reference로 wrapping하고 모듈 본문을 서버에서 실행하지 않는다. 그래서 `.tsx` 파일 끝에서 한 `Component.meta = {...}` side-effect는 server에는 보이지 않고 → `library['nav'].meta` 가 undefined → sync/validate 시 `Cannot read properties of undefined (reading 'dataSchema')` 폭발.
     **해법**: client 컴포넌트의 meta는 항상 sibling `<Component>.meta.ts` 에 named export 로 정의하고, library/index.ts 에서 `libEntry(Component, componentMeta)` 로 명시 전달. server 컴포넌트는 종전대로 `.meta = {...}` 그대로 OK.
     현재 client 컴포넌트 9개 (cafe/Navigation, corporate/Contact, fitness/Nav, interior/{Contact,Nav}, legal/{Contact,Faq}, wedding/{Contact,Faq}) 가 이 패턴을 따른다.
 
-11. **Capture는 dev server를 띄움**
+13. **Capture는 dev server를 띄움**
     `thumbnail.config.ts`의 `source`가 `preview://`로 시작하면 `capture-templates.ts`가 자동으로 `pnpm dev`를 백그라운드로 실행. CI에서는 `templates-ui/*.html` 파일 source를 쓰면 server-less.
-
 ---
 
 ## 11. 코드 위치 맵

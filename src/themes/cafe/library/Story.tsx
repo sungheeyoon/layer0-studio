@@ -19,9 +19,6 @@ const Story: SectionComponent = function Story({ section }: ThemeSectionProps) {
     { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), icon: <HandHeartIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
   ].filter(p => p.title);
 
-  // Wait, I should check the field names in slots.ts for Story
-  // story: label, title1, titleAccent, title2, quote, description, image, f1Title, f1Desc, f2Title, f2Desc, f3Title, f3Desc
-
   return (
     <section className="py-24 lg:py-32 bg-[var(--c-espresso)]" id="story">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">

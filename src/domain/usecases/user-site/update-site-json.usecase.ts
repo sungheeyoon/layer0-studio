@@ -85,7 +85,7 @@ export class UpdateSiteJsonUseCase {
     const field = section.data[fieldKey];
     if (field.type === 'array') {
       // For now, we don't support partial array updates via this method
-      throw new Error('Partial updates for array fields not supported');
+      throw new TemplateError('UNSUPPORTED_FIELD_TYPE');
     }
 
     field.value = value;
