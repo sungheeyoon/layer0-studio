@@ -20,7 +20,7 @@ const MenuBento: SectionComponent = function MenuBento({ section }: ThemeSection
     const pBadge = getFieldValue(item.badge);
 
     return {
-      id: getFieldValue(item._key) || String(idx),
+      id: String(idx),
       title: pTitle,
       desc: pDesc,
       price: pPrice,

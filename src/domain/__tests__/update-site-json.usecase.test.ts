@@ -113,4 +113,75 @@ describe('UpdateSiteJsonUseCase.executeFieldUpdate', () => {
     await uc.executeFieldUpdate('site-1', 'section-1', 'title', 'Changed', 'user-1', 'page-1');
     expect((siteJson.pages[0].sections[0].data.title as TextTemplateField).value).toBe(originalValue);
   });
+
+  it('throws UNSUPPORTED_FIELD_TYPE when trying to update an array field directly', async () => {
+    const siteJson = makeTemplateJson({
+      pages: [
+        {
+          id: 'page-1',
+          title: 'Home',
+          slug: 'home',
+          order: 0,
+          sections: [
+            {
+              id: 'section-1',
+              type: 'menu',
+              visible: true,
+              editable: true,
+              data: {
+                items: { type: 'array', label: 'Items', items: [] }
+              }
+            }
+          ]
+        }
+      ]
+    });
+    const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
+    const uc = new UpdateSiteJsonUseCase(repo);
+
+    await expect(uc.executeFieldUpdate('site-1', 'section-1', 'items', '[]', 'user-1'))
+      .rejects.toMatchObject({ code: 'UNSUPPORTED_FIELD_TYPE' });
+  });
 });
+
+describe('UpdateSiteJsonUseCase.execute', () => {
+  it('updates the entire siteJson and preserves array fields', async () => {
+    const siteJsonWithArray: TemplateJson = makeTemplateJson({
+      pages: [
+        {
+          id: 'page-1',
+          title: 'Home',
+          slug: 'home',
+          order: 0,
+          sections: [
+            {
+              id: 'section-1',
+              type: 'menu',
+              visible: true,
+              editable: true,
+              data: {
+                items: {
+                  type: 'array',
+                  label: 'Items',
+                  items: [
+                    { title: { type: 'text', label: 'Title', value: 'Item 1' } }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    });
+    const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1' })]);
+    const uc = new UpdateSiteJsonUseCase(repo);
+
+    const result = await uc.execute('site-1', siteJsonWithArray, 'user-1');
+
+    expect(result.siteJson).toEqual(siteJsonWithArray);
+    const itemsField = result.siteJson.pages[0].sections[0].data.items as any;
+    expect(itemsField.type).toBe('array');
+    expect(itemsField.items).toHaveLength(1);
+  });
+});
+

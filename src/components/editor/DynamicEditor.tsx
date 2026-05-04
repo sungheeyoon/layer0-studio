@@ -9,54 +9,16 @@ import {
   TemplateField,
   ArrayTemplateField,
 } from '@/domain/entities/template.entity';
-import { saveSiteJsonAction, publishSiteAction } from '@/app/dashboard/editor/actions';
+import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTheme } from '@/themes/registry';
-import { ThemeRendererProps, SectionDataSchema, ThemeModule } from '@/themes/types';
+import { SectionDataSchema, ThemeModule } from '@/themes/types';
 import { createClient } from '@/utils/supabase/client';
 import { getSiteError } from '@/lib/errors/messages';
-import { initUploadAction, confirmUploadAction } from '@/app/dashboard/editor/actions';
+import { injectKeys, stripKeys } from '@/lib/template/keys';
 
 interface DynamicEditorProps {
   site: UserSite;
-}
-
-/**
- * Add stable _key to array items for React rendering.
- * Stripped before saving.
- */
-function injectKeys(json: TemplateJson): TemplateJson {
-  const updated = structuredClone(json);
-  updated.pages.forEach((page) => {
-    page.sections.forEach((section) => {
-      Object.values(section.data).forEach((field) => {
-        if (field.type === 'array' && field.items) {
-          field.items.forEach((item) => {
-            if (!item._key) {
-              item._key = { type: 'text', value: Math.random().toString(36).slice(2), label: '_key', editable: false };
-            }
-          });
-        }
-      });
-    });
-  });
-  return updated;
-}
-
-function stripKeys(json: TemplateJson): TemplateJson {
-  const updated = structuredClone(json);
-  updated.pages.forEach((page) => {
-    page.sections.forEach((section) => {
-      Object.values(section.data).forEach((field) => {
-        if (field.type === 'array' && field.items) {
-          field.items.forEach((item) => {
-            delete item._key;
-          });
-        }
-      });
-    });
-  });
-  return updated;
 }
 
 export default function DynamicEditor({ site }: DynamicEditorProps) {
@@ -117,7 +79,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setAutoSaveStatus('idle');
     autoSaveTimerRef.current = setTimeout(async () => {
       setAutoSaveStatus('saving');
-      const result = await saveSiteJsonAction(site.id, siteJsonRef.current, knownUpdatedAtRef.current);
+      const result = await saveSiteJsonAction(site.id, stripKeys(siteJsonRef.current), knownUpdatedAtRef.current);
       if (result && 'error' in result) {
         if (result.error === 'STALE_VERSION') {
           setConflictDetected(true);

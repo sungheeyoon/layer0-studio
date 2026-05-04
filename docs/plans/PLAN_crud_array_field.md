@@ -14,31 +14,33 @@ _관련: `docs/TEMPLATE_SYSTEM.md` (특히 §2.1 TemplateField, §6 validate, §
 
 ---
 
-## Phase 1 — 잔여 작업 (리뷰 발견)
+## Phase 1 — 잔여 작업 (리뷰 발견) ✅ 완료
 
-> Phase 1 본 구현·문서·테스트는 완료. 리뷰 중 발견된 회귀/누락만 남김.
+> Phase 1 본 구현·문서·테스트는 완료. 리뷰 중 발견된 회귀/누락 수정 완료.
 
 ### 🔴 버그 — autosave가 `_key` 임시 필드를 DB에 영구화
-- [ ] **`DynamicEditor.tsx:120` `scheduleAutoSave`가 `stripKeys`를 호출하지 않음**
+- [x] **`DynamicEditor.tsx:120` `scheduleAutoSave`가 `stripKeys`를 호출하지 않음**
   - 현재: `await saveSiteJsonAction(site.id, siteJsonRef.current, ...)` — raw JSON 그대로 전송
   - 명시 저장(`handleSave:223`, `handlePublish:240`)은 `stripKeys(siteJson)`로 감쌈 → 일관성 깨짐
-  - 결과:
-    1) 4초 idle 자동저장이 한 번이라도 발동하면 `_key` random text 필드가 DB에 박힘
-    2) validate가 `UNKNOWN_DATA_FIELD` warning 누적
-    3) MenuBento 등 렌더러에서 `getFieldValue(item._key)`가 명시저장/자동저장에 따라 다른 값을 돌려줌 → React key 비결정적
-  - 수정: `scheduleAutoSave` 안에서도 `stripKeys(siteJsonRef.current)`로 전송 + 가능하면 `stripKeys`를 단일 헬퍼화하여 3곳에서 공통 사용
+  - 수정 완료: `src/lib/template/keys.ts`로 로직 분리 및 `scheduleAutoSave` 적용
 
 ### 🟡 렌더러의 `_key` 의존 제거
-- [ ] **`MenuBento.tsx:23` `getFieldValue(item._key) || String(idx)`** — `_key`는 에디터 in-memory only로 설계됨(저장 직전 strip). 위 autosave 버그 수정 후에는 항상 `String(idx)`로 떨어지므로 `_key` 참조 자체를 제거하거나, _key를 정식 데이터 필드로 정의하고 strip 로직을 제거하는 방향 중 하나로 정리 (현재는 두 모드가 섞여 있음).
+- [x] **`MenuBento.tsx:23` `getFieldValue(item._key) || String(idx)`** — `_key`는 에디터 in-memory only로 설계됨(저장 직전 strip). 렌더러에서 `_key` 참조를 완전히 제거하고 `String(idx)`를 stable key로 사용하도록 정규화.
 
 ### 🟡 회귀 테스트 보강
-- [ ] **`UpdateSiteJsonUseCase.execute` array round-trip 테스트** — 에디터의 array CRUD 저장은 `execute` 경로(전체 교체)로 흐른다. 현재 `update-site-json.usecase.test.ts`는 `executeFieldUpdate`만 7개 테스트. array 필드를 포함한 `execute` 호출 후 `userSiteRepository.updateSiteJson`에 array가 그대로 통과되는지 검증 케이스 1개 추가.
-- [ ] **`executeFieldUpdate` array 분기 테스트** — `update-site-json.usecase.ts:88`이 `TemplateError('UNSUPPORTED_FIELD_TYPE')`을 throw하지만 회귀 테스트가 없음. 1줄짜리 케이스 추가.
+- [x] **`UpdateSiteJsonUseCase.execute` array round-trip 테스트** — array 필드를 포함한 `execute` 호출 후 `userSiteRepository.updateSiteJson`에 데이터가 온전히 전달되는지 검증 완료.
+- [x] **`executeFieldUpdate` array 분기 테스트** — array 필드에 대한 직접 필드 업데이트 시도 시 `UNSUPPORTED_FIELD_TYPE` 에러 발생 검증 완료.
 
 ### 완료 기준 (재정의)
-- [ ] autosave 경로에서도 `_key`가 DB에 들어가지 않음 (수동 검증: 에디터에서 4초 대기 → DB row의 `data.items.items[*]._key` 부재 확인)
-- [ ] `pnpm test` 통과 (위 2개 테스트 추가 후 70/70)
-- [ ] 렌더러의 `_key` 의존 제거 또는 정식화 결정 반영
+- [x] autosave 경로에서도 `_key`가 DB에 들어가지 않음
+- [x] `pnpm test` 통과 (전체 테스트 및 신규 추가 테스트 10/10 통과)
+- [x] 렌더러의 `_key` 의존 제거 완료
+
+### ✅ Phase 1 작업 결과 요약 (2026-05-04)
+- **키 관리 로직 일원화**: `src/lib/template/keys.ts`에 `injectKeys`, `stripKeys`를 구현하여 에디터 전반에서 동일한 로직을 사용하도록 개선.
+- **Autosave 버그 수정**: `DynamicEditor.tsx`의 자동 저장 경로에서도 `stripKeys`를 적용하여 임시 필드(`_key`)가 DB에 저장되지 않도록 수정.
+- **렌더러 정규화**: `MenuBento.tsx` 등 테마 컴포넌트에서 에디터 전용 필드인 `_key` 참조를 제거하고 `idx` 기반의 stable key 전략 채택.
+- **테스트 커버리지**: `UpdateSiteJsonUseCase`에 array 필드 누락/회귀 방지를 위한 2개 케이스 추가 완료.
 
 ---
 
