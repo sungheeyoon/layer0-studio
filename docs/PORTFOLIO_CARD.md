@@ -14,10 +14,11 @@
 
 | 항목 | 내용 |
 |---|---|
-| **기간** | 2026.01 ~ 2026.04 (4개월) |
+| **기간** | 2026.01 ~ 2026.05 (5개월, 운영 중) |
 | **역할** | 1인 풀스택 (기획·설계·개발·배포) |
 | **기술** | Next.js 16 · TypeScript · Supabase · Tailwind v4 · Vercel |
 | **아키텍처** | Clean Architecture (Domain / Data / Presentation) |
+| **테마** | 7종 (corporate / cafe / fitness / interior / legal / medical / wedding) |
 
 ---
 
@@ -40,6 +41,19 @@
 - 팩토리 함수 기반 요청별 DI (싱글턴 함정 회피)
 
 → 인메모리 fake로 **단위 테스트 가능**, 인프라 교체 시 Data 레이어만 수정
+
+### 4. 플러그형 테마 시스템
+- `src/themes/<key>/` 디렉터리만 추가하면 자동 등록 (`pnpm generate:themes`)
+- 섹션 컴포넌트가 `dataSchema` 로 자기 스키마 선언 → 에디터가 동적으로 폼 생성
+- `pnpm template:sync` 가 코드의 프리셋을 DB 로 단방향 반영 (코드 = 단일 진실)
+
+→ 새 템플릿 추가 시 **코어 코드 수정 0줄**, 디자이너/개발자 분업 가능
+
+### 5. `array` 필드로 반복 섹션 편집
+- 메뉴/팀원/FAQ 같은 N개 항목을 시각적으로 추가·정렬·삭제
+- `dataSchema` 차원에서 동적 검증 + 자동 저장과 충돌 모달까지 그대로 통합
+
+→ 단순 텍스트 편집을 넘어선 **실제 콘텐츠 운영 수준**의 편집기
 
 ---
 
