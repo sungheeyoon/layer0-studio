@@ -1,14 +1,15 @@
 import Sidebar from "@/components/dashboard/Sidebar";
 import TopNavBar from "@/components/dashboard/TopNavBar";
-import { redirect } from "next/navigation";
 import { getCurrentUser, getCurrentUserSites } from "@/lib/auth/current-user";
-import { DashboardDataProvider } from "./DashboardDataProvider";
+import { DashboardDataProvider } from "./DashboardDataProvider"; // Updated path: it was in the same dir, now it's moved too
+import { notFound } from "next/navigation";
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardWithSidebarLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect('/login');
+    // This should be handled by the parent layout, but for type safety:
+    return null;
   }
 
   const sites = await getCurrentUserSites(user.id);

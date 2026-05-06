@@ -1,7 +1,7 @@
 ---
 title: UI 문제 해결 체크리스트
 status: in-progress
-last-updated: 2026-05-04
+last-updated: 2026-05-05
 owner: layer0-studio
 ---
 
@@ -15,125 +15,25 @@ owner: layer0-studio
 
 ## 1. 에디터 라이브 프리뷰 — `position: fixed` 누출 ✅ 해결됨
 
-> 증상: cafe/fitness 테마의 `position: fixed` navbar 가 viewport 에 anchor 되어 좌측 패널·dashboard 사이드바·시스템 chrome 위로 떠 버리는 문제.
-
-### 결론
-
-`sticky` 테마(medical / wedding / legal)는 **원래 정상 동작**했고 (스크롤 조상인 프리뷰 컨테이너에 anchor), 진짜 문제는 `position: fixed`(cafe / fitness) 뿐이었다.
-
-### 적용된 해결책 — `fix/editor-fixed-navbar-containment` (main 대비 2줄)
-
-`src/components/editor/DynamicEditor.tsx:455-460`:
-
-```diff
-- <section className="... overflow-hidden flex flex-col">
-+ <section className="... overflow-hidden flex flex-col p-6">
-   <div className="absolute top-0 left-0 ... LIVE PREVIEW">…</div>
-
--  <div className="flex-grow overflow-y-auto custom-scrollbar p-6">
-+  <div className="flex-grow overflow-y-auto custom-scrollbar transform-gpu">
-     <div style={themeVariables} className="min-h-full bg-white shadow-2xl">
-```
-
-- [x] 스크롤 래퍼에 `transform-gpu` 추가 → descendant `position: fixed` 의 containing block 을 viewport 에서 스크롤 래퍼로 끌어옴
-- [x] `p-6` 을 스크롤 래퍼에서 outer `<section>` 으로 한 단계 위로 이동 → `fixed` 가 transform 조상의 *padding box 외곽선* 에 anchor 하므로, 스크롤 래퍼 자체에 padding 이 있으면 navbar 가 흰 카드 밖으로 튀어나감
-
-### 왜 이게 충분한가
-
-1. CSS 스펙 상 descendant `position: fixed` 의 containing block 을 viewport 에서 빼앗아 오는 방법은 `transform` / `filter` / `perspective` / `contain: layout|paint` / `will-change: transform` 뿐. `overflow: hidden` 으로는 절대 안 됨.
-2. `position: fixed` 는 transform 조상의 *padding box* 가장자리(= 테두리 안쪽)에 anchor — padding 두께를 무시하므로 padding 은 *바깥* 으로 옮겨야 함.
-3. `position: sticky` 는 가장 가까운 *스크롤 조상* 기준 — `transform` 은 스크롤 조상이 되지 않으므로 sticky 테마는 영향 없음.
-4. LIVE PREVIEW 라벨은 `absolute top-0 left-0` 인데, absolute 는 padding box 에 anchor 되므로 section padding 영향 받지 않음 → 종전 코너 위치 그대로.
-
-### 의식적으로 *하지 않은 것*
-
-- ❌ `:where(.navbar, .navWrap)` 글로벌 selector 로 `position: sticky !important` 강제 — sticky 테마까지 무의미하게 override
-- ❌ DOM 재편 (스크롤을 흰 카드로 이전, `absolute inset-0` 2단 구조) — 이전 회귀 원인
-- ❌ 테마 모듈 CSS 직접 수정 — 발행 사이트(`/site/[domain]`) 동작에 영향
-
-### 검증 결과
-
-- [x] cafe / fitness: navbar 가 흰 카드 상단 가장자리에 정확히 anchor, 외부 chrome 침범 없음
-- [x] medical / wedding / legal: 종전 sticky 동작 그대로 (회귀 0)
-- [x] LIVE PREVIEW 라벨: 종전 코너 위치 유지
-- [x] 발행 사이트: `transform-gpu` 미적용 → 테마 원본 `fixed` / `sticky` 동작 보존
-
-### 폐기된 시도 — `fix/editor-preview-position-leak` 브랜치 (원격 보존)
-
-회귀 사례로 보존. 실패 원인 요약:
-
-1. `:where(.navbar, .navWrap) { position: sticky !important }` — sticky 테마까지 영향 + CSS Modules 해시 클래스와의 selector 매칭 신뢰성 문제
-2. 스크롤 컨테이너를 흰 카드로 이전 + `absolute inset-0` 2단 구조 — 레이아웃·스크롤 회귀 누적
-3. 5개 시도 커밋 (`d411fef`~`52a23a0`) — main 머지 안 함
-
-→ 핵심 교훈: **sticky 는 원래 잘 동작하고 있었다. fixed 만 격리하면 됐을 일을 sticky 까지 건드리며 일을 키웠다.** 다음 작업에서도 *"이미 동작하는 것은 건드리지 말 것"* 원칙을 우선시할 것.
+스크롤 래퍼에 `transform-gpu` 추가 + `p-6` 을 한 단계 상위 `<section>` 으로 이동, 2줄 수정으로 `position: fixed` 누출 격리 완료 (`fix/editor-fixed-navbar-containment` → main 머지).
 
 ---
 
 ## 2. 로그인 입력 폼 — 좌우 패딩 부재로 글자 밀착 ✅ 해결됨
 
-> 증상: `/login` 의 이메일·비밀번호 인풋에 좌우 패딩이 없어 placeholder/입력 글자가 좌측 경계에 딱 붙는다.
-
-### 진단
-- [x] `src/app/login/page.tsx:60` — email 인풋: `w-full h-10 bg-transparent border-0 border-b ... font-body text-sm font-light tracking-widest` — *수평 패딩 클래스 없음*
-- [x] `src/app/login/page.tsx:82` — password 인풋: 동일 패턴, 동일 문제
-- [x] 라벨(line 53, 75)도 인풋과 동일한 좌측 정렬, 별도 패딩 없음
-
-### 원인
-- 디자인 의도는 "border-bottom 만 있는 미니멀 인풋" 인데, 시각 균형을 위한 최소 좌측 인셋이 빠져 있어 placeholder 의 첫 글자가 라벨/외곽과 충돌하는 인상.
-- `tracking-widest` 가 첫 글자 좌측 spacing 을 깎아 더 붙어 보임.
-
-### 해결방안
-
-**전략: 인풋의 의미적 구조(border-bottom only)를 유지하면서 좌우 인셋만 부여한다.**
-
-- [x] email 인풋(60)에 `px-2` 추가 → `... border-b border-outline-variant px-2 focus:ring-0 focus:border-primary ...`
-- [x] password 인풋(82)에 동일하게 `px-2` 추가
-- [x] 라벨 정렬도 인풋과 어긋나지 않도록 라벨에 `pl-2` 추가 (line 53, 75)
-- [x] 우측 status dot (line 68, 89) 위치가 `right-0` 인데 인풋 내부 `pr-2` 와 겹치지 않도록 dot 을 `right-2` 로 이동
-- [x] 동일 패턴이 `/signup`, `/forgot-password`, `/update-password` 에 있는지 확인 후 일괄 수정
-
-### 검증
-- [x] `pnpm dev` 후 `/login` 진입 → 이메일/비밀번호 placeholder 가 라벨과 같은 들여쓰기에서 시작하는지 확인
-- [x] 한국어 IME 입력 시에도 첫 글자가 시각적으로 충분한 여백을 갖는지 확인
-- [x] 포커스 시 우측 dot 이 인풋 내부 텍스트 위로 침범하지 않는지 확인
+인풋에 `px-2`, 라벨에 `pl-2`, status dot 을 `right-2` 로 이동; `/signup`, `/forgot-password`, `/update-password` 동일 패턴 일괄 적용 완료 (`fix/login-input-padding` → main 머지).
 
 ---
 
-## 3. 에디터 라이브 프리뷰가 좁다 — 대시보드 사이드바 중복
+## 3. 에디터 라이브 프리뷰가 좁다 — 대시보드 사이드바 중복 ✅ 해결됨
 
-> 증상: 에디터에서 라이브 프리뷰 폭이 좁게 느껴진다. 좌측에 대시보드 `Sidebar` 까지 함께 떠 있어 가용 폭이 더 줄어든다.
+Route Groups (`(authenticated)`, `(with-sidebar)`) 를 활용해 대시보드 레이아웃을 분리하고 에디터에서 사이드바를 제거함 (`fix/editor-workspace-layout` → main 머지).
 
-### 진단
-- [ ] `src/app/dashboard/layout.tsx:18` — `<Sidebar />` (256px, `ml-64`)
-- [ ] `src/app/dashboard/layout.tsx:20` — `<TopNavBar />` 와 `<main className="flex-1 p-12 ...">` (`p-12` = 48px 패딩)
-- [ ] `src/components/editor/DynamicEditor.tsx:280` — 에디터 자체 좌측 패널 `w-[280px]`
-- [ ] `src/app/dashboard/editor/page.tsx:50` — 에디터 컨테이너 `<main className="p-4 h-[calc(100vh-124px)] flex gap-4">`
-- [ ] **합계**: 좌측에 사이드바 256 + main 패딩 48 + 에디터 패널 280 + gap 16 + 에디터 main 패딩 16 = **약 616px** 이 라이브 프리뷰 *왼쪽* 에 점유됨. 1440px 화면에서 프리뷰 가용 폭은 ~800px → 데스크톱 미리보기로는 좁음.
-
-### 원인
-- 에디터는 *전용 풀폭 작업공간* 이 되어야 하는데, 일반 dashboard 페이지용 chrome(사이드바 + 큰 패딩)을 그대로 상속받고 있다.
-- 라우트가 `/dashboard/editor` 라 `dashboard/layout.tsx` 가 자동 적용된 것이 원인.
-
-### 해결방안
-
-**전략: 에디터 라우트에 한해 dashboard chrome 을 우회한다. Next.js App Router 의 *route group* 을 사용해 같은 인증을 유지하면서 다른 레이아웃을 적용.**
-
-- [ ] 옵션 A — **Route Group 분리 (권장)**:
-  - [ ] `src/app/dashboard/editor/` 를 `src/app/(authenticated)/editor/` 로 이전하거나, `src/app/dashboard/(editor)/editor/` 로 그룹 만들고 그룹 안에 자체 `layout.tsx` 정의
-  - [ ] 그룹 layout 은 `getCurrentUser()` 호출 + `redirect('/login')` 만 수행, `<Sidebar />` 와 `<TopNavBar />` 는 호출하지 않음
-  - [ ] 에디터 자체 `<main>` 패딩을 `p-0` 또는 `p-2` 로 축소, height 를 `h-screen` 으로 변경 (TopNavBar 가 사라지므로 124px 차감 불필요)
-- [ ] 옵션 B — **사이드바 토글 (간이)**:
-  - [ ] `usePathname()` 으로 `dashboard/layout.tsx` 에서 `/dashboard/editor` 일 때 `<Sidebar />` 를 숨기고 `ml-64` 도 제거
-  - [ ] 단점: 인라인 분기, layout.tsx 가 client 컴포넌트로 변경되어야 할 수도 있음 (현재 server)
-- [ ] 결정: **옵션 A** 를 우선 채택. 옵션 B는 polish-단계 임시방편으로만 고려.
-- [ ] 라이브 프리뷰 카드 `<div className="min-h-full bg-white shadow-2xl">` (461) 에 데스크톱 디바이스 폭(예: `max-w-[1280px] mx-auto`) 옵션을 향후 도입 가능하도록 메모만 남겨둘 것 (이번 PR 범위 밖)
-- [ ] 좌측 패널 `w-[280px]` 은 유지 (콘텐츠/디자인 탭 + 폼 필드가 들어가야 해서 그 이하로 줄이기 어려움). 향후 collapsible 로 만들 가능성을 별도 이슈로 백로그 등록.
-
-### 검증
-- [ ] `pnpm dev` 후 `/dashboard/editor?siteId=...` 진입 → 좌측에 dashboard 사이드바 없음, 라이브 프리뷰 폭이 시각적으로 넓어졌는지 확인
-- [ ] `/dashboard` (대시보드 홈), `/dashboard/templates`, `/dashboard/settings` 등 *다른* dashboard 경로는 사이드바·TopNavBar가 그대로 보이는지 회귀 확인
-- [ ] 인증 가드: 비로그인 상태로 `/dashboard/editor` 접속 시 `/login` 으로 redirect 되는지 확인 (옵션 A 의 새 layout 이 인증 체크를 제대로 가지고 있는지)
+### 규칙 준수 결과
+- `editor/` 는 sidebar를 절대 import하지 않음: **준수**
+- `dashboard/layout.tsx` 인증 가드 삭제 → `(authenticated)/layout.tsx` 로 단일화: **준수**
+- `editor/page.tsx` 내부 padding: `p-4` → `p-0`, `h-[calc(100vh-124px)]` → `h-full`: **준수**
+- `actions.ts` 는 이동 금지 (import 경로 깨짐 방지): **준수** (단, dashboard 폴더 전체 이동에 따른 하위 import 경로는 일괄 업데이트함)
 
 ---
 
@@ -176,9 +76,9 @@ owner: layer0-studio
 
 ## 작업 순서 권고
 
-1. ✅ **#1 fixed navbar 격리** — 완료 (`fix/editor-fixed-navbar-containment`, 2줄 수정)
-2. **#2 로그인 패딩** ← 다음 (블라스트 반경 가장 작음, 즉시 효과)
-3. **#4 썸네일 비율** (한 줄 수정 + 시각 검증, 회귀 위험 적음)
-4. **#3 사이드바 분리** (route group 변경 — 인증 가드 회귀 위험이 가장 크므로 마지막)
+1. ✅ **#1 fixed navbar 격리** — 완료
+2. ✅ **#2 로그인 패딩** — 완료
+3. **#4 썸네일 비율** ← 다음 (한 줄 수정, 회귀 위험 적음)
+4. **#3 에디터 분리** (route group 변경 — URL 유지, actions.ts 이동 없음, 인증 가드 회귀 위험 있으므로 마지막)
 
 각 항목은 *별도 브랜치 / 별도 PR* 로 분리해 회귀 시 bisect 가 쉽도록 한다.

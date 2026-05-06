@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Template } from '@/domain/entities/template.entity';
-import { selectTemplateAction } from '@/app/dashboard/templates/actions';
+import { selectTemplateAction } from '@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions';
 import { getDomainError } from '@/lib/errors/messages';
 
 interface CreateProjectClientProps {

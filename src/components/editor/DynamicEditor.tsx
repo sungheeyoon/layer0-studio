@@ -8,7 +8,7 @@ import {
   TemplateField,
   ArrayTemplateField,
 } from '@/domain/entities/template.entity';
-import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/dashboard/editor/actions';
+import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTheme } from '@/themes/registry';
 import { SectionDataSchema, ThemeModule } from '@/themes/types';

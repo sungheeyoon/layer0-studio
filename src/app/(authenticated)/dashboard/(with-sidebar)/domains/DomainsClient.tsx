@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { updateSiteDomainAction } from '@/app/dashboard/editor/actions';
+import { updateSiteDomainAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import { getDomainError } from '@/lib/errors/messages';
 import { useDashboardData } from '../DashboardDataProvider';
 

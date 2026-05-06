@@ -4,7 +4,7 @@ import { Template } from '@/domain/entities/template.entity';
 import { UserSite } from '@/domain/entities/user-site.entity';
 import { useState, useTransition, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { listPaginatedTemplatesAction } from '@/app/dashboard/templates/actions';
+import { listPaginatedTemplatesAction } from '@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions';
 
 interface DynamicTemplateGridProps {
   templates: Template[];

@@ -1,4 +1,4 @@
-import { listPaginatedTemplatesAction, listCategoriesAction } from "@/app/dashboard/templates/actions";
+import { listPaginatedTemplatesAction, listCategoriesAction } from "@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions";
 import PublicTemplateGrid from "@/components/templates/PublicTemplateGrid";
 
 export default async function PublicTemplatesPage() {

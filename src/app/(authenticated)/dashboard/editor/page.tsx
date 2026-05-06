@@ -11,7 +11,7 @@ export default async function EditorPage({ searchParams }: EditorPageProps) {
 
   if (!siteId) {
     return (
-      <main className="p-10 h-[calc(100vh-124px)] flex items-center justify-center">
+      <main className="h-full flex items-center justify-center">
         <div className="text-center">
           <h2 className="font-['Inter'] font-light text-2xl tracking-wider mb-4">No site selected</h2>
           <p className="font-['Inter'] font-light text-sm text-on-surface-variant mb-8">
@@ -32,7 +32,7 @@ export default async function EditorPage({ searchParams }: EditorPageProps) {
 
   if (!site) {
     return (
-      <main className="p-10 h-[calc(100vh-124px)] flex items-center justify-center">
+      <main className="h-full flex items-center justify-center">
         <div className="text-center">
           <h2 className="font-['Inter'] font-light text-2xl tracking-wider mb-4">Site not found</h2>
           <a
@@ -47,7 +47,7 @@ export default async function EditorPage({ searchParams }: EditorPageProps) {
   }
 
   return (
-    <main className="p-4 h-[calc(100vh-124px)] flex gap-4">
+    <main className="h-full flex">
       <DynamicEditor site={site} />
     </main>
   );
