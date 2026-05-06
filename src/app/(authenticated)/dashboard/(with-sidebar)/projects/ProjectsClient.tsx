@@ -10,7 +10,7 @@ import {
   deleteSiteAction,
   updateSiteNameAction,
   unpublishSiteAction,
-} from "@/app/dashboard/editor/actions";
+} from "@/app/(authenticated)/dashboard/editor/actions";
 import { getDomainError, getSiteError } from "@/lib/errors/messages";
 import { useDashboardData } from "../DashboardDataProvider";
 
