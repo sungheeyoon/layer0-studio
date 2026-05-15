@@ -38,6 +38,17 @@ src/lib/di/       ← Dependency injection: factory functions that wire repos �
 src/lib/errors/   ← User-facing error message registry (Korean i18n) — map domain error codes → display strings
 src/lib/seo/      ← SITE_URL helper (origin only, trailing slash trimmed)
 src/app/          ← Next.js App Router pages and Server Actions (call use cases via DI)
+  (authenticated)/          ← Route group: auth guard (session check in layout.tsx)
+    layout.tsx              ← Single auth guard for all authenticated routes
+    dashboard/
+      (with-sidebar)/       ← Route group: dashboard pages that render the sidebar
+        layout.tsx          ← Sidebar layout
+        page.tsx            ← /dashboard
+        projects/           ← /dashboard/projects, /dashboard/projects/create
+        templates/          ← /dashboard/templates
+        domains/            ← /dashboard/domains
+        settings/           ← /dashboard/settings
+      editor/               ← /dashboard/editor — NO sidebar, full-viewport layout
 src/components/   ← UI components
 src/themes/       ← Theme renderers (pluggable)
 src/middleware.ts ← Supabase session refresh on every request (excludes static assets)
@@ -59,10 +70,10 @@ src/types/database.ts ← Generated Supabase DB types
 | `/update-password` | Set new password after reset link verification |
 | `/auth/confirm` | OTP verification handler — used by signup confirmation and password-reset flows |
 | `/legal/privacy`, `/legal/terms` | Static legal pages |
-| `/dashboard/*` | Authenticated user area (protected in `dashboard/layout.tsx`) |
+| `/dashboard/*` | Authenticated user area (auth guard in `(authenticated)/layout.tsx`) |
 | `/dashboard/templates` | Authenticated template catalog (same data, different chrome) |
 | `/dashboard/projects/create?templateId=<id>` | Provision a new site from a template |
-| `/dashboard/editor?siteId=<id>` | Visual editor |
+| `/dashboard/editor?siteId=<id>` | Visual editor — full-viewport, no sidebar (`(authenticated)/dashboard/editor/`) |
 | `/dashboard/settings` | Account settings — change password, delete account |
 | `/admin/*` | Admin area — requires `app_metadata.role === 'admin'` |
 | `/site/[domain]` | Public published site renderer |
