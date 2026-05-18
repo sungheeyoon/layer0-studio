@@ -137,3 +137,17 @@ SQL migrations live in `docs/migrations/` (001–012). Apply manually via the Su
 ### Deployment
 
 Production: https://layer0-studio.vercel.app (Vercel).
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues in `sungheeyoon/layer0-studio`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical defaults (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout (`CONTEXT.md` + `docs/adr/` at the repo root). See `docs/agents/domain.md`.
