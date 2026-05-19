@@ -80,11 +80,11 @@ export default async function PublicSitePage({ params }: Props) {
 
   const { siteJson } = site;
 
-  const templateKey = siteJson.templateKey || 'corporate';
+  const templateKey = siteJson.templateKey || 'corporate-default';
   const templateModule = await loadTemplate(templateKey);
 
   if (!templateModule) {
-    console.error(`[PublicSitePage] Theme "${templateKey}" not found`);
+    console.error(`[PublicSitePage] Template "${templateKey}" not found`);
     notFound();
   }
 

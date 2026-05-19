@@ -108,7 +108,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       }, 10000);
 
       try {
-        const mod = await loadTemplate(siteJson.templateKey || 'corporate');
+        const mod = await loadTemplate(siteJson.templateKey || 'corporate-default');
         clearTimeout(timeoutId);
         if (mounted) {
           if (mod) {

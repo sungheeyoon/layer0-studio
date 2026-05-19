@@ -53,7 +53,7 @@ export default async function TemplatePreviewPage({ params }: Props) {
       style={themeVariables}
     >
       <TemplateClientWrapper
-        templateKey={templateJson.templateKey || 'corporate'}
+        templateKey={templateJson.templateKey || 'corporate-default'}
         siteJson={templateJson}
         selectedSectionId={null}
       />
