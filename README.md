@@ -44,7 +44,7 @@ src/data/         ← Supabase repository implementations
 src/lib/di/       ← DI factory functions (wire repos → use cases per request)
 src/app/          ← Next.js App Router pages and Server Actions
 src/components/   ← UI components
-src/themes/       ← Pluggable theme renderers
+src/templates/    ← Self-contained template renderers (β model: <category>/<leaf>/)
 ```
 
 Server Actions call `create*UseCase(supabase)` factories from `src/lib/di/container.ts`. No singletons — a fresh Supabase client is passed per request.
@@ -65,9 +65,9 @@ Server Actions call `create*UseCase(supabase)` factories from `src/lib/di/contai
 | `/preview/[id]` | Preview before publishing |
 | `/api/cron/cleanup-assets` | Orphan asset cleanup cron (Bearer `CRON_SECRET`) |
 
-## Theme system
+## Template system
 
-Themes live in `src/themes/`. Each exports a renderer component, a `slots` array, and a `defaultTemplateJson`. Register new themes in `src/themes/registry.ts`.
+Templates live in `src/templates/<category>/<leaf>/` (β model). Each is self-contained: own tokens, own library, own renderer. The codegen at `src/templates/_generated.ts` is regenerated on predev/prebuild via `pnpm generate:templates` — just add a new template directory and it auto-registers.
 
 The core data model is `TemplateJson` (`src/domain/entities/template.entity.ts`):
 - `templateKey` — selects the renderer

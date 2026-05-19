@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { createGetTemplateUseCase } from '@/lib/di/container';
 import type { Metadata } from 'next';
 import React from 'react';
-import TemplateClientWrapper from '@/themes/TemplateClientWrapper';
+import TemplateClientWrapper from '@/templates/TemplateClientWrapper';
 
 interface Props {
   params: Promise<{ id: string }>;

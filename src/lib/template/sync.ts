@@ -1,8 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { presetMap, templateMap, getAvailableTemplateKeys } from '@/themes/_generated';
+import { presetMap, templateMap, getAvailableTemplateKeys, templateCategories } from '@/templates/_generated';
 import { validateTemplateJson } from './validate';
 import { deriveTemplateJsonFromPreset } from './preset';
-import type { TemplatePreset } from '@/themes/types';
+import type { TemplatePreset } from '@/templates/types';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -69,34 +69,34 @@ export async function syncTemplates(
     details: []
   };
 
-  const presetKeys = Object.keys(presetMap);
-  const presets: TemplatePreset[] = [];
+  // Each entry: { templateKey, preset } — templateKey comes from presetMap iteration key
+  // (post-β: templateMap and presetMap share keys, so templateKey identifies both).
+  const entries: Array<{ templateKey: string; preset: TemplatePreset }> = [];
 
-  for (const key of presetKeys) {
-    const preset = (await presetMap[key]()).default;
-    if (targetSlug && preset.slug !== targetSlug && !key.startsWith(targetSlug)) continue;
-    presets.push(preset);
+  for (const templateKey of Object.keys(presetMap)) {
+    const preset = (await presetMap[templateKey]()).default;
+    if (targetSlug && preset.slug !== targetSlug && !templateKey.startsWith(targetSlug)) continue;
+    entries.push({ templateKey, preset });
   }
 
-  if (presets.length === 0) return summary;
+  if (entries.length === 0) return summary;
 
   // Pre-fetch existing templates
   const { data: existingTemplates, error: fetchError } = await supabase
     .from('templates')
     .select('*')
-    .in('slug', presets.map(p => p.slug));
+    .in('slug', entries.map(e => e.preset.slug));
 
   if (fetchError) throw fetchError;
 
   const existingMap = new Map(existingTemplates?.map(t => [t.slug, t]));
 
-  for (const preset of presets) {
-    // 1. Determine templateKey
-    const templateKey = preset.composition ? preset.templateKey : preset.templateJson?.templateKey;
-
-    if (!templateKey) {
+  for (const { templateKey, preset } of entries) {
+    // templateKey known from presetMap iteration; category derived from codegen layout.
+    const category = templateCategories[templateKey];
+    if (!category) {
       summary.errors++;
-      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [`Missing templateKey for preset ${preset.slug}`] });
+      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [`No category derivable for templateKey ${templateKey}`] });
       continue;
     }
 
@@ -155,7 +155,7 @@ export async function syncTemplates(
           slug: preset.slug,
           name: preset.defaults.name,
           description: preset.defaults.description,
-          category: preset.defaults.category,
+          category,
           template_json: effectiveTemplateJson,
           version: preset.version,
           thumbnail_url: thumbnailUrl,

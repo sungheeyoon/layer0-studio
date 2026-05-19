@@ -8,8 +8,8 @@ import {
   updateTemplateAction,
   uploadThumbnailAction,
 } from './actions';
-import { getAvailableTemplateKeys } from '@/themes/registry';
-import { isPresetSlug } from '@/themes/_generated';
+import { getAvailableTemplateKeys } from '@/templates/registry';
+import { isPresetSlug } from '@/templates/_generated';
 import CompositionPreview from './CompositionPreview';
 import { TemplateJson } from '@/domain/entities/template.entity';
 

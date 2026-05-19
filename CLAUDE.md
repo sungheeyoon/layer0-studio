@@ -14,10 +14,10 @@ pnpm lint               # Run ESLint (eslint config: eslint-config-next)
 pnpm test               # Vitest run (domain layer only)
 pnpm test:watch         # Vitest watch mode
 
-pnpm generate:themes    # Regenerate src/themes/_generated.ts from theme dirs
+pnpm generate:templates # Regenerate src/templates/_generated.ts from template dirs
 pnpm template:sync      # Reflect code presets → DB (dry-run by default; pass --apply to commit)
 pnpm template:capture   # Playwright thumbnail capture for templates
-pnpm template:scaffold  # Scaffold a new theme directory skeleton
+pnpm template:scaffold  # Scaffold a new template directory skeleton
 ```
 
 TypeScript checking: `pnpm tsc --noEmit`. Tests live in `src/domain/__tests__/` and use in-memory fakes — no DB required.
@@ -50,7 +50,7 @@ src/app/          ← Next.js App Router pages and Server Actions (call use case
         settings/           ← /dashboard/settings
       editor/               ← /dashboard/editor — NO sidebar, full-viewport layout
 src/components/   ← UI components
-src/themes/       ← Theme renderers (pluggable)
+src/templates/    ← Template renderers (β model: src/templates/<category>/<leaf>/, self-contained)
 src/middleware.ts ← Supabase session refresh on every request (excludes static assets)
 src/types/database.ts ← Generated Supabase DB types
 ```
@@ -84,7 +84,7 @@ src/types/database.ts ← Generated Supabase DB types
 
 > **Any work touching templates / themes / presets / sync / validate / thumbnail capture: read `docs/TEMPLATE_SYSTEM.md` FIRST.** That doc is the single source of truth — concepts, data model, sync pipeline, validate rules, extension scenarios, gotchas, and code map. The summary here is just a pointer.
 
-Themes live in `src/themes/<key>/`. Each theme is **visual tokens (`tokens.ts`) + a library of self-describing section components (`library/*.tsx` with `.meta.dataSchema`) + presets (`presets/*.preset.ts`)**. The registry is auto-generated (`src/themes/_generated.ts` via `pnpm generate:themes`, hooked into predev/prebuild) — adding a directory is enough to register. Currently 7 themes ship: `corporate`, `cafe`, `fitness`, `interior`, `legal`, `medical`, `wedding`.
+Templates live in `src/templates/<category>/<leaf>/` (β model since #6). Each template is **self-contained**: own visual tokens (`tokens.ts`), own library of section components (`library/*.tsx` with `.meta.dataSchema`), own `template.ts` (the seed), own `index.tsx` renderer. Components are NOT shared across templates — every template owns its copies. The registry is auto-generated (`src/templates/_generated.ts` via `pnpm generate:templates`, hooked into predev/prebuild) — adding a directory is enough to register. **templateKey = `<category>-<leaf>` (concat)**. Category is derived from the parent dir name. Currently 9 templates ship across 7 categories: `cafe-{cozy,default,modern}`, `corporate-default`, `fitness-default`, `interior-default`, `legal-default`, `medical-default`, `wedding-default`.
 
 The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer:
 - `templateKey`: selects the renderer

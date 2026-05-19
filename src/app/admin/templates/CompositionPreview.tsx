@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { TemplateJson } from '@/domain/entities/template.entity';
-import { templateMap } from '@/themes/_generated';
-import { TemplateLibrary } from '@/themes/types';
+import { templateMap } from '@/templates/_generated';
+import { TemplateLibrary } from '@/templates/types';
 
 interface CompositionPreviewProps {
   templateJson: TemplateJson;

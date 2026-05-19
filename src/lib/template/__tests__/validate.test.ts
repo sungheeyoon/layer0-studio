@@ -2,21 +2,22 @@ import { describe, it, expect } from 'vitest';
 import { validateTemplateJson } from '../validate';
 import { deriveTemplateJsonFromPreset } from '../preset';
 import { TemplateJson, ArrayTemplateField } from '@/domain/entities/template.entity';
-import type { TemplateLibrary } from '@/themes/types';
+import type { TemplateLibrary } from '@/templates/types';
 
-// -- All 7 presets --
-import corporatePreset from '@/themes/corporate/presets/default.preset';
-import cafePreset from '@/themes/cafe/presets/default.preset';
-import fitnessPreset from '@/themes/fitness/presets/default.preset';
-import interiorPreset from '@/themes/interior/presets/default.preset';
-import legalPreset from '@/themes/legal/presets/default.preset';
-import medicalPreset from '@/themes/medical/presets/default.preset';
-import weddingPreset from '@/themes/wedding/presets/default.preset';
-import cafeModernPreset from '@/themes/cafe/presets/modern.preset';
+// -- All 9 templates --
+import corporatePreset from '@/templates/corporate/default/template';
+import cafePreset from '@/templates/cafe/default/template';
+import fitnessPreset from '@/templates/fitness/default/template';
+import interiorPreset from '@/templates/interior/default/template';
+import legalPreset from '@/templates/legal/default/template';
+import medicalPreset from '@/templates/medical/default/template';
+import weddingPreset from '@/templates/wedding/default/template';
+import cafeModernPreset from '@/templates/cafe/modern/template';
+import cafeCozyPreset from '@/templates/cafe/cozy/template';
 
-import { templateMap } from '@/themes/_generated';
+import { templateMap, getAvailableTemplateKeys } from '@/templates/_generated';
 
-const ALL_TEMPLATE_KEYS = ['cafe', 'corporate', 'fitness', 'interior', 'legal', 'medical', 'wedding'];
+const ALL_TEMPLATE_KEYS = getAvailableTemplateKeys();
 
 function minimalJson(overrides: Partial<TemplateJson> = {}): TemplateJson {
   return {
@@ -328,14 +329,15 @@ describe('validateTemplateJson — warnings', () => {
 
 describe('all presets — errors must be zero', () => {
   const cases = [
-    { name: 'corporate-default', preset: corporatePreset, templateKey: 'corporate' },
-    { name: 'cafe-default',      preset: cafePreset,      templateKey: 'cafe' },
-    { name: 'fitness-default',   preset: fitnessPreset,   templateKey: 'fitness' },
-    { name: 'interior-default',  preset: interiorPreset,  templateKey: 'interior' },
-    { name: 'legal-default',     preset: legalPreset,     templateKey: 'legal' },
-    { name: 'medical-default',   preset: medicalPreset,   templateKey: 'medical' },
-    { name: 'wedding-default',   preset: weddingPreset,   templateKey: 'wedding' },
-    { name: 'cafe-modern',       preset: cafeModernPreset, templateKey: 'cafe' },
+    { name: 'corporate-default', preset: corporatePreset,  templateKey: 'corporate-default' },
+    { name: 'cafe-default',      preset: cafePreset,       templateKey: 'cafe-default' },
+    { name: 'fitness-default',   preset: fitnessPreset,    templateKey: 'fitness-default' },
+    { name: 'interior-default',  preset: interiorPreset,   templateKey: 'interior-default' },
+    { name: 'legal-default',     preset: legalPreset,      templateKey: 'legal-default' },
+    { name: 'medical-default',   preset: medicalPreset,    templateKey: 'medical-default' },
+    { name: 'wedding-default',   preset: weddingPreset,    templateKey: 'wedding-default' },
+    { name: 'cafe-modern',       preset: cafeModernPreset, templateKey: 'cafe-modern' },
+    { name: 'cafe-cozy',         preset: cafeCozyPreset,   templateKey: 'cafe-cozy' },
   ];
 
   for (const { name, preset, templateKey } of cases) {

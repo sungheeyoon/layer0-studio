@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/container';
-import { loadTemplate } from '@/themes/registry';
+import { loadTemplate } from '@/templates/registry';
 import { SITE_URL } from '@/lib/seo/base-url';
 import { getFieldValue } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
