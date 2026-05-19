@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Template } from '@/domain/entities/template.entity';
 import { deleteTemplateAction, archiveTemplateAction, revertToDraftAction, syncTemplatesAction } from './actions';
-import { isPresetSlug } from '@/themes/_generated';
+import { isPresetSlug } from '@/templates/_generated';
 import { SyncSummary } from '@/lib/template/sync';
 
 interface TemplateListPanelProps {

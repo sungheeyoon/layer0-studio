@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/container';
-import { loadTemplate } from '@/themes/registry';
+import { loadTemplate } from '@/templates/registry';
 import { SITE_URL } from '@/lib/seo/base-url';
 import { getFieldValue } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
@@ -80,11 +80,11 @@ export default async function PublicSitePage({ params }: Props) {
 
   const { siteJson } = site;
 
-  const templateKey = siteJson.templateKey || 'corporate';
+  const templateKey = siteJson.templateKey || 'corporate-default';
   const templateModule = await loadTemplate(templateKey);
 
   if (!templateModule) {
-    console.error(`[PublicSitePage] Theme "${templateKey}" not found`);
+    console.error(`[PublicSitePage] Template "${templateKey}" not found`);
     notFound();
   }
 

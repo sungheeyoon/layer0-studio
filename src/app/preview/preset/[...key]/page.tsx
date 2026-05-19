@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import { presetMap, templateMap } from '@/themes/_generated';
-import TemplateClientWrapper from '@/themes/TemplateClientWrapper';
+import { presetMap, templateMap } from '@/templates/_generated';
+import TemplateClientWrapper from '@/templates/TemplateClientWrapper';
 import { deriveTemplateJsonFromPreset } from '@/lib/template/preset';
 import React from 'react';
 
@@ -19,10 +19,10 @@ export default async function PresetPreviewPage({ params }: Props) {
   }
 
   const preset = (await loader()).default;
-  
-  // Load theme module to provide base configuration if needed
-  const templateKey = preset.composition ? preset.templateKey : preset.templateJson?.templateKey;
-  const templateLoader = templateKey ? templateMap[templateKey as keyof typeof templateMap] : null;
+
+  // post-β: presetMap key == templateKey == preset.slug
+  const templateKey = presetKey;
+  const templateLoader = templateMap[templateKey as keyof typeof templateMap];
   const templateModule = templateLoader ? await templateLoader() : null;
 
   let templateJson;

@@ -1,19 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncTemplates } from '../sync';
 import { deriveTemplateJsonFromPreset } from '../preset';
-import { TemplatePreset } from '@/themes/types';
+import { TemplatePreset } from '@/templates/types';
 import { ArrayTemplateField, TextTemplateField } from '@/domain/entities/template.entity';
 
 // Mock presetMap and validateTemplateJson
-vi.mock('@/themes/_generated', () => ({
+// post-β: presetMap/templateMap keys are templateKeys; templateCategories maps to category.
+vi.mock('@/templates/_generated', () => ({
   templateMap: {},
-  getAvailableTemplateKeys: () => ['test'],
+  templateCategories: { 'test-default': 'test' },
+  getAvailableTemplateKeys: () => ['test-default'],
   presetMap: {
-    'test/default': () => Promise.resolve({
+    'test-default': () => Promise.resolve({
       default: {
         slug: 'test-default',
         templateJson: {
-          templateKey: 'test',
+          templateKey: 'test-default',
           pages: [{ id: 'index', title: 'Index', slug: 'index', sections: [], order: 0 }],
           globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' }
         },
@@ -22,7 +24,6 @@ vi.mock('@/themes/_generated', () => ({
         defaults: {
           name: 'New Name',
           description: 'New Description',
-          category: 'new',
         }
       }
     })
@@ -141,10 +142,11 @@ describe('syncTemplates', () => {
     const summary = await syncTemplates(mockSupabase, { dryRun: false });
 
     expect(summary.creates).toBe(1);
+    // post-β: category derived from templateCategories map (not preset.defaults.category)
     expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({
       slug: 'test-default',
       name: 'New Name',
-      category: 'new'
+      category: 'test'
     }));
   });
 });

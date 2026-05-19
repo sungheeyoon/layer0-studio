@@ -1,5 +1,5 @@
 import { TemplateJson, TemplateField } from '@/domain/entities/template.entity';
-import { TemplateLibrary, SectionDataSchema } from '@/themes/types';
+import { TemplateLibrary, SectionDataSchema } from '@/templates/types';
 
 export interface ValidationIssue {
   code: string;

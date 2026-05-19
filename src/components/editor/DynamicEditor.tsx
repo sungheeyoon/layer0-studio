@@ -10,8 +10,8 @@ import {
 } from '@/domain/entities/template.entity';
 import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
-import { loadTemplate } from '@/themes/registry';
-import { SectionDataSchema, TemplateModule } from '@/themes/types';
+import { loadTemplate } from '@/templates/registry';
+import { SectionDataSchema, TemplateModule } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
 import { getSiteError } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
@@ -108,7 +108,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       }, 10000);
 
       try {
-        const mod = await loadTemplate(siteJson.templateKey || 'corporate');
+        const mod = await loadTemplate(siteJson.templateKey || 'corporate-default');
         clearTimeout(timeoutId);
         if (mounted) {
           if (mod) {
