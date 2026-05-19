@@ -1,8 +1,8 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Team: SectionComponent = function Team({ section }: ThemeSectionProps) {
+const Team: SectionComponent = function Team({ section }: TemplateSectionProps) {
   const { data } = section;
   const title = getFieldValue(data, 'title') || '';
 

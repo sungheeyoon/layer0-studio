@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'interior-default',
-  themeKey: 'interior',
+  templateKey: 'interior',
   composition: [
     {
       id: 'nav-001',

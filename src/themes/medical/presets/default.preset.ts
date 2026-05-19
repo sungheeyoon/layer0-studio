@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'medical-default',
-  themeKey: 'medical',
+  templateKey: 'medical',
   composition: [
     {
       id: 'nav-001',

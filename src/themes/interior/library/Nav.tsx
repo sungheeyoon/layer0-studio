@@ -1,11 +1,11 @@
 'use client';
 
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { HomeIcon, ChatIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
+const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || '에스파시오';
   const ctaText = getFieldValue(data, 'ctaText') || '무료 상담 신청';

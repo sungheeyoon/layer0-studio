@@ -1,8 +1,8 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import { HomeIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, LetterIcon, ClockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
+const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
   const { data } = section;
   const description = getFieldValue(data, 'description') || '';
   const address = getFieldValue(data, 'address') || '';

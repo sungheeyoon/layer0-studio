@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { PlusIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Faq: SectionComponent = function Faq({ section }: ThemeSectionProps) {
+const Faq: SectionComponent = function Faq({ section }: TemplateSectionProps) {
   const { data } = section;
   const title = getFieldValue(data, 'title') || '';
 

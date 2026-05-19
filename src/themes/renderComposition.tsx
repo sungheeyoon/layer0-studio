@@ -1,22 +1,22 @@
 import React from 'react';
-import { ThemeRendererProps, ThemeLibrary } from './types';
+import { TemplateRendererProps, TemplateLibrary } from './types';
 
-interface RenderCompositionProps extends ThemeRendererProps {
-  library: ThemeLibrary;
+interface RenderCompositionProps extends TemplateRendererProps {
+  library: TemplateLibrary;
   className?: string;
   itemClassName?: (sectionId: string) => string;
 }
 
 /**
  * Generic renderer for the Composition model.
- * 
+ *
  * Instead of iterating over 'slots', it iterates over the actual 'sections'
  * defined in the siteJson and looks them up in the library.
  */
-export function RenderComposition({ 
-  siteJson, 
-  selectedSectionId, 
-  onSectionClick, 
+export function RenderComposition({
+  siteJson,
+  selectedSectionId,
+  onSectionClick,
   activePageId,
   library,
   className,
@@ -25,7 +25,7 @@ export function RenderComposition({
   const page = activePageId
     ? siteJson.pages.find(p => p.id === activePageId)
     : siteJson.pages[0];
-  
+
   const sections = page?.sections || [];
 
   return (

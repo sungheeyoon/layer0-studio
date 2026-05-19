@@ -8,7 +8,7 @@ import {
   updateTemplateAction,
   uploadThumbnailAction,
 } from './actions';
-import { getAvailableThemeKeys } from '@/themes/registry';
+import { getAvailableTemplateKeys } from '@/themes/registry';
 import { isPresetSlug } from '@/themes/_generated';
 import CompositionPreview from './CompositionPreview';
 import { TemplateJson } from '@/domain/entities/template.entity';
@@ -25,7 +25,7 @@ export default function TemplateEditorPanel({
 }: TemplateEditorPanelProps) {
   const isEditing = !!template;
   const isCodePreset = template ? isPresetSlug(template.slug) : false;
-  const availableThemes = getAvailableThemeKeys();
+  const availableThemes = getAvailableTemplateKeys();
 
   // JSON state
   const [templateJsonStr, setTemplateJsonStr] = useState(
@@ -68,14 +68,14 @@ export default function TemplateEditorPanel({
     }
   };
 
-  const handleThemeChange = (themeKey: string) => {
+  const handleThemeChange = (templateKey: string) => {
     if (isCodePreset) return;
     try {
-      const currentJson = templateJsonStr ? JSON.parse(templateJsonStr) : { themeKey: '' };
-      currentJson.themeKey = themeKey;
+      const currentJson = templateJsonStr ? JSON.parse(templateJsonStr) : { templateKey: '' };
+      currentJson.templateKey = templateKey;
       setTemplateJsonStr(JSON.stringify(currentJson, null, 2));
     } catch {
-      // If JSON is invalid, we can't safely update themeKey
+      // If JSON is invalid, we can't safely update templateKey
     }
   };
 
@@ -133,11 +133,11 @@ export default function TemplateEditorPanel({
     setIsSubmitting(false);
   }, [jsonError, templateJsonStr, thumbnailUrl, isEditing, template, onDone]);
 
-  // Get current themeKey for select input
+  // Get current templateKey for select input
   let currentThemeKey = 'corporate';
   try {
-    currentThemeKey = JSON.parse(templateJsonStr).themeKey || 'corporate';
-  } catch { /* invalid JSON, keep previous themeKey */ }
+    currentThemeKey = JSON.parse(templateJsonStr).templateKey || 'corporate';
+  } catch { /* invalid JSON, keep previous templateKey */ }
 
   return (
     <section className="col-span-8 bg-surface overflow-y-auto">

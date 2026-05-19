@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { createGetTemplateUseCase } from '@/lib/di/container';
 import type { Metadata } from 'next';
 import React from 'react';
-import ThemeClientWrapper from '@/themes/ThemeClientWrapper';
+import TemplateClientWrapper from '@/themes/TemplateClientWrapper';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -52,8 +52,8 @@ export default async function TemplatePreviewPage({ params }: Props) {
       className="min-h-screen"
       style={themeVariables}
     >
-      <ThemeClientWrapper
-        themeKey={templateJson.themeKey || 'corporate'}
+      <TemplateClientWrapper
+        templateKey={templateJson.templateKey || 'corporate'}
         siteJson={templateJson}
         selectedSectionId={null}
       />

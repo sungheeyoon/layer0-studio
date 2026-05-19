@@ -1,8 +1,8 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Why: SectionComponent = function Why({ section }: ThemeSectionProps) {
+const Why: SectionComponent = function Why({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '';
   const title = getFieldValue(data, 'title') || '';

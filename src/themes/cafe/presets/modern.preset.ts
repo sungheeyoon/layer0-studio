@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'cafe-modern',
-  themeKey: 'cafe',
+  templateKey: 'cafe',
   globalStyles: {
     primaryColor: '#2A9D8F', // Teal
     secondaryColor: '#264653', // Deep Blue

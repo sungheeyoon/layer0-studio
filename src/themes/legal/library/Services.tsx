@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { ArrowRightIcon, BuildingsIcon, CalculatorIcon, HomeIcon, GraphIcon, UserHandsIcon, LawIcon, CheckCircleIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Services: SectionComponent = function Services({ section }: ThemeSectionProps) {
+const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
   const { data } = section;
   const title = getFieldValue(data, 'title') || '';
 

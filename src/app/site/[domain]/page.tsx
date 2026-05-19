@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/container';
-import { loadTheme } from '@/themes/registry';
+import { loadTemplate } from '@/themes/registry';
 import { SITE_URL } from '@/lib/seo/base-url';
 import { getFieldValue } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
@@ -80,15 +80,15 @@ export default async function PublicSitePage({ params }: Props) {
 
   const { siteJson } = site;
 
-  const themeKey = siteJson.themeKey || 'corporate';
-  const themeModule = await loadTheme(themeKey);
+  const templateKey = siteJson.templateKey || 'corporate';
+  const templateModule = await loadTemplate(templateKey);
 
-  if (!themeModule) {
-    console.error(`[PublicSitePage] Theme "${themeKey}" not found`);
+  if (!templateModule) {
+    console.error(`[PublicSitePage] Theme "${templateKey}" not found`);
     notFound();
   }
 
-  const ThemeRenderer = themeModule.default;
+  const TemplateRenderer = templateModule.default;
 
   const homePage = siteJson.pages.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages[0];
   const activePageId = homePage?.id;
@@ -105,7 +105,7 @@ export default async function PublicSitePage({ params }: Props) {
       className="min-h-screen"
       style={themeVariables}
     >
-      <ThemeRenderer
+      <TemplateRenderer
         siteJson={siteJson}
         selectedSectionId={null}
         activePageId={activePageId}

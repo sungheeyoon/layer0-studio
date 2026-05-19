@@ -1,11 +1,11 @@
 'use client';
 
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { PhoneIcon, ClockIcon, MapPinIcon, ChatIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Contact: SectionComponent = function Contact({ section }: ThemeSectionProps) {
+const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
   const { data } = section;
   const title = getFieldValue(data, 'title') || '';
   const body = getFieldValue(data, 'body') || '';

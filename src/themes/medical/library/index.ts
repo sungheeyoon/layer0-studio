@@ -1,4 +1,4 @@
-import { ThemeLibrary, libEntry } from '../../types';
+import { TemplateLibrary, libEntry } from '../../types';
 import Nav from './Nav';
 import Hero from './Hero';
 import Marquee from './Marquee';
@@ -10,7 +10,7 @@ import Testimonials from './Testimonials';
 import Booking from './Booking';
 import Footer from './Footer';
 
-export const medicalLibrary: ThemeLibrary = {
+export const medicalLibrary: TemplateLibrary = {
   nav: libEntry(Nav),
   hero: libEntry(Hero),
   marquee: libEntry(Marquee),

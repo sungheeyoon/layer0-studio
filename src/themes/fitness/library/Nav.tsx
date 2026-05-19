@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { DumbbellIcon, HamburgerIcon, ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
+const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || 'APEX';
   const ctaText = getFieldValue(data, 'ctaText') || '무료 체험';

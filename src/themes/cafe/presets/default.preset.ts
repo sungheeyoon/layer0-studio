@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'cafe-default',
-  themeKey: 'cafe',
+  templateKey: 'cafe',
   composition: [
     {
       id: 'nav-001',

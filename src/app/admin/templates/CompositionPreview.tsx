@@ -2,23 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { TemplateJson } from '@/domain/entities/template.entity';
-import { themeMap } from '@/themes/_generated';
-import { ThemeLibrary } from '@/themes/types';
+import { templateMap } from '@/themes/_generated';
+import { TemplateLibrary } from '@/themes/types';
 
 interface CompositionPreviewProps {
   templateJson: TemplateJson;
 }
 
 export default function CompositionPreview({ templateJson }: CompositionPreviewProps) {
-  const [library, setLibrary] = useState<ThemeLibrary | null>(null);
+  const [library, setLibrary] = useState<TemplateLibrary | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const themeKey = templateJson.themeKey;
-    if (themeMap[themeKey]) {
+    const templateKey = templateJson.templateKey;
+    if (templateMap[templateKey]) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(true);
-      themeMap[themeKey]()
+      templateMap[templateKey]()
         .then((mod) => {
           setLibrary(mod.library || null);
         })
@@ -28,7 +28,7 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
     } else {
       setLibrary(null);
     }
-  }, [templateJson.themeKey]);
+  }, [templateJson.templateKey]);
 
   // We only show the first page's composition for now
   const page = templateJson.pages[0];

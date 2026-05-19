@@ -1,15 +1,15 @@
 import React from 'react';
-import { ThemeRendererProps, ThemeLibrary } from '../types';
+import { TemplateRendererProps, TemplateLibrary } from '../types';
 import styles from './wedding.module.css';
 import { weddingLibrary } from './library';
 import { RenderComposition } from '../renderComposition';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
-export const library: ThemeLibrary = weddingLibrary;
+export const library: TemplateLibrary = weddingLibrary;
 
 export const defaultTemplateJson: TemplateJson = {
-  themeKey: 'wedding',
+  templateKey: 'wedding',
   globalStyles: defaultGlobalStyles,
   pages: [
     {
@@ -22,7 +22,7 @@ export const defaultTemplateJson: TemplateJson = {
   ],
 };
 
-export default function WeddingTheme(props: ThemeRendererProps) {
+export default function WeddingTheme(props: TemplateRendererProps) {
   return (
     <RenderComposition
       {...props}

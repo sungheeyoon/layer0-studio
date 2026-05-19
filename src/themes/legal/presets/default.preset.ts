@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'legal-default',
-  themeKey: 'legal',
+  templateKey: 'legal',
   composition: [
     {
       id: 'nav-001',

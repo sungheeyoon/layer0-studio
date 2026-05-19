@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { VerifiedCheckIcon, ChatIcon, ArrowDownIcon, DiplomaIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
+const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
   const { data } = section;
   const eyebrow = getFieldValue(data, 'eyebrow') || '';
   const title = getFieldValue(data, 'title') || '';

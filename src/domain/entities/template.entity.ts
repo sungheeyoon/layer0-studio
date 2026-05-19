@@ -89,7 +89,7 @@ export interface TemplatePage {
 }
 
 export interface TemplateJson {
-  themeKey: string; // 'corporate' | 'cafe' etc. - renderer key
+  templateKey: string; // 'corporate' | 'cafe' etc. - renderer key
   globalStyles: TemplateGlobalStyles;
   pages: TemplatePage[];
 }

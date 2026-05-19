@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
+const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
   const { data } = section;
   const brand = getFieldValue(data, 'brand') || 'HAUTRE';
   const tagline = getFieldValue(data, 'tagline') || '';

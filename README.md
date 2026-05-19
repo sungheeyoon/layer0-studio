@@ -70,7 +70,7 @@ Server Actions call `create*UseCase(supabase)` factories from `src/lib/di/contai
 Themes live in `src/themes/`. Each exports a renderer component, a `slots` array, and a `defaultTemplateJson`. Register new themes in `src/themes/registry.ts`.
 
 The core data model is `TemplateJson` (`src/domain/entities/template.entity.ts`):
-- `themeKey` — selects the renderer
+- `templateKey` — selects the renderer
 - `globalStyles` — CSS custom properties applied at the root
 - `pages[].sections` — page content (top-level `sections` was removed 2026-04-24)
 

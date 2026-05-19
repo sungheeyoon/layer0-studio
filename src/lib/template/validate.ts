@@ -1,5 +1,5 @@
 import { TemplateJson, TemplateField } from '@/domain/entities/template.entity';
-import { ThemeLibrary, SectionDataSchema } from '@/themes/types';
+import { TemplateLibrary, SectionDataSchema } from '@/themes/types';
 
 export interface ValidationIssue {
   code: string;
@@ -18,10 +18,10 @@ export interface SlotDefinition {
 }
 
 export interface ValidateOptions {
-  /** When provided, themeKey must be in this list. */
-  availableThemeKeys?: string[];
+  /** When provided, templateKey must be in this list. */
+  availableTemplateKeys?: string[];
   /** Phase 6: Provides component library and their data schemas for deep validation. */
-  themeLibrary?: ThemeLibrary;
+  templateLibrary?: TemplateLibrary;
 }
 
 const KNOWN_LAYOUTS = ['wide', 'narrow', 'asymmetric', 'default', 'full'];
@@ -40,9 +40,9 @@ export function validateTemplateJson(
   const warn = (code: string, message: string, path?: string) =>
     warnings.push({ code, message, path });
 
-  // Rule 1: themeKey must be in availableThemeKeys when provided
-  if (options.availableThemeKeys && !options.availableThemeKeys.includes(json.themeKey)) {
-    err('UNKNOWN_THEME_KEY', `themeKey "${json.themeKey}" not found in registry`, 'themeKey');
+  // Rule 1: templateKey must be in availableTemplateKeys when provided
+  if (options.availableTemplateKeys && !options.availableTemplateKeys.includes(json.templateKey)) {
+    err('UNKNOWN_TEMPLATE_KEY', `templateKey "${json.templateKey}" not found in registry`, 'templateKey');
   }
 
   // Rule 6 (a): pages must be a non-empty array
@@ -100,13 +100,13 @@ export function validateTemplateJson(
       }
       sectionIds.add(section.id);
 
-      // Rule 2: section.type must be in themeLibrary (Phase 6)
-      if (options.themeLibrary) {
-        const entry = options.themeLibrary[section.type];
+      // Rule 2: section.type must be in templateLibrary (Phase 6)
+      if (options.templateLibrary) {
+        const entry = options.templateLibrary[section.type];
         if (!entry) {
           err(
             'UNKNOWN_COMPONENT_KEY',
-            `componentKey "${section.type}" not found in theme library for "${json.themeKey}"`,
+            `componentKey "${section.type}" not found in template library for "${json.templateKey}"`,
             `${secRef}.type`,
           );
         } else {

@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
+const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || 'MONO';
   const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Specialty Coffee & Bakery';

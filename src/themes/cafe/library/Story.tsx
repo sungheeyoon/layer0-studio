@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { LeafIcon, FireIcon, HandHeartIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Story: SectionComponent = function Story({ section }: ThemeSectionProps) {
+const Story: SectionComponent = function Story({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '카페 소개';
   const title1 = getFieldValue(data, 'title1') || '커피 한 잔에는';

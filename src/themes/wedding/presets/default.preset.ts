@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'wedding-default',
-  themeKey: 'wedding',
+  templateKey: 'wedding',
   composition: [
     {
       id: 'nav-001',

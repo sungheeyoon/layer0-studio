@@ -1,8 +1,8 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Gallery: SectionComponent = function Gallery({ section }: ThemeSectionProps) {
+const Gallery: SectionComponent = function Gallery({ section }: TemplateSectionProps) {
   const { data } = section;
   const eyebrow = getFieldValue(data, 'eyebrow') || '';
   const title = getFieldValue(data, 'title') || '';

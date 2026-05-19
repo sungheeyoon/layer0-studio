@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon, PhoneIcon, MedalIcon, ShieldCheckIcon, StarIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
+const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || 'Seoul Premium Interior Studio';
   const estLabel = getFieldValue(data, 'estLabel') || 'Est. 2015';

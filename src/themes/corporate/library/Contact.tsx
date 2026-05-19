@@ -1,10 +1,10 @@
 'use client';
 
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../corporate.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Contact: SectionComponent = function Contact({ section }: ThemeSectionProps) {
+const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
   const { data } = section;
   const title = getFieldValue(data, 'title') || 'Get in Touch';
   const email = getFieldValue(data, 'email') || '';

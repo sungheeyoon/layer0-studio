@@ -1,15 +1,15 @@
 import React from 'react';
-import { ThemeRendererProps, ThemeLibrary } from '../types';
+import { TemplateRendererProps, TemplateLibrary } from '../types';
 import styles from './cafe.module.css';
 import { cafeLibrary } from './library';
 import { RenderComposition } from '../renderComposition';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
-export const library: ThemeLibrary = cafeLibrary;
+export const library: TemplateLibrary = cafeLibrary;
 
 export const defaultTemplateJson: TemplateJson = {
-  themeKey: 'cafe',
+  templateKey: 'cafe',
   globalStyles: defaultGlobalStyles,
   pages: [
     {
@@ -22,7 +22,7 @@ export const defaultTemplateJson: TemplateJson = {
   ],
 };
 
-export default function CafeTheme(props: ThemeRendererProps) {
+export default function CafeTheme(props: TemplateRendererProps) {
   return (
     <RenderComposition
       {...props}

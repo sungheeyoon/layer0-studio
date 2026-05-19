@@ -4,7 +4,7 @@ import { TemplateJson } from '../entities/template.entity';
 
 export function makeTemplateJson(overrides: Partial<TemplateJson> = {}): TemplateJson {
   return {
-    themeKey: 'corporate',
+    templateKey: 'corporate',
     globalStyles: {
       primaryColor: '#000',
       secondaryColor: '#fff',

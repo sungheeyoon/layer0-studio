@@ -1,4 +1,4 @@
-import { ThemeLibrary, libEntry } from '../../types';
+import { TemplateLibrary, libEntry } from '../../types';
 import Nav from './Nav';
 import Hero from './Hero';
 import TrustStrip from './TrustStrip';
@@ -13,7 +13,7 @@ import Contact from './Contact';
 import { contactMeta } from './Contact.meta';
 import Footer from './Footer';
 
-export const legalLibrary: ThemeLibrary = {
+export const legalLibrary: TemplateLibrary = {
   nav: libEntry(Nav),
   hero: libEntry(Hero),
   'trust-strip': libEntry(TrustStrip),

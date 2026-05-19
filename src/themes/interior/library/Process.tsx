@@ -1,4 +1,4 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { ChatIcon, RulerIcon, PenIcon, LetterIcon, HammerIcon, KeyIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
@@ -12,7 +12,7 @@ const STEP_ICONS = [
   <KeyIcon key="6" size={22} className="text-[var(--i-gold)]" />,
 ];
 
-const Process: SectionComponent = function Process({ section }: ThemeSectionProps) {
+const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || 'How We Work';
   const title = getFieldValue(data, 'title') || '';

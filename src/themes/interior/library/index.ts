@@ -1,4 +1,4 @@
-import { ThemeLibrary, libEntry } from '../../types';
+import { TemplateLibrary, libEntry } from '../../types';
 import Nav from './Nav';
 import { navMeta } from './Nav.meta';
 import Hero from './Hero';
@@ -12,7 +12,7 @@ import Contact from './Contact';
 import { contactMeta } from './Contact.meta';
 import Footer from './Footer';
 
-export const interiorLibrary: ThemeLibrary = {
+export const interiorLibrary: TemplateLibrary = {
   nav: libEntry(Nav, navMeta),
   hero: libEntry(Hero),
   stats: libEntry(Stats),

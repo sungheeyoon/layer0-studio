@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon, HeartIcon, GiftIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Services: SectionComponent = function Services({ section }: ThemeSectionProps) {
+const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
   const { data } = section;
   const eyebrow = getFieldValue(data, 'eyebrow') || '';
   const title = getFieldValue(data, 'title') || '';

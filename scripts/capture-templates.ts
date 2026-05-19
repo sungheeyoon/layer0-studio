@@ -60,7 +60,7 @@ async function ensureDevServer() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: any, isCheck: boolean): Promise<boolean> {
+async function captureTheme(templateKey: string, config: ThumbnailConfig, browser: any, isCheck: boolean): Promise<boolean> {
   const page = await browser.newPage();
   await page.setViewportSize(config.viewport);
 
@@ -75,7 +75,7 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
     url = config.source;
   }
 
-  console.log(`📸 Capturing [${themeKey}] from ${url}...`);
+  console.log(`📸 Capturing [${templateKey}] from ${url}...`);
 
   await page.goto(url, {
     waitUntil: config.waitFor.networkIdle ? 'networkidle' : 'load',
@@ -152,7 +152,7 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
         if (diffPercent < 0.1) { // 0.1% threshold
           hasVisualChange = false;
         } else {
-          console.log(`  [${themeKey}] Visual change detected: ${diffPercent.toFixed(2)}%`);
+          console.log(`  [${templateKey}] Visual change detected: ${diffPercent.toFixed(2)}%`);
         }
       } catch {
         // Fallback to hasVisualChange = true if dimensions mismatch etc.
@@ -162,13 +162,13 @@ async function captureTheme(themeKey: string, config: ThumbnailConfig, browser: 
 
   if (hasVisualChange) {
     if (isCheck) {
-      console.error(`❌ [${themeKey}] FAILED: Visual changes detected in --check mode.`);
+      console.error(`❌ [${templateKey}] FAILED: Visual changes detected in --check mode.`);
     } else {
       writeFileSync(outputPath, newWebpBuffer);
       console.log(`✅ Saved → ${config.output}`);
     }
   } else {
-    console.log(`⏭️ No visual change for [${themeKey}].`);
+    console.log(`⏭️ No visual change for [${templateKey}].`);
   }
   
   await page.close();
@@ -184,13 +184,13 @@ async function run() {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const themeKeys = readdirSync(THEMES_DIR).filter((k) =>
+  const templateKeys = readdirSync(THEMES_DIR).filter((k) =>
     existsSync(join(THEMES_DIR, k, 'thumbnail.config.ts'))
   );
 
   const filteredThemes = targetTheme
-    ? themeKeys.filter((k) => k === targetTheme)
-    : themeKeys;
+    ? templateKeys.filter((k) => k === targetTheme)
+    : templateKeys;
 
   if (filteredThemes.length === 0) {
     console.log('No themes with thumbnail.config.ts found.');

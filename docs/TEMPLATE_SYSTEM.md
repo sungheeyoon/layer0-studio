@@ -36,7 +36,7 @@ _최종 갱신: 2026-05-04 (Phase 6d 정리 + array 필드 Phase 1 완료 시점
 
 | 용어 | 무엇 | 어디 산다 | 누가 만든다 |
 |---|---|---|---|
-| **Theme** | 시각 토큰(`tokens.ts`) + 재사용 가능한 **Section Component 라이브러리** + ThemeRenderer | `src/themes/<key>/` | 개발자 (코드 PR) |
+| **Theme** | 시각 토큰(`tokens.ts`) + 재사용 가능한 **Section Component 라이브러리** + TemplateRenderer | `src/themes/<key>/` | 개발자 (코드 PR) |
 | **Section Component** | 자기 메타(`componentKey`/`category`/`label`/`dataSchema`)를 동봉하는 self-describing React 컴포넌트 | `src/themes/<key>/library/<Name>.tsx` | 개발자 |
 | **Library** | `componentKey → Section Component` 매핑. 한 테마의 "조립 키트" | `src/themes/<key>/library/index.ts` | 개발자 |
 | **Preset** | 라이브러리에서 골라 배열한 **composition** + 데이터 + 토큰 오버라이드. 코드가 진실인 시드 템플릿 | `src/themes/<key>/presets/<slug>.preset.ts` | 개발자 |
@@ -64,7 +64,7 @@ _최종 갱신: 2026-05-04 (Phase 6d 정리 + array 필드 Phase 1 완료 시점
 
 ```ts
 TemplateJson = {
-  themeKey: 'cafe',                     // _generated.ts의 themeMap 키
+  templateKey: 'cafe',                     // _generated.ts의 templateMap 키
   globalStyles: {
     primaryColor: '#C96A3A',            // hex 권장 (validate가 warn)
     secondaryColor: '#231509',
@@ -110,7 +110,7 @@ TemplateJson = {
 ```ts
 interface TemplatePreset {
   slug: string;                          // DB upsert 키. 변경 금지.
-  themeKey?: string;                     // composition 사용 시 필수
+  templateKey?: string;                     // composition 사용 시 필수
   composition?: PresetSection[];         // ★ 신규 모델
   globalStyles?: Partial<TemplateGlobalStyles>;
   templateJson?: TemplateJson;           // legacy — composition 미사용 시
@@ -152,19 +152,19 @@ interface SectionDataSchema {
   };
 }
 
-type SectionComponent = ComponentType<ThemeSectionProps> & { meta?: SectionComponentMeta };
+type SectionComponent = ComponentType<TemplateSectionProps> & { meta?: SectionComponentMeta };
 
-interface ThemeLibraryEntry {
+interface TemplateLibraryEntry {
   Component: SectionComponent;
   meta: SectionComponentMeta;            // 항상 server-resolved
 }
 
-interface ThemeLibrary {
-  [componentKey: string]: ThemeLibraryEntry;
+interface TemplateLibrary {
+  [componentKey: string]: TemplateLibraryEntry;
 }
 
 // helper used in every <theme>/library/index.ts
-function libEntry(Component: SectionComponent, metaOverride?: SectionComponentMeta): ThemeLibraryEntry;
+function libEntry(Component: SectionComponent, metaOverride?: SectionComponentMeta): TemplateLibraryEntry;
 ```
 
 라이브러리는 항상 **`{ Component, meta }` 쌍**으로 등록한다. **이유**: `'use client'` 컴포넌트는 server-side import 시 client reference로 wrapping되어 모듈 본문이 서버에서 실행되지 않는다 → `Component.meta = {...}` side-effect가 server에서 안 보인다. sync/validate는 서버에서 돌기 때문에 meta를 server-resolved 위치에 따로 두어야 한다 (자세한 함정은 §10.10).
@@ -173,13 +173,13 @@ function libEntry(Component: SectionComponent, metaOverride?: SectionComponentMe
 - **server 컴포넌트** (no `'use client'`): `.tsx` 안에서 `Component.meta = {...}` 으로 부착. `libEntry(Component)` 만 호출 — 헬퍼가 `Component.meta` 를 자동으로 가져옴.
 - **client 컴포넌트** (`'use client'`): meta를 sibling `<Component>.meta.ts` 에 named export 로 정의 → `libEntry(Component, componentMeta)` 로 명시 전달.
 
-### 2.4 `ThemeModule` (`src/themes/types.ts`)
+### 2.4 `TemplateModule` (`src/themes/types.ts`)
 
 ```ts
-interface ThemeModule {
-  default: ComponentType<ThemeRendererProps>;  // 페이지 레벨 렌더러
+interface TemplateModule {
+  default: ComponentType<TemplateRendererProps>;  // 페이지 레벨 렌더러
   defaultTemplateJson: TemplateJson;            // 시각 토큰 시드 (composition은 [] 비워둠)
-  library: ThemeLibrary;                        // ★ Phase 6d 이후 필수
+  library: TemplateLibrary;                        // ★ Phase 6d 이후 필수
 }
 ```
 
@@ -214,7 +214,7 @@ src/themes/cafe/
 │   └── icons.tsx
 ├── thumbnail.config.ts            # Playwright 캡처 설정
 ├── cafe.module.css                # 테마 전용 CSS
-└── index.tsx                      # ThemeRenderer (RenderComposition 위임), library export
+└── index.tsx                      # TemplateRenderer (RenderComposition 위임), library export
 ```
 
 > **`sections/`는 더 이상 컴포넌트를 두지 않는다.** 공통 아이콘/유틸만 사는 폴더로 축소됨. 새 섹션은 무조건 `library/`.
@@ -229,10 +229,10 @@ src/themes/cafe/
 사이트 요청
     │
     ▼
-loadTheme(themeKey)            ← src/themes/registry.ts
+loadTemplate(templateKey)            ← src/themes/registry.ts
     │
     ▼
-ThemeRenderer (themes/<key>/index.tsx)
+TemplateRenderer (themes/<key>/index.tsx)
     │
     ▼
 RenderComposition              ← src/themes/renderComposition.tsx
@@ -261,11 +261,11 @@ RenderComposition              ← src/themes/renderComposition.tsx
 ```
 1. _generated.ts의 presetMap 순회
 2. preset 1개에 대해:
-   ├─ themeKey 결정 (composition? preset.themeKey : preset.templateJson?.themeKey)
-   ├─ themeMap[themeKey]() 로드
+   ├─ templateKey 결정 (composition? preset.templateKey : preset.templateJson?.templateKey)
+   ├─ templateMap[templateKey]() 로드
    ├─ deriveTemplateJsonFromPreset(preset, themeModule)  ← src/lib/template/preset.ts
    │     composition[] → pages[0].sections[] (id/type/visible/data)
-   ├─ validateTemplateJson(json, { availableThemeKeys, themeLibrary: themeModule.library })
+   ├─ validateTemplateJson(json, { availableTemplateKeys, templateLibrary: themeModule.library })
    │     ↳ 에러 1개라도 있으면 SKIP (해당 preset만)
    ├─ thumbnail 처리:
    │     md5 해시 기반 파일명 (template-cafe-<hash>.webp)
@@ -309,8 +309,8 @@ pnpm template:sync cafe             # 슬러그 또는 테마 prefix로 필터
 
 ```ts
 {
-  availableThemeKeys?: string[];   // 있으면 themeKey 검증
-  themeLibrary?: ThemeLibrary;     // 있으면 dataSchema 깊은 검증
+  availableTemplateKeys?: string[];   // 있으면 templateKey 검증
+  templateLibrary?: TemplateLibrary;     // 있으면 dataSchema 깊은 검증
 }
 ```
 
@@ -318,7 +318,7 @@ pnpm template:sync cafe             # 슬러그 또는 테마 prefix로 필터
 
 | Code | 조건 |
 |---|---|
-| `UNKNOWN_THEME_KEY` | `themeKey`가 `availableThemeKeys`에 없음 |
+| `UNKNOWN_TEMPLATE_KEY` | `templateKey`가 `availableTemplateKeys`에 없음 |
 | `PAGES_EMPTY` | `pages`가 없거나 빈 배열 |
 | `MISSING_GLOBAL_STYLES` | `globalStyles` 누락 |
 | `INVALID_COLOR` | primary/secondary 누락 |
@@ -326,7 +326,7 @@ pnpm template:sync cafe             # 슬러그 또는 테마 prefix로 필터
 | `UNKNOWN_LAYOUT` | 화이트리스트 외 (`wide`/`narrow`/`asymmetric`/`default`/`full`) |
 | `DUPLICATE_PAGE_SLUG` | page.slug 중복 |
 | `DUPLICATE_SECTION_ID` | 페이지 내 section.id 중복 |
-| `UNKNOWN_COMPONENT_KEY` | `themeLibrary` 옵션 + `section.type`이 라이브러리에 없음 |
+| `UNKNOWN_COMPONENT_KEY` | `templateLibrary` 옵션 + `section.type`이 라이브러리에 없음 |
 | `MISSING_REQUIRED_FIELD` | `dataSchema[field].required === true` 인데 누락 |
 | `FIELD_TYPE_MISMATCH` | `field.type !== schema[field].type` |
 | `MISSING_FIELD_TYPE` / `MISSING_FIELD_LABEL` / `MISSING_FIELD_VALUE` | 필수 메타 누락 |
@@ -400,7 +400,7 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
    import { TemplatePreset } from '../../types';
    const preset: TemplatePreset = {
      slug: 'cafe-cozy',                    // DB upsert 키 — 영원히 고정
-     themeKey: 'cafe',
+     templateKey: 'cafe',
      globalStyles: { primaryColor: '#...' }, // 토큰 오버라이드
      composition: [
        { id: 'nav-1',   componentKey: 'nav',         data: { /* dataSchema 만족 */ } },
@@ -425,9 +425,9 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 
 1. `src/themes/<theme>/library/HeroParallax.tsx` 신규
    ```tsx
-   import { ThemeSectionProps, SectionComponent } from '../../types';
+   import { TemplateSectionProps, SectionComponent } from '../../types';
 
-   const HeroParallax: SectionComponent = function HeroParallax({ section }: ThemeSectionProps) {
+   const HeroParallax: SectionComponent = function HeroParallax({ section }: TemplateSectionProps) {
      const { data } = section;
      // ... 렌더 로직
    };
@@ -450,7 +450,7 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
    ```ts
    import { libEntry } from '../../types';
    import HeroParallax from './HeroParallax';
-   export const cafeLibrary: ThemeLibrary = {
+   export const cafeLibrary: TemplateLibrary = {
      // ...기존
      'hero-parallax': libEntry(HeroParallax),  // server 컴포넌트 → meta는 .tsx 안에서 자동 픽업
    };
@@ -526,7 +526,7 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 6. **`required: true`를 dataSchema에 안 적으면 silent**
    필수 필드를 빠뜨려도 sync 통과하고 런타임에 빈 값. `dataSchema`에 명시할 것.
 
-7. **`themeKey` 누락 → `'corporate'` 폴백**
+7. **`templateKey` 누락 → `'corporate'` 폴백**
    `site/[domain]/page.tsx`, `DynamicEditor.tsx`. 의도된 동작이지만 디버깅 시간 낭비 흔함.
 
 8. **`editable: false`는 UI만 숨김**
@@ -558,9 +558,9 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 | 무엇 | 어디 |
 |---|---|
 | `TemplateJson` / `TemplateSection` / `TemplateField` 타입 | `src/domain/entities/template.entity.ts` |
-| `TemplatePreset` / `PresetSection` / `SectionComponent` / `ThemeModule` 타입 | `src/themes/types.ts` |
+| `TemplatePreset` / `PresetSection` / `SectionComponent` / `TemplateModule` 타입 | `src/themes/types.ts` |
 | 자동생성 레지스트리 | `src/themes/_generated.ts` (커밋, 수정 금지) |
-| 동적 import 헬퍼 | `src/themes/registry.ts` (`loadTheme(themeKey)`) |
+| 동적 import 헬퍼 | `src/themes/registry.ts` (`loadTemplate(templateKey)`) |
 | 범용 렌더러 | `src/themes/renderComposition.tsx` |
 | 테마 1개 reference | `src/themes/cafe/` (composition variant 3개), `src/themes/corporate/` (가장 단순) |
 | Validate 규칙 | `src/lib/template/validate.ts` (+ `__tests__/validate.test.ts`) |

@@ -1,4 +1,4 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { CheckCircleIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
@@ -16,7 +16,7 @@ interface Pkg {
   premium?: boolean;
 }
 
-const Pricing: SectionComponent = function Pricing({ section }: ThemeSectionProps) {
+const Pricing: SectionComponent = function Pricing({ section }: TemplateSectionProps) {
   const { data } = section;
   const eyebrow = getFieldValue(data, 'eyebrow') || '';
   const title = getFieldValue(data, 'title') || '';

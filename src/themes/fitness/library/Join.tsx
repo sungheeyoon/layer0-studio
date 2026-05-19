@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { PhoneIcon, MapPinIcon, ClockIcon, ChatIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Join: SectionComponent = function Join({ section }: ThemeSectionProps) {
+const Join: SectionComponent = function Join({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '무료 체험';
   const titleLine1 = getFieldValue(data, 'title1') || '지금 시작하면';

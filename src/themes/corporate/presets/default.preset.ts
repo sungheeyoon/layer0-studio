@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'corporate-default',
-  themeKey: 'corporate',
+  templateKey: 'corporate',
   composition: [
     {
       id: "hero-001",

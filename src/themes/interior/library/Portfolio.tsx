@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Portfolio: SectionComponent = function Portfolio({ section }: ThemeSectionProps) {
+const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || 'Portfolio';
   const title = getFieldValue(data, 'title') || '';

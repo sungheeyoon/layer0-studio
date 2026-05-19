@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { validateTemplateJson } from '../validate';
 import { deriveTemplateJsonFromPreset } from '../preset';
 import { TemplateJson, ArrayTemplateField } from '@/domain/entities/template.entity';
-import type { ThemeLibrary } from '@/themes/types';
+import type { TemplateLibrary } from '@/themes/types';
 
 // -- All 7 presets --
 import corporatePreset from '@/themes/corporate/presets/default.preset';
@@ -14,13 +14,13 @@ import medicalPreset from '@/themes/medical/presets/default.preset';
 import weddingPreset from '@/themes/wedding/presets/default.preset';
 import cafeModernPreset from '@/themes/cafe/presets/modern.preset';
 
-import { themeMap } from '@/themes/_generated';
+import { templateMap } from '@/themes/_generated';
 
-const ALL_THEME_KEYS = ['cafe', 'corporate', 'fitness', 'interior', 'legal', 'medical', 'wedding'];
+const ALL_TEMPLATE_KEYS = ['cafe', 'corporate', 'fitness', 'interior', 'legal', 'medical', 'wedding'];
 
 function minimalJson(overrides: Partial<TemplateJson> = {}): TemplateJson {
   return {
-    themeKey: 'corporate',
+    templateKey: 'corporate',
     globalStyles: {
       primaryColor: '#1a1a2e',
       secondaryColor: '#e94560',
@@ -99,20 +99,20 @@ describe('validateTemplateJson — structure', () => {
   });
 });
 
-describe('validateTemplateJson — themeKey', () => {
-  it('errors when themeKey is not in availableThemeKeys', () => {
-    const result = validateTemplateJson(minimalJson(), { availableThemeKeys: ['cafe'] });
-    expect(result.errors.some((e) => e.code === 'UNKNOWN_THEME_KEY')).toBe(true);
+describe('validateTemplateJson — templateKey', () => {
+  it('errors when templateKey is not in availableTemplateKeys', () => {
+    const result = validateTemplateJson(minimalJson(), { availableTemplateKeys: ['cafe'] });
+    expect(result.errors.some((e) => e.code === 'UNKNOWN_TEMPLATE_KEY')).toBe(true);
   });
 
-  it('passes when themeKey is in availableThemeKeys', () => {
-    const result = validateTemplateJson(minimalJson(), { availableThemeKeys: ['corporate'] });
-    expect(result.errors.filter((e) => e.code === 'UNKNOWN_THEME_KEY')).toHaveLength(0);
+  it('passes when templateKey is in availableTemplateKeys', () => {
+    const result = validateTemplateJson(minimalJson(), { availableTemplateKeys: ['corporate'] });
+    expect(result.errors.filter((e) => e.code === 'UNKNOWN_TEMPLATE_KEY')).toHaveLength(0);
   });
 
-  it('skips themeKey check when availableThemeKeys is not provided', () => {
-    const result = validateTemplateJson(minimalJson({ themeKey: 'nonexistent' }));
-    expect(result.errors.filter((e) => e.code === 'UNKNOWN_THEME_KEY')).toHaveLength(0);
+  it('skips templateKey check when availableTemplateKeys is not provided', () => {
+    const result = validateTemplateJson(minimalJson({ templateKey: 'nonexistent' }));
+    expect(result.errors.filter((e) => e.code === 'UNKNOWN_TEMPLATE_KEY')).toHaveLength(0);
   });
 });
 
@@ -161,19 +161,19 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
         },
       },
     },
-  } as unknown as ThemeLibrary;
+  } as unknown as TemplateLibrary;
 
   it('errors when componentKey is unknown', () => {
     const json = minimalJson();
     json.pages[0].sections[0].type = 'unknown-comp';
-    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'UNKNOWN_COMPONENT_KEY')).toBe(true);
   });
 
   it('errors when required field is missing', () => {
     const json = minimalJson();
     json.pages[0].sections[0].data = {}; // title is required
-    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
   });
 
@@ -181,14 +181,14 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
     const json = minimalJson();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (json.pages[0].sections[0].data.title as any).type = 'image'; // expected text
-    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'FIELD_TYPE_MISMATCH')).toBe(true);
   });
 
   it('warns on unknown data fields', () => {
     const json = minimalJson();
     json.pages[0].sections[0].data.extra = { type: 'text', label: 'Extra', value: '...', editable: true };
-    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.warnings.some((w) => w.code === 'UNKNOWN_DATA_FIELD')).toBe(true);
   });
 });
@@ -214,7 +214,7 @@ describe('validateTemplateJson — array fields', () => {
         },
       },
     },
-  } as unknown as ThemeLibrary;
+  } as unknown as TemplateLibrary;
 
   it('passes when array items are valid', () => {
     const json = minimalJson();
@@ -228,7 +228,7 @@ describe('validateTemplateJson — array fields', () => {
         ],
       },
     };
-    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors).toHaveLength(0);
   });
 
@@ -243,7 +243,7 @@ describe('validateTemplateJson — array fields', () => {
         items: 'not-an-array',
       },
     };
-    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'NON_ARRAY_FIELD_VALUE')).toBe(true);
   });
 
@@ -261,7 +261,7 @@ describe('validateTemplateJson — array fields', () => {
     };
     // Let's test missing field
     (json.pages[0].sections[0].data.items as ArrayTemplateField).items[0] = {}; // title missing
-    const result = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
     expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path).toContain('items.items[0].data.title');
   });
@@ -276,7 +276,7 @@ describe('validateTemplateJson — array fields', () => {
         items: [], // minItems is 1
       },
     };
-    const resultMin = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const resultMin = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(resultMin.errors.some((e) => e.code === 'ARRAY_ITEMS_BELOW_MIN')).toBe(true);
 
     (json.pages[0].sections[0].data.items as ArrayTemplateField).items = [
@@ -284,7 +284,7 @@ describe('validateTemplateJson — array fields', () => {
       { title: { type: 'text', label: 'T', value: '2' } },
       { title: { type: 'text', label: 'T', value: '3' } }, // maxItems is 2
     ];
-    const resultMax = validateTemplateJson(json, { themeLibrary: mockLibrary });
+    const resultMax = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(resultMax.errors.some((e) => e.code === 'ARRAY_ITEMS_ABOVE_MAX')).toBe(true);
   });
 
@@ -298,14 +298,14 @@ describe('validateTemplateJson — array fields', () => {
           },
         },
       },
-    } as unknown as ThemeLibrary;
+    } as unknown as TemplateLibrary;
 
     const json = minimalJson();
     json.pages[0].sections[0].type = 'broken-array';
     json.pages[0].sections[0].data = {
       items: { type: 'array', label: 'Items', items: [] },
     };
-    const result = validateTemplateJson(json, { themeLibrary: brokenLibrary });
+    const result = validateTemplateJson(json, { templateLibrary: brokenLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_ITEM_SCHEMA')).toBe(true);
   });
 });
@@ -328,29 +328,29 @@ describe('validateTemplateJson — warnings', () => {
 
 describe('all presets — errors must be zero', () => {
   const cases = [
-    { name: 'corporate-default', preset: corporatePreset, themeKey: 'corporate' },
-    { name: 'cafe-default',      preset: cafePreset,      themeKey: 'cafe' },
-    { name: 'fitness-default',   preset: fitnessPreset,   themeKey: 'fitness' },
-    { name: 'interior-default',  preset: interiorPreset,  themeKey: 'interior' },
-    { name: 'legal-default',     preset: legalPreset,     themeKey: 'legal' },
-    { name: 'medical-default',   preset: medicalPreset,   themeKey: 'medical' },
-    { name: 'wedding-default',   preset: weddingPreset,   themeKey: 'wedding' },
-    { name: 'cafe-modern',      preset: cafeModernPreset, themeKey: 'cafe' },
+    { name: 'corporate-default', preset: corporatePreset, templateKey: 'corporate' },
+    { name: 'cafe-default',      preset: cafePreset,      templateKey: 'cafe' },
+    { name: 'fitness-default',   preset: fitnessPreset,   templateKey: 'fitness' },
+    { name: 'interior-default',  preset: interiorPreset,  templateKey: 'interior' },
+    { name: 'legal-default',     preset: legalPreset,     templateKey: 'legal' },
+    { name: 'medical-default',   preset: medicalPreset,   templateKey: 'medical' },
+    { name: 'wedding-default',   preset: weddingPreset,   templateKey: 'wedding' },
+    { name: 'cafe-modern',       preset: cafeModernPreset, templateKey: 'cafe' },
   ];
 
-  for (const { name, preset, themeKey } of cases) {
+  for (const { name, preset, templateKey } of cases) {
     it(`${name} validates with no errors`, async () => {
-      const themeLoader = themeMap[themeKey];
-      const themeModule = themeLoader ? await themeLoader() : null;
-      const themeLibrary = themeModule?.library;
+      const templateLoader = templateMap[templateKey];
+      const templateModule = templateLoader ? await templateLoader() : null;
+      const templateLibrary = templateModule?.library;
 
-      const templateJson = deriveTemplateJsonFromPreset(preset, themeModule);
+      const templateJson = deriveTemplateJsonFromPreset(preset, templateModule);
 
       const result = validateTemplateJson(templateJson, {
-        availableThemeKeys: ALL_THEME_KEYS,
-        themeLibrary,
+        availableTemplateKeys: ALL_TEMPLATE_KEYS,
+        templateLibrary,
       });
-      
+
       if (result.errors.length > 0) {
         console.error(`Errors in ${name}:`, result.errors);
       }
