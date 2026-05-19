@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import { presetMap, themeMap } from '@/themes/_generated';
-import ThemeClientWrapper from '@/themes/ThemeClientWrapper';
+import { presetMap, templateMap } from '@/themes/_generated';
+import TemplateClientWrapper from '@/themes/TemplateClientWrapper';
 import { deriveTemplateJsonFromPreset } from '@/lib/template/preset';
 import React from 'react';
 
@@ -21,13 +21,13 @@ export default async function PresetPreviewPage({ params }: Props) {
   const preset = (await loader()).default;
   
   // Load theme module to provide base configuration if needed
-  const themeKey = preset.composition ? preset.themeKey : preset.templateJson?.themeKey;
-  const themeLoader = themeKey ? themeMap[themeKey as keyof typeof themeMap] : null;
-  const themeModule = themeLoader ? await themeLoader() : null;
+  const templateKey = preset.composition ? preset.templateKey : preset.templateJson?.templateKey;
+  const templateLoader = templateKey ? templateMap[templateKey as keyof typeof templateMap] : null;
+  const templateModule = templateLoader ? await templateLoader() : null;
 
   let templateJson;
   try {
-    templateJson = deriveTemplateJsonFromPreset(preset, themeModule);
+    templateJson = deriveTemplateJsonFromPreset(preset, templateModule);
   } catch (err) {
     console.error(`[PresetPreviewPage] Failed to derive templateJson:`, err);
     notFound();
@@ -45,8 +45,8 @@ export default async function PresetPreviewPage({ params }: Props) {
       className="min-h-screen"
       style={themeVariables}
     >
-      <ThemeClientWrapper
-        themeKey={templateJson.themeKey}
+      <TemplateClientWrapper
+        templateKey={templateJson.templateKey}
         siteJson={templateJson}
         selectedSectionId={null}
       />

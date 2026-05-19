@@ -1,9 +1,9 @@
 import { getFieldValue } from '@/domain/entities/template.entity';
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { ArrowRightIcon, CupIcon, PieChartIcon } from '../sections/icons';
 
-const MenuBento: SectionComponent = function MenuBento({ section }: ThemeSectionProps) {
+const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '메뉴';
   const title = getFieldValue(data, 'title') || '매일 정성껏\n내리는 한 잔';

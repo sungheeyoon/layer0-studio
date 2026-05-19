@@ -30,23 +30,23 @@ export interface SectionDataSchema {
  * imports of client modules are wrapped as client references and the module
  * body never runs server-side. For those, meta is supplied via libEntry().
  */
-export type SectionComponent = ComponentType<ThemeSectionProps> & {
+export type SectionComponent = ComponentType<TemplateSectionProps> & {
   meta?: SectionComponentMeta;
 };
 
 /**
- * One entry in a theme's library: the component plus its server-resolved metadata.
+ * One entry in a template's library: the component plus its server-resolved metadata.
  */
-export interface ThemeLibraryEntry {
+export interface TemplateLibraryEntry {
   Component: SectionComponent;
   meta: SectionComponentMeta;
 }
 
 /**
- * Library of components exported by a theme module, keyed by componentKey.
+ * Library of components exported by a template module, keyed by componentKey.
  */
-export interface ThemeLibrary {
-  [componentKey: string]: ThemeLibraryEntry;
+export interface TemplateLibrary {
+  [componentKey: string]: TemplateLibraryEntry;
 }
 
 /**
@@ -57,7 +57,7 @@ export interface ThemeLibrary {
 export function libEntry(
   Component: SectionComponent,
   metaOverride?: SectionComponentMeta,
-): ThemeLibraryEntry {
+): TemplateLibraryEntry {
   const meta = metaOverride ?? Component.meta;
   if (!meta) {
     throw new Error(
@@ -74,7 +74,7 @@ export function libEntry(
  */
 export interface PresetSection {
   id: string;                       // Stable ID preserved in user sites
-  componentKey: string;             // Must exist in theme.library
+  componentKey: string;             // Must exist in template.library
   visible?: boolean;
   data: Record<string, TemplateField>;
 }
@@ -88,20 +88,20 @@ export interface TemplatePreset {
   /** DB row slug — upsert key. Never change after first publish. */
   slug: string;
 
-  /** 
+  /**
    * The composition of sections. If provided, templateJson is derived from this.
    * If not provided, templateJson must be present.
    */
   composition?: PresetSection[];
 
-  /** Theme key (e.g. 'cafe', 'corporate'). Required if composition is used. */
-  themeKey?: string;
+  /** Template key (e.g. 'cafe', 'corporate'). Required if composition is used. */
+  templateKey?: string;
 
-  /** Global style overrides. Optional, merged with theme defaults if composition is used. */
+  /** Global style overrides. Optional, merged with template defaults if composition is used. */
   globalStyles?: Partial<TemplateGlobalStyles>;
 
-  /** 
-   * The full template JSON seeded into the DB. 
+  /**
+   * The full template JSON seeded into the DB.
    * If composition is present, this is ignored/derived during sync.
    */
   templateJson?: TemplateJson;
@@ -119,23 +119,23 @@ export interface TemplatePreset {
   };
 }
 
-/** Theme overall page renderer Props */
-export interface ThemeRendererProps {
+/** Template overall page renderer Props */
+export interface TemplateRendererProps {
   siteJson: TemplateJson;
   selectedSectionId: string | null;
   onSectionClick?: (sectionId: string) => void;
   activePageId?: string; // ID of the page to render
 }
 
-/** Theme individual section renderer Props (for components within slots) */
-export interface ThemeSectionProps {
+/** Template individual section renderer Props (for components within slots) */
+export interface TemplateSectionProps {
   section: TemplateSection;
   isSelected?: boolean;
   onClick?: () => void;
 }
 
-export interface ThemeModule {
-  default: ComponentType<ThemeRendererProps>;
+export interface TemplateModule {
+  default: ComponentType<TemplateRendererProps>;
   defaultTemplateJson: TemplateJson;
-  library: ThemeLibrary;
+  library: TemplateLibrary;
 }

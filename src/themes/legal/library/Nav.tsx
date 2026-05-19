@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { ShieldCheckIcon, ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Nav: SectionComponent = function Nav({ section }: ThemeSectionProps) {
+const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || '하람';
   const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Law & Tax';

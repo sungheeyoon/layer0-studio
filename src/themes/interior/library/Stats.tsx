@@ -1,8 +1,8 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Stats: SectionComponent = function Stats({ section }: ThemeSectionProps) {
+const Stats: SectionComponent = function Stats({ section }: TemplateSectionProps) {
   const { data } = section;
   const stats = [1, 2, 3, 4].map(n => ({
     value: getFieldValue(data, `s${n}Value`),

@@ -1,4 +1,4 @@
-import { ThemeLibrary, libEntry } from '../../types';
+import { TemplateLibrary, libEntry } from '../../types';
 import Navigation from './Navigation';
 import { navigationMeta } from './Navigation.meta';
 import HeroImage from './HeroImage';
@@ -12,7 +12,7 @@ import Testimonials from './Testimonials';
 import Visit from './Visit';
 import Footer from './Footer';
 
-export const cafeLibrary: ThemeLibrary = {
+export const cafeLibrary: TemplateLibrary = {
   nav: libEntry(Navigation, navigationMeta),
   'hero-image': libEntry(HeroImage),
   'hero-video': libEntry(HeroVideo),

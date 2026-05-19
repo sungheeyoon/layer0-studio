@@ -1,15 +1,15 @@
 import React from 'react';
-import { ThemeRendererProps, ThemeLibrary } from '../types';
+import { TemplateRendererProps, TemplateLibrary } from '../types';
 import styles from './corporate.module.css';
 import { corporateLibrary } from './library';
 import { RenderComposition } from '../renderComposition';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
-export const library: ThemeLibrary = corporateLibrary;
+export const library: TemplateLibrary = corporateLibrary;
 
 export const defaultTemplateJson: TemplateJson = {
-  themeKey: 'corporate',
+  templateKey: 'corporate',
   globalStyles: defaultGlobalStyles,
   pages: [
     {
@@ -22,7 +22,7 @@ export const defaultTemplateJson: TemplateJson = {
   ],
 };
 
-export default function CorporateTheme(props: ThemeRendererProps) {
+export default function CorporateTheme(props: TemplateRendererProps) {
   return (
     <RenderComposition
       {...props}

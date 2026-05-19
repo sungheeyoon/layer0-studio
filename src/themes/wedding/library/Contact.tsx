@@ -1,12 +1,12 @@
 'use client';
 
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ClockIcon, HeartIcon, MapIcon, PhoneIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Contact: SectionComponent = function Contact({ section }: ThemeSectionProps) {
+const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
   const { data } = section;
   const eyebrow = getFieldValue(data, 'eyebrow') || '';
   const title = getFieldValue(data, 'title') || '';

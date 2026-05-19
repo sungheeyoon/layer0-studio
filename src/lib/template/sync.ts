@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { presetMap, themeMap, getAvailableThemeKeys } from '@/themes/_generated';
+import { presetMap, templateMap, getAvailableTemplateKeys } from '@/themes/_generated';
 import { validateTemplateJson } from './validate';
 import { deriveTemplateJsonFromPreset } from './preset';
 import type { TemplatePreset } from '@/themes/types';
@@ -91,22 +91,22 @@ export async function syncTemplates(
   const existingMap = new Map(existingTemplates?.map(t => [t.slug, t]));
 
   for (const preset of presets) {
-    // 1. Determine themeKey
-    const themeKey = preset.composition ? preset.themeKey : preset.templateJson?.themeKey;
-    
-    if (!themeKey) {
+    // 1. Determine templateKey
+    const templateKey = preset.composition ? preset.templateKey : preset.templateJson?.templateKey;
+
+    if (!templateKey) {
       summary.errors++;
-      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [`Missing themeKey for preset ${preset.slug}`] });
+      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [`Missing templateKey for preset ${preset.slug}`] });
       continue;
     }
 
-    const themeModuleLoader = themeMap[themeKey];
-    const themeModule = themeModuleLoader ? await themeModuleLoader() : null;
+    const templateModuleLoader = templateMap[templateKey];
+    const templateModule = templateModuleLoader ? await templateModuleLoader() : null;
 
     // 2. Derive effective templateJson
     let effectiveTemplateJson;
     try {
-      effectiveTemplateJson = deriveTemplateJsonFromPreset(preset, themeModule);
+      effectiveTemplateJson = deriveTemplateJsonFromPreset(preset, templateModule);
     } catch (err: unknown) {
       summary.errors++;
       const errorMessage = err instanceof Error ? err.message : String(err);
@@ -116,8 +116,8 @@ export async function syncTemplates(
 
     // 3. Validate
     const validation = validateTemplateJson(effectiveTemplateJson, {
-      availableThemeKeys: getAvailableThemeKeys(),
-      themeLibrary: themeModule?.library
+      availableTemplateKeys: getAvailableTemplateKeys(),
+      templateLibrary: templateModule?.library
     });
     if (validation.errors.length > 0) {
       summary.errors++;
@@ -130,7 +130,7 @@ export async function syncTemplates(
     }
 
     const existing = existingMap.get(preset.slug);
-    
+
     // Determine thumbnail URL (local path -> storage URL)
     let thumbnailUrl = preset.thumbnailPath;
     if (preset.thumbnailPath.startsWith('public/thumbnails/')) {
@@ -165,16 +165,16 @@ export async function syncTemplates(
     } else {
       // UPDATE?
       const changes: string[] = [];
-      
+
       // Compare templateJson
       if (JSON.stringify(existing.template_json) !== JSON.stringify(effectiveTemplateJson)) {
         changes.push('templateJson changed');
       }
-      
+
       if (existing.version !== preset.version) {
         changes.push(`version: ${existing.version} -> ${preset.version}`);
       }
-      
+
       if (existing.thumbnail_url !== thumbnailUrl) {
         changes.push(`thumbnail: ${existing.thumbnail_url} -> ${thumbnailUrl}`);
       }

@@ -6,16 +6,16 @@ import { ArrayTemplateField, TextTemplateField } from '@/domain/entities/templat
 
 // Mock presetMap and validateTemplateJson
 vi.mock('@/themes/_generated', () => ({
-  themeMap: {},
-  getAvailableThemeKeys: () => ['test'],
+  templateMap: {},
+  getAvailableTemplateKeys: () => ['test'],
   presetMap: {
     'test/default': () => Promise.resolve({
       default: {
         slug: 'test-default',
-        templateJson: { 
-          themeKey: 'test', 
-          pages: [{ id: 'index', title: 'Index', slug: 'index', sections: [], order: 0 }], 
-          globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' } 
+        templateJson: {
+          templateKey: 'test',
+          pages: [{ id: 'index', title: 'Index', slug: 'index', sections: [], order: 0 }],
+          globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' }
         },
         thumbnailPath: 'test.jpg',
         version: '1.1.0',
@@ -41,7 +41,7 @@ describe('deriveTemplateJsonFromPreset — array fields', () => {
       thumbnailPath: 't.jpg',
       defaults: { name: 'N', description: 'D', category: 'C' },
       templateJson: {
-        themeKey: 'test',
+        templateKey: 'test',
         globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' },
         pages: [{
           id: 'p1',
@@ -82,7 +82,7 @@ describe('syncTemplates', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     mockSupabase = {
       from: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
@@ -122,7 +122,7 @@ describe('syncTemplates', () => {
       version: '1.1.0',
       thumbnail_url: 'test.jpg'
     }));
-    
+
     // Check that name/description/category are NOT in the update call
     const updateCall = mockSupabase.update.mock.calls[0][0];
     expect(updateCall.name).toBeUndefined();

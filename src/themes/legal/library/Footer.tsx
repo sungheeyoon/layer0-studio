@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../legal.module.css';
 import { ShieldCheckIcon, DocumentTextIcon, ChatIcon, PlayCircleIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
+const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || '하람 법률세무사무소';
   const copyright = getFieldValue(data, 'copyright') || '© 2024 하람 법률세무사무소. All rights reserved.';

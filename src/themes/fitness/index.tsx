@@ -1,15 +1,15 @@
 import React from 'react';
-import { ThemeRendererProps, ThemeLibrary } from '../types';
+import { TemplateRendererProps, TemplateLibrary } from '../types';
 import styles from './fitness.module.css';
 import { fitnessLibrary } from './library';
 import { RenderComposition } from '../renderComposition';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
-export const library: ThemeLibrary = fitnessLibrary;
+export const library: TemplateLibrary = fitnessLibrary;
 
 export const defaultTemplateJson: TemplateJson = {
-  themeKey: 'fitness',
+  templateKey: 'fitness',
   globalStyles: defaultGlobalStyles,
   pages: [
     {
@@ -22,7 +22,7 @@ export const defaultTemplateJson: TemplateJson = {
   ],
 };
 
-export default function FitnessTheme(props: ThemeRendererProps) {
+export default function FitnessTheme(props: TemplateRendererProps) {
   return (
     <RenderComposition
       {...props}

@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { PhoneIcon, ChatIcon, ClockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Booking: SectionComponent = function Booking({ section }: ThemeSectionProps) {
+const Booking: SectionComponent = function Booking({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '';
   const title = getFieldValue(data, 'title') || '';

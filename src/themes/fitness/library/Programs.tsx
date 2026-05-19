@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { ArrowUpRightIcon, BoxingIcon, YogaIcon, ChefHatIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Programs: SectionComponent = function Programs({ section }: ThemeSectionProps) {
+const Programs: SectionComponent = function Programs({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '프로그램';
   const title = getFieldValue(data, 'title') || '당신의 목표에 맞는 프로그램';

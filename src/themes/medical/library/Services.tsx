@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon, MagicStickIcon, SyringeIcon, LeafIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Services: SectionComponent = function Services({ section }: ThemeSectionProps) {
+const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '';
   const title = getFieldValue(data, 'title') || '';

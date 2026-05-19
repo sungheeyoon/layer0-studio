@@ -10,8 +10,8 @@ import {
 } from '@/domain/entities/template.entity';
 import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
-import { loadTheme } from '@/themes/registry';
-import { SectionDataSchema, ThemeModule } from '@/themes/types';
+import { loadTemplate } from '@/themes/registry';
+import { SectionDataSchema, TemplateModule } from '@/themes/types';
 import { createClient } from '@/utils/supabase/client';
 import { getSiteError } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
@@ -91,7 +91,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     }, 4000);
   }, [site.id, applySuccessfulSave]);
 
-  const [themeModule, setThemeModule] = useState<ThemeModule | null>(null);
+  const [templateModule, setTemplateModule] = useState<TemplateModule | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     let loaded = false;
     const fetchTheme = async () => {
       setLoadingError(null);
-      setThemeModule(null);
+      setTemplateModule(null);
 
       const timeoutId = setTimeout(() => {
         if (mounted && !loaded) {
@@ -108,14 +108,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       }, 10000);
 
       try {
-        const mod = await loadTheme(siteJson.themeKey || 'corporate');
+        const mod = await loadTemplate(siteJson.templateKey || 'corporate');
         clearTimeout(timeoutId);
         if (mounted) {
           if (mod) {
             loaded = true;
-            setThemeModule(mod);
+            setTemplateModule(mod);
           } else {
-            setLoadingError(`Theme "${siteJson.themeKey}" not found.`);
+            setLoadingError(`Theme "${siteJson.templateKey}" not found.`);
           }
         }
       } catch (err) {
@@ -128,9 +128,9 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     };
     fetchTheme();
     return () => { mounted = false; };
-  }, [siteJson.themeKey]);
+  }, [siteJson.templateKey]);
 
-  const ThemeRenderer = themeModule?.default;
+  const TemplateRenderer = templateModule?.default;
 
   const selectedSection = activePage.sections.find((s) => s.id === selectedSectionId) ?? null;
 
@@ -363,7 +363,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                     {Object.entries(selectedSection.data)
                       .filter(([, field]) => field.editable !== false)
                       .map(([fieldKey, field]) => {
-                        const schema = themeModule?.library[selectedSection.type]?.meta.dataSchema[fieldKey];
+                        const schema = templateModule?.library[selectedSection.type]?.meta.dataSchema[fieldKey];
                         return (
                           <DynamicField
                             key={`${selectedSection.id}-${fieldKey}`}
@@ -465,8 +465,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 <p className="text-error font-medium mb-2">Theme Load Error</p>
                 <p className="text-outline text-sm max-w-xs">{loadingError}</p>
               </div>
-            ) : ThemeRenderer ? (
-              <ThemeRenderer
+            ) : TemplateRenderer ? (
+              <TemplateRenderer
                 siteJson={siteJson}
                 selectedSectionId={selectedSectionId}
                 onSectionClick={handleSectionClick}

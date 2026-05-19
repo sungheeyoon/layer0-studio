@@ -1,7 +1,7 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
+const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
   const { data } = section;
   const copyright = getFieldValue(data, 'copyright') || `© ${new Date().getFullYear()} Layer0 Studio`;
   const companyName = getFieldValue(data, 'companyName') || 'LAYER0';

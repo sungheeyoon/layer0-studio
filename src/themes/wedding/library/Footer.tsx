@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { BookmarkIcon, ChatSquareIcon, InstagramIcon, PlayIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Footer: SectionComponent = function Footer({ section }: ThemeSectionProps) {
+const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
   const { data } = section;
   const brand = getFieldValue(data, 'brand') || 'HAUTRE';
   const tagline = getFieldValue(data, 'tagline') || '';

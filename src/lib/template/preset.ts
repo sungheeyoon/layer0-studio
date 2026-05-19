@@ -1,32 +1,32 @@
-import { TemplatePreset, ThemeModule } from '@/themes/types';
+import { TemplatePreset, TemplateModule } from '@/themes/types';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
 /**
  * Derives a full TemplateJson from a TemplatePreset.
  * If the preset already has templateJson, it returns it.
- * If it has composition, it constructs templateJson using the theme's default as a base.
+ * If it has composition, it constructs templateJson using the template's default as a base.
  */
 export function deriveTemplateJsonFromPreset(
   preset: TemplatePreset,
-  themeModule?: ThemeModule | null
+  templateModule?: TemplateModule | null
 ): TemplateJson {
   if (preset.templateJson && !preset.composition) {
     return preset.templateJson;
   }
 
-  if (!preset.composition || !preset.themeKey) {
+  if (!preset.composition || !preset.templateKey) {
     if (preset.templateJson) return preset.templateJson;
-    throw new Error(`Preset ${preset.slug} must have either templateJson or both themeKey and composition`);
+    throw new Error(`Preset ${preset.slug} must have either templateJson or both templateKey and composition`);
   }
 
-  if (!themeModule) {
-    throw new Error(`Theme module required to derive templateJson for composition-based preset ${preset.slug}`);
+  if (!templateModule) {
+    throw new Error(`Template module required to derive templateJson for composition-based preset ${preset.slug}`);
   }
 
   return {
-    themeKey: preset.themeKey,
+    templateKey: preset.templateKey,
     globalStyles: {
-      ...themeModule.defaultTemplateJson.globalStyles,
+      ...templateModule.defaultTemplateJson.globalStyles,
       ...preset.globalStyles,
     },
     pages: [

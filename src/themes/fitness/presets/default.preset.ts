@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'fitness-default',
-  themeKey: 'fitness',
+  templateKey: 'fitness',
   composition: [
     {
       id: 'nav-001',

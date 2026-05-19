@@ -1,4 +1,4 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../wedding.module.css';
 import { ChatIcon, NotebookIcon, PaletteIcon, SparkleIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
@@ -10,7 +10,7 @@ const STEP_ICONS = [
   <SparkleIcon key="4" size={24} />,
 ];
 
-const Process: SectionComponent = function Process({ section }: ThemeSectionProps) {
+const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
   const { data } = section;
   const eyebrow = getFieldValue(data, 'eyebrow') || '';
   const title = getFieldValue(data, 'title') || '';

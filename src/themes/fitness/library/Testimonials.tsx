@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { StarIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Testimonials: SectionComponent = function Testimonials({ section }: ThemeSectionProps) {
+const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '멤버 후기';
   const title = getFieldValue(data, 'title') || '결과가\n모든 걸\n말합니다';

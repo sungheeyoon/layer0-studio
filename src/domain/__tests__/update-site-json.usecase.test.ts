@@ -5,7 +5,7 @@ import { TemplateJson, TextTemplateField, ArrayTemplateField } from '../entities
 
 function makeTwoPageJson(): TemplateJson {
   return {
-    themeKey: 'corporate',
+    templateKey: 'corporate',
     globalStyles: {
       primaryColor: '#000',
       secondaryColor: '#fff',

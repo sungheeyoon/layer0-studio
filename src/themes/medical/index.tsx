@@ -1,15 +1,15 @@
 import React from 'react';
-import { ThemeRendererProps, ThemeLibrary } from '../types';
+import { TemplateRendererProps, TemplateLibrary } from '../types';
 import styles from './medical.module.css';
 import { medicalLibrary } from './library';
 import { RenderComposition } from '../renderComposition';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
-export const library: ThemeLibrary = medicalLibrary;
+export const library: TemplateLibrary = medicalLibrary;
 
 export const defaultTemplateJson: TemplateJson = {
-  themeKey: 'medical',
+  templateKey: 'medical',
   globalStyles: defaultGlobalStyles,
   pages: [
     {
@@ -22,7 +22,7 @@ export const defaultTemplateJson: TemplateJson = {
   ],
 };
 
-export default function MedicalTheme(props: ThemeRendererProps) {
+export default function MedicalTheme(props: TemplateRendererProps) {
   return (
     <RenderComposition
       {...props}

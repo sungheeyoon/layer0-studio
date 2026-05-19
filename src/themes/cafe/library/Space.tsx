@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { SunIcon, BuildingsIcon, LaptopIcon, BookIcon, VinylIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Space: SectionComponent = function Space({ section }: ThemeSectionProps) {
+const Space: SectionComponent = function Space({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '공간';
   const title = getFieldValue(data, 'title') || '머물고 싶은\n공간을 만듭니다';

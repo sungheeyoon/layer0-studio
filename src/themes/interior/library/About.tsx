@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../interior.module.css';
 import { PenIcon, DiamondIcon, ClockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const About: SectionComponent = function About({ section }: ThemeSectionProps) {
+const About: SectionComponent = function About({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || 'About Espacio';
   const title = getFieldValue(data, 'title') || '';

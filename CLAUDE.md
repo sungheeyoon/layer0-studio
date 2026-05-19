@@ -87,7 +87,7 @@ src/types/database.ts ← Generated Supabase DB types
 Themes live in `src/themes/<key>/`. Each theme is **visual tokens (`tokens.ts`) + a library of self-describing section components (`library/*.tsx` with `.meta.dataSchema`) + presets (`presets/*.preset.ts`)**. The registry is auto-generated (`src/themes/_generated.ts` via `pnpm generate:themes`, hooked into predev/prebuild) — adding a directory is enough to register. Currently 7 themes ship: `corporate`, `cafe`, `fitness`, `interior`, `legal`, `medical`, `wedding`.
 
 The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer:
-- `themeKey`: selects the renderer
+- `templateKey`: selects the renderer
 - `globalStyles`: CSS custom properties applied at the root
 - `pages[].sections[]`: each section's `type` matches a `componentKey` in the theme's library; **array order = render order** (the deprecated `section.order` field was removed in Phase 6d / migration 012)
 
@@ -95,7 +95,7 @@ The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the cor
 
 **Code is source of truth, sync reflects to DB.** `pnpm template:sync` (default dry-run, `--apply` to commit) reads presets, validates against each component's `dataSchema`, and upserts `templates` rows. Admin UI mirrors this with a 2-step Preview → Apply gated on `app_metadata.canPublishTemplates`.
 
-The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the theme renderer at runtime via `loadTheme()`. Clicking a section in the preview panel selects it in the left panel for inline editing.
+The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the theme renderer at runtime via `loadTemplate()`. Clicking a section in the preview panel selects it in the left panel for inline editing.
 
 **Auto-save + optimistic concurrency:** Edits debounce-save after 4s idle, with a `beforeunload` guard for in-flight changes. Saves carry the row's `expectedUpdatedAt`; the `save_site_template_with_lock` RPC (migration 010) returns `'STALE_VERSION'` if another tab/device wrote in the meantime, which surfaces a Conflict modal in the editor. When adding new save paths, always thread `expectedUpdatedAt` through — never bypass the RPC.
 

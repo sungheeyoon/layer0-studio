@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { VerifiedCheckIcon, StarIcon, ShieldCheckIcon, GraduationCapIcon, HospitalIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Marquee: SectionComponent = function Marquee({ section }: ThemeSectionProps) {
+const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionProps) {
   const { data } = section;
   const items = [1, 2, 3, 4, 5, 6].map(n => getFieldValue(data, `item${n}`)).filter(Boolean);
 

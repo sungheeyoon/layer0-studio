@@ -69,9 +69,9 @@ export const defaultGlobalStyles: TemplateGlobalStyles = {
   // 2. library/index.ts
   const libraryIndexPath = join(themeDir, 'library', 'index.ts');
   if (!existsSync(libraryIndexPath)) {
-    const content = `import { ThemeLibrary } from '../../types';
+    const content = `import { TemplateLibrary } from '../../types';
 
-export const ${key}Library: ThemeLibrary = {
+export const ${key}Library: TemplateLibrary = {
   // Add components here
 };
 `;
@@ -83,17 +83,17 @@ export const ${key}Library: ThemeLibrary = {
   const indexPath = join(themeDir, 'index.tsx');
   if (!existsSync(indexPath)) {
     const content = `import React from 'react';
-import { ThemeRendererProps, ThemeLibrary } from '../types';
+import { TemplateRendererProps, TemplateLibrary } from '../types';
 import styles from './${key}.module.css';
 import { ${key}Library } from './library';
 import { RenderComposition } from '../renderComposition';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
-export const library: ThemeLibrary = ${key}Library;
+export const library: TemplateLibrary = ${key}Library;
 
 export const defaultTemplateJson: TemplateJson = {
-  themeKey: '${key}',
+  templateKey: '${key}',
   globalStyles: defaultGlobalStyles,
   pages: [
     {
@@ -106,7 +106,7 @@ export const defaultTemplateJson: TemplateJson = {
   ],
 };
 
-export default function ${key.charAt(0).toUpperCase() + key.slice(1)}Theme(props: ThemeRendererProps) {
+export default function ${key.charAt(0).toUpperCase() + key.slice(1)}Theme(props: TemplateRendererProps) {
   return (
     <RenderComposition
       {...props}
@@ -128,7 +128,7 @@ export default function ${key.charAt(0).toUpperCase() + key.slice(1)}Theme(props
 
 const preset: TemplatePreset = {
   slug: '${key}-default',
-  themeKey: '${key}',
+  templateKey: '${key}',
   composition: [
     {
       id: 'hero-001',

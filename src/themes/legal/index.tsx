@@ -1,15 +1,15 @@
 import React from 'react';
-import { ThemeRendererProps, ThemeLibrary } from '../types';
+import { TemplateRendererProps, TemplateLibrary } from '../types';
 import styles from './legal.module.css';
 import { legalLibrary } from './library';
 import { RenderComposition } from '../renderComposition';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
-export const library: ThemeLibrary = legalLibrary;
+export const library: TemplateLibrary = legalLibrary;
 
 export const defaultTemplateJson: TemplateJson = {
-  themeKey: 'legal',
+  templateKey: 'legal',
   globalStyles: defaultGlobalStyles,
   pages: [
     {
@@ -22,7 +22,7 @@ export const defaultTemplateJson: TemplateJson = {
   ],
 };
 
-export default function LegalTheme(props: ThemeRendererProps) {
+export default function LegalTheme(props: TemplateRendererProps) {
   return (
     <RenderComposition
       {...props}

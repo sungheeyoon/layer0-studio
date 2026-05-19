@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { CupIcon, DiplomaIcon, ClockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Trainers: SectionComponent = function Trainers({ section }: ThemeSectionProps) {
+const Trainers: SectionComponent = function Trainers({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '트레이너';
   const title = getFieldValue(data, 'title') || '당신 옆에서\n함께 싸웁니다';

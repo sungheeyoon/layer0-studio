@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { ArrowRightIcon, LeafIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const HeroVideo: SectionComponent = function HeroVideo({ section }: ThemeSectionProps) {
+const HeroVideo: SectionComponent = function HeroVideo({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || 'Seoul Seongsu — Specialty Coffee';
   const title1 = getFieldValue(data, 'title1') || '천천히,';

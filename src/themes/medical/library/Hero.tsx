@@ -1,10 +1,10 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon, StarIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Hero: SectionComponent = function Hero({ section }: ThemeSectionProps) {
+const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '';
   const title = getFieldValue(data, 'title') || '';

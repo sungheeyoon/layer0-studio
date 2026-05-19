@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   slug: 'cafe-cozy',
-  themeKey: 'cafe',
+  templateKey: 'cafe',
   globalStyles: {
     primaryColor: '#8D5B3E', // Brown
     secondaryColor: '#3D2B1F', // Dark Brown

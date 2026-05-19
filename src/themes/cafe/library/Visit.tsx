@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { PhoneIcon, ArrowUpRightIcon, MapPointIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Visit: SectionComponent = function Visit({ section }: ThemeSectionProps) {
+const Visit: SectionComponent = function Visit({ section }: TemplateSectionProps) {
   const { data } = section;
   const bgImage = getFieldValue(data, 'backgroundImage') || '';
   const label = getFieldValue(data, 'label') || '방문 안내';

@@ -1,9 +1,9 @@
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../fitness.module.css';
 import { RulerIcon, DumbbellIcon, ShowerIcon, ClockIcon, ParkingIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Facility: SectionComponent = function Facility({ section }: ThemeSectionProps) {
+const Facility: SectionComponent = function Facility({ section }: TemplateSectionProps) {
   const { data } = section;
   const label = getFieldValue(data, 'label') || '시설 안내';
   const title = getFieldValue(data, 'title') || '장비가\n결과를\n만듭니다';

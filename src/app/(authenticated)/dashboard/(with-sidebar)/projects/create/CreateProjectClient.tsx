@@ -183,7 +183,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] tracking-[0.1em] font-light text-neutral-500 uppercase">Style Dictionary</span>
-                    <span className="text-[10px] tracking-[0.1em] font-medium text-black uppercase">{template.templateJson?.themeKey || 'DEFAULT'}</span>
+                    <span className="text-[10px] tracking-[0.1em] font-medium text-black uppercase">{template.templateJson?.templateKey || 'DEFAULT'}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] tracking-[0.1em] font-light text-neutral-500 uppercase">Runtime Env</span>

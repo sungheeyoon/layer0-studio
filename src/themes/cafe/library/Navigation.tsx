@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ThemeSectionProps, SectionComponent } from '../../types';
+import { TemplateSectionProps, SectionComponent } from '../../types';
 import styles from '../cafe.module.css';
 import { MapPointIcon, HamburgerIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Navigation: SectionComponent = function Navigation({ section }: ThemeSectionProps) {
+const Navigation: SectionComponent = function Navigation({ section }: TemplateSectionProps) {
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || 'MONO';
   const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Specialty Coffee';
