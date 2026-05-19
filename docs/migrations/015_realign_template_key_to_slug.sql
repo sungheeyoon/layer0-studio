@@ -1,3 +1,19 @@
+-- ⚠️ DO NOT APPLY THIS MIGRATION. SUPERSEDED BY 016.
+--
+-- This file is a bug: it assumed every templates row's slug equals its renderer
+-- key. That's true for the 9 codegen preset rows, but admin-created custom
+-- templates have arbitrary slugs (e.g., 'hautre-wedding-planner') that are not
+-- valid templateMap keys. Running this migration overwrites the correct renderer
+-- key with the slug, breaking loadTemplate() and producing 404 for those sites.
+--
+-- If you already applied 015, run 016 to repair the damage.
+-- If you haven't applied 015, skip it entirely and rely on the loadTemplate()
+-- shim (release a36902b) which fixes the original problem without a migration.
+--
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Original (broken) migration body retained below for archaeology only.
+-- ─────────────────────────────────────────────────────────────────────────────
+
 -- Migration 015: Realign JSONB `templateKey` values to the new concat slug (post-#6 β model)
 -- Date: 2026-05-19
 --
