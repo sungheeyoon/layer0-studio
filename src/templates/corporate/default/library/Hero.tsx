@@ -19,16 +19,16 @@ const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) 
     >
       {bgImage && <div className="absolute inset-0 bg-black/40" />}
       <div className={styles.heroContent}>
-        <h1 className={styles.heroTitle} style={bgImage ? { color: '#fff' } : {}}>
+        <h1 className={styles.heroTitle} style={bgImage ? { color: 'var(--corp-on-image-fg)' } : {}}>
           {title}
         </h1>
         {subtitle && (
-          <p className={styles.heroSubtitle} style={bgImage ? { color: '#eee' } : {}}>
+          <p className={styles.heroSubtitle} style={bgImage ? { color: 'var(--corp-on-image-fg-muted)' } : {}}>
             {subtitle}
           </p>
         )}
         {ctaText && (
-          <a href={ctaUrl} className={styles.ctaButton} style={bgImage ? { color: '#fff', borderColor: '#fff' } : {}}>
+          <a href={ctaUrl} className={styles.ctaButton} style={bgImage ? { color: 'var(--corp-on-image-fg)', borderColor: 'var(--corp-on-image-fg)' } : {}}>
             {ctaText}
           </a>
         )}
