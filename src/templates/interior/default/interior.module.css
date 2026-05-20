@@ -9,6 +9,31 @@
   --i-muted: #7A6E60;
   --i-surface: #1C1915;
 
+  /* One-off solid bgs (extracted from inline literals) */
+  --i-dark-deepest: #080704;   /* Footer */
+  --i-stat-bg:      #111009;   /* Stats section */
+  --i-blue-accent:  #8BB4D8;   /* Portfolio cool accent */
+
+  /* Decorative gradients — defined here so section components stay token-only.
+     Each is intentionally distinct (different art directions). */
+  --i-grad-hero:    linear-gradient(145deg, #2A1E12 0%, #1A130B 40%, #221A0F 70%, #1A1208 100%);
+  --i-grad-contact: linear-gradient(150deg, #161008 0%, #0C0A08 60%, #120E06 100%);
+  --i-grad-about:   linear-gradient(150deg, #1E160E 0%, #140F09 50%, #1A1209 100%);
+  --i-grad-portfolio-1: linear-gradient(150deg, #211810 0%, #160F09 50%, #1D1308 100%);
+  --i-grad-portfolio-2: linear-gradient(135deg, #161B1E 0%, #111518 100%);
+  --i-grad-portfolio-3: linear-gradient(145deg, #181C18 0%, #111411 100%);
+  --i-grad-portfolio-4: linear-gradient(145deg, #16181E 0%, #101218 100%);
+
+  /* SVG illustration palettes — referenced as `fill="var(--i-svg-*)"` in
+     inline SVG art. These are decorative, fixed per-illustration. */
+  --i-svg-leaf-mid:   rgba(80, 90, 70, 0.15);
+  --i-svg-leaf-soft:  rgba(80, 100, 70, 0.1);
+  --i-svg-port-warm-1: rgba(28, 18, 10, 1);
+  --i-svg-port-warm-2: rgba(40, 28, 16, 0.8);
+  --i-svg-port-cool-1: rgba(18, 22, 25, 1);
+  --i-svg-port-cool-2: rgba(16, 20, 16, 1);
+  --i-svg-port-cool-3: rgba(14, 16, 22, 1);
+
   font-family: var(--theme-font-family, 'Pretendard', system-ui, sans-serif);
   font-size: var(--theme-font-size, 16px);
   background-color: var(--i-dark);

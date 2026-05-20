@@ -21,7 +21,7 @@ const Testimonials: SectionComponent = function Testimonials({ section }: Templa
           <div className={`${styles.reveal} ${styles.revealIn} flex items-center justify-center gap-3 mb-5`}>
             <span className={styles.goldBar}></span>
             <span className={styles.secTag}>{label}</span>
-            <span className={styles.goldBar} style={{ background: 'linear-gradient(270deg, #C9A96E, rgba(201,169,110,0))' }}></span>
+            <span className={styles.goldBar} style={{ background: 'linear-gradient(270deg, var(--i-gold), color-mix(in srgb, var(--i-gold) 0%, transparent))' }}></span>
           </div>
           <h2 className={`${styles.reveal} ${styles.revealIn} ${styles.delay1} font-extrabold tracking-tight text-[var(--i-cream)]`} style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1 }}>
             {title.split('\n').map((line, i) => (
@@ -37,15 +37,15 @@ const Testimonials: SectionComponent = function Testimonials({ section }: Templa
 
         <div className="grid md:grid-cols-3 gap-6">
           {reviews.map((r, i) => (
-            <div key={i} className={`${styles.reveal} ${styles.revealIn} ${styles[`delay${i}` as keyof typeof styles] || ''} ${styles.testiCard}`} style={i === 1 ? { borderColor: 'rgba(201,169,110,0.2)' } : {}}>
+            <div key={i} className={`${styles.reveal} ${styles.revealIn} ${styles[`delay${i}` as keyof typeof styles] || ''} ${styles.testiCard}`} style={i === 1 ? { borderColor: 'color-mix(in srgb, var(--i-gold) 20%, transparent)' } : {}}>
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, j) => (
                   <StarIcon key={j} size={14} className="text-[var(--i-gold)]" />
                 ))}
               </div>
               <p className="text-[14px] text-[var(--i-cream)] leading-relaxed mb-6 whitespace-pre-line">{r.body}</p>
-              <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,.06)' }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[13px]" style={{ background: 'rgba(201,169,110,0.15)', color: '#C9A96E' }}>
+              <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid color-mix(in srgb, white 6%, transparent)' }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[13px]" style={{ background: 'color-mix(in srgb, var(--i-gold) 15%, transparent)', color: 'var(--i-gold)' }}>
                   {r.author?.charAt(0)}
                 </div>
                 <div>

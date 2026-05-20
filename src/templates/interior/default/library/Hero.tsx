@@ -51,7 +51,7 @@ const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) 
             <div className={`${styles.reveal} ${styles.revealIn} ${styles.delay3} flex flex-wrap items-center gap-4`}>
               <a href="#portfolio" className={`${styles.pillBtn} no-underline`}>
                 <span className={styles.ic}>
-                  <ArrowRightIcon size={16} className="text-[#0C0A08]" />
+                  <ArrowRightIcon size={16} className="text-[var(--i-dark)]" />
                 </span>
                 {ctaPrimary}
               </a>
@@ -81,28 +81,28 @@ const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) 
           {/* Right: Visual art */}
           <div className={`${styles.revealRight} ${styles.revealIn} ${styles.delay2} relative hidden lg:block`}>
             <div className="relative" style={{ borderRadius: '24px', overflow: 'hidden', aspectRatio: '3/4' }}>
-              <div className={`absolute inset-0 ${styles.imgWarm}`} style={{ background: 'linear-gradient(145deg, #2A1E12 0%, #1A130B 40%, #221A0F 70%, #1A1208 100%)' }}></div>
+              <div className={`absolute inset-0 ${styles.imgWarm}`} style={{ background: 'var(--i-grad-hero)' }}></div>
               <svg viewBox="0 0 420 560" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
-                <rect x="0" y="400" width="420" height="160" fill="rgba(201,169,110,0.04)"/>
-                <rect x="0" y="392" width="420" height="4" fill="rgba(201,169,110,0.12)"/>
-                <rect x="60" y="50" width="180" height="280" rx="4" fill="rgba(201,169,110,0.05)" stroke="rgba(201,169,110,0.2)" strokeWidth="1.5"/>
-                <line x1="150" y1="50" x2="150" y2="330" stroke="rgba(201,169,110,0.15)" strokeWidth="1"/>
-                <line x1="60" y1="190" x2="240" y2="190" stroke="rgba(201,169,110,0.15)" strokeWidth="1"/>
-                <polygon points="60,330 240,330 320,400 -20,400" fill="rgba(201,169,110,0.025)"/>
-                <rect x="20" y="360" width="280" height="40" rx="8" fill="rgba(201,169,110,0.06)"/>
-                <rect x="20" y="340" width="280" height="28" rx="6" fill="rgba(201,169,110,0.04)"/>
-                <rect x="310" y="370" width="60" height="4" rx="2" fill="rgba(201,169,110,0.1)"/>
-                <rect x="336" y="374" width="8" height="26" rx="2" fill="rgba(201,169,110,0.08)"/>
-                <polygon points="340,340 330,374 350,374" fill="rgba(201,169,110,0.06)"/>
+                <rect x="0" y="400" width="420" height="160" fill="color-mix(in srgb, var(--i-gold) 4%, transparent)"/>
+                <rect x="0" y="392" width="420" height="4" fill="color-mix(in srgb, var(--i-gold) 12%, transparent)"/>
+                <rect x="60" y="50" width="180" height="280" rx="4" fill="color-mix(in srgb, var(--i-gold) 5%, transparent)" stroke="color-mix(in srgb, var(--i-gold) 20%, transparent)" strokeWidth="1.5"/>
+                <line x1="150" y1="50" x2="150" y2="330" stroke="color-mix(in srgb, var(--i-gold) 15%, transparent)" strokeWidth="1"/>
+                <line x1="60" y1="190" x2="240" y2="190" stroke="color-mix(in srgb, var(--i-gold) 15%, transparent)" strokeWidth="1"/>
+                <polygon points="60,330 240,330 320,400 -20,400" fill="color-mix(in srgb, var(--i-gold) 2.5%, transparent)"/>
+                <rect x="20" y="360" width="280" height="40" rx="8" fill="color-mix(in srgb, var(--i-gold) 6%, transparent)"/>
+                <rect x="20" y="340" width="280" height="28" rx="6" fill="color-mix(in srgb, var(--i-gold) 4%, transparent)"/>
+                <rect x="310" y="370" width="60" height="4" rx="2" fill="color-mix(in srgb, var(--i-gold) 10%, transparent)"/>
+                <rect x="336" y="374" width="8" height="26" rx="2" fill="color-mix(in srgb, var(--i-gold) 8%, transparent)"/>
+                <polygon points="340,340 330,374 350,374" fill="color-mix(in srgb, var(--i-gold) 6%, transparent)"/>
                 <radialGradient id="lampGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#C9A96E" stopOpacity="0.12"/>
-                  <stop offset="100%" stopColor="#C9A96E" stopOpacity="0"/>
+                  <stop offset="0%" stopColor="var(--i-gold)" stopOpacity="0.12"/>
+                  <stop offset="100%" stopColor="var(--i-gold)" stopOpacity="0"/>
                 </radialGradient>
                 <ellipse cx="340" cy="355" rx="60" ry="50" fill="url(#lampGlow)"/>
-                <rect x="370" y="300" width="10" height="100" rx="3" fill="rgba(80,90,70,0.15)"/>
-                <ellipse cx="375" cy="295" rx="28" ry="40" fill="rgba(80,100,70,0.1)"/>
+                <rect x="370" y="300" width="10" height="100" rx="3" fill="var(--i-svg-leaf-mid)"/>
+                <ellipse cx="375" cy="295" rx="28" ry="40" fill="var(--i-svg-leaf-soft)"/>
               </svg>
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(12,10,8,.6) 100%)' }}></div>
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, color-mix(in srgb, var(--i-dark) 60%, transparent) 100%)' }}></div>
               <div className="absolute bottom-6 left-6 right-6">
                 <p className="text-[11px] text-[var(--i-gold)] opacity-70 tracking-widest mb-1 uppercase">Featured Project</p>
                 <p className="text-[15px] font-semibold text-[var(--i-cream)]">{projectTitle}</p>
