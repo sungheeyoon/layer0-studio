@@ -2,6 +2,13 @@
   /* Variables are injected via DynamicEditor/Public renderer */
   font-family: var(--theme-font-family, 'Inter', sans-serif);
   font-size: var(--theme-font-size, 16px);
+
+  /* Text colors layered on top of a dark hero background image.
+     Not themed — these stay white/near-white for legibility regardless
+     of the user's brand palette. */
+  --corp-on-image-fg: #ffffff;
+  --corp-on-image-fg-muted: #eeeeee;
+
   color: #333;
   line-height: 1.5;
   background: #fff;

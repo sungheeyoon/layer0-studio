@@ -36,7 +36,7 @@ const Visit: SectionComponent = function Visit({ section }: TemplateSectionProps
       {/* Warm glow */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(201, 106, 58, 0.12) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(ellipse, color-mix(in srgb, var(--c-terra) 12%, transparent) 0%, transparent 70%)' }}
       ></div>
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10 py-24 lg:py-32">
@@ -65,7 +65,7 @@ const Visit: SectionComponent = function Visit({ section }: TemplateSectionProps
                 </a>
               )}
               <a href={instagram} className="no-underline">
-                <button className={styles.btnGhost} style={{ borderColor: 'rgba(245, 240, 232, 0.2)', color: 'var(--c-linen)' }}>
+                <button className={styles.btnGhost} style={{ borderColor: 'color-mix(in srgb, var(--c-linen) 20%, transparent)', color: 'var(--c-linen)' }}>
                   <span>인스타그램</span>
                   <ArrowUpRightIcon size={15} />
                 </button>
