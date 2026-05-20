@@ -25,11 +25,11 @@ import type { ValidationIssue } from './validate';
 // not a hex digit).
 export const COLOR_HEX_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?!\w)/g;
 export const COLOR_FUNC_RE = /\b(?:rgb|rgba|hsl|hsla)\s*\(/g;
-// Exclude CSS-wide keywords (inherit/initial/unset/revert) which are valid
-// font-family values but are not "design tokens" being inlined.
-export const FONT_FAMILY_RE = /font-family\s*:\s*['"](?!(?:inherit|initial|unset|revert)['"])[^'"\n]+['"]/gi;
+// Exclude CSS-wide keywords (inherit/initial/unset/revert) and `var(--*)`
+// references — these are valid font-family values, not inline literals.
+export const FONT_FAMILY_RE = /font-family\s*:\s*['"](?!(?:inherit|initial|unset|revert)['"])(?!var\s*\()[^'"\n]+['"]/gi;
 // JSX inline style — `fontFamily: '...'` (camelCase, JS object syntax).
-export const FONT_FAMILY_JSX_RE = /\bfontFamily\s*:\s*['"](?!(?:inherit|initial|unset|revert)['"])[^'"\n]+['"]/g;
+export const FONT_FAMILY_JSX_RE = /\bfontFamily\s*:\s*['"](?!(?:inherit|initial|unset|revert)['"])(?!var\s*\()[^'"\n]+['"]/g;
 
 /** Strings that are not "design tokens" and so do not require var(--*). */
 export const COLOR_WHITELIST = new Set([

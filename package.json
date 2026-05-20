@@ -13,6 +13,7 @@
     "template:sync": "tsx scripts/sync-templates.ts",
     "template:capture": "tsx scripts/capture-templates.ts",
     "template:scaffold": "tsx scripts/scaffold-template.ts",
+    "template:generate": "tsx scripts/generate-template.ts",
     "predev": "node scripts/generate-templates.mjs",
     "prebuild": "node scripts/generate-templates.mjs"
   },

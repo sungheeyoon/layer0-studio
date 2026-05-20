@@ -416,7 +416,12 @@ pnpm template:sync cafe             # 슬러그 또는 테마 prefix로 필터
 
 ```bash
 # 코드 생성
-pnpm generate:themes              # _generated.ts 재생성 (predev/prebuild에 자동 연결)
+pnpm generate:templates           # _generated.ts 재생성 (predev/prebuild에 자동 연결)
+
+# AI 템플릿 생성 (Tracer #1, stub — Issue #10)
+pnpm template:generate "<brief>"                  # 인터랙티브 4단계 승인
+pnpm template:generate "<brief>" --auto-approve   # 무인 (CI/smoke)
+pnpm template:generate --help
 
 # 썸네일 캡처 (Playwright + sharp + pixelmatch)
 pnpm template:capture             # 모든 테마 일괄
@@ -436,6 +441,21 @@ pnpm template:scaffold <key> --from templates-ui/<key>.html
 pnpm test                         # vitest — validate 규칙 + sync 단위 테스트
 pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 ```
+
+### 7.1 `template:generate` 흐름 (Issue #10 Tracer #1)
+
+```
+brief ──▶ propose_composition  ──▶ [approve y/n]
+       ──▶ propose_design_tokens ──▶ [approve y/n]
+       ──▶ generate_section(×N)  ──▶ [approve y/n] (per section)
+       ──▶ writeFiles + generate:templates
+       ──▶ validate_and_capture  ──▶ [approve y/n]
+```
+
+생성 결과: `src/templates/<category>/<leaf>/` 안에 6개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). 자동으로 `pnpm generate:templates` 실행 → `_generated.ts` 갱신 → `/preview/preset/<templateKey>`에서 즉시 미리보기 가능.
+
+**현재 stub 단계** — 모든 출력이 하드코딩 (category='cafe', leaf='stub-template', Hero 한 섹션). 후속 이슈 #11–#16에서 4개 도구를 LLM 호출로 1개씩 교체. 오케스트레이터·파일 writer·승인 흐름은 안정적이라 변경 無.
+
 
 ---
 

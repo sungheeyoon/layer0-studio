@@ -90,9 +90,12 @@ const rule = {
         if (keyName !== 'fontFamily') return;
         const v = node.value;
         if (v.type === 'Literal' && typeof v.value === 'string' && v.value.length > 0) {
-          // CSS-wide keywords (inherit / initial / unset / revert) are
-          // not design tokens — allow them through.
-          if (COLOR_WHITELIST.has(v.value.trim())) return;
+          const trimmed = v.value.trim();
+          // CSS-wide keywords (inherit / initial / unset / revert) are not
+          // design tokens — allow them through.
+          if (COLOR_WHITELIST.has(trimmed)) return;
+          // `var(--font-*)` is the correct pattern — not a literal.
+          if (/^var\s*\(/.test(trimmed)) return;
           context.report({
             node: v,
             messageId: 'inlineFont',
