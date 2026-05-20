@@ -93,6 +93,8 @@ The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the cor
 
 **`array` field type** (Phase 1, merged): components can declare repeating-item fields in their `dataSchema` (e.g. menu items, FAQ entries). The editor renders add/remove/reorder UI and recursively validates each item against its `itemSchema`. Phase 2 (Collections — separate table + RLS for blogs/notices) is intentionally deferred — see `docs/plans/PLAN_crud_array_field.md` for trigger conditions before opening that work.
 
+**Rich design tokens** (Issue #9): `tokens.ts` exports BOTH `defaultGlobalStyles` (thin, user-editable) AND `designTokens` (rich, code-fixed: `colors`/`fonts`/`spacing`/`radius`/`shadows`/`typography`). `RenderComposition` accepts a `designTokens` prop and injects CSS custom properties (`--color-primary`, `--font-base`, ...) on the template root via `tokensToCssVars()` (`src/lib/template/design-tokens.ts`). The thin globalStyles overlay specific tokens via `OVERLAY_MAP` (primaryColor → `--color-primary`, etc.). Currently only **cafe-default** uses the rich pattern; other 8 templates keep their legacy `--{prefix}-{name}` defs in `.module.css`. See TEMPLATE_SYSTEM.md §2.5.
+
 **Code is source of truth, sync reflects to DB.** `pnpm template:sync` (default dry-run, `--apply` to commit) reads presets, validates against each component's `dataSchema`, and upserts `templates` rows. Admin UI mirrors this with a 2-step Preview → Apply gated on `app_metadata.canPublishTemplates`.
 
 The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the theme renderer at runtime via `loadTemplate()`. Clicking a section in the preview panel selects it in the left panel for inline editing.

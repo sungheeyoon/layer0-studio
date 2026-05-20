@@ -8,17 +8,17 @@ const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionP
   const items = [1, 2, 3, 4, 5, 6, 7, 8].map(n => getFieldValue(data, `item${n}`)).filter(Boolean);
 
   return (
-    <section className="bg-[var(--c-espresso)] py-5 overflow-hidden">
+    <section className="bg-[var(--color-secondary)] py-5 overflow-hidden">
       <div className="overflow-hidden">
         <div className={styles.marqueeTrack}>
           {/* Segment A */}
           <div className="flex items-center gap-10 px-5">
             {items.map((item, i) => (
               <span key={i} className="flex items-center gap-10">
-                <span className={`${styles.fontSerif} italic text-[var(--c-linen)] opacity-50 text-[14px] whitespace-nowrap`}>
+                <span className={`${styles.fontSerif} italic text-[var(--color-surface)] opacity-50 text-[14px] whitespace-nowrap`}>
                   {item}
                 </span>
-                <CoffeeIcon size={13} className="text-[var(--c-terra)] shrink-0 fill-current" />
+                <CoffeeIcon size={13} className="text-[var(--color-primary)] shrink-0 fill-current" />
               </span>
             ))}
           </div>
@@ -26,10 +26,10 @@ const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionP
           <div className="flex items-center gap-10 px-5" aria-hidden="true">
             {items.map((item, i) => (
               <span key={`b-${i}`} className="flex items-center gap-10">
-                <span className={`${styles.fontSerif} italic text-[var(--c-linen)] opacity-50 text-[14px] whitespace-nowrap`}>
+                <span className={`${styles.fontSerif} italic text-[var(--color-surface)] opacity-50 text-[14px] whitespace-nowrap`}>
                   {item}
                 </span>
-                <CoffeeIcon size={13} className="text-[var(--c-terra)] shrink-0 fill-current" />
+                <CoffeeIcon size={13} className="text-[var(--color-primary)] shrink-0 fill-current" />
               </span>
             ))}
           </div>

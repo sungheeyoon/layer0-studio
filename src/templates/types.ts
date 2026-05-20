@@ -139,3 +139,31 @@ export interface TemplateModule {
   defaultTemplateJson: TemplateJson;
   library: TemplateLibrary;
 }
+
+/**
+ * A template's rich design tokens — the *code-fixed* visual identity.
+ * The user-editable thin layer is `TemplateGlobalStyles` (primaryColor,
+ * secondaryColor, fontFamily, fontSize) which overlays specific keys here
+ * via `tokensToCssVars()` (`src/lib/template/design-tokens.ts`).
+ *
+ * Convention: each dimension's entries become `--{dimension-singular}-{key}`
+ * CSS custom properties on the template root, e.g. `colors.primary` →
+ * `--color-primary`. Section components reference these via `var(--color-primary)`.
+ *
+ * AI generation pipeline (issues #11+) emits this shape directly so visual
+ * identity is captured as data, not as ad-hoc CSS strings.
+ */
+export interface DesignTokens {
+  /** Palette. globalStyles.primaryColor overlays `primary`, secondaryColor overlays `secondary`. */
+  colors?: Record<string, string>;
+  /** Font stacks. globalStyles.fontFamily overlays `base`. */
+  fonts?: Record<string, string>;
+  /** Spacing scale (e.g. `sm`, `md`, `lg`). */
+  spacing?: Record<string, string>;
+  /** Border radii. */
+  radius?: Record<string, string>;
+  /** Box shadows. */
+  shadows?: Record<string, string>;
+  /** Typography (font-size, line-height, letter-spacing presets). */
+  typography?: Record<string, string>;
+}
