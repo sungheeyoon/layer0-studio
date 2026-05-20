@@ -13,8 +13,8 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
 
   return (
     <footer style={{
-      background: 'var(--w-bg, #0a0908)',
-      borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+      background: 'var(--w-bg, var(--w-bg))',
+      borderTop: '1px solid color-mix(in srgb, white 5%, transparent)',
       padding: '4rem 1rem',
     }}>
       <div className={styles.sectionInner}>
@@ -23,14 +23,14 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
           gap: '2.5rem',
           paddingBottom: '2.5rem',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          borderBottom: '1px solid color-mix(in srgb, white 5%, transparent)',
         }}>
           <div style={{ gridColumn: 'span 2 / span 2', minWidth: 0 }}>
             <div className={styles.fontDisplay} style={{
               fontSize: '1.5rem',
               fontWeight: 300,
               letterSpacing: '0.15em',
-              color: '#f5f0eb',
+              color: 'var(--w-cream)',
               marginBottom: '0.5rem',
             }}>
               {brand}
@@ -38,7 +38,7 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
             {tagline && (
               <p style={{
                 fontSize: '0.75rem',
-                color: 'rgba(245, 240, 235, 0.2)',
+                color: 'color-mix(in srgb, var(--w-cream) 20%, transparent)',
                 letterSpacing: '0.15em',
                 textTransform: 'uppercase',
                 marginBottom: '1.25rem',
@@ -49,7 +49,7 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
             {description && (
               <p style={{
                 fontSize: '0.875rem',
-                color: 'rgba(245, 240, 235, 0.3)',
+                color: 'color-mix(in srgb, var(--w-cream) 30%, transparent)',
                 lineHeight: 1.65,
                 wordBreak: 'keep-all',
                 maxWidth: '20rem',
@@ -70,7 +70,7 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
             <p style={{
               fontSize: '0.75rem',
               fontWeight: 700,
-              color: 'rgba(245, 240, 235, 0.2)',
+              color: 'color-mix(in srgb, var(--w-cream) 20%, transparent)',
               textTransform: 'uppercase',
               letterSpacing: '0.15em',
               marginBottom: '1rem',
@@ -80,7 +80,7 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
               {['풀 웨딩 플래닝', '스몰 웨딩', '프러포즈 이벤트', '기념일 이벤트', '해외 웨딩'].map((item) => (
                 <li key={item}>
-                  <a href="#services" style={{ fontSize: '0.875rem', color: 'rgba(245, 240, 235, 0.3)', textDecoration: 'none' }}>
+                  <a href="#services" style={{ fontSize: '0.875rem', color: 'color-mix(in srgb, var(--w-cream) 30%, transparent)', textDecoration: 'none' }}>
                     {item}
                   </a>
                 </li>
@@ -92,7 +92,7 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
             <p style={{
               fontSize: '0.75rem',
               fontWeight: 700,
-              color: 'rgba(245, 240, 235, 0.2)',
+              color: 'color-mix(in srgb, var(--w-cream) 20%, transparent)',
               textTransform: 'uppercase',
               letterSpacing: '0.15em',
               marginBottom: '1rem',
@@ -107,17 +107,17 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
                 ['상담 신청', '#contact'],
               ].map(([label, href]) => (
                 <li key={label}>
-                  <a href={href} style={{ fontSize: '0.875rem', color: 'rgba(245, 240, 235, 0.3)', textDecoration: 'none' }}>
+                  <a href={href} style={{ fontSize: '0.875rem', color: 'color-mix(in srgb, var(--w-cream) 30%, transparent)', textDecoration: 'none' }}>
                     {label}
                   </a>
                 </li>
               ))}
             </ul>
             {address && (
-              <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+              <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid color-mix(in srgb, white 5%, transparent)' }}>
                 <p style={{
                   fontSize: '0.75rem',
-                  color: 'rgba(245, 240, 235, 0.2)',
+                  color: 'color-mix(in srgb, var(--w-cream) 20%, transparent)',
                   lineHeight: 1.65,
                   whiteSpace: 'pre-line',
                   margin: 0,
@@ -138,12 +138,12 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
           gap: '0.75rem',
           flexWrap: 'wrap',
         }}>
-          <p style={{ fontSize: '0.75rem', color: 'rgba(245, 240, 235, 0.15)', margin: 0 }}>{copyright}</p>
+          <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--w-cream) 15%, transparent)', margin: 0 }}>{copyright}</p>
           <div style={{ display: 'flex', gap: '1.25rem' }}>
-            <a href="/legal/privacy" style={{ fontSize: '0.75rem', color: 'rgba(245, 240, 235, 0.15)', textDecoration: 'none' }}>
+            <a href="/legal/privacy" style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--w-cream) 15%, transparent)', textDecoration: 'none' }}>
               개인정보처리방침
             </a>
-            <a href="/legal/terms" style={{ fontSize: '0.75rem', color: 'rgba(245, 240, 235, 0.15)', textDecoration: 'none' }}>
+            <a href="/legal/terms" style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--w-cream) 15%, transparent)', textDecoration: 'none' }}>
               이용약관
             </a>
           </div>
@@ -162,11 +162,11 @@ function SocialLink({ children, label }: { children: React.ReactNode; label: str
         width: '2.25rem',
         height: '2.25rem',
         borderRadius: '0.5rem',
-        background: 'rgba(255, 255, 255, 0.05)',
+        background: 'color-mix(in srgb, white 5%, transparent)',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'rgba(245, 240, 235, 0.3)',
+        color: 'color-mix(in srgb, var(--w-cream) 30%, transparent)',
         textDecoration: 'none',
         transition: 'all 0.2s ease',
       }}

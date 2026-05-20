@@ -58,7 +58,7 @@ const Pricing: SectionComponent = function Pricing({ section }: TemplateSectionP
           {eyebrow && <div className={styles.lineOrnament} style={{ marginBottom: '2rem', justifyContent: 'center' }}>{eyebrow}</div>}
           <h2 className={styles.sectionTitle} style={{ marginBottom: '0.75rem' }}>{title}</h2>
           {subtitle && (
-            <p style={{ color: 'rgba(245, 240, 235, 0.4)', fontSize: '0.875rem', wordBreak: 'keep-all', margin: 0 }}>
+            <p style={{ color: 'color-mix(in srgb, var(--w-cream) 40%, transparent)', fontSize: '0.875rem', wordBreak: 'keep-all', margin: 0 }}>
               {subtitle}
             </p>
           )}
@@ -71,10 +71,10 @@ const Pricing: SectionComponent = function Pricing({ section }: TemplateSectionP
         }}>
           {visiblePkgs.map((p, i) => {
             const tierColor = p.featured
-              ? 'rgba(232, 180, 184, 0.6)'
+              ? 'color-mix(in srgb, var(--w-blush) 60%, transparent)'
               : p.premium
-              ? 'rgba(212, 169, 106, 0.5)'
-              : 'rgba(245, 240, 235, 0.3)';
+              ? 'color-mix(in srgb, var(--w-gold) 50%, transparent)'
+              : 'color-mix(in srgb, var(--w-cream) 30%, transparent)';
             return (
               <div
                 key={i}
@@ -91,14 +91,14 @@ const Pricing: SectionComponent = function Pricing({ section }: TemplateSectionP
                 }}>
                   {p.tier}
                 </p>
-                <h3 style={{ color: '#f5f0eb', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', wordBreak: 'keep-all' }}>
+                <h3 style={{ color: 'var(--w-cream)', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', wordBreak: 'keep-all' }}>
                   {p.name}
                 </h3>
                 <p className={`${styles.pkgPrice} ${p.premium ? styles.pkgPriceGold : ''}`}>
                   {p.price}
                   <span className={styles.pkgPriceUnit}>{p.priceSuffix}</span>
                 </p>
-                <p style={{ fontSize: '0.75rem', color: 'rgba(245, 240, 235, 0.3)', marginBottom: '1.5rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--w-cream) 30%, transparent)', marginBottom: '1.5rem' }}>
                   {p.note}
                 </p>
                 <ul className={`${styles.pkgList} ${p.featured ? styles.pkgListFeatured : ''}`}>

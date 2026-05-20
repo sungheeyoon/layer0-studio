@@ -90,6 +90,9 @@ const rule = {
         if (keyName !== 'fontFamily') return;
         const v = node.value;
         if (v.type === 'Literal' && typeof v.value === 'string' && v.value.length > 0) {
+          // CSS-wide keywords (inherit / initial / unset / revert) are
+          // not design tokens — allow them through.
+          if (COLOR_WHITELIST.has(v.value.trim())) return;
           context.report({
             node: v,
             messageId: 'inlineFont',

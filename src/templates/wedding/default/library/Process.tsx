@@ -48,10 +48,10 @@ const Process: SectionComponent = function Process({ section }: TemplateSectionP
                 <p className={`${styles.stepNumber} ${isLast ? styles.stepNumberGold : ''}`}>
                   {String(i + 1).padStart(2, '0')}
                 </p>
-                <h3 style={{ color: '#f5f0eb', fontWeight: 700, marginBottom: '0.5rem', wordBreak: 'keep-all' }}>
+                <h3 style={{ color: 'var(--w-cream)', fontWeight: 700, marginBottom: '0.5rem', wordBreak: 'keep-all' }}>
                   {step.title}
                 </h3>
-                <p style={{ color: 'rgba(245, 240, 235, 0.4)', fontSize: '0.875rem', lineHeight: 1.65, wordBreak: 'keep-all', margin: 0 }}>
+                <p style={{ color: 'color-mix(in srgb, var(--w-cream) 40%, transparent)', fontSize: '0.875rem', lineHeight: 1.65, wordBreak: 'keep-all', margin: 0 }}>
                   {step.body}
                 </p>
               </div>
@@ -65,7 +65,7 @@ const Process: SectionComponent = function Process({ section }: TemplateSectionP
               {ctaText}
             </a>
             {ctaNote && (
-              <p style={{ fontSize: '0.75rem', color: 'rgba(245, 240, 235, 0.3)', marginTop: '0.75rem' }}>
+              <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--w-cream) 30%, transparent)', marginTop: '0.75rem' }}>
                 {ctaNote}
               </p>
             )}
