@@ -51,7 +51,7 @@ const Trainers: SectionComponent = function Trainers({ section }: TemplateSectio
               />
               {m.badge && (
                 <div className={`${styles.clipCorner} absolute top-4 left-4 bg-[var(--f-lime)] px-3 py-1`}>
-                  <span className={`${styles.fontCondensed} font-black text-[#080808] text-[11px] tracking-widest uppercase`}>
+                  <span className={`${styles.fontCondensed} font-black text-[var(--f-void)] text-[11px] tracking-widest uppercase`}>
                     {m.badge}
                   </span>
                 </div>

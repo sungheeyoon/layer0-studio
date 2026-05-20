@@ -59,6 +59,20 @@ describe('scanInlineTokens', () => {
     expect(v.some(x => x.code === 'INLINE_COLOR_LITERAL')).toBe(false);
   });
 
+  it('does NOT flag hex-shaped prefix of an anchor link / identifier', () => {
+    // `#fac` is hex-shaped but followed by alpha char `i` — clearly an
+    // anchor like `#facility`, not a color literal.
+    expect(scanInlineTokens(`<a href="#facility">x</a>`)).toHaveLength(0);
+    expect(scanInlineTokens(`const x = '#cafeteria';`)).toHaveLength(0);
+    expect(scanInlineTokens(`<a href="#feed_me">x</a>`)).toHaveLength(0);
+  });
+
+  it('still flags hex followed by punctuation / quote / end-of-string', () => {
+    expect(scanInlineTokens(`const c = '#fff';`)).toHaveLength(1);
+    expect(scanInlineTokens(`color: #fff,`)).toHaveLength(1);
+    expect(scanInlineTokens(`#fff`)).toHaveLength(1);
+  });
+
   it('ignores literal text inside line comments', () => {
     const v = scanInlineTokens(`// brand was #ff0000\nconst c = 'var(--brand)';`);
     expect(v).toHaveLength(0);

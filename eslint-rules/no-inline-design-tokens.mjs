@@ -15,7 +15,10 @@
  * If you change one, change the other.
  */
 
-const COLOR_HEX_RE  = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?![0-9a-fA-F])/;
+// Hex literal must be followed by a non-word char (or end-of-string).
+// Without `\w`, `#facility` would match `#fac` since `i` is non-hex; we
+// require the next char (if any) to be outside the identifier alphabet.
+const COLOR_HEX_RE  = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?!\w)/;
 const COLOR_FUNC_RE = /\b(?:rgb|rgba|hsl|hsla)\s*\(/;
 const FONT_FAMILY_CSS_RE = /font-family\s*:\s*['"][^'"\n]+['"]/i;
 

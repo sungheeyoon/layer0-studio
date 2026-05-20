@@ -34,7 +34,7 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
           {/* Logo */}
           <a href="#" className="flex items-center gap-3 spring hover:opacity-70">
             <div className={`${styles.clipCorner} w-8 h-8 bg-[var(--f-lime)] flex items-center justify-center shrink-0`}>
-              <DumbbellIcon size={16} className="text-[#080808]" />
+              <DumbbellIcon size={16} className="text-[var(--f-void)]" />
             </div>
             <span className={`${styles.fontCondensed} font-black text-[22px] tracking-[.12em] text-[var(--f-snow)] uppercase`}>
               {brandName}

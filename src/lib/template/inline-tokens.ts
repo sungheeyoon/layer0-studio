@@ -19,8 +19,11 @@ import path from 'path';
 import type { ValidationIssue } from './validate';
 
 // ─── Regexes (also mirrored in eslint-rules/no-inline-design-tokens.mjs) ───
-// 3, 4, 6, or 8 hex digits, bounded so we do not match longer hex words.
-export const COLOR_HEX_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?![0-9a-fA-F])/g;
+// 3, 4, 6, or 8 hex digits, bounded by a non-word boundary so we do not
+// match the hex-shaped prefix of an identifier (e.g. `#facility` must not
+// match `#fac`, since the following `i` is a word char even though it is
+// not a hex digit).
+export const COLOR_HEX_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?!\w)/g;
 export const COLOR_FUNC_RE = /\b(?:rgb|rgba|hsl|hsla)\s*\(/g;
 export const FONT_FAMILY_RE = /font-family\s*:\s*['"][^'"\n]+['"]/gi;
 // JSX inline style — `fontFamily: '...'` (camelCase, JS object syntax).

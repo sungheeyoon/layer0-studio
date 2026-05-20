@@ -50,8 +50,8 @@ const Programs: SectionComponent = function Programs({ section }: TemplateSectio
       title: getFieldValue(data, 'p6Title'),
       desc: getFieldValue(data, 'p6Desc'),
       icon: <ChefHatIcon size={22} className="text-[var(--f-lime)]" />,
-      bg: 'rgba(205, 255, 0, 0.07)',
-      borderColor: 'rgba(205, 255, 0, 0.15)',
+      bg: 'color-mix(in srgb, var(--f-lime) 7%, transparent)',
+      borderColor: 'color-mix(in srgb, var(--f-lime) 15%, transparent)',
     },
   ].filter(p => p.title);
 
@@ -93,7 +93,7 @@ const Programs: SectionComponent = function Programs({ section }: TemplateSectio
                   <div className="flex items-end justify-between">
                     <div>
                       {p.badge && (
-                        <span className={`${styles.fontCondensed} inline-block bg-[var(--f-lime)] text-[#080808] font-black text-[11px] tracking-widest uppercase px-3 py-1 mb-3`}>
+                        <span className={`${styles.fontCondensed} inline-block bg-[var(--f-lime)] text-[var(--f-void)] font-black text-[11px] tracking-widest uppercase px-3 py-1 mb-3`}>
                           {p.badge}
                         </span>
                       )}
