@@ -30,7 +30,7 @@ const Join: SectionComponent = function Join({ section }: TemplateSectionProps) 
       {/* Lime glow */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(205, 255, 0, 0.07) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--f-lime) 7%, transparent) 0%, transparent 70%)' }}
       ></div>
 
       <div className="relative max-w-3xl mx-auto px-6 text-center">

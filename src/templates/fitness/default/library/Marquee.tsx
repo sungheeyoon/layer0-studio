@@ -15,10 +15,10 @@ const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionP
           <div className="flex items-center gap-8 px-4">
             {items.map((item, i) => (
               <span key={i} className="flex items-center gap-8">
-                <span className={`${styles.fontCondensed} font-black text-[13px] tracking-[.18em] uppercase text-[#080808] whitespace-nowrap`}>
+                <span className={`${styles.fontCondensed} font-black text-[13px] tracking-[.18em] uppercase text-[var(--f-void)] whitespace-nowrap`}>
                   {item}
                 </span>
-                <StarIcon size={12} className="text-[#080808] shrink-0" />
+                <StarIcon size={12} className="text-[var(--f-void)] shrink-0" />
               </span>
             ))}
           </div>
@@ -26,10 +26,10 @@ const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionP
           <div className="flex items-center gap-8 px-4" aria-hidden="true">
             {items.map((item, i) => (
               <span key={`b-${i}`} className="flex items-center gap-8">
-                <span className={`${styles.fontCondensed} font-black text-[13px] tracking-[.18em] uppercase text-[#080808] whitespace-nowrap`}>
+                <span className={`${styles.fontCondensed} font-black text-[13px] tracking-[.18em] uppercase text-[var(--f-void)] whitespace-nowrap`}>
                   {item}
                 </span>
-                <StarIcon size={12} className="text-[#080808] shrink-0" />
+                <StarIcon size={12} className="text-[var(--f-void)] shrink-0" />
               </span>
             ))}
           </div>

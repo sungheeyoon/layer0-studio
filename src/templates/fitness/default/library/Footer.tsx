@@ -16,14 +16,14 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
   const hours = getFieldValue(data, 'hours') || '';
 
   return (
-    <footer className="bg-[#080808] border-t border-[var(--f-border)] pt-16 pb-10 px-6 lg:px-10">
+    <footer className="bg-[var(--f-void)] border-t border-[var(--f-border)] pt-16 pb-10 px-6 lg:px-10">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-5">
               <div className={`${styles.clipCorner} w-8 h-8 bg-[var(--f-lime)] flex items-center justify-center shrink-0`}>
-                <DumbbellIcon size={16} className="text-[#080808]" />
+                <DumbbellIcon size={16} className="text-[var(--f-void)]" />
               </div>
               <div>
                 <span className={`${styles.fontCondensed} font-black text-[20px] tracking-[.12em] text-[var(--f-snow)] uppercase block leading-none`}>
