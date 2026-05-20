@@ -3,7 +3,7 @@ import { TemplateRendererProps, TemplateLibrary } from '../../types';
 import styles from './cafe.module.css';
 import { cafeDefaultLibrary } from './library';
 import { RenderComposition } from '../../renderComposition';
-import { defaultGlobalStyles } from './tokens';
+import { defaultGlobalStyles, designTokens } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = cafeDefaultLibrary;
@@ -28,6 +28,7 @@ export default function CafeDefaultTemplate(props: TemplateRendererProps) {
       {...props}
       library={library}
       className={styles.themeRoot}
+      designTokens={designTokens}
       itemClassName={(id) => props.selectedSectionId === id ? styles.selectedSlot : ''}
     />
   );

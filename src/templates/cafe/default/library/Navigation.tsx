@@ -34,10 +34,10 @@ const Navigation: SectionComponent = function Navigation({ section }: TemplateSe
         <div className="flex items-center justify-between h-[68px]">
           {/* Logo */}
           <a href="#" className="flex flex-col spring hover:opacity-60 no-underline">
-            <span className={`${styles.fontSerif} font-bold text-[22px] tracking-[.16em] text-[var(--c-espresso)] italic leading-none`}>
+            <span className={`${styles.fontSerif} font-bold text-[22px] tracking-[.16em] text-[var(--color-secondary)] italic leading-none`}>
               {brandName}
             </span>
-            <span className="text-[9px] font-medium tracking-[.22em] text-[var(--c-dust)] uppercase mt-0.5">
+            <span className="text-[9px] font-medium tracking-[.22em] text-[var(--color-dust)] uppercase mt-0.5">
               {brandSubtext}
             </span>
           </a>
@@ -48,7 +48,7 @@ const Navigation: SectionComponent = function Navigation({ section }: TemplateSe
               <a
                 key={i}
                 href={item.href}
-                className="text-[13px] font-medium text-[var(--c-dust)] tracking-wide spring hover:text-[var(--c-espresso)] no-underline"
+                className="text-[13px] font-medium text-[var(--color-dust)] tracking-wide spring hover:text-[var(--color-secondary)] no-underline"
               >
                 {item.label}
               </a>
@@ -64,7 +64,7 @@ const Navigation: SectionComponent = function Navigation({ section }: TemplateSe
               </button>
             </a>
             <button
-              className="lg:hidden p-2 text-[var(--c-dust)] spring hover:text-[var(--c-espresso)] bg-transparent border-0 cursor-pointer"
+              className="lg:hidden p-2 text-[var(--color-dust)] spring hover:text-[var(--color-secondary)] bg-transparent border-0 cursor-pointer"
               onClick={() => setMobOpen(!mobOpen)}
             >
               <HamburgerIcon size={22} />
@@ -74,12 +74,12 @@ const Navigation: SectionComponent = function Navigation({ section }: TemplateSe
       </div>
 
       {/* Mobile menu */}
-      <div className={`lg:hidden bg-[var(--c-linen)] border-t border-[var(--c-linen-dark)] px-6 py-6 space-y-4 overflow-hidden transition-all duration-400 ${mobOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
+      <div className={`lg:hidden bg-[var(--color-surface)] border-t border-[var(--color-surface-dark)] px-6 py-6 space-y-4 overflow-hidden transition-all duration-400 ${mobOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
         {menuItems.map((item, i) => (
           <a
             key={i}
             href={item.href}
-            className="block text-[14px] font-medium text-[var(--c-espresso)] py-2 no-underline"
+            className="block text-[14px] font-medium text-[var(--color-secondary)] py-2 no-underline"
             onClick={() => setMobOpen(false)}
           >
             {item.label}

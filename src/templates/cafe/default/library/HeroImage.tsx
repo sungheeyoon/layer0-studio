@@ -27,23 +27,23 @@ const HeroImage: SectionComponent = function HeroImage({ section }: TemplateSect
     <section className="min-h-[100dvh] flex items-stretch pt-[68px]" id="hero">
       <div className="w-full grid lg:grid-cols-[52fr_48fr]">
         {/* Left: content */}
-        <div className="flex flex-col justify-center px-8 lg:px-14 xl:px-20 py-16 order-2 lg:order-1 bg-[var(--c-linen)]">
+        <div className="flex flex-col justify-center px-8 lg:px-14 xl:px-20 py-16 order-2 lg:order-1 bg-[var(--color-surface)]">
           <p className={`${styles.reveal} ${styles.revealIn} ${styles.sectionLabel} mb-8`}>{label}</p>
 
           <div className={`${styles.reveal} ${styles.revealIn} mb-7`}>
             <h1
-              className={`${styles.fontSerif} leading-[1.06] text-[var(--c-espresso)]`}
+              className={`${styles.fontSerif} leading-[1.06] text-[var(--color-secondary)]`}
               style={{ fontSize: 'clamp(3rem, 5.5vw, 5.2rem)' }}
             >
               {title1}<br />
-              <em style={{ color: 'var(--c-terra)', fontStyle: 'italic' }}>{titleAccent}</em>
+              <em style={{ color: 'var(--color-primary)', fontStyle: 'italic' }}>{titleAccent}</em>
             </h1>
-            <p className={`${styles.fontSerif} italic text-[var(--c-dust)] mt-2`} style={{ fontSize: 'clamp(1.1rem, 2vw, 1.5rem)' }}>
+            <p className={`${styles.fontSerif} italic text-[var(--color-dust)] mt-2`} style={{ fontSize: 'clamp(1.1rem, 2vw, 1.5rem)' }}>
               {subtitle}
             </p>
           </div>
 
-          <p className={`${styles.reveal} ${styles.revealIn} text-[var(--c-dust)] text-[15px] leading-[1.9] mb-10 max-w-[360px] whitespace-pre-line`}>
+          <p className={`${styles.reveal} ${styles.revealIn} text-[var(--color-dust)] text-[15px] leading-[1.9] mb-10 max-w-[360px] whitespace-pre-line`}>
             {description}
           </p>
 
@@ -62,20 +62,20 @@ const HeroImage: SectionComponent = function HeroImage({ section }: TemplateSect
           </div>
 
           {/* Mini info */}
-          <div className={`${styles.reveal} ${styles.revealIn} grid grid-cols-3 gap-5 pt-8 border-t border-[var(--c-linen-dark)]`}>
+          <div className={`${styles.reveal} ${styles.revealIn} grid grid-cols-3 gap-5 pt-8 border-t border-[var(--color-surface-dark)]`}>
             {stats.map((s, i) => (
               <div key={i}>
-                <p className={`${styles.fontSerif} text-[1.8rem] font-medium text-[var(--c-espresso)] leading-none`}>
+                <p className={`${styles.fontSerif} text-[1.8rem] font-medium text-[var(--color-secondary)] leading-none`}>
                   {s.value}
                 </p>
-                <p className="text-[11px] text-[var(--c-dust)] mt-1 tracking-wide">{s.label}</p>
+                <p className="text-[11px] text-[var(--color-dust)] mt-1 tracking-wide">{s.label}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Right: hero image */}
-        <div className="relative overflow-hidden bg-[var(--c-linen-dark)] order-1 lg:order-2 h-[55vw] max-h-[600px] lg:h-auto lg:max-h-none">
+        <div className="relative overflow-hidden bg-[var(--color-surface-dark)] order-1 lg:order-2 h-[55vw] max-h-[600px] lg:h-auto lg:max-h-none">
           {image && (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -85,19 +85,19 @@ const HeroImage: SectionComponent = function HeroImage({ section }: TemplateSect
               loading="eager"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--c-espresso)]/20 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--color-secondary)]/20 pointer-events-none"></div>
 
           {/* Float badge */}
           <div className={`absolute bottom-8 right-8 ${styles.floatSoft}`}>
-            <div className="bg-[var(--c-linen)]/95 backdrop-blur-sm px-5 py-4 shadow-xl border border-[var(--c-linen-dark)]/70">
-              <p className={`${styles.fontSerif} text-[var(--c-espresso)] text-[1.1rem] font-medium italic mb-0.5`}>{badgeText}</p>
-              <p className="text-[11px] text-[var(--c-dust)] tracking-wider uppercase">{badgeSubtext}</p>
+            <div className="bg-[var(--color-surface)]/95 backdrop-blur-sm px-5 py-4 shadow-xl border border-[var(--color-surface-dark)]/70">
+              <p className={`${styles.fontSerif} text-[var(--color-secondary)] text-[1.1rem] font-medium italic mb-0.5`}>{badgeText}</p>
+              <p className="text-[11px] text-[var(--color-dust)] tracking-wider uppercase">{badgeSubtext}</p>
             </div>
           </div>
 
           {/* Season tag */}
           <div className="absolute top-8 left-8">
-            <div className="flex items-center gap-2 bg-[var(--c-terra)] text-[var(--c-linen)] px-4 py-2">
+            <div className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-surface)] px-4 py-2">
               <LeafIcon size={13} className="fill-current" />
               <span className="text-[11px] font-semibold tracking-widest uppercase">{seasonTag}</span>
             </div>

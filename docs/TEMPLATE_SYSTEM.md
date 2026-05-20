@@ -187,6 +187,47 @@ interface TemplateModule {
 
 `slots` / `ThemeSlotDefinition` 은 **제거됨** (Phase 6d). 이전 어댑터(`buildLibraryFromSlots`)도 사라졌다.
 
+### 2.5 `DesignTokens` — 풍부한 토큰 (Issue #9)
+
+`tokens.ts`는 **두 레이어**로 구성:
+
+```ts
+// src/templates/cafe/default/tokens.ts
+export const defaultGlobalStyles: TemplateGlobalStyles = { ... };  // 얇은 layer (사용자 편집)
+export const designTokens: DesignTokens = { ... };                 // 풍부한 layer (코드 고정)
+```
+
+**얇은 layer (`TemplateGlobalStyles`)** — 어드민·에디터에서 편집 가능한 5개 필드:
+`primaryColor`, `secondaryColor`, `fontFamily`, `fontSize`, `layout`.
+
+**풍부한 layer (`DesignTokens`)** — 코드 고정. 6개 차원 (`colors`, `fonts`, `spacing`, `radius`, `shadows`, `typography`). 각 차원 entry는 `--{dimension-singular}-{key}` CSS custom property가 됨 (`colors.primary` → `--color-primary`).
+
+**Overlay 규칙** — `src/lib/template/design-tokens.ts`의 `OVERLAY_MAP`이 얇은 layer를 풍부한 layer 위에 덮음:
+
+| 얇은 layer 필드 | 덮어쓰는 CSS var |
+|---|---|
+| `primaryColor` | `--color-primary` |
+| `secondaryColor` | `--color-secondary` |
+| `fontFamily` | `--font-base` |
+| `fontSize` | `--font-size` |
+
+→ 사용자가 `primaryColor`만 바꿔도 사이트 전역의 `var(--color-primary)` 참조가 즉시 propagate.
+
+**적용 방법**: 템플릿 `index.tsx`에서 `RenderComposition`에 `designTokens` prop 전달:
+
+```tsx
+<RenderComposition
+  {...props}
+  library={library}
+  className={styles.themeRoot}
+  designTokens={designTokens}   // ← root div에 var들이 inline style로 주입됨
+/>
+```
+
+**컴포넌트 사용**: 인라인 hex 금지 (§6.3 룰). `var(--color-primary)`, `var(--font-base)` 등 참조만 허용.
+
+현재 적용 상태: **cafe-default**만 풍부 토큰 패턴 적용 완료 (#9 demo). 다른 8개 템플릿은 `.module.css`에 기존 `--{prefix}-{name}` 패턴 유지 — 점진적 마이그 가능.
+
 ---
 
 ## 3. 테마 디렉터리 구조

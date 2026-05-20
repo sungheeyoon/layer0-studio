@@ -15,10 +15,10 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
   const cardDesc = getFieldValue(data, 'cardDesc') || '';
 
   const features = [
-    { title: getFieldValue(data, 'f1Title'), desc: getFieldValue(data, 'f1Desc'), icon: <BuildingsIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
-    { title: getFieldValue(data, 'f2Title'), desc: getFieldValue(data, 'f2Desc'), icon: <LaptopIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
-    { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), icon: <BookIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
-    { title: getFieldValue(data, 'f4Title'), desc: getFieldValue(data, 'f4Desc'), icon: <VinylIcon size={20} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(data, 'f1Title'), desc: getFieldValue(data, 'f1Desc'), icon: <BuildingsIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: getFieldValue(data, 'f2Title'), desc: getFieldValue(data, 'f2Desc'), icon: <LaptopIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), icon: <BookIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: getFieldValue(data, 'f4Title'), desc: getFieldValue(data, 'f4Desc'), icon: <VinylIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
   ].filter(f => f.title);
 
   return (
@@ -27,7 +27,7 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
         <div className={`${styles.reveal} ${styles.revealIn}`}>
           <p className={`${styles.sectionLabel} mb-5`}>{label}</p>
           <h2
-            className={`${styles.fontSerif} leading-[1.1] text-[var(--c-espresso)]`}
+            className={`${styles.fontSerif} leading-[1.1] text-[var(--color-secondary)]`}
             style={{ fontSize: 'clamp(2.2rem, 4vw, 3.6rem)' }}
           >
             {title.split('\n').map((line, i) => (
@@ -35,7 +35,7 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
             ))}
           </h2>
         </div>
-        <p className={`${styles.reveal} ${styles.revealIn} text-[var(--c-dust)] text-[14px] leading-relaxed max-w-[280px]`}>
+        <p className={`${styles.reveal} ${styles.revealIn} text-[var(--color-dust)] text-[14px] leading-relaxed max-w-[280px]`}>
           {description}
         </p>
       </div>
@@ -43,7 +43,7 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
       {/* Asymmetric image grid */}
       <div className="grid grid-cols-12 gap-4 mb-12">
         {/* Large left image */}
-        <div className={`${styles.reveal} ${styles.revealIn} col-span-12 lg:col-span-7 overflow-hidden bg-[var(--c-linen-dark)]`} style={{ height: '480px' }}>
+        <div className={`${styles.reveal} ${styles.revealIn} col-span-12 lg:col-span-7 overflow-hidden bg-[var(--color-surface-dark)]`} style={{ height: '480px' }}>
           {imageLarge && (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -57,7 +57,7 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
 
         {/* Right column: 2 stacked */}
         <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
-          <div className={`${styles.reveal} ${styles.revealIn} overflow-hidden bg-[var(--c-linen-dark)] flex-1`} style={{ minHeight: '220px' }}>
+          <div className={`${styles.reveal} ${styles.revealIn} overflow-hidden bg-[var(--color-surface-dark)] flex-1`} style={{ minHeight: '220px' }}>
             {imageSmall && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
@@ -69,11 +69,11 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
             )}
           </div>
           {/* Text card */}
-          <div className={`${styles.reveal} ${styles.revealIn} bg-[var(--c-terra)] p-7 flex flex-col justify-between`} style={{ minHeight: '220px' }}>
-            <SunIcon size={28} className="text-[var(--c-linen)] opacity-50 fill-current" />
+          <div className={`${styles.reveal} ${styles.revealIn} bg-[var(--color-primary)] p-7 flex flex-col justify-between`} style={{ minHeight: '220px' }}>
+            <SunIcon size={28} className="text-[var(--color-surface)] opacity-50 fill-current" />
             <div>
-              <h3 className={`${styles.fontSerif} italic text-[var(--c-linen)] text-[1.4rem] mb-2`}>{cardTitle}</h3>
-              <p className="text-[var(--c-linen)] opacity-70 text-[13px] leading-relaxed whitespace-pre-line">{cardDesc}</p>
+              <h3 className={`${styles.fontSerif} italic text-[var(--color-surface)] text-[1.4rem] mb-2`}>{cardTitle}</h3>
+              <p className="text-[var(--color-surface)] opacity-70 text-[13px] leading-relaxed whitespace-pre-line">{cardDesc}</p>
             </div>
           </div>
         </div>
@@ -82,10 +82,10 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
       {/* Space features */}
       <div className={`${styles.reveal} ${styles.revealIn} grid grid-cols-2 md:grid-cols-4 gap-4`}>
         {features.map((f, i) => (
-          <div key={i} className="bg-[var(--c-cream)] border border-[var(--c-linen-dark)] p-5 spring hover:border-[var(--c-terra)]/40">
+          <div key={i} className="bg-[var(--color-cream)] border border-[var(--color-surface-dark)] p-5 spring hover:border-[var(--color-primary)]/40">
             <div className="mb-3 block">{f.icon}</div>
-            <p className="text-[var(--c-espresso)] font-medium text-[13px] mb-1">{f.title}</p>
-            <p className="text-[var(--c-dust)] text-[12px] leading-relaxed">{f.desc}</p>
+            <p className="text-[var(--color-secondary)] font-medium text-[13px] mb-1">{f.title}</p>
+            <p className="text-[var(--color-dust)] text-[12px] leading-relaxed">{f.desc}</p>
           </div>
         ))}
       </div>

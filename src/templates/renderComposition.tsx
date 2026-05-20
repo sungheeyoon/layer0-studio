@@ -1,10 +1,18 @@
 import React from 'react';
-import { TemplateRendererProps, TemplateLibrary } from './types';
+import { TemplateRendererProps, TemplateLibrary, DesignTokens } from './types';
+import { tokensToCssVars } from '@/lib/template/design-tokens';
 
 interface RenderCompositionProps extends TemplateRendererProps {
   library: TemplateLibrary;
   className?: string;
   itemClassName?: (sectionId: string) => string;
+  /**
+   * Rich design tokens. When provided, the root div carries
+   * `style={tokensToCssVars(designTokens, siteJson.globalStyles)}` so every
+   * descendant `var(--color-*)` / `var(--font-*)` reference resolves to the
+   * template's palette, with user globalStyles overrides applied on top.
+   */
+  designTokens?: DesignTokens;
 }
 
 /**
@@ -20,7 +28,8 @@ export function RenderComposition({
   activePageId,
   library,
   className,
-  itemClassName
+  itemClassName,
+  designTokens,
 }: RenderCompositionProps) {
   const page = activePageId
     ? siteJson.pages.find(p => p.id === activePageId)
@@ -28,8 +37,12 @@ export function RenderComposition({
 
   const sections = page?.sections || [];
 
+  const rootStyle = designTokens
+    ? tokensToCssVars(designTokens, siteJson.globalStyles)
+    : undefined;
+
   return (
-    <div className={className}>
+    <div className={className} style={rootStyle}>
       {sections.map((section) => {
         if (!section.visible) return null;
 

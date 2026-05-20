@@ -17,13 +17,13 @@ const Testimonials: SectionComponent = function Testimonials({ section }: Templa
   })).filter(r => r.body);
 
   return (
-    <section className="py-24 lg:py-32 bg-[var(--c-linen-dark)]" id="reviews">
+    <section className="py-24 lg:py-32 bg-[var(--color-surface-dark)]" id="reviews">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-6">
           <div className={`${styles.reveal} ${styles.revealIn}`}>
             <p className={`${styles.sectionLabel} mb-5`}>{label}</p>
             <h2
-              className={`${styles.fontSerif} leading-[1.1] text-[var(--c-espresso)]`}
+              className={`${styles.fontSerif} leading-[1.1] text-[var(--color-secondary)]`}
               style={{ fontSize: 'clamp(2.2rem, 4vw, 3.4rem)' }}
             >
               {title.split('\n').map((line, i) => (
@@ -34,13 +34,13 @@ const Testimonials: SectionComponent = function Testimonials({ section }: Templa
           <div className={`${styles.reveal} ${styles.revealIn} flex items-center gap-3`}>
             <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
-                <StarIcon key={i} size={18} className="text-[var(--c-terra)] fill-current" />
+                <StarIcon key={i} size={18} className="text-[var(--color-primary)] fill-current" />
               ))}
             </div>
-            <span className={`${styles.fontSerif} text-[var(--c-espresso)] text-[2.2rem] font-medium leading-none`}>
+            <span className={`${styles.fontSerif} text-[var(--color-secondary)] text-[2.2rem] font-medium leading-none`}>
               {ratingValue}
             </span>
-            <span className="text-[var(--c-dust)] text-sm">/ 5.0</span>
+            <span className="text-[var(--color-dust)] text-sm">/ 5.0</span>
           </div>
         </div>
 
@@ -49,19 +49,19 @@ const Testimonials: SectionComponent = function Testimonials({ section }: Templa
             <div key={i} className={`${styles.reveal} ${styles.revealIn} ${styles.reviewCard} p-7 ${r.mt}`}>
               <div className="flex gap-0.5 mb-5">
                 {[...Array(5)].map((_, j) => (
-                  <StarIcon key={j} size={13} className="text-[var(--c-terra)] fill-current" />
+                  <StarIcon key={j} size={13} className="text-[var(--color-primary)] fill-current" />
                 ))}
               </div>
-              <p className={`${styles.fontSerif} italic text-[var(--c-espresso-soft)] text-[1rem] leading-[1.8] mb-6 whitespace-pre-line`}>
+              <p className={`${styles.fontSerif} italic text-[var(--color-secondary-soft)] text-[1rem] leading-[1.8] mb-6 whitespace-pre-line`}>
                 {r.body}
               </p>
-              <div className="flex items-center gap-3 border-t border-[var(--c-linen-dark)] pt-4">
-                <div className={`${styles.fontSerif} w-9 h-9 rounded-full bg-[var(--c-linen-dark)] flex items-center justify-center text-[var(--c-dust)] italic text-sm shrink-0`}>
+              <div className="flex items-center gap-3 border-t border-[var(--color-surface-dark)] pt-4">
+                <div className={`${styles.fontSerif} w-9 h-9 rounded-full bg-[var(--color-surface-dark)] flex items-center justify-center text-[var(--color-dust)] italic text-sm shrink-0`}>
                   {r.author?.charAt(0)}
                 </div>
                 <div>
-                  <p className="text-[var(--c-espresso)] font-medium text-[13px]">{r.author}</p>
-                  <p className="text-[var(--c-dust)] text-[11px]">{r.meta}</p>
+                  <p className="text-[var(--color-secondary)] font-medium text-[13px]">{r.author}</p>
+                  <p className="text-[var(--color-dust)] text-[11px]">{r.meta}</p>
                 </div>
               </div>
             </div>

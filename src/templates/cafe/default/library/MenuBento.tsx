@@ -27,8 +27,8 @@ const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSect
       image: pImage,
       badge: pBadge,
       colSpan: idx === 0 ? 'md:col-span-2' : '',
-      icon: idx === 2 ? <CupIcon size={20} className="text-[var(--c-terra)] fill-current" /> :
-        idx === 3 ? <PieChartIcon size={20} className="text-[var(--c-terra)] fill-current" /> : null,
+      icon: idx === 2 ? <CupIcon size={20} className="text-[var(--color-primary)] fill-current" /> :
+        idx === 3 ? <PieChartIcon size={20} className="text-[var(--color-primary)] fill-current" /> : null,
     };
   }).filter(p => p.title);
 
@@ -38,7 +38,7 @@ const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSect
         <div className={`${styles.reveal} ${styles.revealIn}`}>
           <p className={`${styles.sectionLabel} mb-5`}>{label}</p>
           <h2
-            className={`${styles.fontSerif} leading-[1.1] text-[var(--c-espresso)]`}
+            className={`${styles.fontSerif} leading-[1.1] text-[var(--color-secondary)]`}
             style={{ fontSize: 'clamp(2.2rem, 4vw, 3.6rem)' }}
           >
             {title.split('\n').map((line, i) => (
@@ -46,7 +46,7 @@ const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSect
             ))}
           </h2>
         </div>
-        <p className={`${styles.reveal} ${styles.revealIn} text-[var(--c-dust)] text-[14px] leading-relaxed max-w-[280px]`}>
+        <p className={`${styles.reveal} ${styles.revealIn} text-[var(--color-dust)] text-[14px] leading-relaxed max-w-[280px]`}>
           {description}
         </p>
       </div>
@@ -55,7 +55,7 @@ const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSect
         {programs.map((p) => (
           <div
             key={p.id}
-            className={`${styles.reveal} ${styles.revealIn} ${styles.menuCard} ${p.colSpan || ''} ${p.image ? '' : 'bg-[var(--c-cream)] border border-[var(--c-linen-dark)] p-7 flex flex-col justify-between spring hover:border-[var(--c-terra)]/40'}`}
+            className={`${styles.reveal} ${styles.revealIn} ${styles.menuCard} ${p.colSpan || ''} ${p.image ? '' : 'bg-[var(--color-cream)] border border-[var(--color-surface-dark)] p-7 flex flex-col justify-between spring hover:border-[var(--color-primary)]/40'}`}
           >
             {p.image ? (
               <>
@@ -70,18 +70,18 @@ const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSect
                   <div className="flex items-end justify-between">
                     <div>
                       {p.badge && (
-                        <span className="inline-block bg-[var(--c-terra)] text-[var(--c-linen)] text-[10px] font-semibold tracking-widest uppercase px-3 py-1 mb-3">
+                        <span className="inline-block bg-[var(--color-primary)] text-[var(--color-surface)] text-[10px] font-semibold tracking-widest uppercase px-3 py-1 mb-3">
                           {p.badge}
                         </span>
                       )}
-                      <h3 className={`${styles.fontSerif} text-[var(--c-linen)] text-[1.5rem] italic mb-1`}>
+                      <h3 className={`${styles.fontSerif} text-[var(--color-surface)] text-[1.5rem] italic mb-1`}>
                         {p.title}
                       </h3>
-                      <p className="text-[var(--c-linen)]/65 text-[13px]">{p.desc}</p>
+                      <p className="text-[var(--color-surface)]/65 text-[13px]">{p.desc}</p>
                     </div>
                     {p.price && (
-                      <p className={`${styles.fontSerif} text-[var(--c-linen)] text-[1.4rem] font-medium mb-1`}>
-                        {p.price}<span className="text-[var(--c-linen)]/60 text-sm">원</span>
+                      <p className={`${styles.fontSerif} text-[var(--color-surface)] text-[1.4rem] font-medium mb-1`}>
+                        {p.price}<span className="text-[var(--color-surface)]/60 text-sm">원</span>
                       </p>
                     )}
                   </div>
@@ -89,17 +89,17 @@ const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSect
               </>
             ) : (
               <>
-                <div className="w-10 h-10 flex items-center justify-center bg-[var(--c-terra)]/10 border border-[var(--c-terra)]/20 shrink-0">
+                <div className="w-10 h-10 flex items-center justify-center bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 shrink-0">
                   {p.icon}
                 </div>
                 <div>
-                  <h3 className={`${styles.fontSerif} text-[var(--c-espresso)] text-[1.3rem] italic mb-2`}>
+                  <h3 className={`${styles.fontSerif} text-[var(--color-secondary)] text-[1.3rem] italic mb-2`}>
                     {p.title}
                   </h3>
-                  <p className="text-[var(--c-dust)] text-[13px] leading-relaxed mb-4">{p.desc}</p>
+                  <p className="text-[var(--color-dust)] text-[13px] leading-relaxed mb-4">{p.desc}</p>
                   {p.price && (
-                    <p className={`${styles.fontSerif} text-[var(--c-espresso)] font-medium text-[1.1rem]`}>
-                      {p.price}<span className="text-[var(--c-dust)] text-sm">원</span>
+                    <p className={`${styles.fontSerif} text-[var(--color-secondary)] font-medium text-[1.1rem]`}>
+                      {p.price}<span className="text-[var(--color-dust)] text-sm">원</span>
                     </p>
                   )}
                 </div>
