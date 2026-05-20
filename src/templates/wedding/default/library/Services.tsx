@@ -53,7 +53,7 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={service1.image} alt={service1.title} loading="lazy" />
               )}
-              <div className={styles.photoOverlay} style={{ opacity: 1, background: 'linear-gradient(to top, rgba(10,9,8,0.85) 0%, rgba(10,9,8,0.4) 50%, transparent 100%)' }} />
+              <div className={styles.photoOverlay} style={{ opacity: 1, background: 'linear-gradient(to top, color-mix(in srgb, var(--w-bg) 85%, transparent) 0%, color-mix(in srgb, var(--w-bg) 40%, transparent) 50%, transparent 100%)' }} />
               <div style={{
                 position: 'absolute',
                 inset: 0,
@@ -67,22 +67,22 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
                   <span style={{
                     display: 'inline-block',
                     padding: '0.25rem 0.625rem',
-                    background: 'rgba(232, 180, 184, 0.2)',
-                    color: 'var(--w-blush, #e8b4b8)',
+                    background: 'color-mix(in srgb, var(--w-blush) 20%, transparent)',
+                    color: 'var(--w-blush, var(--w-blush))',
                     fontSize: '0.75rem',
                     fontWeight: 700,
                     borderRadius: '9999px',
-                    border: '1px solid rgba(232, 180, 184, 0.2)',
+                    border: '1px solid color-mix(in srgb, var(--w-blush) 20%, transparent)',
                     marginBottom: '0.75rem',
                     width: 'fit-content',
                   }}>
                     {service1.badge}
                   </span>
                 )}
-                <h3 style={{ color: '#f5f0eb', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', wordBreak: 'keep-all' }}>
+                <h3 style={{ color: 'var(--w-cream)', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', wordBreak: 'keep-all' }}>
                   {service1.title}
                 </h3>
-                <p style={{ color: 'rgba(245, 240, 235, 0.6)', fontSize: '0.875rem', wordBreak: 'keep-all', margin: 0 }}>
+                <p style={{ color: 'color-mix(in srgb, var(--w-cream) 60%, transparent)', fontSize: '0.875rem', wordBreak: 'keep-all', margin: 0 }}>
                   {service1.body}
                 </p>
               </div>
@@ -96,7 +96,7 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={service2.image} alt={service2.title} loading="lazy" />
               )}
-              <div className={styles.photoOverlay} style={{ opacity: 1, background: 'linear-gradient(to top, rgba(10,9,8,0.85) 0%, rgba(10,9,8,0.3) 60%, transparent 100%)' }} />
+              <div className={styles.photoOverlay} style={{ opacity: 1, background: 'linear-gradient(to top, color-mix(in srgb, var(--w-bg) 85%, transparent) 0%, color-mix(in srgb, var(--w-bg) 30%, transparent) 60%, transparent 100%)' }} />
               <div style={{
                 position: 'absolute',
                 inset: 0,
@@ -106,10 +106,10 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
                 padding: '1.75rem',
                 zIndex: 2,
               }}>
-                <h3 style={{ color: '#f5f0eb', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', wordBreak: 'keep-all' }}>
+                <h3 style={{ color: 'var(--w-cream)', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', wordBreak: 'keep-all' }}>
                   {service2.title}
                 </h3>
-                <p style={{ color: 'rgba(245, 240, 235, 0.6)', fontSize: '0.875rem', wordBreak: 'keep-all', margin: 0 }}>
+                <p style={{ color: 'color-mix(in srgb, var(--w-cream) 60%, transparent)', fontSize: '0.875rem', wordBreak: 'keep-all', margin: 0 }}>
                   {service2.body}
                 </p>
               </div>
@@ -122,8 +122,8 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
               <div className={styles.iconCircle}>
                 <HeartIcon size={20} />
               </div>
-              <h3 style={{ color: '#f5f0eb', fontWeight: 700, marginBottom: '0.5rem', wordBreak: 'keep-all' }}>{service3.title}</h3>
-              <p style={{ color: 'rgba(245, 240, 235, 0.5)', fontSize: '0.875rem', lineHeight: 1.65, wordBreak: 'keep-all', margin: 0 }}>{service3.body}</p>
+              <h3 style={{ color: 'var(--w-cream)', fontWeight: 700, marginBottom: '0.5rem', wordBreak: 'keep-all' }}>{service3.title}</h3>
+              <p style={{ color: 'color-mix(in srgb, var(--w-cream) 50%, transparent)', fontSize: '0.875rem', lineHeight: 1.65, wordBreak: 'keep-all', margin: 0 }}>{service3.body}</p>
             </div>
           )}
 
@@ -133,15 +133,15 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
               <div className={`${styles.iconCircle} ${styles.iconCircleGold}`}>
                 <GiftIcon size={20} />
               </div>
-              <h3 style={{ color: '#f5f0eb', fontWeight: 700, marginBottom: '0.5rem', wordBreak: 'keep-all' }}>{service4.title}</h3>
-              <p style={{ color: 'rgba(245, 240, 235, 0.5)', fontSize: '0.875rem', lineHeight: 1.65, wordBreak: 'keep-all', margin: 0 }}>{service4.body}</p>
+              <h3 style={{ color: 'var(--w-cream)', fontWeight: 700, marginBottom: '0.5rem', wordBreak: 'keep-all' }}>{service4.title}</h3>
+              <p style={{ color: 'color-mix(in srgb, var(--w-cream) 50%, transparent)', fontSize: '0.875rem', lineHeight: 1.65, wordBreak: 'keep-all', margin: 0 }}>{service4.body}</p>
             </div>
           )}
 
           {/* CTA card */}
           {ctaCardButton && (
             <div style={{
-              background: 'var(--w-blush, #e8b4b8)',
+              background: 'var(--w-blush, var(--w-blush))',
               borderRadius: '1rem',
               padding: '1.75rem',
               display: 'flex',
@@ -153,7 +153,7 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
                 <p className={styles.fontDisplay} style={{
                   fontSize: '1.5rem',
                   fontWeight: 300,
-                  color: '#0a0908',
+                  color: 'var(--w-bg)',
                   lineHeight: 1.2,
                   marginBottom: '0.75rem',
                   wordBreak: 'keep-all',
@@ -161,7 +161,7 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
                 }}>
                   {ctaCardTitle}
                 </p>
-                <p style={{ color: 'rgba(10, 9, 8, 0.6)', fontSize: '0.875rem', wordBreak: 'keep-all', margin: 0 }}>
+                <p style={{ color: 'color-mix(in srgb, var(--w-bg) 60%, transparent)', fontSize: '0.875rem', wordBreak: 'keep-all', margin: 0 }}>
                   {ctaCardBody}
                 </p>
               </div>

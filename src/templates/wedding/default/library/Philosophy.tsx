@@ -21,7 +21,7 @@ const Philosophy: SectionComponent = function Philosophy({ section }: TemplateSe
         </h2>
         {body && (
           <p style={{
-            color: 'rgba(245, 240, 235, 0.5)',
+            color: 'color-mix(in srgb, var(--w-cream) 50%, transparent)',
             lineHeight: 1.7,
             fontSize: '1.0625rem',
             wordBreak: 'keep-all',

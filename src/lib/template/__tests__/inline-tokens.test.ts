@@ -48,6 +48,12 @@ describe('scanInlineTokens', () => {
     expect(v.some(x => x.code === 'INLINE_FONT_LITERAL')).toBe(true);
   });
 
+  it('does NOT flag CSS-wide keywords (inherit / initial / unset / revert) as font literals', () => {
+    expect(scanInlineTokens(`<div style={{ fontFamily: 'inherit' }} />`)).toHaveLength(0);
+    expect(scanInlineTokens(`<div style={{ fontFamily: 'initial' }} />`)).toHaveLength(0);
+    expect(scanInlineTokens(`const x = "font-family: 'unset'";`)).toHaveLength(0);
+  });
+
   it('passes var(--*) token references', () => {
     const v = scanInlineTokens(`<div style={{ color: 'var(--c-terra)', background: 'var(--c-bg)' }} />`);
     expect(v).toHaveLength(0);

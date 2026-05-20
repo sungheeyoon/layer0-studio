@@ -36,7 +36,7 @@ const Contact: SectionComponent = function Contact({ section }: TemplateSectionP
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
             loading="lazy"
           />
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(10, 9, 8, 0.88)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'color-mix(in srgb, var(--w-bg) 88%, transparent)' }} />
         </div>
       )}
 
@@ -56,7 +56,7 @@ const Contact: SectionComponent = function Contact({ section }: TemplateSectionP
             {renderAccentTitle(title, styles.titleAccent)}
           </h2>
           {body && (
-            <p style={{ color: 'rgba(245, 240, 235, 0.5)', lineHeight: 1.65, wordBreak: 'keep-all', marginBottom: '2rem' }}>
+            <p style={{ color: 'color-mix(in srgb, var(--w-cream) 50%, transparent)', lineHeight: 1.65, wordBreak: 'keep-all', marginBottom: '2rem' }}>
               {body}
             </p>
           )}
@@ -75,13 +75,13 @@ const Contact: SectionComponent = function Contact({ section }: TemplateSectionP
         </div>
 
         <div style={{
-          background: 'rgba(19, 17, 15, 0.8)',
+          background: 'color-mix(in srgb, var(--w-surface) 80%, transparent)',
           backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(232, 180, 184, 0.1)',
+          border: '1px solid color-mix(in srgb, var(--w-blush) 10%, transparent)',
           borderRadius: '1rem',
           padding: '2rem',
         }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#f5f0eb', marginTop: 0, marginBottom: '1.5rem', wordBreak: 'keep-all' }}>
+          <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--w-cream)', marginTop: 0, marginBottom: '1.5rem', wordBreak: 'keep-all' }}>
             {formTitle}
           </h3>
           <form
@@ -146,7 +146,7 @@ const Contact: SectionComponent = function Contact({ section }: TemplateSectionP
           {formNote && (
             <p style={{
               fontSize: '0.75rem',
-              color: 'rgba(245, 240, 235, 0.2)',
+              color: 'color-mix(in srgb, var(--w-cream) 20%, transparent)',
               textAlign: 'center',
               marginTop: '1rem',
               wordBreak: 'keep-all',
@@ -167,18 +167,18 @@ function ContactRow({ icon, label, value }: { icon: React.ReactNode; label: stri
         width: '2.25rem',
         height: '2.25rem',
         borderRadius: '0.5rem',
-        background: 'rgba(232, 180, 184, 0.1)',
+        background: 'color-mix(in srgb, var(--w-blush) 10%, transparent)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
-        color: 'var(--w-blush, #e8b4b8)',
+        color: 'var(--w-blush, var(--w-blush))',
       }}>
         {icon}
       </div>
       <div>
-        <p style={{ fontSize: '0.75rem', color: 'rgba(245, 240, 235, 0.3)', margin: 0 }}>{label}</p>
-        <p style={{ fontWeight: 700, color: '#f5f0eb', margin: 0 }}>{value}</p>
+        <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--w-cream) 30%, transparent)', margin: 0 }}>{label}</p>
+        <p style={{ fontWeight: 700, color: 'var(--w-cream)', margin: 0 }}>{value}</p>
       </div>
     </div>
   );
