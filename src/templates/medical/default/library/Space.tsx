@@ -12,33 +12,33 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
   const subImage = getFieldValue(data, 'subImage') || '';
 
   const features = [
-    { title: getFieldValue(data, 'feature1Title'), desc: getFieldValue(data, 'feature1Desc'), icon: <BuildingsIcon size={22} className="text-[#C8A97E]" /> },
-    { title: getFieldValue(data, 'feature2Title'), desc: getFieldValue(data, 'feature2Desc'), icon: <SofaIcon size={22} className="text-[#C8A97E]" /> },
-    { title: getFieldValue(data, 'feature3Title'), desc: getFieldValue(data, 'feature3Desc'), icon: <ShieldCheckIcon size={22} className="text-[#C8A97E]" /> },
-    { title: getFieldValue(data, 'feature4Title'), desc: getFieldValue(data, 'feature4Desc'), icon: <MapPointIcon size={22} className="text-[#C8A97E]" /> },
+    { title: getFieldValue(data, 'feature1Title'), desc: getFieldValue(data, 'feature1Desc'), icon: <BuildingsIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: getFieldValue(data, 'feature2Title'), desc: getFieldValue(data, 'feature2Desc'), icon: <SofaIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: getFieldValue(data, 'feature3Title'), desc: getFieldValue(data, 'feature3Desc'), icon: <ShieldCheckIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: getFieldValue(data, 'feature4Title'), desc: getFieldValue(data, 'feature4Desc'), icon: <MapPointIcon size={22} className="text-[var(--m-gold)]" /> },
   ].filter(f => f.title);
 
   return (
-    <section className="bg-[#1C1917] overflow-hidden" id="space">
+    <section className="bg-[var(--m-charcoal)] overflow-hidden" id="space">
       <div className="grid lg:grid-cols-2 min-h-[80vh]">
         {/* Left: text + feature grid */}
         <div className="flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-20 order-2 lg:order-1">
           <div>
-            <p className={styles.sectionLabel} style={{ color: '#C8A97E' }}>{label}</p>
-            <h2 className={`${styles.fontDisplay} text-[clamp(2.4rem,4vw,3.8rem)] font-light text-[#F9F7F3] leading-[1.08] mt-6 mb-8 whitespace-pre-line`}>
+            <p className={styles.sectionLabel} style={{ color: 'var(--m-gold)' }}>{label}</p>
+            <h2 className={`${styles.fontDisplay} text-[clamp(2.4rem,4vw,3.8rem)] font-light text-[var(--m-cream)] leading-[1.08] mt-6 mb-8 whitespace-pre-line`}>
               {title}
             </h2>
-            <p className="text-[#F9F7F3]/55 text-[15px] leading-[1.85] max-w-[360px] mb-12 whitespace-pre-line">
+            <p className="text-[var(--m-cream)]/55 text-[15px] leading-[1.85] max-w-[360px] mb-12 whitespace-pre-line">
               {description}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {features.map((f, i) => (
-              <div key={i} className="border border-[#F9F7F3]/10 p-5 hover:border-[#C8A97E]/40 transition-colors group">
+              <div key={i} className="border border-[var(--m-cream)]/10 p-5 hover:border-[var(--m-gold)]/40 transition-colors group">
                 <div className="mb-3 block group-hover:scale-110 transition-transform">{f.icon}</div>
-                <p className="text-[#F9F7F3] text-sm font-medium mb-1">{f.title}</p>
-                <p className="text-[#F9F7F3]/40 text-xs leading-relaxed">{f.desc}</p>
+                <p className="text-[var(--m-cream)] text-sm font-medium mb-1">{f.title}</p>
+                <p className="text-[var(--m-cream)]/40 text-xs leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -56,7 +56,7 @@ const Space: SectionComponent = function Space({ section }: TemplateSectionProps
           )}
           {/* Inset smaller image */}
           {subImage && (
-            <div className="absolute bottom-8 -left-6 lg:-left-12 w-44 lg:w-60 shadow-2xl border-[3px] border-[#1C1917]">
+            <div className="absolute bottom-8 -left-6 lg:-left-12 w-44 lg:w-60 shadow-2xl border-[3px] border-[var(--m-charcoal)]">
               {/* eslint-disable-next-line @next/next/no-img-element */ }
               <img
                 src={subImage}

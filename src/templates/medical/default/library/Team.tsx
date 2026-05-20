@@ -24,11 +24,11 @@ const Team: SectionComponent = function Team({ section }: TemplateSectionProps) 
       <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-6">
         <div>
           <p className={`${styles.sectionLabel} mb-5`}>{label}</p>
-          <h2 className={`${styles.fontDisplay} text-[clamp(2rem,3.5vw,3.2rem)] font-light text-[#1C1917] leading-[1.12] whitespace-pre-line`}>
+          <h2 className={`${styles.fontDisplay} text-[clamp(2rem,3.5vw,3.2rem)] font-light text-[var(--m-charcoal)] leading-[1.12] whitespace-pre-line`}>
             {title}
           </h2>
         </div>
-        <p className="text-[#9C9189] text-[14px] leading-relaxed max-w-[280px]">
+        <p className="text-[var(--m-warm-gray)] text-[14px] leading-relaxed max-w-[280px]">
           {description}
         </p>
       </div>
@@ -36,26 +36,26 @@ const Team: SectionComponent = function Team({ section }: TemplateSectionProps) 
       <div className="grid md:grid-cols-3 gap-6 lg:gap-10">
         {members.map((m, i) => (
           <div key={i} className={`${m.mt}`}>
-            <div className="aspect-[3/4] overflow-hidden bg-[#F0EBE1]">
+            <div className="aspect-[3/4] overflow-hidden bg-[var(--m-cream-dark)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={m.image} alt={m.name} className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700" />
             </div>
             <div className="pt-6">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-                <h3 className="text-[#1C1917] font-semibold text-lg">{m.name}</h3>
-                <span className={`${styles.pill} bg-[#F0EBE1] text-[#9C9189] border border-[#E5DDD4] text-[11px]`}>{m.role}</span>
+                <h3 className="text-[var(--m-charcoal)] font-semibold text-lg">{m.name}</h3>
+                <span className={`${styles.pill} bg-[var(--m-cream-dark)] text-[var(--m-warm-gray)] border border-[var(--m-warm-light)] text-[11px]`}>{m.role}</span>
               </div>
               <div className="space-y-2">
-                <p className="flex items-center gap-2 text-[#9C9189] text-[12px]">
-                  <GraduationCapIcon size={14} className="text-[#C8A97E] shrink-0" />
+                <p className="flex items-center gap-2 text-[var(--m-warm-gray)] text-[12px]">
+                  <GraduationCapIcon size={14} className="text-[var(--m-gold)] shrink-0" />
                   {m.info1}
                 </p>
-                <p className="flex items-center gap-2 text-[#9C9189] text-[12px]">
-                  <HospitalIcon size={14} className="text-[#C8A97E] shrink-0" />
+                <p className="flex items-center gap-2 text-[var(--m-warm-gray)] text-[12px]">
+                  <HospitalIcon size={14} className="text-[var(--m-gold)] shrink-0" />
                   {m.info2}
                 </p>
-                <p className="flex items-center gap-2 text-[#9C9189] text-[12px]">
-                  <ClockIcon size={14} className="text-[#C8A97E] shrink-0" />
+                <p className="flex items-center gap-2 text-[var(--m-warm-gray)] text-[12px]">
+                  <ClockIcon size={14} className="text-[var(--m-gold)] shrink-0" />
                   {m.info3}
                 </p>
               </div>

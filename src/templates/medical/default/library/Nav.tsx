@@ -23,13 +23,13 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
           {/* Logo */}
           <a href="#" className="flex flex-col hover:opacity-60 transition-opacity">
             <span className={`${styles.fontDisplay} text-[22px] font-light tracking-[.14em] leading-none`}>{brandName}</span>
-            <span className="text-[9px] font-medium tracking-[.22em] text-[#9C9189] uppercase mt-0.5">{brandSubtext}</span>
+            <span className="text-[9px] font-medium tracking-[.22em] text-[var(--m-warm-gray)] uppercase mt-0.5">{brandSubtext}</span>
           </a>
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-10">
             {menuItems.map((item, i) => (
-              <a key={i} href={item.href} className="text-[13px] font-medium text-[#3C3835] tracking-wide hover:text-[#1C1917] transition-colors">
+              <a key={i} href={item.href} className="text-[13px] font-medium text-[var(--m-charcoal-mid)] tracking-wide hover:text-[var(--m-charcoal)] transition-colors">
                 {item.label}
               </a>
             ))}

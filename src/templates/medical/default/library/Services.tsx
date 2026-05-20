@@ -26,7 +26,7 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
       title: getFieldValue(data, 'service3Title'),
       desc: getFieldValue(data, 'service3Desc'),
       dark: true,
-      icon: <SyringeIcon size={22} className="text-[#C8A97E]" />,
+      icon: <SyringeIcon size={22} className="text-[var(--m-gold)]" />,
     },
     {
       title: getFieldValue(data, 'service4Title'),
@@ -46,42 +46,42 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
       <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-6">
         <div>
           <p className={`${styles.sectionLabel} mb-5`}>{label}</p>
-          <h2 className={`${styles.fontDisplay} text-[clamp(2rem,3.5vw,3.2rem)] font-light text-[#1C1917] leading-[1.12] whitespace-pre-line`}>
+          <h2 className={`${styles.fontDisplay} text-[clamp(2rem,3.5vw,3.2rem)] font-light text-[var(--m-charcoal)] leading-[1.12] whitespace-pre-line`}>
             {title}
           </h2>
         </div>
-        <p className="text-[#9C9189] text-[14px] leading-relaxed max-w-[280px] whitespace-pre-line">
+        <p className="text-[var(--m-warm-gray)] text-[14px] leading-relaxed max-w-[280px] whitespace-pre-line">
           {description}
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[280px] lg:auto-rows-[320px]">
         {services.map((s, i) => (
-          <div key={i} className={`${styles.bentoCard} ${s.colSpan || ''} ${s.dark ? 'bg-[#1C1917] p-8 flex flex-col justify-between' : s.light ? 'bg-[#F0EBE1] p-8 flex flex-col justify-between' : ''}`}>
+          <div key={i} className={`${styles.bentoCard} ${s.colSpan || ''} ${s.dark ? 'bg-[var(--m-charcoal)] p-8 flex flex-col justify-between' : s.light ? 'bg-[var(--m-cream-dark)] p-8 flex flex-col justify-between' : ''}`}>
             {s.image && (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={s.image} alt={s.title} className="w-full h-full object-cover" />
                 <div className={styles.bentoInfo}>
                   {s.badge && (
-                    <div className={`${styles.pill} bg-[#C8A97E]/20 text-[#C8A97E] border border-[#C8A97E]/30 mb-3`}>
+                    <div className={`${styles.pill} bg-[var(--m-gold)]/20 text-[var(--m-gold)] border border-[var(--m-gold)]/30 mb-3`}>
                       <MagicStickIcon size={12} />
                       {s.badge}
                     </div>
                   )}
-                  <h3 className="text-[#F9F7F3] font-semibold text-lg mb-1">{s.title}</h3>
-                  <p className="text-[#F9F7F3]/65 text-sm">{s.desc}</p>
+                  <h3 className="text-[var(--m-cream)] font-semibold text-lg mb-1">{s.title}</h3>
+                  <p className="text-[var(--m-cream)]/65 text-sm">{s.desc}</p>
                 </div>
               </>
             )}
             {!s.image && (
               <>
-                <div className="w-11 h-11 flex items-center justify-center bg-[#C8A97E]/10 border border-[#C8A97E]/20 shrink-0">
+                <div className="w-11 h-11 flex items-center justify-center bg-[var(--m-gold)]/10 border border-[var(--m-gold)]/20 shrink-0">
                   {s.icon}
                 </div>
                 <div>
-                  <h3 className={`${s.dark ? 'text-[#F9F7F3]' : 'text-[#1C1917]'} font-semibold text-xl mb-2`}>{s.title}</h3>
-                  <p className={`${s.dark ? 'text-[#F9F7F3]/50' : 'text-[#9C9189]'} text-sm leading-relaxed`}>{s.desc}</p>
+                  <h3 className={`${s.dark ? 'text-[var(--m-cream)]' : 'text-[var(--m-charcoal)]'} font-semibold text-xl mb-2`}>{s.title}</h3>
+                  <p className={`${s.dark ? 'text-[var(--m-cream)]/50' : 'text-[var(--m-warm-gray)]'} text-sm leading-relaxed`}>{s.desc}</p>
                 </div>
               </>
             )}

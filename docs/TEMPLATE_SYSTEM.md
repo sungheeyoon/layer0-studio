@@ -365,7 +365,7 @@ pnpm template:sync cafe             # 슬러그 또는 테마 prefix로 필터
 - 파일: `tokens.ts`, `template.ts` (둘 다 색·폰트 정의 sit-of-truth)
 - 값: `transparent`, `inherit`, `currentColor`, `none`, `initial`, `unset`, `revert` (CSS 키워드 — 디자인 토큰이 아님)
 
-**현재 severity**: `'warn'`. 기존 9개 템플릿이 누적해온 인라인 리터럴 ~371건은 [cleanup follow-up 이슈](#)로 분리됨. 정리 완료 후 `'error'`로 전환 예정.
+**Severity**: `'error'`. #22에서 기존 9개 템플릿의 누적 위반 ~412건을 모두 정리한 뒤 승급됨. 신규 회귀는 `pnpm lint`에서 즉시 차단.
 
 **규칙 추가 시**: `src/lib/template/inline-tokens.ts`의 regex/whitelist와 `eslint-rules/no-inline-design-tokens.mjs`의 동일 항목을 함께 갱신할 것 (의도적 중복).
 

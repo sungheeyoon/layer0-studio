@@ -15,9 +15,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   // Token enforcement on template section components.
-  // Scope: src/templates/**/*.{ts,tsx} except tokens.ts (the source of truth).
-  // Severity: 'warn' for now — existing templates still carry inline literals
-  // that will be migrated in the cleanup follow-up. Flip to 'error' once clean.
+  // Scope: src/templates/**/*.{ts,tsx} except tokens.ts/template.ts (token definition sites).
+  // Severity 'error': all existing templates passed cleanup (#22). Regressions block CI.
   {
     files: ["src/templates/**/*.ts", "src/templates/**/*.tsx"],
     ignores: [
@@ -31,7 +30,7 @@ const eslintConfig = defineConfig([
       local: { rules: { "no-inline-design-tokens": noInlineDesignTokens } },
     },
     rules: {
-      "local/no-inline-design-tokens": "warn",
+      "local/no-inline-design-tokens": "error",
     },
   },
 ]);
