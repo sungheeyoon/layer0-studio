@@ -22,13 +22,13 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
   ].filter(s => s.title);
 
   return (
-    <section id="services" className="py-28 lg:py-36" style={{ background: '#0E0C0A' }}>
+    <section id="services" className="py-28 lg:py-36" style={{ background: 'var(--i-dark)' }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-16">
           <div className={`${styles.reveal} ${styles.revealIn} flex items-center justify-center gap-3 mb-5`}>
             <span className={styles.goldBar}></span>
             <span className={styles.secTag}>{label}</span>
-            <span className={styles.goldBar} style={{ background: 'linear-gradient(270deg, #C9A96E, rgba(201,169,110,0))' }}></span>
+            <span className={styles.goldBar} style={{ background: 'linear-gradient(270deg, var(--i-gold), color-mix(in srgb, var(--i-gold) 0%, transparent))' }}></span>
           </div>
           <h2 className={`${styles.reveal} ${styles.revealIn} ${styles.delay1} font-extrabold tracking-tight mb-4 text-[var(--i-cream)]`} style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1 }}>
             {title.split('\n').map((line, i) => (
@@ -52,7 +52,7 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
             <div className={`${styles.reveal} ${styles.revealIn} md:col-span-2 lg:col-span-2 ${styles.bezel}`}>
               <div className={styles.bezelInner} style={{ padding: '36px 36px 40px' }}>
                 <div className="flex items-start justify-between mb-6">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(201,169,110,0.12)' }}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--i-gold) 12%, transparent)' }}>
                     <HomeIcon size={22} className="text-[var(--i-gold)]" />
                   </div>
                   {s1Badge && (
@@ -63,10 +63,10 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
                 <p className="text-[var(--i-muted)] text-[14px] leading-relaxed mb-6">{s1Desc}</p>
                 <div className="flex flex-wrap gap-2 mb-8">
                   {['아파트', '빌라', '단독주택', '타운하우스'].map(tag => (
-                    <span key={tag} className="text-[12px] text-[var(--i-muted)] px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.06)' }}>{tag}</span>
+                    <span key={tag} className="text-[12px] text-[var(--i-muted)] px-3 py-1 rounded-full" style={{ background: 'color-mix(in srgb, white 4%, transparent)', border: '1px solid color-mix(in srgb, white 6%, transparent)' }}>{tag}</span>
                   ))}
                 </div>
-                <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid rgba(255,255,255,.06)' }}>
+                <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid color-mix(in srgb, white 6%, transparent)' }}>
                   <div>
                     <p className="text-[11px] text-[var(--i-muted)] mb-1 uppercase">Starting from</p>
                     <p className="text-lg font-bold text-[var(--i-cream)]">평당 <span className={styles.textGoldGrad}>{s1Price}</span>~</p>
@@ -85,16 +85,16 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
             <div
               key={i}
               className={`${styles.reveal} ${styles.revealIn} ${styles[`delay${i + 1}` as keyof typeof styles] || ''} ${styles.bezel}`}
-              style={s.isAS ? { background: 'linear-gradient(135deg, rgba(201,169,110,0.06), rgba(201,169,110,0.02))', borderColor: 'rgba(201,169,110,0.25)' } : {}}
+              style={s.isAS ? { background: 'linear-gradient(135deg, color-mix(in srgb, var(--i-gold) 6%, transparent), color-mix(in srgb, var(--i-gold) 2%, transparent))', borderColor: 'color-mix(in srgb, var(--i-gold) 25%, transparent)' } : {}}
             >
-              <div className={styles.bezelInner} style={{ padding: '32px 28px 36px', borderColor: s.isAS ? 'rgba(201,169,110,0.12)' : undefined }}>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style={{ background: s.isAS ? 'rgba(201,169,110,0.15)' : 'rgba(201,169,110,0.12)' }}>
+              <div className={styles.bezelInner} style={{ padding: '32px 28px 36px', borderColor: s.isAS ? 'color-mix(in srgb, var(--i-gold) 12%, transparent)' : undefined }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style={{ background: s.isAS ? 'color-mix(in srgb, var(--i-gold) 15%, transparent)' : 'color-mix(in srgb, var(--i-gold) 12%, transparent)' }}>
                   {s.icon}
                 </div>
                 <h3 className="text-lg font-bold text-[var(--i-cream)] mb-3 tracking-tight">{s.title}</h3>
                 <p className="text-[var(--i-muted)] text-[13px] leading-relaxed mb-6">{s.desc}</p>
                 {s.isConsulting ? (
-                  <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid rgba(255,255,255,.06)' }}>
+                  <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid color-mix(in srgb, white 6%, transparent)' }}>
                     <p className="text-[13px] text-[var(--i-gold)] font-semibold">첫 상담 무료</p>
                     <ArrowRightIcon size={18} className="text-[var(--i-gold)]" style={{ transform: 'rotate(-45deg)' }} />
                   </div>

@@ -23,19 +23,19 @@ const About: SectionComponent = function About({ section }: TemplateSectionProps
           {/* Left: Visual */}
           <div className={`${styles.revealLeft} ${styles.revealIn} relative order-2 lg:order-1`}>
             <div className="relative" style={{ aspectRatio: '4/5', borderRadius: '20px', overflow: 'hidden' }}>
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(150deg, #1E160E 0%, #140F09 50%, #1A1209 100%)' }}></div>
+              <div className="absolute inset-0" style={{ background: 'var(--i-grad-about)' }}></div>
               <svg viewBox="0 0 480 600" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
-                <rect x="40" y="380" width="400" height="60" rx="4" fill="rgba(201,169,110,0.06)" stroke="rgba(201,169,110,0.12)" strokeWidth="1"/>
-                <rect x="40" y="376" width="400" height="8" rx="2" fill="rgba(201,169,110,0.1)"/>
-                <line x1="180" y1="0" x2="180" y2="260" stroke="rgba(201,169,110,0.15)" strokeWidth="1"/>
-                <ellipse cx="180" cy="264" rx="28" ry="12" fill="rgba(201,169,110,0.06)" stroke="rgba(201,169,110,0.2)" strokeWidth="1"/>
+                <rect x="40" y="380" width="400" height="60" rx="4" fill="color-mix(in srgb, var(--i-gold) 6%, transparent)" stroke="color-mix(in srgb, var(--i-gold) 12%, transparent)" strokeWidth="1"/>
+                <rect x="40" y="376" width="400" height="8" rx="2" fill="color-mix(in srgb, var(--i-gold) 10%, transparent)"/>
+                <line x1="180" y1="0" x2="180" y2="260" stroke="color-mix(in srgb, var(--i-gold) 15%, transparent)" strokeWidth="1"/>
+                <ellipse cx="180" cy="264" rx="28" ry="12" fill="color-mix(in srgb, var(--i-gold) 6%, transparent)" stroke="color-mix(in srgb, var(--i-gold) 20%, transparent)" strokeWidth="1"/>
                 <radialGradient id="pendantGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#C9A96E" stopOpacity="0.15"/>
-                  <stop offset="100%" stopColor="#C9A96E" stopOpacity="0"/>
+                  <stop offset="0%" stopColor="var(--i-gold)" stopOpacity="0.15"/>
+                  <stop offset="100%" stopColor="var(--i-gold)" stopOpacity="0"/>
                 </radialGradient>
                 <ellipse cx="180" cy="320" rx="100" ry="80" fill="url(#pendantGlow)"/>
               </svg>
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(12,10,8,.7) 100%)' }}></div>
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, color-mix(in srgb, var(--i-dark) 70%, transparent) 100%)' }}></div>
               <div className="absolute bottom-6 left-6">
                 <p className="text-[11px] text-[var(--i-gold)] opacity-60 tracking-widest mb-1 uppercase">Recent Work</p>
                 <p className="text-sm font-semibold text-[var(--i-cream)]">{projectTitle}</p>
@@ -43,8 +43,8 @@ const About: SectionComponent = function About({ section }: TemplateSectionProps
             </div>
             {/* Second small image placeholder */}
             <div className="absolute -right-6 top-1/3 w-40 border border-white border-opacity-10 rounded-xl overflow-hidden shadow-2xl" style={{ aspectRatio: '3/4' }}>
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(145deg, #181C18 0%, #111411 100%)' }}></div>
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(12,10,8,.75) 100%)' }}></div>
+              <div className="absolute inset-0" style={{ background: 'var(--i-grad-portfolio-3)' }}></div>
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, color-mix(in srgb, var(--i-dark) 75%, transparent) 100%)' }}></div>
               <p className="absolute bottom-3 left-3 right-3 text-[10px] font-medium text-[var(--i-cream)]">침실 설계</p>
             </div>
           </div>
@@ -73,7 +73,7 @@ const About: SectionComponent = function About({ section }: TemplateSectionProps
             <div className={`${styles.reveal} ${styles.revealIn} ${styles.delay3} space-y-4`}>
               {values.map((v, i) => (
                 <div key={i} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: 'rgba(201,169,110,0.1)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: 'color-mix(in srgb, var(--i-gold) 10%, transparent)' }}>
                     {v.icon}
                   </div>
                   <div>

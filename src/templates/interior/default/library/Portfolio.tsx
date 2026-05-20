@@ -16,18 +16,18 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
       desc: getFieldValue(data, 'p1Desc'),
       height: '520px',
       rowSpan: 'md:row-span-2',
-      bg: 'linear-gradient(150deg, #211810 0%, #160F09 50%, #1D1308 100%)',
+      bg: 'var(--i-grad-portfolio-1)',
       svg: (
         <svg viewBox="0 0 360 520" className={styles.portCardImg} preserveAspectRatio="xMidYMid slice">
-          <rect x="0" y="0" width="360" height="520" fill="rgba(28,18,10,1)"/>
-          <rect x="0" y="0" width="200" height="520" fill="rgba(40,28,16,0.8)"/>
-          <rect x="30" y="80" width="120" height="160" rx="2" fill="rgba(201,169,110,0.06)" stroke="rgba(201,169,110,0.15)" strokeWidth="1"/>
-          <rect x="20" y="360" width="240" height="80" rx="10" fill="rgba(201,169,110,0.07)"/>
-          <rect x="20" y="340" width="240" height="28" rx="8" fill="rgba(201,169,110,0.05)"/>
-          <rect x="280" y="200" width="4" height="200" rx="2" fill="rgba(201,169,110,0.1)"/>
+          <rect x="0" y="0" width="360" height="520" fill="var(--i-svg-port-warm-1)"/>
+          <rect x="0" y="0" width="200" height="520" fill="var(--i-svg-port-warm-2)"/>
+          <rect x="30" y="80" width="120" height="160" rx="2" fill="color-mix(in srgb, var(--i-gold) 6%, transparent)" stroke="color-mix(in srgb, var(--i-gold) 15%, transparent)" strokeWidth="1"/>
+          <rect x="20" y="360" width="240" height="80" rx="10" fill="color-mix(in srgb, var(--i-gold) 7%, transparent)"/>
+          <rect x="20" y="340" width="240" height="28" rx="8" fill="color-mix(in srgb, var(--i-gold) 5%, transparent)"/>
+          <rect x="280" y="200" width="4" height="200" rx="2" fill="color-mix(in srgb, var(--i-gold) 10%, transparent)"/>
           <radialGradient id="floorGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#C9A96E" stopOpacity="0.2"/>
-            <stop offset="100%" stopColor="#C9A96E" stopOpacity="0"/>
+            <stop offset="0%" stopColor="var(--i-gold)" stopOpacity="0.2"/>
+            <stop offset="100%" stopColor="var(--i-gold)" stopOpacity="0"/>
           </radialGradient>
           <ellipse cx="282" cy="240" rx="70" ry="90" fill="url(#floorGlow)"/>
         </svg>
@@ -39,16 +39,16 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
       title: getFieldValue(data, 'p2Title'),
       height: '250px',
       colSpan: 'md:col-span-2',
-      bg: 'linear-gradient(135deg, #161B1E 0%, #111518 100%)',
+      bg: 'var(--i-grad-portfolio-2)',
       svg: (
         <svg viewBox="0 0 700 250" className={styles.portCardImg} preserveAspectRatio="xMidYMid slice">
-          <rect x="0" y="0" width="700" height="250" fill="rgba(18,22,25,1)"/>
-          <rect x="100" y="120" width="500" height="8" rx="3" fill="rgba(201,169,110,0.1)"/>
-          <line x1="230" y1="0" x2="230" y2="80" stroke="rgba(201,169,110,0.12)" strokeWidth="1"/>
-          <ellipse cx="230" cy="84" rx="22" ry="9" fill="rgba(201,169,110,0.07)" stroke="rgba(201,169,110,0.2)" strokeWidth="1"/>
+          <rect x="0" y="0" width="700" height="250" fill="var(--i-svg-port-cool-1)"/>
+          <rect x="100" y="120" width="500" height="8" rx="3" fill="color-mix(in srgb, var(--i-gold) 10%, transparent)"/>
+          <line x1="230" y1="0" x2="230" y2="80" stroke="color-mix(in srgb, var(--i-gold) 12%, transparent)" strokeWidth="1"/>
+          <ellipse cx="230" cy="84" rx="22" ry="9" fill="color-mix(in srgb, var(--i-gold) 7%, transparent)" stroke="color-mix(in srgb, var(--i-gold) 20%, transparent)" strokeWidth="1"/>
           <radialGradient id="tableGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#C9A96E" stopOpacity="0.1"/>
-            <stop offset="100%" stopColor="#C9A96E" stopOpacity="0"/>
+            <stop offset="0%" stopColor="var(--i-gold)" stopOpacity="0.1"/>
+            <stop offset="100%" stopColor="var(--i-gold)" stopOpacity="0"/>
           </radialGradient>
           <ellipse cx="350" cy="120" rx="280" ry="70" fill="url(#tableGlow)"/>
         </svg>
@@ -59,16 +59,16 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
       meta: getFieldValue(data, 'p3Meta'),
       title: getFieldValue(data, 'p3Title'),
       height: '255px',
-      bg: 'linear-gradient(145deg, #181C18 0%, #111411 100%)',
+      bg: 'var(--i-grad-portfolio-3)',
       svg: (
         <svg viewBox="0 0 340 255" className={styles.portCardImg} preserveAspectRatio="xMidYMid slice">
-          <rect x="0" y="0" width="340" height="255" fill="rgba(16,20,16,1)"/>
-          <rect x="60" y="100" width="220" height="80" rx="10" fill="rgba(201,169,110,0.05)" stroke="rgba(201,169,110,0.1)" strokeWidth="1"/>
-          <rect x="75" y="140" width="80" height="40" rx="8" fill="rgba(201,169,110,0.06)"/>
-          <rect x="185" y="140" width="80" height="40" rx="8" fill="rgba(201,169,110,0.06)"/>
+          <rect x="0" y="0" width="340" height="255" fill="var(--i-svg-port-cool-2)"/>
+          <rect x="60" y="100" width="220" height="80" rx="10" fill="color-mix(in srgb, var(--i-gold) 5%, transparent)" stroke="color-mix(in srgb, var(--i-gold) 10%, transparent)" strokeWidth="1"/>
+          <rect x="75" y="140" width="80" height="40" rx="8" fill="color-mix(in srgb, var(--i-gold) 6%, transparent)"/>
+          <rect x="185" y="140" width="80" height="40" rx="8" fill="color-mix(in srgb, var(--i-gold) 6%, transparent)"/>
           <radialGradient id="sideGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#C9A96E" stopOpacity="0.2"/>
-            <stop offset="100%" stopColor="#C9A96E" stopOpacity="0"/>
+            <stop offset="0%" stopColor="var(--i-gold)" stopOpacity="0.2"/>
+            <stop offset="100%" stopColor="var(--i-gold)" stopOpacity="0"/>
           </radialGradient>
           <ellipse cx="50" cy="130" rx="60" ry="50" fill="url(#sideGlow)"/>
         </svg>
@@ -79,15 +79,15 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
       meta: getFieldValue(data, 'p4Meta'),
       title: getFieldValue(data, 'p4Title'),
       height: '255px',
-      bg: 'linear-gradient(145deg, #16181E 0%, #101218 100%)',
+      bg: 'var(--i-grad-portfolio-4)',
       svg: (
         <svg viewBox="0 0 340 255" className={styles.portCardImg} preserveAspectRatio="xMidYMid slice">
-          <rect x="0" y="0" width="340" height="255" fill="rgba(14,16,22,1)"/>
-          <rect x="20" y="150" width="300" height="8" rx="3" fill="rgba(201,169,110,0.1)"/>
-          <rect x="120" y="80" width="100" height="70" rx="4" fill="rgba(201,169,110,0.04)" stroke="rgba(201,169,110,0.12)" strokeWidth="1"/>
+          <rect x="0" y="0" width="340" height="255" fill="var(--i-svg-port-cool-3)"/>
+          <rect x="20" y="150" width="300" height="8" rx="3" fill="color-mix(in srgb, var(--i-gold) 10%, transparent)"/>
+          <rect x="120" y="80" width="100" height="70" rx="4" fill="color-mix(in srgb, var(--i-gold) 4%, transparent)" stroke="color-mix(in srgb, var(--i-gold) 12%, transparent)" strokeWidth="1"/>
           <radialGradient id="screenGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#8BB4D8" stopOpacity="0.15"/>
-            <stop offset="100%" stopColor="#8BB4D8" stopOpacity="0"/>
+            <stop offset="0%" stopColor="var(--i-blue-accent)" stopOpacity="0.15"/>
+            <stop offset="100%" stopColor="var(--i-blue-accent)" stopOpacity="0"/>
           </radialGradient>
           <rect x="124" y="84" width="92" height="62" rx="2" fill="url(#screenGlow)"/>
         </svg>

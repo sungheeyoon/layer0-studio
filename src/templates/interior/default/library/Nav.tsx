@@ -23,7 +23,7 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-16">
         <a href="#" className="flex items-center gap-3 no-underline">
           <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--i-gold)] to-yellow-700 flex items-center justify-center">
-            <HomeIcon size={15} className="text-[#0C0A08]" />
+            <HomeIcon size={15} className="text-[var(--i-dark)]" />
           </span>
           <span className="font-bold text-[15px] tracking-tight text-[var(--i-cream)]">{brandName}</span>
         </a>
@@ -40,7 +40,7 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
 
         <a href="#contact" className={`${styles.pillBtn} text-[13px] no-underline`} style={{ padding: '10px 20px 10px 10px', gap: '8px' }}>
           <span className={styles.ic} style={{ width: '28px', height: '28px' }}>
-            <ChatIcon size={13} className="text-[#0C0A08]" />
+            <ChatIcon size={13} className="text-[var(--i-dark)]" />
           </span>
           {ctaText}
         </a>

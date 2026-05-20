@@ -10,7 +10,7 @@ const Stats: SectionComponent = function Stats({ section }: TemplateSectionProps
   })).filter(s => s.value);
 
   return (
-    <section className="border-y border-white border-opacity-5" style={{ background: '#111009' }}>
+    <section className="border-y border-white border-opacity-5" style={{ background: 'var(--i-stat-bg)' }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-white divide-opacity-5">
           {stats.map((s, i) => (

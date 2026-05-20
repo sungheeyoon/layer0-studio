@@ -23,13 +23,13 @@ const Process: SectionComponent = function Process({ section }: TemplateSectionP
   })).filter(s => s.title);
 
   return (
-    <section id="process" className="py-28 lg:py-36" style={{ background: '#0E0C0A' }}>
+    <section id="process" className="py-28 lg:py-36" style={{ background: 'var(--i-dark)' }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-16">
           <div className={`${styles.reveal} ${styles.revealIn} flex items-center justify-center gap-3 mb-5`}>
             <span className={styles.goldBar}></span>
             <span className={styles.secTag}>{label}</span>
-            <span className={styles.goldBar} style={{ background: 'linear-gradient(270deg, #C9A96E, rgba(201,169,110,0))' }}></span>
+            <span className={styles.goldBar} style={{ background: 'linear-gradient(270deg, var(--i-gold), color-mix(in srgb, var(--i-gold) 0%, transparent))' }}></span>
           </div>
           <h2 className={`${styles.reveal} ${styles.revealIn} ${styles.delay1} font-extrabold tracking-tight text-[var(--i-cream)]`} style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1 }}>
             {title.split('\n').map((line, i) => (
@@ -47,7 +47,7 @@ const Process: SectionComponent = function Process({ section }: TemplateSectionP
           {steps.map((s, i) => (
             <div key={i} className={`${styles.reveal} ${styles.revealIn} ${styles[`delay${i}` as keyof typeof styles] || ''} text-center`}>
               <div className="relative inline-flex">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(201,169,110,0.12)', border: '1px solid rgba(201,169,110,0.25)' }}>
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'color-mix(in srgb, var(--i-gold) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--i-gold) 25%, transparent)' }}>
                   {STEP_ICONS[i]}
                 </div>
               </div>
