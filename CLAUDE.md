@@ -133,6 +133,7 @@ SQL migrations live in `docs/migrations/` (001–012). Apply manually via the Su
 - `010_optimistic_concurrency.sql` — replaces `save_site_template_with_lock` to accept `p_expected_updated_at` and return `'OK' | 'STALE_VERSION'` (powers editor Conflict modal)
 - `011_template_sync_audit.sql` — `template_sync_audit` table for `pnpm template:sync` audit trail
 - `012_remove_section_order.sql` — strips deprecated `section.order` from `templates.template_json`, `user_sites.site_json`, and `user_sites.template_snapshot` JSONB (Phase 6d cleanup)
+- `014_template_assets_bucket.sql` — `template_assets` public storage bucket for AI-generated/stock images; public read, `canPublishTemplates` admins write. Helper: `uploadTemplateAsset()` in `src/lib/template/template-assets.ts`; verify with `pnpm tsx scripts/verify-template-assets-bucket.ts`
 
 ### Deployment
 
