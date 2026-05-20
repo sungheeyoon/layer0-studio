@@ -347,6 +347,28 @@ pnpm template:sync cafe             # 슬러그 또는 테마 prefix로 필터
 
 > Phase 6d에서 `DEPRECATED_SECTION_ORDER` / `MISSING_REQUIRED_SLOT` / `UNKNOWN_SECTION_TYPE` 룰은 **삭제**되었다. legacy `themeSlots` 옵션 자체가 사라짐.
 
+### 6.3 Token enforcement (inline 색·폰트 차단)
+
+섹션 컴포넌트는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변수로 풀리는 Tailwind arbitrary value)로 참조해야 한다 — 이게 편집기의 `globalStyles` 오버라이드가 사이트 전역으로 전파되는 유일한 통로이기 때문. 인라인 hex/rgb/hsl 색 리터럴이나 `font-family` 문자열은 그 메커니즘을 우회한다.
+
+**두 레이어로 강제**:
+
+1. **Validate** — `validateTemplateFiles(templateDir)` (`src/lib/template/inline-tokens.ts`): 템플릿 생성 파이프라인이 `library/*.tsx` 파일 텍스트를 스캔. 위반 시 `ValidationIssue[]` 반환.
+2. **ESLint** — `local/no-inline-design-tokens` (`eslint-rules/no-inline-design-tokens.mjs`): `src/templates/**/*.{ts,tsx}` 대상으로 `pnpm lint`에서 동작. AST 기반 (string Literal / TemplateElement / `fontFamily` JSX prop).
+
+| Code | 조건 |
+|---|---|
+| `INLINE_COLOR_LITERAL` | `#rgb` / `#rrggbb` / `#rrggbbaa` 또는 `rgb(`/`rgba(`/`hsl(`/`hsla(` 호출 |
+| `INLINE_FONT_LITERAL`  | `font-family: '...'` (CSS) 또는 `{ fontFamily: '...' }` (JSX inline-style) |
+
+**Whitelist**:
+- 파일: `tokens.ts`, `template.ts` (둘 다 색·폰트 정의 sit-of-truth)
+- 값: `transparent`, `inherit`, `currentColor`, `none`, `initial`, `unset`, `revert` (CSS 키워드 — 디자인 토큰이 아님)
+
+**현재 severity**: `'warn'`. 기존 9개 템플릿이 누적해온 인라인 리터럴 ~371건은 [cleanup follow-up 이슈](#)로 분리됨. 정리 완료 후 `'error'`로 전환 예정.
+
+**규칙 추가 시**: `src/lib/template/inline-tokens.ts`의 regex/whitelist와 `eslint-rules/no-inline-design-tokens.mjs`의 동일 항목을 함께 갱신할 것 (의도적 중복).
+
 ---
 
 ## 7. CLI / 명령 한 장 요약
