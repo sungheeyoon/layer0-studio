@@ -17,7 +17,7 @@ const Process: SectionComponent = function Process({ section }: TemplateSectionP
         <div className="text-center mb-16">
           <div className={`${styles.sectionSep} mx-auto mb-4`}></div>
           <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-3">How We Work</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0f172a] tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--l-navy)] tracking-tight">
             {title}
           </h2>
         </div>
@@ -26,7 +26,7 @@ const Process: SectionComponent = function Process({ section }: TemplateSectionP
           {steps.map((step, i) => {
             const isLast = i === steps.length - 1;
             const bgClass = isLast ? 'bg-amber-50 border-amber-100' : 'bg-white border-stone-200';
-            const numBgClass = isLast ? 'bg-amber-500 text-white' : 'bg-[#0f172a] text-amber-400';
+            const numBgClass = isLast ? 'bg-amber-500 text-white' : 'bg-[var(--l-navy)] text-amber-400';
             
             return (
               <div key={i} className={`flex gap-6 rounded-2xl p-6 border transition-shadow hover:shadow-md ${bgClass}`}>
@@ -37,7 +37,7 @@ const Process: SectionComponent = function Process({ section }: TemplateSectionP
                   {!isLast && <div className="w-px flex-1 bg-stone-200 mt-2"></div>}
                 </div>
                 <div className="pt-1 pb-4">
-                  <h3 className={`font-bold text-[#0f172a] mb-1`}>{step.title}</h3>
+                  <h3 className={`font-bold text-[var(--l-navy)] mb-1`}>{step.title}</h3>
                   <p className={`text-sm leading-relaxed ${isLast ? 'text-stone-600' : 'text-stone-500'}`}>
                     {step.body}
                   </p>

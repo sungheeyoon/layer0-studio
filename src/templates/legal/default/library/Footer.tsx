@@ -10,7 +10,7 @@ const Footer: SectionComponent = function Footer({ section }: TemplateSectionPro
   const address = getFieldValue(data, 'address') || '';
 
   return (
-    <footer className="bg-[#080d1f] py-16 px-4">
+    <footer className="bg-[var(--l-navy-deep)] py-16 px-4">
       <div className={styles.container}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-10 border-b border-white/8">
           <div className="md:col-span-2">

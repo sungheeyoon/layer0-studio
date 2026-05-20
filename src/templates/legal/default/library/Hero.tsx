@@ -21,7 +21,7 @@ const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) 
   const stat4Label = getFieldValue(data, 'stat4Label') || '';
 
   return (
-    <section className="bg-gradient-to-br from-[#fafaf9] via-[#f8f7f4] to-[#f0ece4] min-h-[100dvh] flex flex-col justify-center pt-28 pb-20 px-4 relative overflow-hidden">
+    <section className="bg-gradient-to-br from-[var(--l-surface)] via-[var(--l-surface-warm)] to-[var(--l-surface-warmer)] min-h-[100dvh] flex flex-col justify-center pt-28 pb-20 px-4 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-40" aria-hidden="true">
         <div className="absolute top-20 right-10 w-72 h-72 rounded-full border border-stone-300/60"></div>
         <div className="absolute top-32 right-24 w-48 h-48 rounded-full border border-stone-300/40"></div>
@@ -38,7 +38,7 @@ const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) 
               </div>
             )}
 
-            <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-[#0f172a] leading-[1.1] tracking-tight whitespace-pre-line mb-6">
+            <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-[var(--l-navy)] leading-[1.1] tracking-tight whitespace-pre-line mb-6">
               {title}
             </h1>
 
@@ -67,27 +67,27 @@ const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) 
           <div className="lg:relative">
             <div className="bg-white border border-stone-200 rounded-2xl p-8 shadow-xl shadow-stone-200/60">
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-stone-100">
-                <div className="w-10 h-10 bg-[#0f172a] rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[var(--l-navy)] rounded-xl flex items-center justify-center flex-shrink-0">
                   <DiplomaIcon size={20} className="text-amber-400" />
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest">Established</p>
-                  <p className="text-sm font-bold text-[#0f172a]">2001년 창립 · 서울 강남 소재</p>
+                  <p className="text-sm font-bold text-[var(--l-navy)]">2001년 창립 · 서울 강남 소재</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                  <p className="text-4xl font-black text-[#0f172a]">{stat1Value}<span className="text-2xl font-bold text-amber-600">{stat1Label}</span></p>
+                  <p className="text-4xl font-black text-[var(--l-navy)]">{stat1Value}<span className="text-2xl font-bold text-amber-600">{stat1Label}</span></p>
                 </div>
                 <div>
-                  <p className="text-4xl font-black text-[#0f172a]">{stat2Value}<span className="text-lg font-bold text-amber-600">{stat2Label}</span></p>
+                  <p className="text-4xl font-black text-[var(--l-navy)]">{stat2Value}<span className="text-lg font-bold text-amber-600">{stat2Label}</span></p>
                 </div>
                 <div>
-                  <p className="text-4xl font-black text-[#0f172a]">{stat3Value}<span className="text-lg font-bold text-amber-600">{stat3Label}</span></p>
+                  <p className="text-4xl font-black text-[var(--l-navy)]">{stat3Value}<span className="text-lg font-bold text-amber-600">{stat3Label}</span></p>
                 </div>
                 <div>
-                  <p className="text-4xl font-black text-[#0f172a]">{stat4Value}<span className="text-lg font-bold text-amber-600">{stat4Label}</span></p>
+                  <p className="text-4xl font-black text-[var(--l-navy)]">{stat4Value}<span className="text-lg font-bold text-amber-600">{stat4Label}</span></p>
                 </div>
               </div>
 

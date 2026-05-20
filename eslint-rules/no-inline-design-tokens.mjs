@@ -18,9 +18,12 @@
 // Hex literal must be followed by a non-word char (or end-of-string).
 // Without `\w`, `#facility` would match `#fac` since `i` is non-hex; we
 // require the next char (if any) to be outside the identifier alphabet.
-const COLOR_HEX_RE  = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?!\w)/;
-const COLOR_FUNC_RE = /\b(?:rgb|rgba|hsl|hsla)\s*\(/;
-const FONT_FAMILY_CSS_RE = /font-family\s*:\s*['"][^'"\n]+['"]/i;
+// Global flags — checkString iterates every match in a string so multi-color
+// values (e.g. a gradient `from-[#aaa] to-[#bbb]`) are all reported instead
+// of stopping at the first.
+const COLOR_HEX_RE  = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?!\w)/g;
+const COLOR_FUNC_RE = /\b(?:rgb|rgba|hsl|hsla)\s*\(/g;
+const FONT_FAMILY_CSS_RE = /font-family\s*:\s*['"][^'"\n]+['"]/gi;
 
 const COLOR_WHITELIST = new Set([
   'transparent',
@@ -51,24 +54,21 @@ const rule = {
   },
 
   create(context) {
+    function reportAll(node, raw, re, messageId) {
+      re.lastIndex = 0;
+      let m;
+      while ((m = re.exec(raw)) !== null) {
+        context.report({ node, messageId, data: { match: m[0] } });
+      }
+    }
+
     function checkString(node, raw) {
       if (typeof raw !== 'string' || raw.length === 0) return;
       if (COLOR_WHITELIST.has(raw.trim())) return;
 
-      const hexMatch = raw.match(COLOR_HEX_RE);
-      if (hexMatch) {
-        context.report({ node, messageId: 'inlineColor', data: { match: hexMatch[0] } });
-        return;
-      }
-      const fnMatch = raw.match(COLOR_FUNC_RE);
-      if (fnMatch) {
-        context.report({ node, messageId: 'inlineColor', data: { match: fnMatch[0] } });
-        return;
-      }
-      const fontMatch = raw.match(FONT_FAMILY_CSS_RE);
-      if (fontMatch) {
-        context.report({ node, messageId: 'inlineFont', data: { match: fontMatch[0] } });
-      }
+      reportAll(node, raw, COLOR_HEX_RE,        'inlineColor');
+      reportAll(node, raw, COLOR_FUNC_RE,       'inlineColor');
+      reportAll(node, raw, FONT_FAMILY_CSS_RE,  'inlineFont');
     }
 
     return {
