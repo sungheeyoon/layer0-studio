@@ -8,35 +8,35 @@ const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionP
   const items = [1, 2, 3, 4, 5, 6].map(n => getFieldValue(data, `item${n}`)).filter(Boolean);
 
   const icons = [
-    <VerifiedCheckIcon key="1" size={14} className="text-[#C8A97E]" />,
-    <StarIcon key="2" size={14} className="text-[#C8A97E]" />,
-    <ShieldCheckIcon key="3" size={14} className="text-[#C8A97E]" />,
-    <StarIcon key="4" size={14} className="text-[#C8A97E]" />,
-    <GraduationCapIcon key="5" size={14} className="text-[#C8A97E]" />,
-    <HospitalIcon key="6" size={14} className="text-[#C8A97E]" />,
+    <VerifiedCheckIcon key="1" size={14} className="text-[var(--m-gold)]" />,
+    <StarIcon key="2" size={14} className="text-[var(--m-gold)]" />,
+    <ShieldCheckIcon key="3" size={14} className="text-[var(--m-gold)]" />,
+    <StarIcon key="4" size={14} className="text-[var(--m-gold)]" />,
+    <GraduationCapIcon key="5" size={14} className="text-[var(--m-gold)]" />,
+    <HospitalIcon key="6" size={14} className="text-[var(--m-gold)]" />,
   ];
 
   return (
-    <section className="bg-[#1C1917] py-5 overflow-hidden">
+    <section className="bg-[var(--m-charcoal)] py-5 overflow-hidden">
       <div className="overflow-hidden">
         <div className={styles.marqueeTrack}>
           {/* Segment A */}
           <div className="flex items-center gap-12 px-6">
             {items.map((item, i) => (
-              <span key={i} className="flex items-center gap-2.5 whitespace-nowrap text-[#F9F7F3]/50 text-[11px] tracking-[.18em] uppercase font-medium">
+              <span key={i} className="flex items-center gap-2.5 whitespace-nowrap text-[var(--m-cream)]/50 text-[11px] tracking-[.18em] uppercase font-medium">
                 {icons[i % icons.length]}
                 {item}
-                <span className="text-[#F9F7F3]/15 ml-6">|</span>
+                <span className="text-[var(--m-cream)]/15 ml-6">|</span>
               </span>
             ))}
           </div>
           {/* Segment B */}
           <div className="flex items-center gap-12 px-6" aria-hidden="true">
             {items.map((item, i) => (
-              <span key={`b-${i}`} className="flex items-center gap-2.5 whitespace-nowrap text-[#F9F7F3]/50 text-[11px] tracking-[.18em] uppercase font-medium">
+              <span key={`b-${i}`} className="flex items-center gap-2.5 whitespace-nowrap text-[var(--m-cream)]/50 text-[11px] tracking-[.18em] uppercase font-medium">
                 {icons[i % icons.length]}
                 {item}
-                <span className="text-[#F9F7F3]/15 ml-6">|</span>
+                <span className="text-[var(--m-cream)]/15 ml-6">|</span>
               </span>
             ))}
           </div>

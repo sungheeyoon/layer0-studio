@@ -22,26 +22,26 @@ const Booking: SectionComponent = function Booking({ section }: TemplateSectionP
           className="absolute inset-0 w-full h-full object-cover"
         />
       )}
-      <div className="absolute inset-0 bg-[#1C1917]/82 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[var(--m-charcoal)]/82 pointer-events-none"></div>
 
       <div className="relative max-w-2xl mx-auto px-6 text-center">
         <div>
-          <p className={`${styles.sectionLabel} justify-center mb-6`} style={{ color: '#C8A97E' }}>{label}</p>
-          <h2 className={`${styles.fontDisplay} text-[clamp(2.4rem,5vw,4rem)] font-light text-[#F9F7F3] leading-[1.1] mb-6 whitespace-pre-line`}>
+          <p className={`${styles.sectionLabel} justify-center mb-6`} style={{ color: 'var(--m-gold)' }}>{label}</p>
+          <h2 className={`${styles.fontDisplay} text-[clamp(2.4rem,5vw,4rem)] font-light text-[var(--m-cream)] leading-[1.1] mb-6 whitespace-pre-line`}>
             {title}
           </h2>
-          <p className="text-[#F9F7F3]/55 text-[15px] leading-[1.85] mb-10 max-w-lg mx-auto whitespace-pre-line">
+          <p className="text-[var(--m-cream)]/55 text-[15px] leading-[1.85] mb-10 max-w-lg mx-auto whitespace-pre-line">
             {description}
           </p>
 
           {/* Contact row */}
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-10 text-[#F9F7F3]/70 text-[13px]">
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-10 text-[var(--m-cream)]/70 text-[13px]">
             <span className="flex items-center gap-2">
-              <PhoneIcon size={15} className="text-[#C8A97E]" />
+              <PhoneIcon size={15} className="text-[var(--m-gold)]" />
               {phone}
             </span>
             <span className="flex items-center gap-2">
-              <ClockIcon size={15} className="text-[#C8A97E]" />
+              <ClockIcon size={15} className="text-[var(--m-gold)]" />
               {hours}
             </span>
           </div>
@@ -55,7 +55,7 @@ const Booking: SectionComponent = function Booking({ section }: TemplateSectionP
               </button>
             </a>
             <button
-              className="inline-flex items-center gap-2.5 px-8 py-4 bg-[#FEE500] text-[#391D1D] font-semibold text-[13px] tracking-wide cursor-pointer hover:bg-[#F5DC00] transition-colors"
+              className="inline-flex items-center gap-2.5 px-8 py-4 bg-[var(--m-kakao-yellow)] text-[var(--m-kakao-text)] font-semibold text-[13px] tracking-wide cursor-pointer hover:bg-[var(--m-kakao-yellow-hover)] transition-colors"
             >
               <ChatIcon size={17} />
               카카오로 상담
