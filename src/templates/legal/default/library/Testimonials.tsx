@@ -21,14 +21,14 @@ const Testimonials: SectionComponent = function Testimonials({ section }: Templa
         <div className="text-center mb-16">
           <div className={`${styles.sectionSep} mx-auto mb-4`}></div>
           <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-3">Client Reviews</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0f172a] tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--l-navy)] tracking-tight">
             {title}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {reviews.map((r, i) => (
-            <div key={i} className={`rounded-2xl p-6 border transition-shadow hover:shadow-lg ${r.featured ? 'bg-[#0f172a] text-white border-transparent' : 'bg-stone-50 border-stone-200 text-[#0f172a]'}`}>
+            <div key={i} className={`rounded-2xl p-6 border transition-shadow hover:shadow-lg ${r.featured ? 'bg-[var(--l-navy)] text-white border-transparent' : 'bg-stone-50 border-stone-200 text-[var(--l-navy)]'}`}>
               <div className="flex mb-3 gap-0.5">
                 {[...Array(5)].map((_, j) => (
                   <StarIcon key={j} size={14} className="text-amber-400" />
@@ -42,7 +42,7 @@ const Testimonials: SectionComponent = function Testimonials({ section }: Templa
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={r.avatar} alt={r.author} className="w-9 h-9 rounded-full object-cover" />
                 <div>
-                  <p className={`text-sm font-bold ${r.featured ? 'text-white' : 'text-[#0f172a]'}`}>{r.author}</p>
+                  <p className={`text-sm font-bold ${r.featured ? 'text-white' : 'text-[var(--l-navy)]'}`}>{r.author}</p>
                   <p className={`text-xs ${r.featured ? 'text-blue-300/60' : 'text-stone-400'}`}>{r.meta}</p>
                 </div>
               </div>

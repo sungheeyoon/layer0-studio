@@ -23,7 +23,7 @@ const Faq: SectionComponent = function Faq({ section }: TemplateSectionProps) {
         <div className="text-center mb-16">
           <div className={`${styles.sectionSep} mx-auto mb-4`}></div>
           <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-3">FAQ</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0f172a] tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--l-navy)] tracking-tight">
             {title}
           </h2>
         </div>
@@ -37,7 +37,7 @@ const Faq: SectionComponent = function Faq({ section }: TemplateSectionProps) {
                   className="w-full flex items-center justify-between px-6 py-5 text-left bg-transparent border-0 cursor-pointer"
                   onClick={() => setOpenIdx(isOpen ? null : i)}
                 >
-                  <span className="font-semibold text-[#0f172a] text-sm md:text-base">{it.q}</span>
+                  <span className="font-semibold text-[var(--l-navy)] text-sm md:text-base">{it.q}</span>
                   <PlusIcon 
                     size={20} 
                     className={`text-stone-400 flex-shrink-0 ml-4 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`} 

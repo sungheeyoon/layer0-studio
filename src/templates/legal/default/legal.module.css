@@ -1,12 +1,16 @@
 .themeRoot {
   --l-navy: var(--theme-primary, #0f172a);
   --l-navy-light: #1e2b5e;
+  --l-navy-deep: #080d1f;
   --l-accent: var(--theme-secondary, #92400e);
   --l-accent-light: #d97706;
+  --l-accent-bright: #f59e0b;
   --l-accent-muted: #fef3c7;
   --l-text-primary: #0c0a09;
   --l-text-secondary: #57534e;
   --l-surface: #fafaf9;
+  --l-surface-warm: #f8f7f4;
+  --l-surface-warmer: #f0ece4;
   --l-border: #e7e5e4;
 
   font-family: var(--theme-font-family, 'Pretendard Variable', 'Pretendard', system-ui, sans-serif);

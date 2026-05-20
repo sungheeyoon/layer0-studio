@@ -19,7 +19,7 @@ const TrustStrip: SectionComponent = function TrustStrip({ section }: TemplateSe
   ];
 
   return (
-    <section className="bg-[#0f172a] py-16 px-4">
+    <section className="bg-[var(--l-navy)] py-16 px-4">
       <div className={styles.container}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-white/10">
           {stats.map((s, i) => (

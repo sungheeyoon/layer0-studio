@@ -10,9 +10,9 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
   const services = [
     { title: getFieldValue(data, 'service1Title'), body: getFieldValue(data, 'service1Body'), icon: <BuildingsIcon size={40} className="text-amber-400 mb-5" />, large: true },
     { title: getFieldValue(data, 'service2Title'), body: getFieldValue(data, 'service2Body'), icon: <CalculatorIcon size={32} className="text-amber-600 mb-4" />, bg: 'bg-amber-50 border-amber-100' },
-    { title: getFieldValue(data, 'service3Title'), body: getFieldValue(data, 'service3Body'), icon: <HomeIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
-    { title: getFieldValue(data, 'service4Title'), body: getFieldValue(data, 'service4Body'), icon: <GraphIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
-    { title: getFieldValue(data, 'service5Title'), body: getFieldValue(data, 'service5Body'), icon: <UserHandsIcon size={32} className="text-[#0f172a] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(data, 'service3Title'), body: getFieldValue(data, 'service3Body'), icon: <HomeIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(data, 'service4Title'), body: getFieldValue(data, 'service4Body'), icon: <GraphIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(data, 'service5Title'), body: getFieldValue(data, 'service5Body'), icon: <UserHandsIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
   ];
 
   const mainCtaTitle = getFieldValue(data, 'service6Title') || '';
@@ -24,14 +24,14 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
         <div className="mb-16">
           <div className={`${styles.sectionSep} mb-4`}></div>
           <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-3">Practice Areas</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0f172a] tracking-tight leading-tight whitespace-pre-line max-w-2xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--l-navy)] tracking-tight leading-tight whitespace-pre-line max-w-2xl">
             {title}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Service 1 - Large */}
-          <div className="md:col-span-2 bg-[#0f172a] rounded-2xl p-8 relative overflow-hidden transition-transform duration-400 hover:-translate-y-1 hover:shadow-2xl">
+          <div className="md:col-span-2 bg-[var(--l-navy)] rounded-2xl p-8 relative overflow-hidden transition-transform duration-400 hover:-translate-y-1 hover:shadow-2xl">
             <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/5 -translate-y-1/3 translate-x-1/3 pointer-events-none"></div>
             {services[0].icon}
             <h3 className="text-xl font-bold text-white mb-2">{services[0].title}</h3>
@@ -55,7 +55,7 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
           {/* Service 2 */}
           <div className={`rounded-2xl p-7 border transition-transform duration-400 hover:-translate-y-1 hover:shadow-xl ${services[1].bg}`}>
             {services[1].icon}
-            <h3 className="text-lg font-bold text-[#0f172a] mb-2">{services[1].title}</h3>
+            <h3 className="text-lg font-bold text-[var(--l-navy)] mb-2">{services[1].title}</h3>
             <p className="text-stone-600 text-sm leading-relaxed">{services[1].body}</p>
           </div>
 
@@ -63,13 +63,13 @@ const Services: SectionComponent = function Services({ section }: TemplateSectio
           {services.slice(2).map((s, i) => (
             <div key={i} className={`rounded-2xl p-7 border transition-transform duration-400 hover:-translate-y-1 hover:shadow-xl ${s.bg}`}>
               {s.icon}
-              <h3 className="text-lg font-bold text-[#0f172a] mb-2">{s.title}</h3>
+              <h3 className="text-lg font-bold text-[var(--l-navy)] mb-2">{s.title}</h3>
               <p className="text-stone-600 text-sm leading-relaxed">{s.body}</p>
             </div>
           ))}
 
           {/* Service 6 - Wide CTA */}
-          <div className="md:col-span-3 bg-gradient-to-r from-[#0f172a] to-[#1e2b5e] rounded-2xl p-8 flex flex-col md:flex-row items-start md:items-center gap-6 transition-transform duration-400 hover:-translate-y-1 hover:shadow-2xl">
+          <div className="md:col-span-3 bg-gradient-to-r from-[var(--l-navy)] to-[var(--l-navy-light)] rounded-2xl p-8 flex flex-col md:flex-row items-start md:items-center gap-6 transition-transform duration-400 hover:-translate-y-1 hover:shadow-2xl">
             <div className="flex-1">
               <LawIcon size={32} className="text-amber-400 mb-3" />
               <h3 className="text-lg font-bold text-white mb-1">{mainCtaTitle}</h3>

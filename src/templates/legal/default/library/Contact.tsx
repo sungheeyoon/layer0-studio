@@ -14,7 +14,7 @@ const Contact: SectionComponent = function Contact({ section }: TemplateSectionP
   const location = getFieldValue(data, 'location') || '';
 
   return (
-    <section id="contact" className="py-24 md:py-32 px-4 bg-[#0f172a] relative overflow-hidden">
+    <section id="contact" className="py-24 md:py-32 px-4 bg-[var(--l-navy)] relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-white/3 -translate-y-1/2"></div>
         <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full bg-amber-500/10 translate-y-1/2"></div>
@@ -23,7 +23,7 @@ const Contact: SectionComponent = function Contact({ section }: TemplateSectionP
       <div className="max-w-5xl mx-auto relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
-            <div className={`${styles.sectionSep} mb-4`} style={{ background: 'linear-gradient(to right, #d97706, #f59e0b)' }}></div>
+            <div className={`${styles.sectionSep} mb-4`} style={{ background: 'linear-gradient(to right, var(--l-accent-light), var(--l-accent-bright))' }}></div>
             <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight whitespace-pre-line mb-5">
               {title}
             </h2>
@@ -63,23 +63,23 @@ const Contact: SectionComponent = function Contact({ section }: TemplateSectionP
           </div>
 
           <div className="bg-white rounded-2xl p-8 shadow-2xl">
-            <h3 className="text-xl font-bold text-[#0f172a] mb-6">온라인 상담 신청</h3>
+            <h3 className="text-xl font-bold text-[var(--l-navy)] mb-6">온라인 상담 신청</h3>
 
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wide">성함</label>
-                  <input type="text" placeholder="홍길동" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all" />
+                  <input type="text" placeholder="홍길동" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-[var(--l-navy)] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wide">연락처</label>
-                  <input type="tel" placeholder="010-0000-0000" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all" />
+                  <input type="tel" placeholder="010-0000-0000" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-[var(--l-navy)] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wide">업무 분야</label>
-                <select className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all appearance-none">
+                <select className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-[var(--l-navy)] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all appearance-none">
                   <option value="">분야를 선택해 주세요</option>
                   <option>기업법무 · 계약</option>
                   <option>세무 · 회계 · 세무조사</option>
@@ -93,7 +93,7 @@ const Contact: SectionComponent = function Contact({ section }: TemplateSectionP
 
               <div>
                 <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wide">문의 내용</label>
-                <textarea rows={4} placeholder="상담 받고 싶은 내용을 간략히 적어 주세요. (비밀 보장)" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all resize-none"></textarea>
+                <textarea rows={4} placeholder="상담 받고 싶은 내용을 간략히 적어 주세요. (비밀 보장)" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-[var(--l-navy)] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all resize-none"></textarea>
               </div>
 
               <div className="flex items-start gap-2.5">
