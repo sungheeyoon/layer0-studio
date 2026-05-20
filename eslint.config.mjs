@@ -14,6 +14,17 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // Standard convention: `_`-prefixed args/vars are intentionally unused
+  // (e.g. signature stability for stub implementations).
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      }],
+    },
+  },
   // Token enforcement on template section components.
   // Scope: src/templates/**/*.{ts,tsx} except tokens.ts/template.ts (token definition sites).
   // Severity 'error': all existing templates passed cleanup (#22). Regressions block CI.

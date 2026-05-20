@@ -54,6 +54,12 @@ describe('scanInlineTokens', () => {
     expect(scanInlineTokens(`const x = "font-family: 'unset'";`)).toHaveLength(0);
   });
 
+  it('does NOT flag var(--font-*) references as font literals', () => {
+    expect(scanInlineTokens(`<div style={{ fontFamily: 'var(--font-base)' }} />`)).toHaveLength(0);
+    expect(scanInlineTokens(`<div style={{ fontFamily: 'var(--font-serif, Georgia)' }} />`)).toHaveLength(0);
+    expect(scanInlineTokens(`const x = "font-family: var(--font-base)";`)).toHaveLength(0);
+  });
+
   it('passes var(--*) token references', () => {
     const v = scanInlineTokens(`<div style={{ color: 'var(--c-terra)', background: 'var(--c-bg)' }} />`);
     expect(v).toHaveLength(0);
