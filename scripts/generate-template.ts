@@ -21,10 +21,11 @@
 
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import path, { join } from 'path';
 import { createInterface } from 'readline/promises';
 import { z } from 'zod';
 import { claudeJSON } from './lib/llm';
+import { validateAndCapture } from './lib/validate-and-capture';
 
 // ─── Tool result types ───────────────────────────────────────────────────────
 // Stable across stub/real impls. #11-#16 keep these signatures; only the
@@ -76,12 +77,6 @@ interface GenerateSectionResult {
   tsxSource: string;
   dataSchema: Record<string, { type: string; label: string; required?: boolean }>;
   defaultData: Record<string, { value: string; type: string; label: string }>;
-}
-
-interface ValidateAndCaptureResult {
-  ok: boolean;
-  errors: string[];
-  thumbnailPath: string | null;                    // stub: null (real: capture path)
 }
 
 // ─── 4 stub tool implementations ─────────────────────────────────────────────
@@ -334,9 +329,8 @@ export default ${componentName};
   };
 }
 
-function stub_validate_and_capture(_templateDir: string): ValidateAndCaptureResult {
-  return { ok: true, errors: [], thumbnailPath: null };
-}
+// stub_validate_and_capture removed in Tracer #7 — real impl is
+// `validateAndCapture` in scripts/lib/validate-and-capture.ts.
 
 // ─── File writers ────────────────────────────────────────────────────────────
 
@@ -603,7 +597,7 @@ Flow:
   1. propose_composition    LLM — category, leaf slug candidates, section roles
   2. propose_design_tokens  LLM — defaultGlobalStyles + rich designTokens
   3. generate_section       stub (Tracer #4 will replace)
-  4. validate_and_capture   stub (Tracer #7 will replace)
+  4. validate_and_capture   tsc / eslint / validate / schema-JSX / thumbnail capture
 
 Each step shows the proposal and asks for approval. propose_composition
 also lets the user pick from leaf candidates or regenerate. --auto-approve
@@ -696,16 +690,31 @@ Requires ANTHROPIC_API_KEY in the environment. Tip:
   console.log('\n🔁 Regenerating template registry…');
   execSync('pnpm generate:templates', { stdio: 'inherit' });
 
-  // Step 4 (stub no-op)
-  const validation = stub_validate_and_capture(templateRoot);
-  if (!(await approve('validate_and_capture', validation, autoApprove))) {
-    console.log('Aborted at validate_and_capture.'); process.exit(1);
+  // Step 4 — validate_and_capture (real)
+  console.log('\n🛡️  validate_and_capture — running integration gate (tsc / eslint / validate / capture)…');
+  const validation = await validateAndCapture({ templateKey, templateRoot });
+  for (const step of validation.steps) {
+    const icon = step.ok ? '✅' : '❌';
+    console.log(`  ${icon} ${step.name}`);
+    for (const msg of step.messages) console.log(`     ${msg}`);
+  }
+  if (!validation.ok) {
+    console.error(`\n❌ validate_and_capture halted at step "${validation.steps[validation.steps.length - 1].name}".`);
+    console.error('   Partial work is left in the working tree — inspect git diff, fix manually, then re-run from a clean state.');
+    process.exit(1);
   }
 
   console.log(`\n✅ Generated template "${templateKey}". Next steps:`);
-  console.log(`   pnpm tsc --noEmit                                # type-check`);
-  console.log(`   pnpm dev → /preview/preset/${templateKey}       # visual preview`);
-  console.log(`   pnpm template:sync                               # see it as a 'CREATE' candidate`);
+  console.log(`   1. Review the diff:    git status && git diff`);
+  console.log(`   2. Visual sanity:      pnpm dev → /preview/preset/${templateKey}`);
+  console.log(`   3. Commit + push:      git add … && git commit && gh pr create`);
+  console.log(`   4. Sync to DB:         pnpm template:sync --apply  (or admin's "Apply Sync" button)`);
+  if (validation.thumbnailPath) {
+    console.log(`\n   🖼️  Thumbnail captured: ${path.relative(process.cwd(), validation.thumbnailPath)}`);
+  } else {
+    console.log(`\n   ℹ️  Thumbnail not generated (capture step may have been skipped or failed).`);
+    console.log(`      Re-run independently: pnpm template:capture ${templateKey}`);
+  }
 }
 
 run().catch(err => { console.error(err); process.exit(1); });
