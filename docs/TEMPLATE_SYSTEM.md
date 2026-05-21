@@ -445,18 +445,22 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 ### 7.1 `template:generate` 흐름 (Issue #10 Tracer #1)
 
 ```
-brief ──▶ propose_composition  ──▶ [y / r=regenerate / pick leaf 1-3]   ← LLM (Issue #11)
-       ──▶ propose_design_tokens ──▶ [approve y/n]                      ← stub
-       ──▶ generate_section(×N)  ──▶ [approve y/n] (per section)        ← stub
+brief ──▶ propose_composition   ──▶ [y / r / pick leaf 1-3]    ← LLM (#11)
+       ──▶ propose_design_tokens ──▶ [y / r=regenerate / n]    ← LLM (#12)
+       ──▶ generate_section(×N)  ──▶ [approve y/n] (per section)  ← stub
        ──▶ writeFiles + generate:templates
-       ──▶ validate_and_capture  ──▶ [approve y/n]                      ← stub
+       ──▶ validate_and_capture  ──▶ [approve y/n]               ← stub
 ```
 
 생성 결과: `src/templates/<category>/<leaf>/` 안에 6개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). 자동으로 `pnpm generate:templates` 실행 → `_generated.ts` 갱신 → `/preview/preset/<templateKey>`에서 즉시 미리보기 가능.
 
-**LLM 단계 (Issue #11)** — `propose_composition`만 실제 Claude API 호출 (`claude-opus-4-7`, adaptive thinking, `output_config.format` JSON schema). 시스템 프롬프트는 category 정규화 룰(소문자+hyphen), leaf slug 컨벤션(2-3개 후보 제시), 카테고리별 섹션 역할 가이드를 명시. brief는 한국어/영어/다국어 OK. 환경 변수 `ANTHROPIC_API_KEY` 필요 — `pnpm tsx --env-file=.env.local scripts/generate-template.ts "<brief>"` 권장. 오류(키 누락/네트워크/스키마 불일치)는 사람-가독적 메시지로 surface.
+**LLM 단계 1 (#11) — `propose_composition`**: brief → category, leaf slug 후보 2-3개, section role 시퀀스. 시스템 프롬프트는 category 정규화 룰(소문자+hyphen), leaf slug 컨벤션, 카테고리별 섹션 역할 가이드를 명시. UX: 사람이 leaf 후보 중 선택 또는 커스텀 입력, regenerate 가능.
 
-**나머지 3 단계 stub** — propose_design_tokens / generate_section / validate_and_capture는 여전히 하드코딩. Issue #12–#14에서 1개씩 LLM 호출로 교체 예정. 시그너처가 안정적이라 swap만으로 충분.
+**LLM 단계 2 (#12) — `propose_design_tokens`**: brief + composition → `defaultGlobalStyles` (얇은 5필드) + `designTokens` (rich: colors / fonts / spacing? / radius? / shadows?). #9의 2-layer 모델 그대로. Zod 스키마가 `colors.primary/secondary`, `fonts.base`, hex 색 형식, CSS length 단위 등을 runtime 검증. 카테고리별 mood 가이드(cafe=warm earth, medical=muted+1 accent 등) 시스템 프롬프트에 포함. UX: [y/r/n] regenerate 가능, 최대 4회 시도.
+
+공통 인프라 (#11에서 도입) — `scripts/lib/llm.ts`의 `claudeJSON({systemPrompt, userMessage, schema, …})` 헬퍼: `claude-opus-4-7` + adaptive thinking + `output_config.format` (json_schema), Zod 검증, 사람-가독적 에러 (키 누락 / 401 / 429 / network / parse / schema fail). 환경 변수 `ANTHROPIC_API_KEY` 필요 — `pnpm tsx --env-file=.env.local scripts/generate-template.ts "<brief>"` 권장.
+
+**나머지 2 단계 stub** — generate_section / validate_and_capture는 여전히 하드코딩. Issue #13/#16에서 교체 예정.
 
 
 ---

@@ -58,9 +58,16 @@ interface ProposeDesignTokensResult {
     layout: 'wide' | 'narrow' | 'default';
   };
   designTokens: {
+    /** Palette. `primary`/`secondary` are required — globalStyles overlay overlays them. */
     colors: Record<string, string>;
+    /** Font stacks. `base` is required — globalStyles.fontFamily overlays it. */
     fonts: Record<string, string>;
+    spacing?: Record<string, string>;
+    radius?: Record<string, string>;
+    shadows?: Record<string, string>;
   };
+  /** 1-3문장 — 팔레트·폰트·spacing 선택 이유 (UX용, 저장 안 됨). */
+  rationale?: string;
 }
 
 interface GenerateSectionResult {
@@ -150,28 +157,113 @@ async function propose_composition(brief: string): Promise<ProposeCompositionRes
   });
 }
 
-function stub_propose_design_tokens(_brief: string, _comp: ProposeCompositionResult): ProposeDesignTokensResult {
-  return {
-    defaultGlobalStyles: {
-      primaryColor:   '#C96A3A',
-      secondaryColor: '#231509',
-      fontFamily:     "'Pretendard', sans-serif",
-      fontSize:       '16px',
-      layout:         'wide',
-    },
-    designTokens: {
-      colors: {
-        primary:   '#C96A3A',
-        secondary: '#231509',
-        surface:   '#F5F0E8',
-        cream:     '#F0E9DC',
-      },
-      fonts: {
-        base:  "'Pretendard', sans-serif",
-        serif: "'Playfair Display', Georgia, serif",
-      },
-    },
-  };
+// Zod schema mirrors `ProposeDesignTokensResult`. Required overlay points
+// (primary/secondary/base) are enforced so the thin globalStyles overlay
+// (Issue #9) always has a target token.
+const HEX_COLOR = z
+  .string()
+  .regex(/^#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})$/, 'must be #rgb/#rrggbb/#rgba/#rrggbbaa');
+
+const ProposeDesignTokensSchema = z.object({
+  defaultGlobalStyles: z.object({
+    primaryColor:   HEX_COLOR,
+    secondaryColor: HEX_COLOR,
+    fontFamily:     z.string().min(1),
+    fontSize:       z.string().regex(/^\d+(\.\d+)?(px|rem|em)$/, 'CSS length only (px / rem / em)'),
+    layout:         z.enum(['wide', 'narrow', 'default']),
+  }),
+  designTokens: z.object({
+    colors: z
+      .object({ primary: HEX_COLOR, secondary: HEX_COLOR })
+      .catchall(HEX_COLOR),
+    fonts: z
+      .object({ base: z.string().min(1) })
+      .catchall(z.string().min(1)),
+    spacing: z.record(z.string(), z.string()).optional(),
+    radius:  z.record(z.string(), z.string()).optional(),
+    shadows: z.record(z.string(), z.string()).optional(),
+  }),
+  rationale: z.string().optional(),
+});
+
+const PROPOSE_DESIGN_TOKENS_SYSTEM_PROMPT = `당신은 정적 마케팅 사이트 generator의 두 번째 단계 디자인 디렉터. brief + 이미 확정된 composition을 받아 풍부한 designTokens와 얇은 defaultGlobalStyles를 한 번에 결정.
+
+OUTPUT (JSON only, no prose, no markdown):
+{
+  "defaultGlobalStyles": {
+    "primaryColor":   "#RRGGBB",
+    "secondaryColor": "#RRGGBB",
+    "fontFamily":     "'<Font>', system-ui, sans-serif",
+    "fontSize":       "16px",
+    "layout":         "wide" | "narrow" | "default"
+  },
+  "designTokens": {
+    "colors":  { "primary": "#…", "secondary": "#…", "<semantic-name>": "#…", … },
+    "fonts":   { "base": "'<Font>', …, sans-serif", "serif"?: "'<Font>', serif", "display"?: "'<Font>', …", … },
+    "spacing"?: { "xs": "0.5rem", "sm": "0.75rem", "md": "1rem", "lg": "1.5rem", "xl": "2.5rem" },
+    "radius"?:  { "sm": "0.25rem", "md": "0.5rem", "lg": "1rem", "pill": "9999px" },
+    "shadows"?: { "card": "0 1px 3px rgba(0,0,0,0.1)", "lift": "0 8px 24px rgba(0,0,0,0.12)" }
+  },
+  "rationale": "<1-3문장 — 팔레트·폰트·spacing 선택 이유>"
+}
+
+CORE 모델 (Issue #9):
+- **defaultGlobalStyles**: 사용자가 어드민/에디터에서 *편집 가능한* 5필드만. 이 값은 designTokens의 특정 토큰을 overlay함:
+  - primaryColor   → --color-primary
+  - secondaryColor → --color-secondary
+  - fontFamily     → --font-base
+  - fontSize       → --font-size
+- **designTokens**: 코드 고정. 컴포넌트가 var(--color-*) / var(--font-*) / var(--spacing-*) / var(--radius-*) / var(--shadow-*)로 참조. 위 4개 overlay key (primary/secondary/base/font-size)는 designTokens에 반드시 정의.
+
+RULES — 색:
+- 모두 hex (#rgb/#rrggbb/#rgba/#rrggbbaa). 'rgb()'/'hsl()'/named color 금지.
+- colors.primary/secondary는 필수. 그 외 brand에 어울리는 의미 있는 이름: surface, surface-dark, accent, muted, on-dark, cream, ink 등. 보통 6-10개.
+- WCAG AA 대비 고려: 본문 텍스트색-배경 대비비 4.5:1 이상 (감각으로 OK, 검증은 안 함).
+- 비대비 조합 금지 (저채도 회색 위 저채도 베이지 등). 카테고리 mood에 충돌하는 색 금지 (medical에 네온 핑크 등).
+
+RULES — 폰트:
+- fonts.base는 필수 (전체 사이트 기본 폰트, 사용자 편집 가능).
+- 'serif', 'display', 'mono' 등 추가 가능.
+- 항상 fallback 포함: "'Pretendard', 'Apple SD Gothic Neo', sans-serif" 같은 식. 한글 카테고리는 Pretendard 권장, 영문 위주는 Inter/system-ui.
+
+RULES — spacing/radius/shadows (선택 사항이지만 권장):
+- spacing: T-shirt size (xs/sm/md/lg/xl). 값은 rem 단위.
+- radius: 카테고리 톤에 맞게 — 모던/미니멀이면 작은 값 + pill 변형. 클래식이면 거의 0.
+- shadows: 보수 색 + 낮은 opacity (rgba). 1-3개면 충분.
+
+RULES — 일관성:
+- composition의 sections와 brief의 분위기를 반영. 예: "어두운 바이브의 책방"이면 dark surface + warm gold accent + serif heading.
+- 카테고리 mood 가이드:
+  - cafe: warm earth + cream + serif accent
+  - corporate: cool neutral + bold accent + sans-serif
+  - medical/legal: muted + 1 strong accent + serif heading 권장
+  - portfolio/interior: monochrome + warm/cool 양극화
+  - fitness: high contrast + electric accent
+  - wedding: blush/cream + gold/blush accent + script-feel serif
+
+RULES — 형식:
+- 모든 var name은 영소문자+hyphen만. 한국어 또는 ASCII가 아닌 키 금지.
+- rationale은 brief 언어 따라가도 됨.
+- 절대 prose나 markdown 외부 텍스트 금지. JSON 한 개만.`;
+
+async function propose_design_tokens(
+  brief: string,
+  comp: ProposeCompositionResult,
+): Promise<ProposeDesignTokensResult> {
+  // Compact summary of the composition — saves tokens vs sending full intents.
+  const compositionSummary = comp.composition.map(s => s.role).join(' → ');
+  return claudeJSON({
+    systemPrompt: PROPOSE_DESIGN_TOKENS_SYSTEM_PROMPT,
+    userMessage: `Brief:
+${brief}
+
+Category: ${comp.category}
+Composition (in render order): ${compositionSummary}
+
+Section intents:
+${comp.composition.map(s => `  - ${s.role}: ${s.intent}`).join('\n')}`,
+    schema: ProposeDesignTokensSchema,
+  });
 }
 
 function stub_generate_section(
@@ -277,19 +369,25 @@ function resolveComposition(roles: SectionRole[]): ResolvedSection[] {
 }
 
 function renderTokensFile(t: PlannedTemplate): string {
-  const colors = JSON.stringify(t.tokens.designTokens.colors, null, 2).replace(/\n/g, '\n  ');
-  const fonts  = JSON.stringify(t.tokens.designTokens.fonts,  null, 2).replace(/\n/g, '\n  ');
+  const dt = t.tokens.designTokens;
+  // Format each dimension as nested JSON, re-indented to sit inside the `designTokens` object.
+  const fmt = (obj: Record<string, string>) =>
+    JSON.stringify(obj, null, 2).replace(/\n/g, '\n  ');
+  const lines: string[] = [`colors: ${fmt(dt.colors)}`, `fonts: ${fmt(dt.fonts)}`];
+  if (dt.spacing) lines.push(`spacing: ${fmt(dt.spacing)}`);
+  if (dt.radius)  lines.push(`radius: ${fmt(dt.radius)}`);
+  if (dt.shadows) lines.push(`shadows: ${fmt(dt.shadows)}`);
+  const body = lines.map(l => `  ${l}`).join(',\n');
+
   return `import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
 import type { DesignTokens } from '@/templates/types';
 
-// Generated by \`pnpm template:generate\` (Tracer #1 stub).
-// Edit freely — this is now first-class code.
+// Generated by \`pnpm template:generate\`. Edit freely — this is first-class code.
 
 export const defaultGlobalStyles: TemplateGlobalStyles = ${JSON.stringify(t.tokens.defaultGlobalStyles, null, 2)};
 
 export const designTokens: DesignTokens = {
-  colors: ${colors},
-  fonts: ${fonts},
+${body},
 };
 `;
 }
@@ -503,7 +601,7 @@ AI template generation pipeline.
 
 Flow:
   1. propose_composition    LLM — category, leaf slug candidates, section roles
-  2. propose_design_tokens  stub (Tracer #3 will replace)
+  2. propose_design_tokens  LLM — defaultGlobalStyles + rich designTokens
   3. generate_section       stub (Tracer #4 will replace)
   4. validate_and_capture   stub (Tracer #7 will replace)
 
@@ -558,10 +656,22 @@ Requires ANTHROPIC_API_KEY in the environment. Tip:
     process.exit(1);
   }
 
-  // Step 2 — propose_design_tokens (stub)
-  const tokens = stub_propose_design_tokens(brief, comp);
-  if (!(await approve('propose_design_tokens', tokens, autoApprove))) {
-    console.log('Aborted at propose_design_tokens.'); process.exit(1);
+  // Step 2 — propose_design_tokens (LLM, with regenerate loop)
+  let tokens: ProposeDesignTokensResult | null = null;
+  let tokensApproved = false;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    console.log(`\n🧠 Calling Claude for propose_design_tokens (attempt ${attempt})…`);
+    tokens = await propose_design_tokens(brief, comp);
+    const decision = await approveOrRegen('propose_design_tokens', tokens, autoApprove);
+    if (decision === 'approve') {
+      tokensApproved = true;
+      break;
+    }
+    // decision === 'regenerate' → loop
+  }
+  if (!tokens || !tokensApproved) {
+    console.error('Could not settle on design tokens within 4 attempts.');
+    process.exit(1);
   }
 
   // Step 3 — generate_section per resolved section (stub)
