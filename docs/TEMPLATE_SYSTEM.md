@@ -447,9 +447,9 @@ pnpm tsc --noEmit                 # 타입 체크 (CI에서 클린 유지)
 ```
 brief ──▶ propose_composition   ──▶ [y / r / pick leaf 1-3]    ← LLM (#11)
        ──▶ propose_design_tokens ──▶ [y / r=regenerate / n]    ← LLM (#12)
-       ──▶ generate_section(×N)  ──▶ [approve y/n] (per section)  ← stub
+       ──▶ generate_section(×N)  ──▶ [approve y/n] (per section)  ← stub (#13)
        ──▶ writeFiles + generate:templates
-       ──▶ validate_and_capture  ──▶ [approve y/n]               ← stub
+       ──▶ validate_and_capture  ──▶ tsc/eslint/validate/capture  ← real (#16)
 ```
 
 생성 결과: `src/templates/<category>/<leaf>/` 안에 6개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). 자동으로 `pnpm generate:templates` 실행 → `_generated.ts` 갱신 → `/preview/preset/<templateKey>`에서 즉시 미리보기 가능.
@@ -460,7 +460,9 @@ brief ──▶ propose_composition   ──▶ [y / r / pick leaf 1-3]    ← L
 
 공통 인프라 (#11에서 도입) — `scripts/lib/llm.ts`의 `claudeJSON({systemPrompt, userMessage, schema, …})` 헬퍼: `claude-opus-4-7` + adaptive thinking + `output_config.format` (json_schema), Zod 검증, 사람-가독적 에러 (키 누락 / 401 / 429 / network / parse / schema fail). 환경 변수 `ANTHROPIC_API_KEY` 필요 — `pnpm tsx --env-file=.env.local scripts/generate-template.ts "<brief>"` 권장.
 
-**나머지 2 단계 stub** — generate_section / validate_and_capture는 여전히 하드코딩. Issue #13/#16에서 교체 예정.
+**남은 단계 stub** — generate_section만 여전히 하드코딩. Issue #13에서 LLM 호출로 교체 예정.
+
+**최종 단계 (#16) — `validate_and_capture`**: 6단계 통합 게이트. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — #8 토큰 룰 포함; (3) `validateTemplateJson` — preset → templateJson 유도 후 검증; (4) `validateTemplateFiles` — #8 file-level 인라인 색·폰트 스캔; (5) **dataSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared됨 cross-check (브래스 밸런스 파서 — single/multi-line 둘 다 지원); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp 생성. (1)–(5) 중 하나라도 실패하면 즉시 halt + 부분 진행물 워킹 트리에 남김 (retry 안 함 — 사람 인계가 맞음). 캡처는 soft-fail (썸네일은 사후 재생성 가능).
 
 ### 7.2 이미지 호스팅 헬퍼 (Issue #15)
 

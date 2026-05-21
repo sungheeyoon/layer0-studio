@@ -10,8 +10,34 @@ import http from 'http';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
-const THEMES_DIR = join(ROOT, 'src', 'themes');
+const TEMPLATES_DIR = join(ROOT, 'src', 'templates');
 const OUTPUT_DIR = join(ROOT, 'public', 'thumbnails');
+
+/**
+ * Walk `src/templates/<category>/<leaf>/` and return every templateKey
+ * (`<category>-<leaf>`) that has a `thumbnail.config.ts`. β model (#6) —
+ * categories are top-level dirs (cafe, corporate, ...), leaves are nested.
+ */
+function discoverTemplates(): Array<{ key: string; configPath: string }> {
+  const out: Array<{ key: string; configPath: string }> = [];
+  if (!existsSync(TEMPLATES_DIR)) return out;
+  for (const category of readdirSync(TEMPLATES_DIR)) {
+    const categoryDir = join(TEMPLATES_DIR, category);
+    let leaves: string[];
+    try {
+      leaves = readdirSync(categoryDir);
+    } catch {
+      continue; // not a directory
+    }
+    for (const leaf of leaves) {
+      const configPath = join(categoryDir, leaf, 'thumbnail.config.ts');
+      if (existsSync(configPath)) {
+        out.push({ key: `${category}-${leaf}`, configPath });
+      }
+    }
+  }
+  return out;
+}
 
 interface ThumbnailConfig {
   source: string;
@@ -184,25 +210,26 @@ async function run() {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const templateKeys = readdirSync(THEMES_DIR).filter((k) =>
-    existsSync(join(THEMES_DIR, k, 'thumbnail.config.ts'))
-  );
+  const discovered = discoverTemplates();
+  const filtered = targetTheme
+    ? discovered.filter(t => t.key === targetTheme)
+    : discovered;
 
-  const filteredThemes = targetTheme
-    ? templateKeys.filter((k) => k === targetTheme)
-    : templateKeys;
-
-  if (filteredThemes.length === 0) {
-    console.log('No themes with thumbnail.config.ts found.');
+  if (filtered.length === 0) {
+    console.log(
+      targetTheme
+        ? `No template "${targetTheme}" found with thumbnail.config.ts.`
+        : 'No templates with thumbnail.config.ts found under src/templates/.',
+    );
     return;
   }
 
-  // Check if any filtered theme needs dev server
+  // Check if any template needs dev server (preview:// sources).
   let hasPreviewSource = false;
   const configs: Record<string, ThumbnailConfig> = {};
+  const filteredThemes = filtered.map(t => t.key);
 
-  for (const key of filteredThemes) {
-    const configPath = join(THEMES_DIR, key, 'thumbnail.config.ts');
+  for (const { key, configPath } of filtered) {
     const configModule = await import(pathToFileURL(configPath).href);
     const config = configModule.default as ThumbnailConfig;
     configs[key] = config;
