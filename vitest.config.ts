@@ -3,7 +3,11 @@ import path from 'path';
 
 export default defineConfig({
   test: {
-    include: ['src/domain/**/*.test.ts', 'src/lib/**/*.test.ts'],
+    include: [
+      'src/domain/**/*.test.ts',
+      'src/lib/**/*.test.ts',
+      'scripts/lib/**/*.test.ts',
+    ],
   },
   resolve: {
     alias: {

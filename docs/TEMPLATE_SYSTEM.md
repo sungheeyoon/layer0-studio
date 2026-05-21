@@ -462,6 +462,27 @@ brief ──▶ propose_composition   ──▶ [y / r / pick leaf 1-3]    ← L
 
 **나머지 2 단계 stub** — generate_section / validate_and_capture는 여전히 하드코딩. Issue #13/#16에서 교체 예정.
 
+### 7.2 이미지 호스팅 헬퍼 (Issue #15)
+
+`scripts/lib/image-fetch.ts`의 `fetchAndHostImage({ query, templateKey, aspectRatio?, role? })` — generate_section(#13)이 `dataSchema`에 `type: 'image'` 필드를 만들 때 호출. AI는 query 문자열만 결정하고 헬퍼가 fetch + host를 처리.
+
+**동작 순서**:
+1. Unsplash + Pexels 둘 다 query (둘 다 인증된 env 키 있는 만큼). 결과를 alternate-interleave로 합쳐 pool 구성.
+2. **Pool offset random** — top 10 중 인덱스 1~9에서 랜덤 (index 0 회피, AI가 모두 "1번 사진" 박는 데자뷔 방지).
+3. Unsplash인 경우 download_location 엔드포인트 hit (라이선스 ToS 준수, 사용 트래킹).
+4. 이미지 다운로드 → Supabase Storage `template_assets/` (마이그 014, #7) 업로드.
+5. 다운로드/업로드 실패 시 1회 재시도 → 그래도 실패하면 `picsum.photos/seed/<seed>/<W>/<H>` placeholder URL fallback.
+
+**Aspect ratio**: `wide` (1600×900, hero용), `square` (1000×1000, gallery), `portrait` (900×1200, menu-item) — provider orientation 파라미터와 fallback 치수 결정.
+
+**환경 변수**:
+- `UNSPLASH_ACCESS_KEY` (없으면 Unsplash 스킵)
+- `PEXELS_API_KEY` (없으면 Pexels 스킵)
+- 둘 다 없으면 항상 picsum fallback. 둘 다 무료 tier (Unsplash 50 req/hr demo, Pexels 200 req/hr).
+
+**테스트 가능 형태로 설계** — `fetchImpl`, `random`, `supabase`를 inject 가능. 10건의 단위 테스트 (offset 검증, 빈 풀 fallback, 재시도 후 fallback, 키 부재 picsum 등).
+
+**현재 연결되지 않음** — generate_section(#13)은 아직 stub이라 헬퍼가 자동 호출되지 않음. #13 머지 후 wiring 완료 예정.
 
 ---
 
