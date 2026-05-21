@@ -26,6 +26,11 @@ import { createInterface } from 'readline/promises';
 import { z } from 'zod';
 import { claudeJSON } from './lib/llm';
 import { validateAndCapture } from './lib/validate-and-capture';
+import {
+  isExistingCategory,
+  listExistingCategories,
+  validateCategorySlug,
+} from './lib/category-gate';
 
 // ─── Tool result types ───────────────────────────────────────────────────────
 // Stable across stub/real impls. #11-#16 keep these signatures; only the
@@ -640,6 +645,34 @@ Requires ANTHROPIC_API_KEY in the environment. Tip:
   if (!comp || !leaf) {
     console.error('Could not settle on a composition + leaf within 4 attempts.');
     process.exit(1);
+  }
+
+  // Slug guard — fail loudly on malformed category (no LLM retry; brief should be revised).
+  const slugCheck = validateCategorySlug(comp.category);
+  if (!slugCheck.ok) {
+    console.error(`❌ ${slugCheck.reason}`);
+    console.error('   Adjust the brief or category vocabulary, then re-run.');
+    process.exit(1);
+  }
+
+  // New-category approval gate (Issue #17). Strict equality — no fuzzy match.
+  if (!isExistingCategory(comp.category)) {
+    const existing = listExistingCategories();
+    console.log(`\n⚠️  Category '${comp.category}' is NEW (will create src/templates/${comp.category}/)`);
+    if (existing.length > 0) {
+      console.log(`   Existing categories: ${existing.join(', ')}`);
+    }
+    if (!autoApprove) {
+      const rl = createInterface({ input: process.stdin, output: process.stdout });
+      const answer = (await rl.question('   Bootstrap new category? [y/N] ')).trim().toLowerCase();
+      rl.close();
+      if (answer !== 'y' && answer !== 'yes') {
+        console.error('Aborted: new category not approved.');
+        process.exit(1);
+      }
+    } else {
+      console.log('   → auto-approved');
+    }
   }
 
   const templateKey = `${comp.category}-${leaf}`;
