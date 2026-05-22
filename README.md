@@ -1,8 +1,20 @@
 # Layer0 Studio
 
-A no-code website builder — pick a template, edit visually, publish to a custom domain.
+> 노코드 웹사이트 빌더 — 비개발자가 템플릿을 골라 시각적으로 편집하고 자신의 도메인으로 배포할 수 있는 SaaS 플랫폼.
 
-Built on **Next.js 16** (App Router), **Supabase** (auth + DB + storage), and **Tailwind CSS v4**.
+- 🔗 **Live**: https://layer0-studio.vercel.app
+- 📝 **포트폴리오 상세**: [docs/PORTFOLIO_ENTRY.md](docs/PORTFOLIO_ENTRY.md)
+- 📖 **기술 글**: [Optimistic Concurrency Control 구현기](https://layer0-studio.vercel.app/articles/optimistic-concurrency.html)
+
+**Stack**: Next.js 16 (App Router) · TypeScript · Supabase (Auth/DB/Storage) · Tailwind CSS v4 · Vercel
+**Architecture**: Clean Architecture (Domain / Data / Presentation) · 요청별 DI · Domain layer 단위 테스트 (Vitest)
+
+---
+
+> 본 저장소는 **포트폴리오 공개용**이며 별도 라이선스를 부여하지 않습니다 (All Rights Reserved).
+> 코드 열람은 자유롭게 가능하나, 복제·재배포·상업적 사용은 금지합니다.
+
+---
 
 ## Quick start
 
