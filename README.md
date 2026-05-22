@@ -1,6 +1,6 @@
 # Layer0 Studio
 
-> 노코드 웹사이트 빌더 — 비개발자가 템플릿을 골라 시각적으로 편집하고 자신의 도메인으로 배포할 수 있는 SaaS 플랫폼.
+> 노코드 웹사이트 빌더 — 비개발자가 Template 을 골라 시각적으로 편집하고 자신의 Subdomain 으로 배포할 수 있는 SaaS 플랫폼.
 
 ![Layer0 Studio editor](public/hero-editor.png)
 
@@ -49,14 +49,16 @@ CRON_SECRET=                   # /api/cron/cleanup-assets Bearer 토큰
 
 ## Template system
 
-템플릿은 `src/templates/<category>/<leaf>/` 안에 자기 토큰·라이브러리·렌더러를 모두 가진 자급식(self-contained) 구조입니다. **코드가 source of truth**이고 `pnpm template:sync`가 DB로 반영합니다 — 디렉터리만 추가하면 codegen이 자동으로 레지스트리에 등록.
+각 Template 은 `src/templates/<category>/<leaf>/` 안에 자기 토큰·라이브러리·렌더러를 모두 가진 자급식(self-contained) 구조 — Template 간 코드는 *전혀* 공유하지 않습니다 (DRY 보다 isolation 우선, [ADR-0001](docs/adr/0001-beta-model-template-isolation.md)). **코드가 source of truth**, `pnpm template:sync` 가 DB 로 반영 ([ADR-0002](docs/adr/0002-templates-source-of-truth-is-code.md)) — 디렉터리만 추가하면 codegen 이 자동으로 레지스트리에 등록.
 
-자세한 내용은 [docs/TEMPLATE_SYSTEM.md](docs/TEMPLATE_SYSTEM.md).
+자연어 brief 한 줄로 Template 코드를 LLM 이 통째로 만들어 주는 `pnpm template:generate` 파이프라인도 갖추고 있습니다.
+
+자세한 내용은 [docs/TEMPLATE_SYSTEM.md](docs/TEMPLATE_SYSTEM.md) · [docs/adr/](docs/adr/) · [CONTEXT.md](CONTEXT.md).
 
 ## Editor reliability
 
-- **Asset uploads — 2-phase commit**: `initUploadAction`이 `pending` DB 레코드를 만들고, 클라이언트가 Supabase Storage에 직접 업로드한 뒤 `confirmUploadAction`이 `active`로 마킹합니다. 고아 파일은 일일 크론(`/api/cron/cleanup-assets`)이 `sweep_orphaned_assets` RPC로 정리.
-- **Optimistic concurrency**: 에디터 저장 시 행의 `expectedUpdatedAt`을 함께 보내고, `save_site_template_with_lock` RPC가 `STALE_VERSION`을 반환하면 충돌 모달로 안내합니다. 상세 구현은 [Optimistic Concurrency Control 구현기](https://layer0-studio.vercel.app/articles/optimistic-concurrency.html).
+- **Asset uploads — 2-phase commit** ([ADR-0003](docs/adr/0003-asset-upload-two-phase-cleanup.md)): `initUploadAction` 이 `pending` DB 레코드를 만들고, 클라이언트가 Supabase Storage 에 직접 업로드한 뒤 `confirmUploadAction` 이 `active` 로 마킹합니다. 고아 파일은 일일 크론(`/api/cron/cleanup-assets`)이 `sweep_orphaned_assets` RPC 로 정리.
+- **Optimistic concurrency** ([ADR-0004](docs/adr/0004-optimistic-concurrency-via-rpc.md)): 에디터 저장 시 행의 `expectedUpdatedAt` 을 함께 보내고, `save_site_template_with_lock` RPC 가 `STALE_VERSION` 을 반환하면 충돌 모달로 안내합니다. 상세 구현은 [Optimistic Concurrency Control 구현기](https://layer0-studio.vercel.app/articles/optimistic-concurrency.html).
 
 ---
 
