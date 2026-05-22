@@ -44,7 +44,7 @@ A single typed editable property inside a Section's `data` — e.g. a heading te
 _Avoid_: input, property, attribute, prop.
 
 **Asset**:
-A user-uploaded image used inside a Site. Has a lifecycle: `pending` (reserved) → `active` (confirmed in use). The two-phase pattern exists to handle uploads that abort mid-flight (see [ADR-0003](./docs/adr/0003-asset-upload-two-phase-cleanup.md)).
+A user-uploaded image used inside a Site. Has a lifecycle: `pending` (reserved) → `active` (confirmed in use). The Reserve-Confirm pattern exists to handle uploads that abort mid-flight (see [ADR-0003](./docs/adr/0003-asset-upload-two-phase-cleanup.md)).
 _Avoid_: file, upload, image (in domain talk).
 
 **User**:

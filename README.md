@@ -27,6 +27,8 @@ flowchart LR
 - **요청별 DI** — 싱글톤 없이 매 요청마다 새 Supabase 클라이언트로 조립. 인증 컨텍스트가 절대 누설되지 않습니다.
 - **타입드 에러** — Use Case가 던지는 도메인 에러 코드를 클라이언트가 한국어 메시지로 매핑(`src/lib/errors/messages.ts`).
 
+상세 구현은 [프레임워크 없는 DI · Clean Architecture를 작게 적용하기](https://layer0-studio.vercel.app/articles/clean-architecture.html).
+
 ## Quick start
 
 ```bash
@@ -57,7 +59,7 @@ CRON_SECRET=                   # /api/cron/cleanup-assets Bearer 토큰
 
 ## Editor reliability
 
-- **Asset uploads — 2-phase commit** ([ADR-0003](docs/adr/0003-asset-upload-two-phase-cleanup.md)): `initUploadAction` 이 `pending` DB 레코드를 만들고, 클라이언트가 Supabase Storage 에 직접 업로드한 뒤 `confirmUploadAction` 이 `active` 로 마킹합니다. 고아 파일은 일일 크론(`/api/cron/cleanup-assets`)이 `sweep_orphaned_assets` RPC 로 정리.
+- **Asset uploads — Reserve-Confirm + Orphan Sweep** ([ADR-0003](docs/adr/0003-asset-upload-two-phase-cleanup.md)): `initUploadAction` 이 `pending` DB 레코드를 만들고, 클라이언트가 Supabase Storage 에 직접 업로드한 뒤 `confirmUploadAction` 이 `active` 로 마킹합니다. 고아 파일은 일일 크론(`/api/cron/cleanup-assets`)이 `sweep_orphaned_assets` RPC 로 정리하고, 워커는 `SELECT … FOR UPDATE SKIP LOCKED` 기반 작업 큐로 안전하게 소비합니다. 상세 구현은 [Reserve-Confirm + Orphan Sweep 구현기](https://layer0-studio.vercel.app/articles/asset-upload.html).
 - **Optimistic concurrency** ([ADR-0004](docs/adr/0004-optimistic-concurrency-via-rpc.md)): 에디터 저장 시 행의 `expectedUpdatedAt` 을 함께 보내고, `save_site_template_with_lock` RPC 가 `STALE_VERSION` 을 반환하면 충돌 모달로 안내합니다. 상세 구현은 [Optimistic Concurrency Control 구현기](https://layer0-studio.vercel.app/articles/optimistic-concurrency.html).
 
 ---

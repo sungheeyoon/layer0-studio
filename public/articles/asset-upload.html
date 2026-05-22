@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>이미지 업로드 파이프라인 · Layer0 Studio</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --surface: #161922;
+    --surface-2: #1d2230;
+    --border: #2a3142;
+    --text: #e7eaf2;
+    --text-dim: #9aa3b8;
+    --text-mute: #6b7390;
+    --accent: #7aa2ff;
+    --client: #6ec1ff;
+    --server: #c79bff;
+    --db: #ffb86b;
+    --storage: #9be3a0;
+    --danger: #ff7a7a;
+    --warn: #ffcd6b;
+    --ok: #5cd6a0;
+    --code-bg: #0b0d12;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Pretendard",
+      "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+  }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 64px 24px 120px;
+  }
+
+  header.hero {
+    margin-bottom: 80px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.hero .eyebrow {
+    color: var(--text-mute);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  header.hero h1 {
+    font-size: 40px;
+    line-height: 1.2;
+    margin: 0 0 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  header.hero .lead {
+    color: var(--text-dim);
+    font-size: 17px;
+    max-width: 680px;
+  }
+  header.hero .lead b { color: var(--text); }
+
+  section { margin: 72px 0; }
+  .sec-label {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  section h2 {
+    font-size: 26px;
+    margin: 0 0 20px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+  section h3 {
+    font-size: 18px;
+    margin: 32px 0 14px;
+    font-weight: 600;
+  }
+  p { margin: 0 0 14px; }
+  p.dim { color: var(--text-dim); }
+
+  .tldr {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .tldr .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    position: relative;
+  }
+  .tldr .card .tag {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .tldr .card.problem { border-color: rgba(255, 122, 122, 0.3); }
+  .tldr .card.problem .tag { color: var(--danger); }
+  .tldr .card.solution { border-color: rgba(122, 162, 255, 0.3); }
+  .tldr .card.solution .tag { color: var(--accent); }
+  .tldr .card.result { border-color: rgba(92, 214, 160, 0.3); }
+  .tldr .card.result .tag { color: var(--ok); }
+  .tldr .card .body { font-size: 14px; color: var(--text-dim); }
+  .tldr .card .body b { color: var(--text); font-weight: 600; }
+
+  @media (max-width: 720px) { .tldr { grid-template-columns: 1fr; } }
+
+  .timeline {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    margin-top: 16px;
+  }
+  .timeline-grid {
+    display: grid;
+    grid-template-columns: 90px 1fr 1fr;
+    gap: 12px 14px;
+    align-items: center;
+  }
+  .tl-time {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+    text-align: right;
+  }
+  .tl-header {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .tl-header.a { background: rgba(110, 193, 255, 0.12); color: var(--client); }
+  .tl-header.b { background: rgba(155, 227, 160, 0.12); color: var(--storage); }
+  .tl-cell {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .tl-cell.empty {
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-mute);
+    font-style: italic;
+    text-align: center;
+  }
+  .tl-cell b { color: var(--text); }
+  .tl-cell.danger {
+    background: rgba(255, 122, 122, 0.08);
+    border-color: rgba(255, 122, 122, 0.4);
+  }
+  .tl-cell.danger b { color: var(--danger); }
+  .tl-cell.ok {
+    background: rgba(92, 214, 160, 0.08);
+    border-color: rgba(92, 214, 160, 0.4);
+  }
+  .tl-cell.ok b { color: var(--ok); }
+  .tl-cell.warn {
+    background: rgba(255, 205, 107, 0.08);
+    border-color: rgba(255, 205, 107, 0.4);
+  }
+  .tl-cell.warn b { color: var(--warn); }
+
+  .timeline .verdict {
+    margin-top: 22px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .timeline .verdict.bad {
+    background: rgba(255, 122, 122, 0.08);
+    border: 1px solid rgba(255, 122, 122, 0.3);
+    color: var(--danger);
+  }
+  .timeline .verdict.good {
+    background: rgba(92, 214, 160, 0.08);
+    border: 1px solid rgba(92, 214, 160, 0.3);
+    color: var(--ok);
+  }
+  .verdict b { color: inherit; }
+
+  @media (max-width: 720px) {
+    .timeline-grid { grid-template-columns: 1fr; }
+    .tl-time { text-align: left; }
+  }
+
+  .concept {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+  }
+  .state-row {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 16px;
+    align-items: center;
+    margin: 24px 0;
+  }
+  .state-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .state-box.pending { border-color: rgba(255, 205, 107, 0.4); }
+  .state-box.active  { border-color: rgba(92, 214, 160, 0.4); }
+  .state-box .name {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .state-box.pending .name { color: var(--warn); }
+  .state-box.active  .name { color: var(--ok); }
+  .state-box .desc {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .state-arrow {
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 14px;
+  }
+  .state-arrow .small {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  @media (max-width: 720px) {
+    .state-row { grid-template-columns: 1fr; }
+  }
+
+  .rpc-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .rpc-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .rpc-card .name {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--db);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .rpc-card .desc {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  @media (max-width: 720px) {
+    .rpc-pair { grid-template-columns: 1fr; }
+  }
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 16px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 18px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .step:last-child { border-bottom: none; }
+  .step .num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .step .body .who {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+  }
+  .step .body .who.client  { background: rgba(110, 193, 255, 0.12); color: var(--client); }
+  .step .body .who.server  { background: rgba(199, 155, 255, 0.12); color: var(--server); }
+  .step .body .who.db      { background: rgba(255, 184, 107, 0.12); color: var(--db); }
+  .step .body .who.storage { background: rgba(155, 227, 160, 0.12); color: var(--storage); }
+  .step .body .who.cron    { background: rgba(255, 205, 107, 0.12); color: var(--warn); }
+  .step .body h4 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .step .body p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  .step .body code {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--text);
+  }
+
+  .code-pack { display: grid; gap: 18px; margin-top: 16px; }
+  .code-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .code-card header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .code-card header .title { font-size: 13px; font-weight: 600; }
+  .code-card header .file {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+  }
+  .code-card pre {
+    margin: 0;
+    padding: 18px 20px;
+    background: var(--code-bg);
+    overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .code-card pre .c { color: var(--text-mute); font-style: italic; }
+  .code-card pre .k { color: var(--server); }
+  .code-card pre .s { color: var(--ok); }
+  .code-card pre .n { color: var(--db); }
+  .code-card pre .v { color: var(--client); }
+  .code-card .note {
+    padding: 14px 20px;
+    background: rgba(122, 162, 255, 0.06);
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .code-card .note b { color: var(--accent); }
+
+  .qa { display: grid; gap: 10px; margin-top: 16px; }
+  details.qa-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  details.qa-card[open] { border-color: rgba(122, 162, 255, 0.4); }
+  details.qa-card summary {
+    padding: 16px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14.5px;
+  }
+  details.qa-card summary::-webkit-details-marker { display: none; }
+  details.qa-card summary::after {
+    content: "＋";
+    color: var(--text-mute);
+    font-size: 18px;
+    transition: transform 0.2s;
+  }
+  details.qa-card[open] summary::after {
+    content: "−";
+    color: var(--accent);
+  }
+  details.qa-card .answer {
+    padding: 0 20px 18px;
+    color: var(--text-dim);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  details.qa-card .answer b { color: var(--text); }
+  details.qa-card .answer code {
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin: 12px 0 8px;
+    flex-wrap: wrap;
+    font-size: 12px;
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-mute);
+  }
+  .legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .legend .dot.client  { background: var(--client); }
+  .legend .dot.server  { background: var(--server); }
+  .legend .dot.storage { background: var(--storage); }
+  .legend .dot.db      { background: var(--db); }
+  .legend .dot.cron    { background: var(--warn); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  HERO                                                          -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<header class="hero">
+  <div class="eyebrow">PORTFOLIO · TECHNICAL DEEP-DIVE</div>
+  <h1>이미지 업로드 파이프라인<br/><span style="color: var(--text-dim); font-weight: 500;">Reserve-Confirm + Orphan Sweep</span></h1>
+  <p class="lead">
+    클라이언트가 스토리지에 <b>직접 업로드</b>하면서도 DB·Storage 정합성을 잃지 않기 위한
+    <b>2단계 등록(pending → active)</b>과 <b>SKIP LOCKED 기반 비동기 회수</b> 패턴.
+  </p>
+</header>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  TL;DR                                                         -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">TL;DR · 한눈에</div>
+  <h2>30초 요약</h2>
+  <div class="tldr">
+    <div class="card problem">
+      <div class="tag">⚠ 문제</div>
+      <div class="body">
+        <b>서버 프록시</b>는 대역폭·타임아웃 부담, <b>그냥 client → storage</b>는
+        업로드 중단 시 <b>storage에만 파일이 남음 (orphan)</b>
+      </div>
+    </div>
+    <div class="card solution">
+      <div class="tag">🛠 해결</div>
+      <div class="body">
+        <b>init</b>에서 pending row 예약 → 클라이언트가 직접 업로드 → <b>confirm</b>으로 active 마킹.
+        누락분은 cron + <b>SKIP LOCKED 큐</b>로 비동기 회수
+      </div>
+    </div>
+    <div class="card result">
+      <div class="tag">✓ 결과</div>
+      <div class="body">
+        서버 대역폭 0, <b>DB ↔ Storage 정합성 자가 복구</b>,
+        멀티 워커가 같은 항목을 두 번 처리하지 않음
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PROBLEM SCENARIO                                              -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 1 · 문제 인식</div>
+  <h2>왜 단순 직접 업로드는 안전하지 않은가</h2>
+  <p class="dim">클라이언트가 곧장 Supabase Storage에 PUT을 날리는 단순 구조에서 발생하는 시나리오.</p>
+
+  <div class="timeline">
+    <div class="timeline-grid">
+      <div></div>
+      <div><span class="tl-header a">클라이언트 (브라우저)</span></div>
+      <div><span class="tl-header b">Supabase Storage</span></div>
+
+      <div class="tl-time">10:00:00</div>
+      <div class="tl-cell">이미지 선택<br/><b>5 MB JPG</b></div>
+      <div class="tl-cell empty">대기</div>
+
+      <div class="tl-time">10:00:02</div>
+      <div class="tl-cell">PUT 시작 (multipart)</div>
+      <div class="tl-cell warn">수신 중 <b>40%</b></div>
+
+      <div class="tl-time">10:00:05</div>
+      <div class="tl-cell danger">탭 종료 / 네트워크 끊김</div>
+      <div class="tl-cell warn">파일 <b>부분 수신된 채 종료</b></div>
+
+      <div class="tl-time">이후</div>
+      <div class="tl-cell empty">아무 일도 없음</div>
+      <div class="tl-cell danger"><b>orphan 파일이 영구 잔존</b><br/>DB엔 어떤 row도 없음</div>
+    </div>
+    <div class="verdict bad">
+      💥 <b>스토리지엔 파일이, DB엔 흔적이 없는 불일치 상태.</b>
+      누가 업로드한 건지, 사이즈가 얼마인지, 어떤 사이트에 쓰일 건지 — 검증·정리 모두 불가능.
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  CONCEPT                                                       -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 2 · 핵심 아이디어</div>
+  <h2>"상태 머신 + 자가 복구"로 푼다</h2>
+  <p class="dim">자산은 두 상태만 가진다. 미사용 자산은 <b style="color:var(--text)">1시간 후 큐로 보내져 회수</b>된다.</p>
+
+  <div class="concept">
+    <h3 style="margin-top:0">자산 상태 머신</h3>
+    <div class="state-row">
+      <div class="state-box pending">
+        <div class="name">pending</div>
+        <div class="desc">init으로 예약된 상태. 메타데이터 (user, size, mime) 만 DB에 있고, 스토리지엔 아직 파일이 없거나 업로드 중.</div>
+      </div>
+      <div class="state-arrow">
+        →
+        <span class="small">confirm</span>
+      </div>
+      <div class="state-box active">
+        <div class="name">active</div>
+        <div class="desc">클라이언트 업로드 성공 후 confirm으로 확정. Section의 image Field에서 참조 가능.</div>
+      </div>
+    </div>
+
+    <h3>자가 복구를 위한 RPC 두 개</h3>
+    <div class="rpc-pair">
+      <div class="rpc-card">
+        <div class="name">sweep_orphaned_assets()</div>
+        <div class="desc">생성된 지 <b>1시간이 지났는데</b> 어떤 <code>asset_usages</code>에서도 참조되지 않는 자산을 찾아 <code>cleanup_queue</code>에 enqueue. <code>ON CONFLICT DO NOTHING</code>으로 중복 enqueue 차단.</div>
+      </div>
+      <div class="rpc-card">
+        <div class="name">claim_cleanup_task()</div>
+        <div class="desc"><code>SELECT … FOR UPDATE SKIP LOCKED LIMIT 1</code>으로 큐에서 한 건을 원자적으로 점유. 여러 워커가 동시 실행돼도 같은 항목을 중복 처리하지 않음.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  FLOW                                                          -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 3 · 실제 동작 흐름</div>
+  <h2>7단계 프로세스</h2>
+  <div class="legend">
+    <span><span class="dot client"></span> 클라이언트</span>
+    <span><span class="dot server"></span> 서버 액션</span>
+    <span><span class="dot storage"></span> 스토리지</span>
+    <span><span class="dot db"></span> DB (Postgres)</span>
+    <span><span class="dot cron"></span> Cron / Worker</span>
+  </div>
+
+  <div class="flow">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="body">
+        <span class="who client">CLIENT</span>
+        <h4>사용자가 이미지 선택</h4>
+        <p>에디터에서 image Field 클릭 → 파일 picker → File 객체 확보 (filename, mimeType, size).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <div class="body">
+        <span class="who server">SERVER</span>
+        <h4>initUploadAction — 검증 + pending row 예약</h4>
+        <p><code>validateAssetInfo</code>로 MIME / size 검증 통과 시 <code>assets</code>에 <b>status='pending'</b> row 생성. <code>{ assetId, uploadPath }</code> 반환.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">3</div>
+      <div class="body">
+        <span class="who storage">STORAGE</span>
+        <h4>클라이언트가 직접 Supabase Storage에 PUT</h4>
+        <p>서버를 거치지 않고 <code>uploadPath</code>로 바로 업로드. 서버 함수의 대역폭 / 타임아웃 제약을 우회.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">4</div>
+      <div class="body">
+        <span class="who server">SERVER</span>
+        <h4>confirmUploadAction — active 마킹</h4>
+        <p>소유권 (asset.userId === user.id) 검증 후 <b>status='active'</b>로 갱신, public CDN URL 반환.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">5</div>
+      <div class="body">
+        <span class="who client">CLIENT</span>
+        <h4>Section Field에 URL 반영</h4>
+        <p>받은 URL을 image Field에 set. 동시에 <code>asset_usages</code>에 <code>(asset_id, site_id, slot_key)</code> 기록 → 어느 사이트의 어느 자리에서 쓰이는지 추적 가능.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">6</div>
+      <div class="body">
+        <span class="who cron">CRON</span>
+        <h4>매일 03:00 UTC — sweep_orphaned_assets</h4>
+        <p><code>/api/cron/cleanup-assets</code>가 호출. 생성된 지 1h 이상이면서 <code>asset_usages</code>에 없는 자산을 <code>cleanup_queue</code>에 enqueue. (Hobby plan 1 cron/day 제약 — ADR-0003)</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">7</div>
+      <div class="body">
+        <span class="who db">WORKER</span>
+        <h4>claim_cleanup_task — 큐 소비 + 삭제</h4>
+        <p><b>SKIP LOCKED</b>로 한 건을 안전하게 점유 → Storage 파일 + DB row 삭제 → 큐 row <b>done</b>. 실패 시 <code>retry_count</code> 증가, 3회 초과 시 영구 보류.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  CODE                                                          -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 4 · 핵심 코드</div>
+  <h2>3개 레이어, 각각 한 조각씩</h2>
+
+  <div class="code-pack">
+
+    <div class="code-card">
+      <header>
+        <span class="title" style="color:var(--client)">① 클라이언트 — init → upload → confirm</span>
+        <span class="file">ImageUploader.tsx</span>
+      </header>
+<pre><span class="c">// ① init — pending row 예약 + uploadPath 받기</span>
+<span class="k">const</span> { assetId, uploadPath } = <span class="k">await</span> initUploadAction({
+  filename: file.name,
+  mimeType: file.type,
+  size:     file.size,
+});
+
+<span class="c">// ② Supabase Storage에 직접 업로드 (서버 우회)</span>
+<span class="k">const</span> { error } = <span class="k">await</span> supabase.storage
+  .from(<span class="s">'user_assets'</span>)
+  .upload(uploadPath, file);
+
+<span class="k">if</span> (error) <span class="k">throw</span> error;
+
+<span class="c">// ③ confirm — active 마킹 + 공개 URL 수령</span>
+<span class="k">const</span> { publicUrl } = <span class="k">await</span> confirmUploadAction({
+  assetId,
+  uploadPath,
+});
+
+<span class="c">// ④ Section image Field에 반영</span>
+updateField(sectionId, fieldKey, publicUrl);</pre>
+      <div class="note"><b>포인트</b> · 3단계 중 어느 곳에서든 실패해도 <b>최악의 결과는 1시간짜리 orphan</b>일 뿐. 부분 업로드는 큐가 회수한다.</div>
+    </div>
+
+    <div class="code-card">
+      <header>
+        <span class="title" style="color:var(--server)">② 서버 액션 — 두 시점만 관여</span>
+        <span class="file">actions.ts</span>
+      </header>
+<pre><span class="k">export async function</span> initUploadAction(input: InitInput) {
+  <span class="k">return</span> withUser(<span class="k">async</span> (user, supabase) => {
+    <span class="k">const</span> useCase = createAssetUploadUseCase(supabase);
+    <span class="k">return</span> useCase.executeInit({ userId: user.id, ...input });
+    <span class="c">// ↑ validateAssetInfo → insert pending row → return { assetId, uploadPath }</span>
+  });
+}
+
+<span class="k">export async function</span> confirmUploadAction(input: ConfirmInput) {
+  <span class="k">return</span> withUser(<span class="k">async</span> (user, supabase) => {
+    <span class="k">const</span> useCase = createAssetUploadUseCase(supabase);
+    <span class="k">return</span> useCase.executeConfirm({ userId: user.id, ...input });
+    <span class="c">// ↑ 소유권 검증 → status='active' → return { publicUrl }</span>
+  });
+}</pre>
+      <div class="note"><b>포인트</b> · 서버는 <b>예약</b>과 <b>확정</b> 두 순간만 처리. 파일 자체의 흐름엔 관여하지 않아 함수 타임아웃·대역폭 비용 0.</div>
+    </div>
+
+    <div class="code-card">
+      <header>
+        <span class="title" style="color:var(--db)">③ Postgres RPC — SKIP LOCKED 작업 큐</span>
+        <span class="file">008_cleanup_worker_rpc.sql</span>
+      </header>
+<pre><span class="c">-- 1) 1h 이상 미사용 자산을 큐에 enqueue (중복은 무시)</span>
+<span class="k">CREATE OR REPLACE FUNCTION</span> sweep_orphaned_assets()
+<span class="k">RETURNS SETOF</span> UUID <span class="k">AS</span> $$
+<span class="k">BEGIN</span>
+  <span class="k">INSERT INTO</span> cleanup_queue (asset_id)
+  <span class="k">SELECT</span> a.id <span class="k">FROM</span> assets a
+  <span class="k">WHERE</span> a.created_at < now() - <span class="k">interval</span> <span class="s">'1 hour'</span>
+    <span class="k">AND NOT EXISTS</span> (
+      <span class="k">SELECT</span> 1 <span class="k">FROM</span> asset_usages u <span class="k">WHERE</span> u.asset_id = a.id
+    )
+  <span class="k">ON CONFLICT DO NOTHING</span>;   <span class="c">-- ← 중복 enqueue 방지</span>
+<span class="k">END</span>;
+$$;
+
+<span class="c">-- 2) 워커가 큐에서 한 건을 안전하게 점유</span>
+<span class="k">CREATE OR REPLACE FUNCTION</span> claim_cleanup_task()
+<span class="k">RETURNS TABLE</span> (id UUID, asset_id UUID, ...) <span class="k">AS</span> $$
+<span class="k">BEGIN</span>
+  <span class="k">RETURN QUERY</span>
+  <span class="k">UPDATE</span> cleanup_queue
+  <span class="k">SET</span> status = <span class="s">'processing'</span>, updated_at = now()
+  <span class="k">WHERE</span> cleanup_queue.id = (
+    <span class="k">SELECT</span> q.id <span class="k">FROM</span> cleanup_queue q
+    <span class="k">WHERE</span> q.status <span class="k">IN</span> (<span class="s">'pending'</span>, <span class="s">'failed'</span>)
+      <span class="k">AND</span> q.retry_count < <span class="n">3</span>
+    <span class="k">ORDER BY</span> q.created_at <span class="k">ASC</span>
+    <span class="k">FOR UPDATE SKIP LOCKED</span>      <span class="c">-- ← 멀티 워커 안전</span>
+    <span class="k">LIMIT</span> <span class="n">1</span>
+  )
+  <span class="k">RETURNING</span> ...;
+<span class="k">END</span>;
+$$;</pre>
+      <div class="note"><b>포인트</b> · <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px">SKIP LOCKED</code>는 잠긴 row를 <b>대기 없이 건너뛰는</b> 옵션. 여러 워커가 같은 큐를 동시에 폴링해도 충돌 없이 분산 소비된다.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  DESIGN DECISIONS                                              -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 5 · 설계 결정</div>
+  <h2>주요 트레이드오프</h2>
+  <p class="dim">각 결정의 배경과 검토했던 대안.</p>
+
+  <div class="qa">
+
+    <details class="qa-card">
+      <summary>서버 프록시 대신 클라이언트 직접 업로드를 택한 이유</summary>
+      <div class="answer">
+        서버를 거치면 <b>Serverless 함수의 메모리/타임아웃 한계</b> (Vercel 기본 ~4.5MB body, 300s)에 묶이고
+        대역폭이 두 번 (client → server → storage) 청구됩니다.
+        Supabase Storage는 RLS와 owner 정책으로 직접 업로드를 안전하게 받을 수 있으므로,
+        <b>서버는 검증·예약·확정 메타데이터만 다루는 게 합리적</b>이었습니다.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>왜 init / confirm 두 단계로 나눴나</summary>
+      <div class="answer">
+        단순 client → storage만으로는 <b>업로드 메타데이터를 서버가 검증할 시점이 없습니다</b>.
+        init에서 MIME·size를 미리 검증해 잘못된 업로드를 차단하고, confirm에서 소유권을 한 번 더 검증해
+        <b>다른 사용자의 path를 가로채는 시도를 막습니다</b>. 양 끝에서 한 번씩 책임지는 구조.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>advisory lock 대신 SKIP LOCKED를 쓴 이유</summary>
+      <div class="answer">
+        cleanup_queue는 본질적으로 <b>작업 큐 (work queue)</b>이고, advisory lock은 임의 키에 대한 mutual exclusion에 더 적합합니다.
+        <code>SELECT … FOR UPDATE SKIP LOCKED LIMIT 1</code>은 <b>큐 패턴의 표준 관용구</b>로,
+        잠긴 row를 건너뛰며 다음 가능한 항목을 점유하기 때문에 워커가 늘어도 자연스럽게 분산됩니다.
+        Postgres가 row-level lock으로 직접 보장하니 외부 락 매니저도 필요 없습니다.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>cleanup_queue를 별도 테이블로 둔 이유</summary>
+      <div class="answer">
+        retry/실패 메타데이터 (<code>retry_count</code>, <code>last_error</code>) 를 자산 테이블과 섞고 싶지 않았습니다.
+        <code>UNIQUE(asset_id)</code>로 중복 enqueue를 차단하면서 <b>큐로서의 idempotency를 강제</b>합니다.
+        자산 도메인과 정리 워커의 관심사가 다르므로 테이블도 분리.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>1시간 TTL의 근거</summary>
+      <div class="answer">
+        업로드 후 사용자가 사이트에 적용하기까지 걸리는 시간을 고려한 <b>grace period</b>입니다.
+        너무 짧으면 정상 흐름을 깨고 (예: 업로드 → 다른 탭에서 작업 → 늦게 적용),
+        너무 길면 storage 비용이 누적됩니다. 1h는 단일 상수로 분리되어 있어 측정 후 조정 가능합니다.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>매일 1회 cron의 한계</summary>
+      <div class="answer">
+        Vercel Hobby plan의 <b>1 cron/day 제약</b> 때문이며, 최대 24h 동안 storage에 orphan이 남을 수 있습니다 (ADR-0003).
+        유료 플랜으로 전환 시 스케줄만 시간당으로 바꾸면 코드 변경 없이 그대로 동작하도록 설계했습니다.
+        설계가 정책에 의존하지 않고 <b>주기에만 의존</b>하도록 분리한 것이 핵심.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>현재 모델의 한계</summary>
+      <div class="answer">
+        가장 큰 한계는 <b>"동일 자산을 여러 사이트에서 공유"하는 시나리오</b>입니다.
+        지금은 <code>asset_usages</code>가 site_id별로 분리돼 있어 처리 가능하지만,
+        템플릿/스톡 이미지 같은 cross-tenant 공유 자산이 도입되면 별도 분류와 lifecycle이 필요합니다.
+        실제로 <b>template_assets bucket</b> (migration 014) 은 이미 별도 도메인으로 분리해 둔 상태.
+      </div>
+    </details>
+
+  </div>
+</section>
+
+</div>
+</body>
+</html>

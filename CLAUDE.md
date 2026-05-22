@@ -105,7 +105,7 @@ The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the T
 
 ### Asset upload flow
 
-Image uploads in the editor use a two-phase commit pattern to avoid orphaned storage files (see [ADR-0003](./docs/adr/0003-asset-upload-two-phase-cleanup.md)):
+Image uploads in the editor use a Reserve-Confirm pattern to avoid orphaned storage files (see [ADR-0003](./docs/adr/0003-asset-upload-two-phase-cleanup.md)):
 1. `initUploadAction` — creates a `pending` DB record and returns an upload path
 2. Client uploads directly to Supabase Storage (`user_assets` bucket)
 3. `confirmUploadAction` — marks the DB record `active` and returns the public CDN URL

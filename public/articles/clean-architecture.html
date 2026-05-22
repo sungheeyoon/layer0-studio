@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>프레임워크 없는 DI · Layer0 Studio</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --surface: #161922;
+    --surface-2: #1d2230;
+    --border: #2a3142;
+    --text: #e7eaf2;
+    --text-dim: #9aa3b8;
+    --text-mute: #6b7390;
+    --accent: #7aa2ff;
+    --client: #6ec1ff;
+    --server: #c79bff;
+    --db: #ffb86b;
+    --domain: #b89aff;
+    --data: #ffb86b;
+    --di: #7aa2ff;
+    --app: #6ec1ff;
+    --danger: #ff7a7a;
+    --warn: #ffcd6b;
+    --ok: #5cd6a0;
+    --code-bg: #0b0d12;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Pretendard",
+      "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+  }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 64px 24px 120px; }
+
+  header.hero {
+    margin-bottom: 80px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.hero .eyebrow {
+    color: var(--text-mute);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  header.hero h1 {
+    font-size: 40px;
+    line-height: 1.2;
+    margin: 0 0 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  header.hero .lead {
+    color: var(--text-dim);
+    font-size: 17px;
+    max-width: 680px;
+  }
+  header.hero .lead b { color: var(--text); }
+
+  section { margin: 72px 0; }
+  .sec-label {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  section h2 {
+    font-size: 26px;
+    margin: 0 0 20px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+  section h3 {
+    font-size: 18px;
+    margin: 32px 0 14px;
+    font-weight: 600;
+  }
+  p { margin: 0 0 14px; }
+  p.dim { color: var(--text-dim); }
+
+  .tldr {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .tldr .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+  }
+  .tldr .card .tag {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .tldr .card.problem  { border-color: rgba(255, 122, 122, 0.3); }
+  .tldr .card.problem .tag { color: var(--danger); }
+  .tldr .card.solution { border-color: rgba(122, 162, 255, 0.3); }
+  .tldr .card.solution .tag { color: var(--accent); }
+  .tldr .card.result   { border-color: rgba(92, 214, 160, 0.3); }
+  .tldr .card.result .tag { color: var(--ok); }
+  .tldr .card .body { font-size: 14px; color: var(--text-dim); }
+  .tldr .card .body b { color: var(--text); font-weight: 600; }
+
+  @media (max-width: 720px) { .tldr { grid-template-columns: 1fr; } }
+
+  /* ── Architecture diagram ───────────────────────────────────── */
+  .arch {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 36px 32px;
+  }
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 12px 0 20px;
+    align-items: stretch;
+  }
+  .arch-layer {
+    background: var(--code-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 16px;
+    position: relative;
+    text-align: center;
+  }
+  .arch-layer .name {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .arch-layer .body {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .arch-layer.app    { border-color: rgba(110, 193, 255, 0.4); }
+  .arch-layer.app .name    { color: var(--app); }
+  .arch-layer.di     { border-color: rgba(122, 162, 255, 0.4); }
+  .arch-layer.di .name     { color: var(--di); }
+  .arch-layer.domain { border-color: rgba(184, 154, 255, 0.5); }
+  .arch-layer.domain .name { color: var(--domain); }
+  .arch-layer.data   { border-color: rgba(255, 184, 107, 0.4); }
+  .arch-layer.data .name   { color: var(--data); }
+
+  .arch-arrows {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    color: var(--text-mute);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .arch-arrows span {
+    display: inline-block;
+  }
+  .arch-arrows .a1 { color: var(--di); }
+  .arch-arrows .a2 { color: var(--domain); }
+  .arch-arrows .a3 { color: var(--data); }
+  .arch-rule {
+    margin-top: 24px;
+    padding: 14px 18px;
+    background: rgba(184, 154, 255, 0.08);
+    border: 1px solid rgba(184, 154, 255, 0.3);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .arch-rule b { color: var(--domain); }
+
+  @media (max-width: 720px) {
+    .arch-grid, .arch-arrows { grid-template-columns: 1fr; }
+  }
+
+  /* ── Comparison table ───────────────────────────────────────── */
+  .compare-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .compare-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .compare-table th, .compare-table td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare-table th {
+    background: var(--surface-2);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--text-mute);
+    text-transform: uppercase;
+  }
+  .compare-table td.bad  { color: var(--text-dim); }
+  .compare-table td.good { color: var(--text); }
+  .compare-table td b.ok   { color: var(--ok); }
+  .compare-table td b.bad  { color: var(--danger); }
+  .compare-table tr:last-child td { border-bottom: none; }
+
+  /* ── Flow ───────────────────────────────────────────────────── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 16px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 18px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .step:last-child { border-bottom: none; }
+  .step .num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .step .body .who {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+  }
+  .step .body .who.app    { background: rgba(110, 193, 255, 0.12); color: var(--app); }
+  .step .body .who.di     { background: rgba(122, 162, 255, 0.12); color: var(--di); }
+  .step .body .who.domain { background: rgba(184, 154, 255, 0.12); color: var(--domain); }
+  .step .body .who.data   { background: rgba(255, 184, 107, 0.12); color: var(--data); }
+  .step .body h4 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .step .body p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  .step .body code {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--text);
+  }
+
+  /* ── Code blocks ────────────────────────────────────────────── */
+  .code-pack { display: grid; gap: 18px; margin-top: 16px; }
+  .code-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .code-card header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .code-card header .title { font-size: 13px; font-weight: 600; }
+  .code-card header .file {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+  }
+  .code-card pre {
+    margin: 0;
+    padding: 18px 20px;
+    background: var(--code-bg);
+    overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .code-card pre .c { color: var(--text-mute); font-style: italic; }
+  .code-card pre .k { color: var(--server); }
+  .code-card pre .s { color: var(--ok); }
+  .code-card pre .n { color: var(--db); }
+  .code-card pre .v { color: var(--client); }
+  .code-card pre .t { color: var(--domain); }
+  .code-card .note {
+    padding: 14px 20px;
+    background: rgba(122, 162, 255, 0.06);
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .code-card .note b { color: var(--accent); }
+
+  /* ── Q&A ────────────────────────────────────────────────────── */
+  .qa { display: grid; gap: 10px; margin-top: 16px; }
+  details.qa-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  details.qa-card[open] { border-color: rgba(122, 162, 255, 0.4); }
+  details.qa-card summary {
+    padding: 16px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14.5px;
+  }
+  details.qa-card summary::-webkit-details-marker { display: none; }
+  details.qa-card summary::after {
+    content: "＋";
+    color: var(--text-mute);
+    font-size: 18px;
+  }
+  details.qa-card[open] summary::after { content: "−"; color: var(--accent); }
+  details.qa-card .answer {
+    padding: 0 20px 18px;
+    color: var(--text-dim);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  details.qa-card .answer b { color: var(--text); }
+  details.qa-card .answer code {
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  HERO                                                          -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<header class="hero">
+  <div class="eyebrow">PORTFOLIO · TECHNICAL DEEP-DIVE</div>
+  <h1>프레임워크 없는 의존성 주입<br/><span style="color: var(--text-dim); font-weight: 500;">Clean Architecture, 작게 적용하기</span></h1>
+  <p class="lead">
+    Domain 레이어를 <b>외부 의존성 0</b>으로 유지하면서, NestJS·InversifyJS 같은
+    DI 프레임워크 없이 <b>factory 함수와 인터페이스</b>만으로 테스트 가능성과 교체 가능성을 확보한 방법.
+  </p>
+</header>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  TL;DR                                                         -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">TL;DR · 한눈에</div>
+  <h2>30초 요약</h2>
+  <div class="tldr">
+    <div class="card problem">
+      <div class="tag">⚠ 문제</div>
+      <div class="body">
+        비즈니스 규칙이 Supabase 클라이언트와 직접 결합되면
+        <b>단위 테스트는 mock 지옥</b>, 인프라 교체 시 코드 전반 수정 필요
+      </div>
+    </div>
+    <div class="card solution">
+      <div class="tag">🛠 해결</div>
+      <div class="body">
+        4-layer 분리 + 인터페이스 기반 repository +
+        <b>요청별 factory 함수 DI</b> (프레임워크 X). Domain은 무엇도 import하지 않음
+      </div>
+    </div>
+    <div class="card result">
+      <div class="tag">✓ 결과</div>
+      <div class="body">
+        UseCase를 <b>in-memory fake로 DB 없이 테스트</b>,
+        인프라 변경 시 data 레이어만 수정. 학습 곡선 0 (TS 기본 문법만 사용)
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  ARCHITECTURE                                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 1 · 구조</div>
+  <h2>4개 레이어, 의존성은 항상 안쪽으로</h2>
+  <p class="dim">화살표 방향이 핵심. <b style="color:var(--text)">Domain은 어디로도 import 하지 않는다.</b></p>
+
+  <div class="arch">
+    <div class="arch-grid">
+      <div class="arch-layer app">
+        <div class="name">app/</div>
+        <div class="body">Next.js Server Actions<br/>Server Components<br/>HTTP 직렬화</div>
+      </div>
+      <div class="arch-layer di">
+        <div class="name">lib/di/</div>
+        <div class="body">Factory 함수<br/>repo → usecase<br/>요청별 wiring</div>
+      </div>
+      <div class="arch-layer domain">
+        <div class="name">domain/</div>
+        <div class="body">Entities · Errors<br/>UseCases<br/>Repository <i>interfaces</i></div>
+      </div>
+      <div class="arch-layer data">
+        <div class="name">data/</div>
+        <div class="body">Repository <i>impls</i><br/>Supabase 호출<br/>RPC · RLS</div>
+      </div>
+    </div>
+    <div class="arch-arrows">
+      <span>app</span>
+      <span class="a1">─ uses →</span>
+      <span class="a2">← implements ─</span>
+      <span class="a3">data</span>
+    </div>
+
+    <div class="arch-rule">
+      <b>핵심 규칙</b> · domain/ 안의 어떤 파일도 <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px">@supabase/*</code>,
+      <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px">next/*</code>, <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px">@/data/*</code>를
+      import 하지 않는다. 의존성 방향이 한쪽으로만 흐르기에, domain만 떼어내도 자체적으로 빌드되고 테스트된다.
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  COMPARISON                                                    -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 2 · 왜 프레임워크 없이?</div>
+  <h2>NestJS / Inversify vs Factory 함수</h2>
+  <p class="dim">"DI = 프레임워크"라는 통념을 검토해 봤다. Next.js Server Action 모델에선 오히려 단순함이 이긴다.</p>
+
+  <div class="compare-table">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:24%">관점</th>
+          <th style="width:38%">DI 프레임워크 (NestJS / Inversify)</th>
+          <th style="width:38%">Factory 함수 (이 프로젝트)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>wiring 코드</b></td>
+          <td class="bad">@Module / @Injectable / DI 컨테이너 빌드</td>
+          <td class="good">한 줄 함수 — <code>new Repo(supabase) → new UseCase(repo)</code></td>
+        </tr>
+        <tr>
+          <td><b>요청별 인스턴스</b></td>
+          <td class="bad">Request scope 설정 필요 (default = singleton)</td>
+          <td class="good"><b class="ok">자동</b> — 함수가 매 호출 새 인스턴스 생성</td>
+        </tr>
+        <tr>
+          <td><b>Next.js Server Action 호환</b></td>
+          <td class="bad">컨테이너 부팅·라이프사이클 별도 관리</td>
+          <td class="good"><b class="ok">호환 0 cost</b> — action 함수 안에서 그냥 호출</td>
+        </tr>
+        <tr>
+          <td><b>학습 곡선</b></td>
+          <td class="bad">데코레이터·메타데이터·reflect-metadata</td>
+          <td class="good">TypeScript 기본 문법만</td>
+        </tr>
+        <tr>
+          <td><b>테스트 시 주입 교체</b></td>
+          <td class="bad">TestingModule.overrideProvider(...)</td>
+          <td class="good"><code>new UseCase(<b>fakeRepo</b>)</code> — 한 줄</td>
+        </tr>
+        <tr>
+          <td><b>적합한 상황</b></td>
+          <td class="bad">대형 백엔드, 깊은 의존성 그래프, 다양한 라이프사이클</td>
+          <td class="good"><b class="ok">2-3 layer, 요청-응답 모델, 작은 팀</b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  FLOW                                                          -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 3 · 요청 1건의 흐름</div>
+  <h2>"사이트 JSON 저장" — 끝에서 끝까지</h2>
+
+  <div class="flow">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="body">
+        <span class="who app">APP</span>
+        <h4>클라이언트가 Server Action 호출</h4>
+        <p>에디터가 <code>saveSiteJsonAction(siteId, siteJson, expectedUpdatedAt)</code> 호출.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <div class="body">
+        <span class="who di">DI</span>
+        <h4>Factory가 의존성 wiring</h4>
+        <p><code>createUpdateSiteJsonUseCase(supabase)</code> → <code>new SupabaseUserSiteRepositoryImpl(supabase)</code> → <code>new UpdateSiteJsonUseCase(repo)</code>. <b>요청별 fresh 인스턴스</b>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">3</div>
+      <div class="body">
+        <span class="who domain">DOMAIN</span>
+        <h4>UseCase가 비즈니스 규칙 실행</h4>
+        <p>findById → ownership 검증 → JSON 구조 검증 → repository.updateSiteJson 호출. <b>실패 시 <code>TemplateError(code)</code> throw</b>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">4</div>
+      <div class="body">
+        <span class="who data">DATA</span>
+        <h4>Repository가 Supabase RPC 호출</h4>
+        <p>인터페이스를 만족하는 구현이 실제로 <code>save_site_template_with_lock</code> RPC 호출. <code>'STALE_VERSION'</code> 반환 시 domain error로 변환해 throw.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">5</div>
+      <div class="body">
+        <span class="who app">APP</span>
+        <h4>Server Action이 에러 코드로 변환</h4>
+        <p><code>withUser</code> 헬퍼가 domain error를 catch → <code>{ error: code }</code> 형태로 반환. 도메인은 HTTP·i18n·직렬화를 알지 못함.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">6</div>
+      <div class="body">
+        <span class="who app">APP</span>
+        <h4>클라이언트가 코드 → 한국어 매핑</h4>
+        <p><code>src/lib/errors/messages.ts</code>에서 <code>'STALE_VERSION'</code> → <i>"다른 곳에서 먼저 저장됐습니다"</i>로 매핑해 토스트 표시.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  CODE                                                          -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 4 · 핵심 코드</div>
+  <h2>4개 레이어, 각각 한 조각씩</h2>
+
+  <div class="code-pack">
+
+    <div class="code-card">
+      <header>
+        <span class="title" style="color:var(--domain)">① Domain — Repository 인터페이스 + UseCase</span>
+        <span class="file">domain/</span>
+      </header>
+<pre><span class="c">// repositories/user-site.repository.ts</span>
+<span class="k">export interface</span> <span class="t">IUserSiteRepository</span> {
+  findById(id: string): Promise&lt;UserSite | <span class="v">null</span>&gt;;
+  updateSiteJson(id: string, json: TemplateJson, expectedUpdatedAt?: string): Promise&lt;UserSite&gt;;
+  <span class="c">// ... 외부 라이브러리 0개 import</span>
+}
+
+<span class="c">// usecases/user-site/update-site-json.usecase.ts</span>
+<span class="k">export class</span> <span class="t">UpdateSiteJsonUseCase</span> {
+  <span class="k">constructor</span>(<span class="k">private</span> repo: <span class="t">IUserSiteRepository</span>) {}
+
+  <span class="k">async</span> execute(siteId: string, json: TemplateJson, userId: string, expectedUpdatedAt?: string) {
+    <span class="k">const</span> existing = <span class="k">await</span> <span class="k">this</span>.repo.findById(siteId);
+    <span class="k">if</span> (!existing)                  <span class="k">throw new</span> TemplateError(<span class="s">'SITE_NOT_FOUND'</span>);
+    <span class="k">if</span> (existing.userId !== userId) <span class="k">throw new</span> TemplateError(<span class="s">'SITE_ACCESS_DENIED'</span>);
+
+    <span class="k">this</span>.validateJson(json);
+    <span class="k">return</span> <span class="k">this</span>.repo.updateSiteJson(siteId, json, expectedUpdatedAt);
+  }
+}</pre>
+      <div class="note"><b>포인트</b> · UseCase는 <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px">IUserSiteRepository</code>만 알고 Supabase는 모른다. 같은 인터페이스를 만족하는 어떤 구현이든 받아들일 수 있다.</div>
+    </div>
+
+    <div class="code-card">
+      <header>
+        <span class="title" style="color:var(--data)">② Data — Supabase Repository 구현</span>
+        <span class="file">data/repositories/supabase-user-site.repository.impl.ts</span>
+      </header>
+<pre><span class="k">export class</span> <span class="t">SupabaseUserSiteRepositoryImpl</span> <span class="k">implements</span> <span class="t">IUserSiteRepository</span> {
+  <span class="k">constructor</span>(<span class="k">private</span> supabase: SupabaseClient) {}
+
+  <span class="k">async</span> updateSiteJson(id: string, json: TemplateJson, expectedUpdatedAt?: string) {
+    <span class="k">const</span> { data, error } = <span class="k">await</span> <span class="k">this</span>.supabase.rpc(
+      <span class="s">'save_site_template_with_lock'</span>,
+      { p_site_id: id, p_new_json: json, p_expected_updated_at: expectedUpdatedAt },
+    );
+    <span class="k">if</span> (data === <span class="s">'STALE_VERSION'</span>) <span class="k">throw new</span> TemplateError(<span class="s">'STALE_VERSION'</span>);
+    <span class="k">if</span> (error)                    <span class="k">throw new</span> TemplateError(<span class="s">'UNKNOWN'</span>);
+    <span class="k">return</span> <span class="k">await</span> <span class="k">this</span>.findById(id) <span class="k">as</span> UserSite;
+  }
+}</pre>
+      <div class="note"><b>포인트</b> · 인프라 세부 (RPC 이름, 에러 형식) 가 여기에 격리. RLS·SQL 함수도 이 레이어 안에서만 신경 쓴다.</div>
+    </div>
+
+    <div class="code-card">
+      <header>
+        <span class="title" style="color:var(--di)">③ DI — Factory 함수 + Server Action 진입점</span>
+        <span class="file">lib/di/container.ts &amp; app/.../actions.ts</span>
+      </header>
+<pre><span class="c">// lib/di/container.ts — wiring을 한 군데로</span>
+<span class="k">export const</span> createUpdateSiteJsonUseCase = (supabase: SupabaseClient) =&gt; {
+  <span class="k">const</span> repo = <span class="k">new</span> SupabaseUserSiteRepositoryImpl(supabase);
+  <span class="k">return new</span> UpdateSiteJsonUseCase(repo);
+};
+
+<span class="c">// app/.../actions.ts — Server Action은 그냥 호출만</span>
+<span class="k">export async function</span> saveSiteJsonAction(
+  siteId: string, json: TemplateJson, expectedUpdatedAt?: string,
+) {
+  <span class="k">return</span> withUser(<span class="k">async</span> (user, supabase) =&gt; {
+    <span class="k">const</span> useCase = createUpdateSiteJsonUseCase(supabase);
+    <span class="k">const</span> site = <span class="k">await</span> useCase.execute(siteId, json, user.id, expectedUpdatedAt);
+    <span class="k">return</span> { success: <span class="v">true</span>, updatedAt: site.updatedAt };
+    <span class="c">// withUser가 TemplateError를 catch해 { error: code } 로 변환</span>
+  });
+}</pre>
+      <div class="note"><b>포인트</b> · factory는 <b>요청마다 호출</b>되어 새 인스턴스를 만든다. Supabase 클라이언트가 쿠키 세션을 가지므로 싱글턴이 불가능하기 때문.</div>
+    </div>
+
+    <div class="code-card">
+      <header>
+        <span class="title" style="color:var(--ok)">④ Test — In-memory fake로 DB 없이 검증</span>
+        <span class="file">domain/__tests__/update-site-json.usecase.test.ts</span>
+      </header>
+<pre><span class="c">// fakes.ts — 인터페이스를 만족하는 in-memory 구현</span>
+<span class="k">export class</span> <span class="t">FakeUserSiteRepo</span> <span class="k">implements</span> <span class="t">IUserSiteRepository</span> {
+  sites: UserSite[];
+  <span class="k">constructor</span>(initial: UserSite[] = []) { <span class="k">this</span>.sites = [...initial]; }
+
+  <span class="k">async</span> findById(id: string) { <span class="k">return</span> <span class="k">this</span>.sites.find(s =&gt; s.id === id) ?? <span class="v">null</span>; }
+  <span class="k">async</span> updateSiteJson(id: string, json: TemplateJson) {
+    <span class="k">const</span> site = <span class="k">this</span>.sites.find(s =&gt; s.id === id)!;
+    site.siteJson = json;
+    <span class="k">return</span> site;
+  }
+  <span class="c">// ... 인터페이스의 다른 메서드들</span>
+}
+
+<span class="c">// .test.ts — Supabase 없이 UseCase만 검증</span>
+it(<span class="s">'throws SITE_ACCESS_DENIED if user does not own the site'</span>, <span class="k">async</span> () =&gt; {
+  <span class="k">const</span> repo = <span class="k">new</span> FakeUserSiteRepo([makeSite({ userId: <span class="s">'owner'</span> })]);
+  <span class="k">const</span> uc   = <span class="k">new</span> UpdateSiteJsonUseCase(repo);
+
+  <span class="k">await</span> expect(
+    uc.execute(<span class="s">'site-1'</span>, makeTemplateJson(), <span class="s">'intruder'</span>),
+  ).rejects.toMatchObject({ code: <span class="s">'SITE_ACCESS_DENIED'</span> });
+});</pre>
+      <div class="note"><b>포인트</b> · 테스트는 <b>UseCase의 행동만 검증</b>한다. "어떤 mock 함수가 몇 번 호출됐는지"가 아니라 "주어진 입력에 어떤 결과/에러가 나오는지". 리팩토링에 강하다.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  DESIGN DECISIONS                                              -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="sec-label">STEP 5 · 설계 결정</div>
+  <h2>주요 트레이드오프</h2>
+  <p class="dim">각 결정의 배경과 검토했던 대안.</p>
+
+  <div class="qa">
+
+    <details class="qa-card">
+      <summary>NestJS · InversifyJS 같은 DI 프레임워크를 안 쓴 이유</summary>
+      <div class="answer">
+        Next.js Server Action 모델은 <b>"한 요청 안에서 함수가 호출되고 끝나는 구조"</b>입니다.
+        프레임워크가 제공하는 라이프사이클 관리·모듈 시스템·데코레이터는 그 모델 위에 얹기엔 부담만 큽니다.
+        실제 wiring 코드는 한 줄 (<code>new Repo(supabase) → new UseCase(repo)</code>) 이라
+        <b>추상화 비용보다 직접 작성 비용이 더 작았습니다</b>. 단, layer 수가 5+ 이상이거나 다양한 라이프사이클이 필요해지면 도입을 검토해야 합니다.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>요청별 fresh DI (싱글턴 회피)</summary>
+      <div class="answer">
+        Supabase 클라이언트는 <b>요청별 쿠키에서 세션을 읽어 빌드</b>됩니다.
+        싱글턴으로 만들면 "다른 사용자의 세션을 가진 클라이언트"가 재사용될 수 있어 치명적입니다.
+        factory 함수는 <b>매 호출 시 새 인스턴스</b>를 반환하므로 이 함정을 구조적으로 피합니다.
+        성능 부담은 객체 두세 개 생성 수준이라 무시 가능.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>도메인 에러를 throw + Server Action에서 catch</summary>
+      <div class="answer">
+        Domain은 <b>HTTP·i18n·직렬화 같은 전달 매체를 알아선 안 됩니다</b>.
+        UseCase가 <code>TemplateError('SITE_NOT_FOUND')</code>를 throw하면,
+        Server Action의 <code>withUser</code> 헬퍼가 이를 catch해 <code>{ error: 'SITE_NOT_FOUND' }</code>로 변환합니다.
+        클라이언트는 코드를 한국어 메시지로 매핑 (<code>src/lib/errors/messages.ts</code>). <b>책임이 세 곳에 깔끔하게 나뉩니다</b>.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>mock이 아닌 in-memory fake를 선택한 이유</summary>
+      <div class="answer">
+        Mock은 <b>"이 함수가 이렇게 호출됐는지"</b>를 검증해 구현 세부에 묶이고 (brittle test),
+        Fake는 <b>"이 입력에 이 결과가 나오는지"</b>를 검증해 동작에 묶입니다.
+        UseCase 내부 호출 순서를 바꾸는 리팩토링이 mock 테스트는 깨뜨리지만 fake 테스트는 깨지 않습니다.
+        도메인 인터페이스가 작고 명확하기에 fake 작성 비용도 작음.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>어디까지 분리했고 어디는 안 했나</summary>
+      <div class="answer">
+        <b>분리한 것</b> · 비즈니스 규칙 (ownership, JSON 검증), 에러 코드, repository 인터페이스. 인프라 교체가 *가능하게* 설계됨.<br/><br/>
+        <b>분리하지 않은 것</b> · Supabase RLS 정책, RPC 함수 (<code>save_site_template_with_lock</code>) 의 구체적 시그니처는 <b>data 레이어 안에서만 존재</b>. 인터페이스 차원에서 추상화하지 않았는데, 그렇게 하면 인터페이스가 무한히 비대해질 뿐 실제 교체 시나리오가 없기 때문. <b>"가능하게"와 "실제로 할 것"을 구분</b>한 결과.
+      </div>
+    </details>
+
+    <details class="qa-card">
+      <summary>현재 모델의 한계와 적용 범위</summary>
+      <div class="answer">
+        <b>잘 맞는 상황</b> · 요청-응답 기반 (Server Action, REST), 의존성 그래프가 2-3 layer, 작은 팀.<br/><br/>
+        <b>한계</b> · 백그라운드 워커·이벤트 기반 시스템처럼 라이프사이클이 복잡해지면 factory만으로 부족.
+        cron worker, queue consumer 등이 도입되면 그 부분만 부분적으로 컨테이너 (또는 명시적 builder) 를 도입할 가능성 있음.
+        <b>처음부터 큰 구조를 도입하는 대신, 필요한 시점에 정확히 필요한 만큼 도입</b>하는 것이 이 코드베이스의 일관된 원칙.
+      </div>
+    </details>
+
+  </div>
+</section>
+
+</div>
+</body>
+</html>
