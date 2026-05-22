@@ -5,8 +5,6 @@
 ![Layer0 Studio editor](public/hero-editor.png)
 
 - 🔗 **Live**: https://layer0-studio.vercel.app
-- 📝 **포트폴리오 상세**: [docs/PORTFOLIO_ENTRY.md](docs/PORTFOLIO_ENTRY.md)
-- 📖 **기술 글**: [Optimistic Concurrency Control 구현기](https://layer0-studio.vercel.app/articles/optimistic-concurrency.html)
 
 **Stack**: Next.js 16 (App Router) · TypeScript · Supabase (Auth/DB/Storage) · Tailwind CSS v4 · Vercel
 

@@ -46,3 +46,6 @@ next-env.d.ts
 
 # local scripts (migration helpers, one-off tooling — add to personal .git/info/exclude)
 .claude/
+
+# internal portfolio prep notes (interview cheatsheet — not for public)
+docs/PORTFOLIO_ENTRY.md
