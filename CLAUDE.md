@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-pnpm dev                # Start dev server (predev runs generate:themes)
-pnpm build              # Production build (prebuild runs generate:themes)
+pnpm dev                # Start dev server (predev runs generate:templates)
+pnpm build              # Production build (prebuild runs generate:templates)
 pnpm start              # Start production server
 pnpm lint               # Run ESLint (eslint config: eslint-config-next)
 pnpm test               # Vitest run (domain layer only)
@@ -24,7 +24,7 @@ TypeScript checking: `pnpm tsc --noEmit`. Tests live in `src/domain/__tests__/` 
 
 ## Architecture
 
-Layer0 Studio is a no-code website builder built on **Next.js 16** (App Router), **Supabase** (auth + DB + storage), and **Tailwind CSS v4**. Users pick a template, edit it visually, and publish it to a custom domain.
+Layer0 Studio is a no-code website builder built on **Next.js 16** (App Router), **Supabase** (auth + DB + storage), and **Tailwind CSS v4**. Users pick a Template, edit it visually, and publish it to a Subdomain (see `CONTEXT.md` for the canonical glossary; `docs/adr/` for architectural decisions worth remembering).
 
 ### Layer structure
 
@@ -80,35 +80,37 @@ src/types/database.ts ← Generated Supabase DB types
 | `/preview/[id]` | Preview before publishing |
 | `/api/cron/cleanup-assets` | Cron job: orphan asset cleanup via Supabase RPCs (Bearer `CRON_SECRET`). Schedule: `0 3 * * *` (daily 03:00 UTC) — free Vercel plan limit (1 cron/day) |
 
-### Theme system
+### Template system
 
-> **Any work touching templates / themes / presets / sync / validate / thumbnail capture: read `docs/TEMPLATE_SYSTEM.md` FIRST.** That doc is the single source of truth — concepts, data model, sync pipeline, validate rules, extension scenarios, gotchas, and code map. The summary here is just a pointer.
+> **Any work touching templates / presets / sync / validate / thumbnail capture: read `docs/TEMPLATE_SYSTEM.md` FIRST.** That doc is the single source of truth — concepts, data model, sync pipeline, validate rules, extension scenarios, gotchas, and code map. The summary here is just a pointer.
+>
+> Note: "theme" is a historical term — visual identity is now per-**Template** (Design Tokens), grouping is **Category**. See `CONTEXT.md` Flagged ambiguities.
 
-Templates live in `src/templates/<category>/<leaf>/` (β model since #6). Each template is **self-contained**: own visual tokens (`tokens.ts`), own library of section components (`library/*.tsx` with `.meta.dataSchema`), own `template.ts` (the seed), own `index.tsx` renderer. Components are NOT shared across templates — every template owns its copies. The registry is auto-generated (`src/templates/_generated.ts` via `pnpm generate:templates`, hooked into predev/prebuild) — adding a directory is enough to register. **templateKey = `<category>-<leaf>` (concat)**. Category is derived from the parent dir name. Currently 9 templates ship across 7 categories: `cafe-{cozy,default,modern}`, `corporate-default`, `fitness-default`, `interior-default`, `legal-default`, `medical-default`, `wedding-default`.
+Templates live in `src/templates/<category>/<leaf>/` (β model since #6). Each Template is **self-contained**: own visual tokens (`tokens.ts`), own library of section components (`library/*.tsx` with `.meta.dataSchema`), own `template.ts` (the seed), own `index.tsx` renderer. Components are NOT shared across Templates — every Template owns its copies. This is deliberate (isolation > DRY — see [ADR-0001](./docs/adr/0001-beta-model-template-isolation.md)). The registry is auto-generated (`src/templates/_generated.ts` via `pnpm generate:templates`, hooked into predev/prebuild) — adding a directory is enough to register. **templateKey = `<category>-<leaf>` (concat)**. Category is derived from the parent dir name. Currently 9 Templates ship across 7 Categories: `cafe-{cozy,default,modern}`, `corporate-default`, `fitness-default`, `interior-default`, `legal-default`, `medical-default`, `wedding-default`.
 
 The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer:
 - `templateKey`: selects the renderer
 - `globalStyles`: CSS custom properties applied at the root
-- `pages[].sections[]`: each section's `type` matches a `componentKey` in the theme's library; **array order = render order** (the deprecated `section.order` field was removed in Phase 6d / migration 012)
+- `pages[].sections[]`: each section's `type` matches a `componentKey` in the Template's library; **array order = render order** (the deprecated `section.order` field was removed in Phase 6d / migration 012)
 
 **`array` field type** (Phase 1, merged): components can declare repeating-item fields in their `dataSchema` (e.g. menu items, FAQ entries). The editor renders add/remove/reorder UI and recursively validates each item against its `itemSchema`. Phase 2 (Collections — separate table + RLS for blogs/notices) is intentionally deferred — see `docs/plans/PLAN_crud_array_field.md` for trigger conditions before opening that work.
 
-**Rich design tokens** (Issue #9): `tokens.ts` exports BOTH `defaultGlobalStyles` (thin, user-editable) AND `designTokens` (rich, code-fixed: `colors`/`fonts`/`spacing`/`radius`/`shadows`/`typography`). `RenderComposition` accepts a `designTokens` prop and injects CSS custom properties (`--color-primary`, `--font-base`, ...) on the template root via `tokensToCssVars()` (`src/lib/template/design-tokens.ts`). The thin globalStyles overlay specific tokens via `OVERLAY_MAP` (primaryColor → `--color-primary`, etc.). Currently only **cafe-default** uses the rich pattern; other 8 templates keep their legacy `--{prefix}-{name}` defs in `.module.css`. See TEMPLATE_SYSTEM.md §2.5.
+**Rich design tokens** (Issue #9): `tokens.ts` exports BOTH `defaultGlobalStyles` (thin, user-editable) AND `designTokens` (rich, code-fixed: `colors`/`fonts`/`spacing`/`radius`/`shadows`/`typography`). `RenderComposition` accepts a `designTokens` prop and injects CSS custom properties (`--color-primary`, `--font-base`, ...) on the template root via `tokensToCssVars()` (`src/lib/template/design-tokens.ts`). The thin globalStyles overlay specific tokens via `OVERLAY_MAP` (primaryColor → `--color-primary`, etc.). Currently only **cafe-default** uses the rich pattern; other 8 Templates keep their legacy `--{prefix}-{name}` defs in `.module.css` — this is an *intentional* gradual migration (see [ADR-0005](./docs/adr/0005-design-tokens-gradual-migration.md)). See TEMPLATE_SYSTEM.md §2.5.
 
-**Code is source of truth, sync reflects to DB.** `pnpm template:sync` (default dry-run, `--apply` to commit) reads presets, validates against each component's `dataSchema`, and upserts `templates` rows. Admin UI mirrors this with a 2-step Preview → Apply gated on `app_metadata.canPublishTemplates`.
+**Code is source of truth, sync reflects to DB** (see [ADR-0002](./docs/adr/0002-templates-source-of-truth-is-code.md)). `pnpm template:sync` (default dry-run, `--apply` to commit) reads presets, validates against each component's `dataSchema`, and upserts `templates` rows. Admin UI mirrors this with a 2-step Preview → Apply gated on `app_metadata.canPublishTemplates` — note this capability is **separate from the admin role** (see [ADR-0006](./docs/adr/0006-canpublishtemplates-separate-from-admin.md)).
 
-The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the theme renderer at runtime via `loadTemplate()`. Clicking a section in the preview panel selects it in the left panel for inline editing.
+The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the Template renderer at runtime via `loadTemplate()`. Clicking a section in the preview panel selects it in the left panel for inline editing.
 
-**Auto-save + optimistic concurrency:** Edits debounce-save after 4s idle, with a `beforeunload` guard for in-flight changes. Saves carry the row's `expectedUpdatedAt`; the `save_site_template_with_lock` RPC (migration 010) returns `'STALE_VERSION'` if another tab/device wrote in the meantime, which surfaces a Conflict modal in the editor. When adding new save paths, always thread `expectedUpdatedAt` through — never bypass the RPC.
+**Auto-save + optimistic concurrency** (see [ADR-0004](./docs/adr/0004-optimistic-concurrency-via-rpc.md)): Edits debounce-save after 4s idle, with a `beforeunload` guard for in-flight changes. Saves carry the row's `expectedUpdatedAt`; the `save_site_template_with_lock` RPC (migration 010) returns `'STALE_VERSION'` if another tab/device wrote in the meantime, which surfaces a Conflict modal in the editor. **When adding new save paths, always thread `expectedUpdatedAt` through — never bypass the RPC** (silent overwrites are the failure mode this prevents).
 
 ### Asset upload flow
 
-Image uploads in the editor use a two-phase commit pattern to avoid orphaned storage files:
+Image uploads in the editor use a two-phase commit pattern to avoid orphaned storage files (see [ADR-0003](./docs/adr/0003-asset-upload-two-phase-cleanup.md)):
 1. `initUploadAction` — creates a `pending` DB record and returns an upload path
 2. Client uploads directly to Supabase Storage (`user_assets` bucket)
 3. `confirmUploadAction` — marks the DB record `active` and returns the public CDN URL
 
-Orphan cleanup runs via the cron endpoint using `sweep_orphaned_assets` and `claim_cleanup_task` Supabase RPC functions.
+Orphan cleanup runs via the cron endpoint using `sweep_orphaned_assets` and `claim_cleanup_task` Supabase RPC functions. Daily (not hourly) due to the Hobby plan's 1-cron/day limit — see the ADR for migration path when this changes.
 
 ### Supabase clients
 
