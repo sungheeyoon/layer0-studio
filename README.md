@@ -62,6 +62,12 @@ CRON_SECRET=                   # /api/cron/cleanup-assets Bearer 토큰
 - **Asset uploads — Reserve-Confirm + Orphan Sweep** ([ADR-0003](docs/adr/0003-asset-upload-two-phase-cleanup.md)): `initUploadAction` 이 `pending` DB 레코드를 만들고, 클라이언트가 Supabase Storage 에 직접 업로드한 뒤 `confirmUploadAction` 이 `active` 로 마킹합니다. 고아 파일은 일일 크론(`/api/cron/cleanup-assets`)이 `sweep_orphaned_assets` RPC 로 정리하고, 워커는 `SELECT … FOR UPDATE SKIP LOCKED` 기반 작업 큐로 안전하게 소비합니다. 상세 구현은 [Reserve-Confirm + Orphan Sweep 구현기](https://layer0-studio.vercel.app/articles/asset-upload.html).
 - **Optimistic concurrency** ([ADR-0004](docs/adr/0004-optimistic-concurrency-via-rpc.md)): 에디터 저장 시 행의 `expectedUpdatedAt` 을 함께 보내고, `save_site_template_with_lock` RPC 가 `STALE_VERSION` 을 반환하면 충돌 모달로 안내합니다. 상세 구현은 [Optimistic Concurrency Control 구현기](https://layer0-studio.vercel.app/articles/optimistic-concurrency.html).
 
+## Engineering practice
+
+> **AI 코딩 도구를 쓰는 게 아니라 — AI-native engineering workflow 를 설계·운영한 사례 정리 →** [AI 와 함께 일관된 시스템을 유지하기](https://layer0-studio.vercel.app/articles/ai-workflow.html)
+
+이 프로젝트의 코드 / ADR / migration 은 거의 모두 AI 와의 협업으로 만들어졌습니다. 다만 일관성을 만든 건 AI 가 아니라 *workflow* — 아이디어 → grill → CONTEXT/ADR → `/to-issues` → feature branch → TDD → PR review → merge 6-단계 루프와, non-deterministic 한 AI 출력을 가두는 5 계층 deterministic guard (Zod / per-stage approval / validate rules / ESLint custom rule / Sync re-validation) 가 그 역할을 합니다.
+
 ---
 
 > 본 저장소는 **포트폴리오 공개용**이며 별도 라이선스를 부여하지 않습니다 (All Rights Reserved). 코드 열람은 자유롭게 가능하나, 복제·재배포·상업적 사용은 금지합니다.
