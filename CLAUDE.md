@@ -88,8 +88,8 @@ src/types/database.ts ← Generated Supabase DB types
 
 Templates live in `src/templates/<category>/<leaf>/` (β model since #6). Each Template is **self-contained**: own visual tokens (`tokens.ts`), own library of section components (`library/*.tsx` with `.meta.dataSchema`), own `template.ts` (the seed), own `index.tsx` renderer. Components are NOT shared across Templates — every Template owns its copies. This is deliberate (isolation > DRY — see [ADR-0001](./docs/adr/0001-beta-model-template-isolation.md)). The registry is auto-generated (`src/templates/_generated.ts` via `pnpm generate:templates`, hooked into predev/prebuild) — adding a directory is enough to register. **templateKey = `<category>-<leaf>` (concat)**. Category is derived from the parent dir name. Currently 9 Templates ship across 7 Categories: `cafe-{cozy,default,modern}`, `corporate-default`, `fitness-default`, `interior-default`, `legal-default`, `medical-default`, `wedding-default`.
 
-The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer:
-- `templateKey`: selects the renderer
+The `TemplateJson` type (in `src/domain/entities/template.entity.ts`) is the core data model — it flows from DB → editor → renderer. **Two axes of copy/share (don't conflate — see `CONTEXT.md` Flagged ambiguities):** when a User instantiates a Site, the Template's `TemplateJson` is deep-copied (`structuredClone` in `create-site-from-template.usecase.ts`) into the Site's own `siteJson` (per-Site **data** copy, ~KB); the **renderer code** is never copied — it is shared and loaded at serve time by `templateKey` via `loadTemplate()`. So template edits do not propagate to existing Sites, and "a Site is a copy" means its data, not its code.
+- `templateKey`: selects the renderer (shared across all Sites of that key)
 - `globalStyles`: CSS custom properties applied at the root
 - `pages[].sections[]`: each section's `type` matches a `componentKey` in the Template's library; **array order = render order** (the deprecated `section.order` field was removed in Phase 6d / migration 012)
 

@@ -5,7 +5,7 @@ A no-code website builder. Users pick a **Template**, edit it visually, and publ
 ## Language
 
 **Site**:
-A user's own editable, publishable website — created from a Template and owned by one User. (Admins may also create Sites with no Template — `templateId: null` — but this is rare and not a user-facing flow.)
+A user's own editable, publishable website — created from a Template and owned by one User. (Admins may also create Sites with no Template — `templateId: null` — but this is rare and not a user-facing flow.) **Instantiation semantics (axis B — see Flagged ambiguities):** at creation the Template's `TemplateJson` is **deep-copied** (`structuredClone`) into the Site's own `siteJson`, so a Site is decoupled from its Template the moment it is made — later edits to the Template do not flow into existing Sites. The Site keeps a `templateId` (provenance reference) and an immutable `templateSnapshot` (the original at creation, reserved for future reset/diff features). What is **not** copied is the **Renderer code** — that is shared and loaded at serve time by `templateKey`. So a Site copies *data*, never *code*.
 _Avoid_: UserSite (internal/DB name only), user-site, project, page (a Site contains Pages).
 
 **Template**:
@@ -78,7 +78,7 @@ The authenticated visual editing surface a User uses to modify their Site. Loads
 _Avoid_: builder, designer, dashboard.
 
 **Renderer**:
-The runtime code path that turns a Site's content into served HTML — both for Live Sites and for the in-editor preview. Each Template ships its own Renderer. Distinct from the **Editor**: the Renderer never mutates Site state, the Editor never serves to the public.
+The runtime code path that turns a Site's content into served HTML — both for Live Sites and for the in-editor preview. Each Template ships its own Renderer, and Renderers are **not shared across Templates** (axis A — β model). But along axis B they *are* shared: **every Site built from the same `templateKey` shares that one Renderer at serve time** — it is loaded via `loadTemplate(templateKey)` (`src/templates/registry.ts`) and the Site's own `siteJson` is injected into it (`<TemplateRenderer siteJson={siteJson} />`). So the Renderer is per-Template, never per-Site. Distinct from the **Editor**: the Renderer never mutates Site state, the Editor never serves to the public.
 _Avoid_: theme runtime, view.
 
 ## Relationships
@@ -109,3 +109,7 @@ _Avoid_: theme runtime, view.
 - "composition" appears throughout the code (`RenderComposition`, `propose_composition`, the legacy `composition: PresetSection[]` field) but is **not** a separate domain concept — it is the ordered **Section** list of a **Page**. In conversation always say "the Page's Sections", never "the composition".
 - "theme" is a **historical** term. The visual identity is now per-Template (**Design Tokens**); the catalog grouping is now **Category**. Code residue: `themeKey` was renamed to `templateKey` in migration 013 (PR #18); `src/themes/` was migrated to `src/templates/<category>/<leaf>/` in PR #19 (β model). When reading old PRs or docs, mentally translate "theme" → either Template or Category depending on which job it was doing.
 - `templateKey` (= `${category}-${leaf}`, e.g. `cafe-default`) is a code identifier, not a domain term. "leaf" is similarly internal — it just means the directory name under a Category. Don't promote either to conversation; say "the cafe-default Template" instead.
+- "copy" / "self-contained" / "shared" are overloaded across **two independent axes** — confusing them leads to wrong conclusions about both efficiency and update propagation:
+  - **Axis A — Template ↔ Template (code, design-time):** the β model. Each Template owns *independent copies* of every component, token, and style; nothing is shared across Templates. This is what "self-contained", "own copies", "not shared across Templates" refer to ([ADR-0001](./docs/adr/0001-beta-model-template-isolation.md)).
+  - **Axis B — Site ↔ Template (runtime):** when a User instantiates a Site, the **content data** (`siteJson`) is deep-copied per Site (`structuredClone`), but the **Renderer code** is *shared* — all Sites of one `templateKey` load the same Renderer at serve time. So "a Site is a copy" means *its data*, not *its code*.
+  - Net: a Site duplicates a few KB of JSON, never the components/renderer. The β-model "copies" (axis A) say nothing about per-Site cost (axis B). When discussing storage efficiency or "does a template change reach existing Sites", name the axis first.
