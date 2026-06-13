@@ -6,7 +6,11 @@ A no-code website builder. Users pick a **Template**, edit it visually, and publ
 
 **Site**:
 A user's own editable, publishable website — created from a Template and owned by one User. (Admins may also create Sites with no Template — `templateId: null` — but this is rare and not a user-facing flow.) **Instantiation semantics (axis B — see Flagged ambiguities):** at creation the Template's `TemplateJson` is **deep-copied** (`structuredClone`) into the Site's own `siteJson`, so a Site is decoupled from its Template the moment it is made — later edits to the Template do not flow into existing Sites. The Site keeps a `templateId` (provenance reference) and an immutable `templateSnapshot` (the original at creation, reserved for future reset/diff features). What is **not** copied is the **Renderer code** — that is shared and loaded at serve time by `templateKey`. So a Site copies *data*, never *code*.
-_Avoid_: UserSite (internal/DB name only), user-site, project, page (a Site contains Pages).
+_Avoid_: UserSite (internal/DB name only), user-site, project, page (a Multi Site contains Pages; a Single Site contains Sections directly).
+
+**Site Type (Single / Multi)**:
+Whether a Site is one continuous scroll (**Single**) or a set of routable **Pages** (**Multi**). Fixed at creation from the Template's `mode` discriminator — a Single never *evolves* into a Multi (see [ADR-0007](./docs/adr/0007-single-multi-site-type-structural-union.md)). The two are **structurally different**: a Single carries `sections[]` directly (no Page) with anchor-scroll **nav projection** from those Sections; a Multi carries `pages[]` plus **Shared sections** (header/footer) with page-link nav projection from those Pages.
+_Avoid_: mode (the literal `TemplateJson` field — fine in code, not in conversation).
 
 **Template**:
 A designer-built (or **Generate**d) blueprint that Users instantiate into Sites. Each Template is self-contained in code (its own design tokens, section components, renderer) and lives as a row in the `templates` table; has a status of `draft | active | archived`. Produced by **Sync**'ing its **Preset**. Currently 9 Templates across 7 **Categories**.
@@ -29,15 +33,26 @@ A small set of user-editable visual knobs carried inside a Template — `primary
 _Avoid_: globalStyles (the literal field name, fine in code), theme overrides, brand settings.
 
 **Page**:
-A unit within a Site (or Template) with its own slug and ordered list of Sections.
+A routable unit within a **Multi** Site (or Multi Template) — its own `slug`, an ordered list of Sections, and a `nav: { visible, label }`. Page order = the array order of `pages[]` (no `order` field). **Single Sites have no Pages** — they hold `sections[]` directly (one scroll).
+_Avoid_: tab, screen; for a Single Site, don't say Page at all.
 
 **Section**:
-A single placed unit on a Page — typically a horizontal band like a hero, feature list, FAQ, or footer. Each Section has a `type` that points at a Section component by `componentKey`, plus a `data` payload of editable Fields.
+A single placed unit — typically a horizontal band like a hero, feature list, FAQ, or footer — living directly on a **Single** Site or inside a **Multi** Page. Each Section has a `type` that points at a Section component by `componentKey`, plus a `data` payload of editable Fields. A Single Site's Sections additionally carry `nav: { visible, label }` (they are the **nav projection** source); Sections inside a Multi Page do not.
 _Avoid_: block, widget, module.
 
 **Section component**:
 The React renderer that turns a Section's `data` into UI. Lives **inside its Template's directory** and declares its own `dataSchema`. Not shared across Templates (β model). Only used when distinguishing the renderer from the placed instance — in normal conversation, say **Section**.
 _Avoid_: library component (it's *a* library component, but the canonical name is Section component).
+
+**nav projection**:
+The site navigation menu is **not stored** — it is derived (projected) from its source on each render. **Single**: from the Site's `sections` (label = `nav.label`, href = `#section-<id>` anchor). **Multi**: from the Site's `pages` (label = `nav.label`, href = page `slug`). Reordering the source reorders the nav; a single `deriveNav(source, hrefOf)` covers both modes, differing only in the href scheme (anchor vs slug). See [ADR-0007](./docs/adr/0007-single-multi-site-type-structural-union.md).
+_Avoid_: nav config, menu data (there is no stored nav object).
+
+**Shared sections**:
+A Multi Site's `shared.header` and `shared.footer` — Section lists rendered above and below **every** Page (render order: header → the Page's Sections → footer). Edited once, applied to all Pages. Single Sites have no Shared sections (their nav/footer live inline in `sections[]`, pinned top/bottom in the Editor).
+
+**`visible` vs `nav.visible`** (the two axes):
+Two **independent** axes on a Section (Single) or Page (Multi). `visible` = whether it exists on the served site (a Single Section is rendered; a Multi Page is routable — `false` → 404). `nav.visible` = whether it appears in the nav menu. `visible:false` removes it from the nav too (one-way), but `visible:true` does **not** force nav presence — so an item can be **present yet hidden from nav**: a Single Section shown in the scroll but not in the menu, or a Multi Page reachable by URL/footer but absent from the top nav (e.g. a privacy-policy page).
 
 **Field**:
 A single typed editable property inside a Section's `data` — e.g. a heading text Field, a hero image Field, a brand color Field. Each Field has a type (`text`, `textarea`, `image`, `url`, `color`, `number`, `select`, `array`). An **array Field** holds an ordered list of repeating items (e.g. menu entries, FAQ rows), each item itself a dictionary of Fields validated against an `itemSchema`.
@@ -74,7 +89,7 @@ The operation that synthesizes a new **Preset** from a natural-language brief vi
 _Avoid_: Tracer (an internal PR-series label, not a product term), scaffold (the lower-level `pnpm template:scaffold` skeleton-only command), AI gen.
 
 **Editor**:
-The authenticated visual editing surface a User uses to modify their Site. Loads the Site's Template at runtime; lets the User edit each Section's Fields and reorder Sections within a Page. Persists edits through an optimistic-concurrency RPC that rejects stale writes (see [ADR-0004](./docs/adr/0004-optimistic-concurrency-via-rpc.md)). Distinct from the **Renderer**.
+The authenticated visual editing surface a User uses to modify their Site. Loads the Site's Template at runtime; lets the User edit each Section's Fields, reorder Sections (Single — with the nav/footer Sections pinned), reorder Pages (Multi), and toggle `visible` / `nav.visible`. Users **cannot create or delete** Pages or Sections — the information architecture is template-author-defined (see [ADR-0007](./docs/adr/0007-single-multi-site-type-structural-union.md)). Persists edits through an optimistic-concurrency RPC that rejects stale writes (see [ADR-0004](./docs/adr/0004-optimistic-concurrency-via-rpc.md)). Distinct from the **Renderer**.
 _Avoid_: builder, designer, dashboard.
 
 **Renderer**:
@@ -87,7 +102,7 @@ _Avoid_: theme runtime, view.
 - Each **Template** owns its **Section components** and its single **Preset** (β model — no cross-Template sharing).
 - A **Preset** is either hand-authored or **Generate**d from a brief; either way it is then **Sync**'d into exactly one **Template** row. A **Template** belongs to exactly one **Category**.
 - A **User** owns many **Sites**; each **Site** is created from at most one **Template** (or none, admin-only).
-- A **Site** has many **Pages**; a **Page** has many ordered **Sections**; a **Section** has many **Fields**.
+- A **Single** Site has many ordered **Sections** directly (no Pages). A **Multi** Site has many **Pages** plus **Shared sections** (header / footer); each **Page** has many ordered **Sections**. A **Section** has many **Fields**.
 - A **Site** owns many **Assets**, referenced from its **Section** image Fields.
 - A **Site** becomes **Live** when its **User** **Publish**es it; an admin can **Suspend** a Live Site.
 - The **Editor** writes to a Site's content; the **Renderer** reads it (both in-editor preview and when serving the Live Site).
@@ -99,14 +114,15 @@ _Avoid_: theme runtime, view.
 > **Dev:** "They saved. But the **Site** is **Live** — does the **Renderer** cache?"
 > **PM:** "The Live **Renderer** reads fresh **Site** content per request. Different question — is this a **Site** they made from the **cafe Template**, or a custom one?"
 > **Dev:** "From the cafe **Template**. The menu's an **array Field** on the menu **Section**."
-> **PM:** "Then check whether they were editing a **Page** that's actually in the published version. The menu **Section** might be on a different **Page** than the one they think."
+> **PM:** "A cafe is a **Single** Site — no **Pages**, all its Sections in one scroll. So check the menu **Section**'s `visible`, and that they edited the right one. (If this were a **Multi** Site, I'd also check the menu Section is on the **Page** they think.)"
 
 ## Flagged ambiguities
 
 - "site" was used loosely to mean both the user's editable instance and the published artifact — resolved: the entity is always a **Site**; "publishing" is a state change, not a different thing.
 - "domain" is overloaded three ways: (1) the **Subdomain** product concept (`user_sites.domain` column, the slug a User publishes under), (2) the Clean Architecture layer (`src/domain/`), (3) reserved for the future "bring-your-own custom hostname" feature. The product concept is always called **Subdomain** in conversation. The architecture layer is implementation jargon, not a domain term. The full custom hostname has no canonical word yet — pin one when that feature is on the table.
 - "publish" is overloaded two ways: (1) a User **Publish**es their own Site (draft → Live); (2) an admin "publishes" a Template into the catalog by running Sync — this is what the `canPublishTemplates` capability gates. The User action is called **Publish**; the admin action is called **Sync**. The capability name `canPublishTemplates` predates this distinction and is kept as-is in code.
-- "composition" appears throughout the code (`RenderComposition`, `propose_composition`, the legacy `composition: PresetSection[]` field) but is **not** a separate domain concept — it is the ordered **Section** list of a **Page**. In conversation always say "the Page's Sections", never "the composition".
+- "composition" appears throughout the code (`RenderComposition`, `propose_composition`, the legacy `composition: PresetSection[]` field) but is **not** a separate domain concept — it is the ordered **Section** list of the **Site** itself (Single) or of a **Page** (Multi). The legacy `composition: PresetSection[]` short-hand is being **removed** (see Plan: Multi-page, Phase 0 — Presets carry a full `templateJson`). In conversation say "the Site's / Page's Sections", never "the composition".
+- `data.label` — a Section's on-screen **eyebrow / kicker** Field — is being renamed to `data.eyebrow`, to stop colliding with every Field's own `.label` (its editor display name, e.g. `data.eyebrow.label`). Code residue from the Multi-page work, not a domain term.
 - "theme" is a **historical** term. The visual identity is now per-Template (**Design Tokens**); the catalog grouping is now **Category**. Code residue: `themeKey` was renamed to `templateKey` in migration 013 (PR #18); `src/themes/` was migrated to `src/templates/<category>/<leaf>/` in PR #19 (β model). When reading old PRs or docs, mentally translate "theme" → either Template or Category depending on which job it was doing.
 - `templateKey` (= `${category}-${leaf}`, e.g. `cafe-default`) is a code identifier, not a domain term. "leaf" is similarly internal — it just means the directory name under a Category. Don't promote either to conversation; say "the cafe-default Template" instead.
 - "copy" / "self-contained" / "shared" are overloaded across **two independent axes** — confusing them leads to wrong conclusions about both efficiency and update propagation:
