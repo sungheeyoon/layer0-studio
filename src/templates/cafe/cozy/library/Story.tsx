@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Story: SectionComponent = function Story({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || '카페 소개';
+  const label = getFieldValue(data, 'eyebrow') || '카페 소개';
   const title1 = getFieldValue(data, 'title1') || '커피 한 잔에는';
   const titleAccent = getFieldValue(data, 'titleAccent') || '이야기가';
   const title2 = getFieldValue(data, 'title2') || '담겨 있습니다';
@@ -84,7 +84,7 @@ Story.meta = {
   category: 'about',
   label: 'Our Story',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title1: { type: 'text', label: '타이틀 1행' },
     titleAccent: { type: 'text', label: '강조 타이틀' },
     title2: { type: 'text', label: '타이틀 2행' },

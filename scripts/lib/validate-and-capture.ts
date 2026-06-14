@@ -25,7 +25,6 @@ import path from 'path';
 
 import { validateTemplateJson } from '../../src/lib/template/validate';
 import { validateTemplateFiles } from '../../src/lib/template/inline-tokens';
-import { deriveTemplateJsonFromPreset } from '../../src/lib/template/preset';
 import {
   presetMap,
   templateMap,
@@ -129,13 +128,8 @@ async function runValidateJson(templateKey: string): Promise<StepResult> {
   const preset = (await presetLoader()).default;
   const templateModule = await templateLoader();
 
-  let templateJson;
-  try {
-    templateJson = deriveTemplateJsonFromPreset(preset, templateModule);
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return { name: 'validate-json', ok: false, messages: [`deriveTemplateJsonFromPreset threw: ${msg}`] };
-  }
+  // The Preset carries the full templateJson verbatim (code is source of truth).
+  const templateJson = preset.templateJson;
 
   const result = validateTemplateJson(templateJson, {
     availableTemplateKeys: getAvailableTemplateKeys(),

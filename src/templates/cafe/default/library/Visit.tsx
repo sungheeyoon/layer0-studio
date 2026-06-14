@@ -6,7 +6,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 const Visit: SectionComponent = function Visit({ section }: TemplateSectionProps) {
   const { data } = section;
   const bgImage = getFieldValue(data, 'backgroundImage') || '';
-  const label = getFieldValue(data, 'label') || '방문 안내';
+  const label = getFieldValue(data, 'eyebrow') || '방문 안내';
   const title = getFieldValue(data, 'title') || '언제든\n환영합니다';
   const description = getFieldValue(data, 'description') || '';
   const phone = getFieldValue(data, 'phone') || '';
@@ -112,7 +112,7 @@ Visit.meta = {
   label: 'Visit Info',
   dataSchema: {
     backgroundImage: { type: 'image', label: '배경 이미지' },
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀' },
     description: { type: 'textarea', label: '섹션 설명' },
     phone: { type: 'text', label: '전화번호' },

@@ -1,5 +1,5 @@
 import { IUserSiteRepository } from '../../repositories/user-site.repository';
-import { TemplateJson } from '../../entities/template.entity';
+import { TemplateJson, allSections } from '../../entities/template.entity';
 import { TemplateError } from '../../errors/template.error';
 
 export class UpdateSiteJsonUseCase {
@@ -61,18 +61,11 @@ export class UpdateSiteJsonUseCase {
     // Deep copy current JSON
     const updatedJson: TemplateJson = structuredClone(site.siteJson);
 
-    // Find the section and update the field
-    let section;
-    if (pageId) {
-      const page = updatedJson.pages.find(p => p.id === pageId);
-      section = page?.sections.find(s => s.id === sectionId);
-    } else {
-      // Search across all pages when pageId is not provided
-      for (const page of updatedJson.pages) {
-        section = page.sections.find(s => s.id === sectionId);
-        if (section) break;
-      }
-    }
+    // Find the section by id. Section ids are unique across the whole template
+    // (Single: sections[]; Multi: shared + every page) so a flat lookup is safe.
+    // pageId remains a (Multi-only) hint and is not required for the lookup.
+    void pageId;
+    const section = allSections(updatedJson).find(s => s.id === sectionId);
 
     if (!section) {
       throw new TemplateError('UNKNOWN');
@@ -94,7 +87,15 @@ export class UpdateSiteJsonUseCase {
   }
 
   private validateJson(siteJson: TemplateJson) {
-    if (!Array.isArray(siteJson.pages) || siteJson.pages.length === 0) {
+    if (siteJson.mode === 'single') {
+      if (!Array.isArray(siteJson.sections) || siteJson.sections.length === 0) {
+        throw new TemplateError('INVALID_TEMPLATE_JSON');
+      }
+    } else if (siteJson.mode === 'multi') {
+      if (!Array.isArray(siteJson.pages) || siteJson.pages.length === 0) {
+        throw new TemplateError('INVALID_TEMPLATE_JSON');
+      }
+    } else {
       throw new TemplateError('INVALID_TEMPLATE_JSON');
     }
 

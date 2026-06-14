@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Space: SectionComponent = function Space({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || '';
+  const label = getFieldValue(data, 'eyebrow') || '';
   const title = getFieldValue(data, 'title') || '';
   const description = getFieldValue(data, 'description') || '';
   const mainImage = getFieldValue(data, 'mainImage') || '';
@@ -76,7 +76,7 @@ Space.meta = {
   category: 'content',
   label: 'Medical Space',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },
     mainImage: { type: 'image', label: '메인 이미지' },

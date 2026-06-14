@@ -1,8 +1,9 @@
 import React from 'react';
 import { TemplateRendererProps, TemplateLibrary, DesignTokens } from './types';
 import { tokensToCssVars } from '@/lib/template/design-tokens';
+import { isSingleTemplate } from '@/domain/entities/template.entity';
 
-interface RenderCompositionProps extends TemplateRendererProps {
+interface RenderSingleSiteProps extends TemplateRendererProps {
   library: TemplateLibrary;
   className?: string;
   itemClassName?: (sectionId: string) => string;
@@ -16,26 +17,20 @@ interface RenderCompositionProps extends TemplateRendererProps {
 }
 
 /**
- * Generic renderer for the Composition model.
- *
- * Instead of iterating over 'slots', it iterates over the actual 'sections'
- * defined in the siteJson and looks them up in the library.
+ * Renderer for a **Single** Site — iterates the Site's `sections[]` directly
+ * (one continuous scroll) and looks each up in the template library by `type`.
+ * Multi-mode rendering is a separate entrypoint (Phase 2). See ADR-0007.
  */
-export function RenderComposition({
+export function RenderSingleSite({
   siteJson,
   selectedSectionId,
   onSectionClick,
-  activePageId,
   library,
   className,
   itemClassName,
   designTokens,
-}: RenderCompositionProps) {
-  const page = activePageId
-    ? siteJson.pages.find(p => p.id === activePageId)
-    : siteJson.pages[0];
-
-  const sections = page?.sections || [];
+}: RenderSingleSiteProps) {
+  const sections = isSingleTemplate(siteJson) ? siteJson.sections : [];
 
   const rootStyle = designTokens
     ? tokensToCssVars(designTokens, siteJson.globalStyles)
@@ -48,7 +43,7 @@ export function RenderComposition({
 
         const entry = library[section.type];
         if (!entry) {
-          console.warn(`[RenderComposition] Component not found for type: ${section.type}`);
+          console.warn(`[RenderSingleSite] Component not found for type: ${section.type}`);
           return null;
         }
         const Component = entry.Component;

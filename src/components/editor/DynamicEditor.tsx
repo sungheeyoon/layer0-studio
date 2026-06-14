@@ -7,6 +7,8 @@ import {
   TemplateGlobalStyles,
   TemplateField,
   ArrayTemplateField,
+  isSingleTemplate,
+  allSections,
 } from '@/domain/entities/template.entity';
 import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
@@ -24,16 +26,15 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const [siteJson, setSiteJson] = useState<TemplateJson>(() => injectKeys(site.siteJson));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
-  const [activePageId, setActivePageId] = useState<string>(
-    siteJson.pages?.[0]?.id || 'home'
+  // Single-mode sites carry their sections directly (one continuous scroll).
+  // Multi-mode editing (page tabs) is a separate entrypoint — Phase 2.
+  const sections = useMemo(
+    () => (isSingleTemplate(siteJson) ? siteJson.sections : []),
+    [siteJson],
   );
 
-  const activePage = useMemo(() => {
-    return siteJson.pages.find(p => p.id === activePageId) || siteJson.pages[0];
-  }, [siteJson.pages, activePageId]);
-
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
-    activePage.sections[0]?.id ?? null
+    sections[0]?.id ?? null
   );
 
   const [saving, setSaving] = useState(false);
@@ -132,7 +133,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   const TemplateRenderer = templateModule?.default;
 
-  const selectedSection = activePage.sections.find((s) => s.id === selectedSectionId) ?? null;
+  const selectedSection = sections.find((s) => s.id === selectedSectionId) ?? null;
 
   const updateSiteJson = useCallback((updater: (json: TemplateJson) => void) => {
     setSiteJson((prev) => {
@@ -146,8 +147,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const handleFieldChange = useCallback(
     (sectionId: string, fieldKey: string, value: string | ArrayTemplateField['items'], assetId?: string) => {
       updateSiteJson((json) => {
-        const page = json.pages.find(p => p.id === activePageId);
-        const section = page?.sections.find(s => s.id === sectionId);
+        const section = allSections(json).find(s => s.id === sectionId);
         if (section && section.data[fieldKey]) {
           const field = section.data[fieldKey];
           if (field.type === 'array' && Array.isArray(value)) {
@@ -161,7 +161,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         }
       });
     },
-    [activePageId, updateSiteJson]
+    [updateSiteJson]
   );
 
   const handleGlobalStyleChange = useCallback(
@@ -299,39 +299,13 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         <div className="flex-grow overflow-y-auto p-6 custom-scrollbar">
           {activeTab === 'content' ? (
             <div className="space-y-12">
-              {/* Pages Selector */}
-              {siteJson.pages && siteJson.pages.length > 0 && (
-                <div>
-                  <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                    Pages
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mb-8">
-                    {siteJson.pages.map((page) => (
-                      <button
-                        key={page.id}
-                        onClick={() => {
-                          setActivePageId(page.id);
-                          setSelectedSectionId(page.sections[0]?.id || null);
-                        }}
-                        className={`px-3 py-1.5 text-[10px] uppercase tracking-widest border transition-all ${activePageId === page.id
-                            ? 'bg-primary text-on-primary border-primary'
-                            : 'bg-surface text-outline border-outline-variant hover:border-primary'
-                          }`}
-                      >
-                        {page.title}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Hierarchy */}
               <div>
                 <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
                   Hierarchy
                 </h3>
                 <ul className="space-y-4">
-                  {activePage.sections.map((section) => (
+                  {sections.map((section) => (
                     <li
                       key={section.id}
                       onClick={() => setSelectedSectionId(section.id)}
@@ -354,7 +328,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               </div>
 
               {/* Parameters */}
-              {selectedSection && selectedSection.editable && (
+              {selectedSection && (
                 <div>
                   <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
                     Parameters // {selectedSection.type}
@@ -470,7 +444,6 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 siteJson={siteJson}
                 selectedSectionId={selectedSectionId}
                 onSectionClick={handleSectionClick}
-                activePageId={activePageId}
               />
             ) : (
               <div className="flex items-center justify-center h-[50vh] text-outline font-light text-sm tracking-widest uppercase animate-pulse">

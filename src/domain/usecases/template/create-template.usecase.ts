@@ -24,8 +24,13 @@ export class CreateTemplateUseCase {
       throw new TemplateError('TEMPLATE_SLUG_EXISTS');
     }
 
-    // Validate JSON structure
-    if (!Array.isArray(input.templateJson.pages) || input.templateJson.pages.length === 0) {
+    // Validate JSON structure (mode-discriminated union)
+    const tj = input.templateJson;
+    const shapeOk =
+      tj.mode === 'single'
+        ? Array.isArray(tj.sections) && tj.sections.length > 0
+        : tj.mode === 'multi' && Array.isArray(tj.pages) && tj.pages.length > 0;
+    if (!shapeOk) {
       throw new TemplateError('INVALID_TEMPLATE_JSON');
     }
 

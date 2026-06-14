@@ -1,7 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { presetMap, templateMap, getAvailableTemplateKeys, templateCategories } from '@/templates/_generated';
 import { validateTemplateJson } from './validate';
-import { deriveTemplateJsonFromPreset } from './preset';
 import type { TemplatePreset } from '@/templates/types';
 import fs from 'fs';
 import path from 'path';
@@ -103,16 +102,8 @@ export async function syncTemplates(
     const templateModuleLoader = templateMap[templateKey];
     const templateModule = templateModuleLoader ? await templateModuleLoader() : null;
 
-    // 2. Derive effective templateJson
-    let effectiveTemplateJson;
-    try {
-      effectiveTemplateJson = deriveTemplateJsonFromPreset(preset, templateModule);
-    } catch (err: unknown) {
-      summary.errors++;
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      summary.details.push({ slug: preset.slug, action: 'ERROR', errors: [errorMessage] });
-      continue;
-    }
+    // 2. The Preset carries the full templateJson verbatim (code is source of truth).
+    const effectiveTemplateJson = preset.templateJson;
 
     // 3. Validate
     const validation = validateTemplateJson(effectiveTemplateJson, {

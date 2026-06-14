@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || '손님 후기';
+  const label = getFieldValue(data, 'eyebrow') || '손님 후기';
   const title = getFieldValue(data, 'title') || '이 공간에서\n느낀 것들';
   const ratingValue = getFieldValue(data, 'ratingValue') || '4.9';
 
@@ -77,7 +77,7 @@ Testimonials.meta = {
   category: 'social',
   label: 'Guest Reviews',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀' },
     ratingValue: { type: 'text', label: '별점 수치' },
     r1Body: { type: 'textarea', label: '후기 1 본문', required: true },

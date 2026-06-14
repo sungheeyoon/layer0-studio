@@ -1,10 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { UpdateSiteJsonUseCase } from '../usecases/user-site/update-site-json.usecase';
 import { FakeUserSiteRepo, makeSite, makeTemplateJson } from './fakes';
-import { TemplateJson, TextTemplateField, ArrayTemplateField } from '../entities/template.entity';
+import {
+  TemplateJson,
+  SinglePageTemplate,
+  TextTemplateField,
+  ArrayTemplateField,
+} from '../entities/template.entity';
 
-function makeTwoPageJson(): TemplateJson {
+// All current Sites are Single (ADR-0007) — sections live at the top level.
+const asSingle = (json: TemplateJson) => json as SinglePageTemplate;
+
+function makeTwoSectionJson(): TemplateJson {
   return {
+    mode: 'single',
     templateKey: 'corporate',
     globalStyles: {
       primaryColor: '#000',
@@ -13,40 +22,24 @@ function makeTwoPageJson(): TemplateJson {
       fontSize: '16px',
       layout: 'default',
     },
-    pages: [
+    sections: [
       {
-        id: 'page-1',
-        title: 'Home',
-        slug: 'home',
-        order: 0,
-        sections: [
-          {
-            id: 'section-a',
-            type: 'hero',
-            visible: true,
-            editable: true,
-            data: {
-              title: { type: 'text', label: 'Title', value: 'Page1 Title', editable: true },
-            },
-          },
-        ],
+        id: 'section-a',
+        type: 'hero',
+        visible: true,
+        nav: { visible: false, label: 'Hero' },
+        data: {
+          title: { type: 'text', label: 'Title', value: 'Section1 Title', editable: true },
+        },
       },
       {
-        id: 'page-2',
-        title: 'About',
-        slug: 'about',
-        order: 1,
-        sections: [
-          {
-            id: 'section-b',
-            type: 'text',
-            visible: true,
-            editable: true,
-            data: {
-              body: { type: 'textarea', label: 'Body', value: 'Page2 Body', editable: true },
-            },
-          },
-        ],
+        id: 'section-b',
+        type: 'text',
+        visible: true,
+        nav: { visible: false, label: 'Text' },
+        data: {
+          body: { type: 'textarea', label: 'Body', value: 'Section2 Body', editable: true },
+        },
       },
     ],
   };
@@ -64,33 +57,24 @@ describe('UpdateSiteJsonUseCase.executeFieldUpdate', () => {
     await expect(uc.executeFieldUpdate('site-1', 'section-1', 'title', 'New', 'user-2')).rejects.toMatchObject({ code: 'SITE_ACCESS_DENIED' });
   });
 
-  it('updates field when pageId is provided (targeted page lookup)', async () => {
-    const siteJson = makeTwoPageJson();
+  it('updates a field by section id (flat lookup)', async () => {
+    const siteJson = makeTwoSectionJson();
     const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
     const uc = new UpdateSiteJsonUseCase(repo);
-    const result = await uc.executeFieldUpdate('site-1', 'section-a', 'title', 'Updated', 'user-1', 'page-1');
-    expect((result.siteJson.pages[0].sections[0].data.title as TextTemplateField).value).toBe('Updated');
+    const result = await uc.executeFieldUpdate('site-1', 'section-a', 'title', 'Updated', 'user-1');
+    expect((asSingle(result.siteJson).sections[0].data.title as TextTemplateField).value).toBe('Updated');
   });
 
-  it('finds section across all pages when pageId is omitted', async () => {
-    const siteJson = makeTwoPageJson();
+  it('finds any section by id regardless of order', async () => {
+    const siteJson = makeTwoSectionJson();
     const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
     const uc = new UpdateSiteJsonUseCase(repo);
-    // section-b lives on page-2; no pageId given
     const result = await uc.executeFieldUpdate('site-1', 'section-b', 'body', 'Updated Body', 'user-1');
-    expect((result.siteJson.pages[1].sections[0].data.body as TextTemplateField).value).toBe('Updated Body');
+    expect((asSingle(result.siteJson).sections[1].data.body as TextTemplateField).value).toBe('Updated Body');
   });
 
-  it('throws UNKNOWN when section is not found on the specified page', async () => {
-    const siteJson = makeTwoPageJson();
-    const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
-    const uc = new UpdateSiteJsonUseCase(repo);
-    await expect(uc.executeFieldUpdate('site-1', 'section-b', 'body', 'New', 'user-1', 'page-1'))
-      .rejects.toMatchObject({ code: 'UNKNOWN' });
-  });
-
-  it('throws UNKNOWN when section is not found (no pageId, cross-page scan)', async () => {
-    const siteJson = makeTwoPageJson();
+  it('throws UNKNOWN when section is not found', async () => {
+    const siteJson = makeTwoSectionJson();
     const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
     const uc = new UpdateSiteJsonUseCase(repo);
     await expect(uc.executeFieldUpdate('site-1', 'missing-section', 'body', 'New', 'user-1'))
@@ -98,7 +82,7 @@ describe('UpdateSiteJsonUseCase.executeFieldUpdate', () => {
   });
 
   it('throws UNKNOWN when field key does not exist in section data', async () => {
-    const siteJson = makeTwoPageJson();
+    const siteJson = makeTwoSectionJson();
     const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
     const uc = new UpdateSiteJsonUseCase(repo);
     await expect(uc.executeFieldUpdate('site-1', 'section-a', 'missing-field', 'New', 'user-1'))
@@ -107,34 +91,26 @@ describe('UpdateSiteJsonUseCase.executeFieldUpdate', () => {
 
   it('does not mutate the original siteJson object (structuredClone guard)', async () => {
     const siteJson = makeTemplateJson();
-    const originalValue = (siteJson.pages[0].sections[0].data.title as TextTemplateField).value;
+    const originalValue = (asSingle(siteJson).sections[0].data.title as TextTemplateField).value;
     const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
     const uc = new UpdateSiteJsonUseCase(repo);
-    await uc.executeFieldUpdate('site-1', 'section-1', 'title', 'Changed', 'user-1', 'page-1');
-    expect((siteJson.pages[0].sections[0].data.title as TextTemplateField).value).toBe(originalValue);
+    await uc.executeFieldUpdate('site-1', 'section-1', 'title', 'Changed', 'user-1');
+    expect((asSingle(siteJson).sections[0].data.title as TextTemplateField).value).toBe(originalValue);
   });
 
   it('throws UNSUPPORTED_FIELD_TYPE when trying to update an array field directly', async () => {
     const siteJson = makeTemplateJson({
-      pages: [
+      sections: [
         {
-          id: 'page-1',
-          title: 'Home',
-          slug: 'home',
-          order: 0,
-          sections: [
-            {
-              id: 'section-1',
-              type: 'menu',
-              visible: true,
-              editable: true,
-              data: {
-                items: { type: 'array', label: 'Items', items: [] }
-              }
-            }
-          ]
-        }
-      ]
+          id: 'section-1',
+          type: 'menu',
+          visible: true,
+          nav: { visible: false, label: 'Menu' },
+          data: {
+            items: { type: 'array', label: 'Items', items: [] },
+          },
+        },
+      ],
     });
     const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1', siteJson })]);
     const uc = new UpdateSiteJsonUseCase(repo);
@@ -147,31 +123,23 @@ describe('UpdateSiteJsonUseCase.executeFieldUpdate', () => {
 describe('UpdateSiteJsonUseCase.execute', () => {
   it('updates the entire siteJson and preserves array fields', async () => {
     const siteJsonWithArray: TemplateJson = makeTemplateJson({
-      pages: [
+      sections: [
         {
-          id: 'page-1',
-          title: 'Home',
-          slug: 'home',
-          order: 0,
-          sections: [
-            {
-              id: 'section-1',
-              type: 'menu',
-              visible: true,
-              editable: true,
-              data: {
-                items: {
-                  type: 'array',
-                  label: 'Items',
-                  items: [
-                    { title: { type: 'text', label: 'Title', value: 'Item 1' } }
-                  ]
-                }
-              }
-            }
-          ]
-        }
-      ]
+          id: 'section-1',
+          type: 'menu',
+          visible: true,
+          nav: { visible: false, label: 'Menu' },
+          data: {
+            items: {
+              type: 'array',
+              label: 'Items',
+              items: [
+                { title: { type: 'text', label: 'Title', value: 'Item 1' } },
+              ],
+            },
+          },
+        },
+      ],
     });
     const repo = new FakeUserSiteRepo([makeSite({ id: 'site-1', userId: 'user-1' })]);
     const uc = new UpdateSiteJsonUseCase(repo);
@@ -179,9 +147,8 @@ describe('UpdateSiteJsonUseCase.execute', () => {
     const result = await uc.execute('site-1', siteJsonWithArray, 'user-1');
 
     expect(result.siteJson).toEqual(siteJsonWithArray);
-    const itemsField = result.siteJson.pages[0].sections[0].data.items as ArrayTemplateField;
+    const itemsField = asSingle(result.siteJson).sections[0].data.items as ArrayTemplateField;
     expect(itemsField.type).toBe('array');
     expect(itemsField.items).toHaveLength(1);
   });
 });
-

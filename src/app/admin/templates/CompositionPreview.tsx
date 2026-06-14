@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { TemplateJson, allSections } from '@/domain/entities/template.entity';
 import { templateMap } from '@/templates/_generated';
 import { TemplateLibrary } from '@/templates/types';
 
@@ -30,9 +30,9 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
     }
   }, [templateJson.templateKey]);
 
-  // We only show the first page's composition for now
-  const page = templateJson.pages[0];
-  if (!page) return null;
+  // Flat list of every section (Single: sections[]; Multi: shared + pages).
+  const sections = allSections(templateJson);
+  if (sections.length === 0) return null;
 
   return (
     <div className="space-y-4">
@@ -44,7 +44,7 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
       </div>
 
       <div className="space-y-2">
-        {page.sections.map((section, index) => {
+        {sections.map((section, index) => {
           const entry = library?.[section.type];
           const meta = entry?.meta;
 

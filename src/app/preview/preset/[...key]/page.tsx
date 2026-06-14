@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
-import { presetMap, templateMap } from '@/templates/_generated';
+import { presetMap } from '@/templates/_generated';
 import TemplateClientWrapper from '@/templates/TemplateClientWrapper';
-import { deriveTemplateJsonFromPreset } from '@/lib/template/preset';
 import React from 'react';
 
 interface Props {
@@ -20,18 +19,9 @@ export default async function PresetPreviewPage({ params }: Props) {
 
   const preset = (await loader()).default;
 
-  // post-β: presetMap key == templateKey == preset.slug
-  const templateKey = presetKey;
-  const templateLoader = templateMap[templateKey as keyof typeof templateMap];
-  const templateModule = templateLoader ? await templateLoader() : null;
-
-  let templateJson;
-  try {
-    templateJson = deriveTemplateJsonFromPreset(preset, templateModule);
-  } catch (err) {
-    console.error(`[PresetPreviewPage] Failed to derive templateJson:`, err);
-    notFound();
-  }
+  // post-β: presetMap key == templateKey == preset.slug.
+  // The Preset carries the full templateJson verbatim (code is source of truth).
+  const templateJson = preset.templateJson;
 
   const themeVariables = {
     '--theme-primary': templateJson.globalStyles.primaryColor,

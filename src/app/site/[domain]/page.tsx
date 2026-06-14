@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/container';
 import { loadTemplate } from '@/templates/registry';
 import { SITE_URL } from '@/lib/seo/base-url';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import { getFieldValue, allSections } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
 
@@ -31,11 +31,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const site = await useCase.execute(domain);
     const { siteJson } = site;
 
-    const homePage = siteJson.pages.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages[0];
-    const heroSection = homePage?.sections.find(s => s.type === 'hero');
+    const heroSection = allSections(siteJson).find(s => s.type === 'hero');
     const heroTitle = getFieldValue(heroSection?.data['title']) || getFieldValue(heroSection?.data['heading']) || '';
     const heroSubtitle = getFieldValue(heroSection?.data['subtitle']) || '';
-    const description = buildDescription(site.siteName, homePage?.title, heroTitle, heroSubtitle);
+    const description = buildDescription(site.siteName, undefined, heroTitle, heroSubtitle);
 
     const canonical = `${SITE_URL}/site/${domain}`;
 
@@ -90,9 +89,6 @@ export default async function PublicSitePage({ params }: Props) {
 
   const TemplateRenderer = templateModule.default;
 
-  const homePage = siteJson.pages.find(p => p.slug === '/' || p.id === 'home') || siteJson.pages[0];
-  const activePageId = homePage?.id;
-
   const themeVariables = {
     '--theme-primary': siteJson.globalStyles.primaryColor,
     '--theme-secondary': siteJson.globalStyles.secondaryColor,
@@ -108,7 +104,6 @@ export default async function PublicSitePage({ params }: Props) {
       <TemplateRenderer
         siteJson={siteJson}
         selectedSectionId={null}
-        activePageId={activePageId}
       />
     </main>
   );

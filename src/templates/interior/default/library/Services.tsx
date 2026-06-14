@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || 'Our Services';
+  const label = getFieldValue(data, 'eyebrow') || 'Our Services';
   const title = getFieldValue(data, 'title') || '';
   const description = getFieldValue(data, 'description') || '';
 
@@ -117,7 +117,7 @@ Services.meta = {
   category: 'features',
   label: 'Interior Services',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },
     s1Badge: { type: 'text', label: 'S1 배지' },

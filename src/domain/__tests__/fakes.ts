@@ -1,9 +1,10 @@
 import { IUserSiteRepository } from '../repositories/user-site.repository';
 import { UserSite, CreateUserSiteDto, UpdateUserSiteDto } from '../entities/user-site.entity';
-import { TemplateJson } from '../entities/template.entity';
+import { TemplateJson, SinglePageTemplate } from '../entities/template.entity';
 
-export function makeTemplateJson(overrides: Partial<TemplateJson> = {}): TemplateJson {
+export function makeTemplateJson(overrides: Partial<SinglePageTemplate> = {}): TemplateJson {
   return {
+    mode: 'single',
     templateKey: 'corporate',
     globalStyles: {
       primaryColor: '#000',
@@ -12,23 +13,15 @@ export function makeTemplateJson(overrides: Partial<TemplateJson> = {}): Templat
       fontSize: '16px',
       layout: 'default',
     },
-    pages: [
+    sections: [
       {
-        id: 'page-1',
-        title: 'Home',
-        slug: 'home',
-        order: 0,
-        sections: [
-          {
-            id: 'section-1',
-            type: 'hero',
-            visible: true,
-            editable: true,
-            data: {
-              title: { type: 'text', label: 'Title', value: 'Hello', editable: true },
-            },
-          },
-        ],
+        id: 'section-1',
+        type: 'hero',
+        visible: true,
+        nav: { visible: false, label: 'Hero' },
+        data: {
+          title: { type: 'text', label: 'Title', value: 'Hello', editable: true },
+        },
       },
     ],
     ...overrides,

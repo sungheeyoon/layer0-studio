@@ -1,6 +1,6 @@
 'use client';
 
-import { Template } from '@/domain/entities/template.entity';
+import { Template, allSections } from '@/domain/entities/template.entity';
 import { UserSite } from '@/domain/entities/user-site.entity';
 import { useState, useTransition, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -156,7 +156,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
             <div className="grid grid-cols-2 gap-4 border-t border-neutral-200 dark:border-zinc-800 pt-4">
               <div>
                 <div className="text-[8px] text-neutral-400 tracking-widest uppercase mb-1">Page_Count</div>
-                <div className="text-xs font-light tracking-widest text-black dark:text-white">{template.templateJson?.pages?.[0]?.sections?.length ?? 0}_UNITS</div>
+                <div className="text-xs font-light tracking-widest text-black dark:text-white">{template.templateJson ? allSections(template.templateJson).length : 0}_UNITS</div>
               </div>
               <div>
                 <div className="text-[8px] text-neutral-400 tracking-widest uppercase mb-1">Responsive_Status</div>

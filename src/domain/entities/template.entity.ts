@@ -64,12 +64,36 @@ export function getFieldValue(fieldOrData: TemplateField | Record<string, Templa
   return field.value ?? '';
 }
 
+/**
+ * Navigation projection source — carried by the unit that drives the nav.
+ * `visible` = nav-eligibility (independent of the unit's own `visible`),
+ * `label` = the nav text (and, for a Page, the page's name in the editor tab).
+ * See ADR-0007 and CONTEXT.md "nav projection".
+ */
+export interface NavMeta {
+  visible: boolean;
+  label: string;
+}
+
+/**
+ * Base section — the "content shape" of a section, shared by Single and Multi
+ * so section renderers are reused. No `title` (the name lives in the nav source's
+ * `nav.label`) and no `editable` (it was always `true` — dead field). Field-level
+ * `TemplateField.editable` is kept.
+ */
 export interface TemplateSection {
   id: string;
   type: string;
   visible: boolean;
-  editable: boolean;
   data: Record<string, TemplateField>;
+}
+
+/**
+ * Single-mode section — the section itself drives the nav (anchor scroll),
+ * so it carries the unified `nav` projection source.
+ */
+export interface SingleSection extends TemplateSection {
+  nav: NavMeta;
 }
 
 export interface TemplateGlobalStyles {
@@ -80,18 +104,82 @@ export interface TemplateGlobalStyles {
   layout: string;
 }
 
-export interface TemplatePage {
-  id: string;
+/** 🔮 Phase 6 placeholder — per-page (Multi) / top-level (Single) SEO. */
+export interface PageSeo {
   title: string;
-  slug: string;
-  order: number;
-  sections: TemplateSection[];
+  description: string;
 }
 
-export interface TemplateJson {
-  templateKey: string; // 'corporate' | 'cafe' etc. - renderer key
+/**
+ * Multi-mode page — the page drives the nav (page link), so it carries the
+ * unified `nav` projection source. Inner sections use base `TemplateSection`
+ * (no nav). No `title` (name = `nav.label`); no `order` (array order = render order).
+ */
+export interface TemplatePage {
+  id: string;
+  slug: string;
+  visible: boolean; // routable? false → 404 (data preserved)
+  nav: NavMeta;
+  sections: TemplateSection[];
+  seo?: PageSeo; // 🔮 Phase 6
+}
+
+interface TemplateBase {
+  templateKey: string; // selects the (shared) renderer
   globalStyles: TemplateGlobalStyles;
+}
+
+export interface SinglePageTemplate extends TemplateBase {
+  mode: 'single';
+  sections: SingleSection[]; // nav/footer inline, pinned in the editor
+  seo?: PageSeo; // 🔮 Phase 6 (single has one page → site-level)
+}
+
+export interface MultiPageTemplate extends TemplateBase {
+  mode: 'multi';
+  shared: { header: TemplateSection[]; footer: TemplateSection[] };
   pages: TemplatePage[];
+}
+
+/** Structural union discriminated on `mode`. See ADR-0007. */
+export type TemplateJson = SinglePageTemplate | MultiPageTemplate;
+
+/** Narrow a TemplateJson to the Single shape. */
+export function isSingleTemplate(json: TemplateJson): json is SinglePageTemplate {
+  return json.mode === 'single';
+}
+
+/** Narrow a TemplateJson to the Multi shape. */
+export function isMultiTemplate(json: TemplateJson): json is MultiPageTemplate {
+  return json.mode === 'multi';
+}
+
+/**
+ * Every section in a TemplateJson, regardless of mode — Single's `sections`,
+ * or Multi's `shared.header` + `shared.footer` + each page's `sections`.
+ * Returns live references (safe to mutate after a structuredClone).
+ */
+export function allSections(json: TemplateJson): TemplateSection[] {
+  if (json.mode === 'single') return json.sections;
+  return [
+    ...json.shared.header,
+    ...json.shared.footer,
+    ...json.pages.flatMap((p) => p.sections),
+  ];
+}
+
+/**
+ * Project a nav menu from its source (sections for Single, pages for Multi).
+ * The object shape, filter rule (`visible && nav.visible`) and label source
+ * (`nav.label`) are identical across modes; only the href scheme differs.
+ */
+export function deriveNav<T extends { visible: boolean; nav: NavMeta }>(
+  source: T[],
+  hrefOf: (x: T) => string,
+): Array<{ label: string; href: string }> {
+  return source
+    .filter((x) => x.visible && x.nav.visible)
+    .map((x) => ({ label: x.nav.label, href: hrefOf(x) }));
 }
 
 export interface Template {

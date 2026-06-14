@@ -1,8 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncTemplates } from '../sync';
-import { deriveTemplateJsonFromPreset } from '../preset';
-import { TemplatePreset } from '@/templates/types';
-import { ArrayTemplateField, TextTemplateField } from '@/domain/entities/template.entity';
 
 // Mock presetMap and validateTemplateJson
 // post-β: presetMap/templateMap keys are templateKeys; templateCategories maps to category.
@@ -15,8 +12,9 @@ vi.mock('@/templates/_generated', () => ({
       default: {
         slug: 'test-default',
         templateJson: {
+          mode: 'single',
           templateKey: 'test-default',
-          pages: [{ id: 'index', title: 'Index', slug: 'index', sections: [], order: 0 }],
+          sections: [],
           globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' }
         },
         thumbnailPath: 'test.jpg',
@@ -33,48 +31,6 @@ vi.mock('@/templates/_generated', () => ({
 vi.mock('../validate', () => ({
   validateTemplateJson: vi.fn(() => ({ errors: [], warnings: [] }))
 }));
-
-describe('deriveTemplateJsonFromPreset — array fields', () => {
-  it('should preserve array fields during derivation', () => {
-    const preset: TemplatePreset = {
-      slug: 'test-array',
-      version: '1.0.0',
-      thumbnailPath: 't.jpg',
-      defaults: { name: 'N', description: 'D', category: 'C' },
-      templateJson: {
-        templateKey: 'test',
-        globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' },
-        pages: [{
-          id: 'p1',
-          title: 'P1',
-          slug: '/',
-          order: 0,
-          sections: [{
-            id: 's1',
-            type: 'menu',
-            visible: true,
-            editable: true,
-            data: {
-              items: {
-                type: 'array',
-                label: 'Items',
-                items: [
-                  { title: { type: 'text', label: 'T', value: 'V' } }
-                ]
-              }
-            }
-          }]
-        }]
-      }
-    };
-
-    const result = deriveTemplateJsonFromPreset(preset, null);
-    const itemsField = result.pages[0].sections[0].data.items as ArrayTemplateField;
-    expect(itemsField.type).toBe('array');
-    expect(itemsField.items).toHaveLength(1);
-    expect((itemsField.items[0].title as TextTemplateField).value).toBe('V');
-  });
-});
 
 describe('syncTemplates', () => {
   // Use any to bypass SupabaseClient's complex internal types in tests

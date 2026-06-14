@@ -1,4 +1,4 @@
-import { TemplateJson, TemplateField } from '@/domain/entities/template.entity';
+import { TemplateJson, TemplateSection, TemplateField } from '@/domain/entities/template.entity';
 import { TemplateLibrary, SectionDataSchema } from '@/templates/types';
 
 export interface ValidationIssue {
@@ -45,9 +45,19 @@ export function validateTemplateJson(
     err('UNKNOWN_TEMPLATE_KEY', `templateKey "${json.templateKey}" not found in registry`, 'templateKey');
   }
 
-  // Rule 6 (a): pages must be a non-empty array
-  if (!Array.isArray(json.pages) || json.pages.length === 0) {
-    err('PAGES_EMPTY', 'pages array must contain at least one page', 'pages');
+  // Rule 6 (a): mode-specific top-level shape must be present
+  if (json.mode === 'single') {
+    if (!Array.isArray(json.sections) || json.sections.length === 0) {
+      err('SECTIONS_EMPTY', 'sections array must contain at least one section', 'sections');
+      return { errors, warnings };
+    }
+  } else if (json.mode === 'multi') {
+    if (!Array.isArray(json.pages) || json.pages.length === 0) {
+      err('PAGES_EMPTY', 'pages array must contain at least one page', 'pages');
+      return { errors, warnings };
+    }
+  } else {
+    err('UNKNOWN_MODE', `templateJson.mode "${(json as { mode?: string }).mode}" is not 'single' | 'multi'`, 'mode');
     return { errors, warnings };
   }
 
@@ -78,25 +88,12 @@ export function validateTemplateJson(
     }
   }
 
-  // Rule 6 (b): page.slug must be unique across all pages
-  const pageSlugs = new Set<string>();
-  for (const page of json.pages) {
-    if (pageSlugs.has(page.slug)) {
-      err('DUPLICATE_PAGE_SLUG', `page slug "${page.slug}" is not unique`, `pages[slug=${page.slug}]`);
-    }
-    pageSlugs.add(page.slug);
-  }
-
-  for (const page of json.pages) {
-    const pageRef = `pages[slug=${page.slug}]`;
-    const sectionIds = new Set<string>();
-
-    for (const section of page.sections) {
-      const secRef = `${pageRef}.sections[id=${section.id}]`;
-
-      // Rule 4: section.id must be unique within the page
+  // Per-section validation, shared across modes.
+  const sectionIds = new Set<string>();
+  const validateSection = (section: TemplateSection, secRef: string) => {
+      // Rule 4: section.id must be unique across the whole template
       if (sectionIds.has(section.id)) {
-        err('DUPLICATE_SECTION_ID', `section id "${section.id}" is not unique in page "${page.slug}"`, secRef);
+        err('DUPLICATE_SECTION_ID', `section id "${section.id}" is not unique`, secRef);
       }
       sectionIds.add(section.id);
 
@@ -236,7 +233,52 @@ export function validateTemplateJson(
           }
         }
       }
+  };
+
+  // Each nav-projection source (Single section / Multi page) must carry nav:{visible,label}.
+  const validateNavMeta = (
+    x: { nav?: { visible?: unknown; label?: unknown } },
+    ref: string,
+  ) => {
+    if (!x.nav || typeof x.nav !== 'object') {
+      err('MISSING_NAV', 'nav:{visible,label} is required', `${ref}.nav`);
+      return;
     }
+    if (typeof x.nav.visible !== 'boolean') {
+      err('INVALID_NAV_VISIBLE', 'nav.visible must be a boolean', `${ref}.nav.visible`);
+    }
+    if (typeof x.nav.label !== 'string') {
+      err('INVALID_NAV_LABEL', 'nav.label must be a string', `${ref}.nav.label`);
+    }
+  };
+
+  if (json.mode === 'single') {
+    json.sections.forEach((section) => {
+      const secRef = `sections[id=${section.id}]`;
+      validateSection(section, secRef);
+      validateNavMeta(section, secRef);
+    });
+  } else {
+    const pageSlugs = new Set<string>();
+    json.pages.forEach((page) => {
+      const pageRef = `pages[slug=${page.slug}]`;
+      if (!page.slug) {
+        err('MISSING_PAGE_SLUG', 'page slug is required', `${pageRef}.slug`);
+      } else if (pageSlugs.has(page.slug)) {
+        err('DUPLICATE_PAGE_SLUG', `page slug "${page.slug}" is not unique`, pageRef);
+      }
+      pageSlugs.add(page.slug);
+      validateNavMeta(page, pageRef);
+      page.sections.forEach((section) =>
+        validateSection(section, `${pageRef}.sections[id=${section.id}]`),
+      );
+    });
+    json.shared.header.forEach((section) =>
+      validateSection(section, `shared.header.sections[id=${section.id}]`),
+    );
+    json.shared.footer.forEach((section) =>
+      validateSection(section, `shared.footer.sections[id=${section.id}]`),
+    );
   }
 
   return { errors, warnings };

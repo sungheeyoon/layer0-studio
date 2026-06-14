@@ -1,4 +1,4 @@
-import { TemplateJson, TemplateSection, TemplateFieldType, TemplateField, TemplateGlobalStyles } from '@/domain/entities/template.entity';
+import { TemplateJson, TemplateSection, TemplateFieldType } from '@/domain/entities/template.entity';
 import { ComponentType } from 'react';
 
 /**
@@ -70,16 +70,6 @@ export function libEntry(
 }
 
 /**
- * A section entry within a preset or page
- */
-export interface PresetSection {
-  id: string;                       // Stable ID preserved in user sites
-  componentKey: string;             // Must exist in template.library
-  visible?: boolean;
-  data: Record<string, TemplateField>;
-}
-
-/**
  * A seed template stored in code.
  * templateJson / thumbnailPath / version — code is source of truth (sync always overwrites).
  * defaults.* — seed-only; DB value is preserved if the row already exists.
@@ -89,22 +79,11 @@ export interface TemplatePreset {
   slug: string;
 
   /**
-   * The composition of sections. If provided, templateJson is derived from this.
-   * If not provided, templateJson must be present.
+   * The full template JSON seeded into the DB. A `mode`-discriminated union
+   * (Single / Multi) — the Preset is the source of truth, carried verbatim
+   * (the legacy `composition` short-hand was removed, see ADR-0007).
    */
-  composition?: PresetSection[];
-
-  /** Template key (e.g. 'cafe', 'corporate'). Required if composition is used. */
-  templateKey?: string;
-
-  /** Global style overrides. Optional, merged with template defaults if composition is used. */
-  globalStyles?: Partial<TemplateGlobalStyles>;
-
-  /**
-   * The full template JSON seeded into the DB.
-   * If composition is present, this is ignored/derived during sync.
-   */
-  templateJson?: TemplateJson;
+  templateJson: TemplateJson;
 
   /** Relative path from project root, e.g. 'public/thumbnails/template-cafe.jpg' */
   thumbnailPath: string;

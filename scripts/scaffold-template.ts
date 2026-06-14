@@ -86,29 +86,22 @@ export const ${key}Library: TemplateLibrary = {
 import { TemplateRendererProps, TemplateLibrary } from '../types';
 import styles from './${key}.module.css';
 import { ${key}Library } from './library';
-import { RenderComposition } from '../renderComposition';
+import { RenderSingleSite } from '../renderSingleSite';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = ${key}Library;
 
 export const defaultTemplateJson: TemplateJson = {
+  mode: 'single',
   templateKey: '${key}',
   globalStyles: defaultGlobalStyles,
-  pages: [
-    {
-      id: 'home',
-      title: 'Home',
-      slug: '/',
-      order: 0,
-      sections: [], // Filled by presets/composition
-    },
-  ],
+  sections: [], // Empty skeleton; presets provide the sections
 };
 
 export default function ${key.charAt(0).toUpperCase() + key.slice(1)}Theme(props: TemplateRendererProps) {
   return (
-    <RenderComposition
+    <RenderSingleSite
       {...props}
       library={library}
       className={styles.themeRoot}
@@ -125,26 +118,35 @@ export default function ${key.charAt(0).toUpperCase() + key.slice(1)}Theme(props
   const presetPath = join(presetsDir, 'default.preset.ts');
   if (!existsSync(presetPath)) {
     const content = `import { TemplatePreset } from '../../types';
+import { defaultGlobalStyles } from './tokens';
 
 const preset: TemplatePreset = {
   slug: '${key}-default',
-  templateKey: '${key}',
-  composition: [
-    {
-      id: 'hero-001',
-      componentKey: 'hero',
-      data: {
-        title: { value: '${meta.title}', type: 'text', label: '타이틀', editable: true },
+  templateJson: {
+    mode: 'single',
+    templateKey: '${key}',
+    globalStyles: defaultGlobalStyles,
+    sections: [
+      {
+        id: 'hero-001',
+        type: 'hero',
+        visible: true,
+        nav: { visible: false, label: 'hero' },
+        data: {
+          title: { value: '${meta.title}', type: 'text', label: '타이틀', editable: true },
+        },
       },
-    },
-    {
-      id: 'footer-001',
-      componentKey: 'footer',
-      data: {
-        text: { value: '© 2026 ${meta.title}', type: 'text', label: '카피라이트', editable: true },
+      {
+        id: 'footer-001',
+        type: 'footer',
+        visible: true,
+        nav: { visible: false, label: 'footer' },
+        data: {
+          text: { value: '© 2026 ${meta.title}', type: 'text', label: '카피라이트', editable: true },
+        },
       },
-    },
-  ],
+    ],
+  },
   thumbnailPath: 'public/thumbnails/template-${key}.webp',
   version: '1.0.0',
   defaults: {

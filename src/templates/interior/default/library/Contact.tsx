@@ -7,7 +7,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || 'Get Started';
+  const label = getFieldValue(data, 'eyebrow') || 'Get Started';
   const title = getFieldValue(data, 'title') || '';
   const description = getFieldValue(data, 'description') || '';
   const phone = getFieldValue(data, 'phone') || '';
