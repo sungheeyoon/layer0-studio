@@ -34,30 +34,6 @@ const preset: TemplatePreset = {
             "label": "Subtext",
             "editable": true
           },
-          "menu1": {
-            "value": "진료 안내",
-            "type": "text",
-            "label": "Menu 1",
-            "editable": true
-          },
-          "menu2": {
-            "value": "클리닉 소개",
-            "type": "text",
-            "label": "Menu 2",
-            "editable": true
-          },
-          "menu3": {
-            "value": "의료진",
-            "type": "text",
-            "label": "Menu 3",
-            "editable": true
-          },
-          "menu4": {
-            "value": "후기",
-            "type": "text",
-            "label": "Menu 4",
-            "editable": true
-          },
           "ctaText": {
             "value": "예약하기",
             "type": "text",

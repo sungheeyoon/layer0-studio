@@ -113,6 +113,23 @@ export interface TemplateSectionProps {
   onClick?: () => void;
 }
 
+/** A single derived nav entry. `href` = anchor (Single) or slug (Multi). */
+export interface NavItem {
+  label: string;
+  href: string;
+}
+
+/**
+ * Props for a nav section component. The nav can't see its siblings through
+ * `TemplateSectionProps` (which only carries its own `section`), so the site
+ * renderer projects the menu (`deriveNav`) and injects it directly into the
+ * `type === 'nav'` section. `navItems` is supplied by the renderer (always
+ * present — possibly empty). See ADR-0007 / PLAN_multipage §3.3.
+ */
+export interface NavSectionProps extends TemplateSectionProps {
+  navItems: NavItem[];
+}
+
 export interface TemplateModule {
   default: ComponentType<TemplateRendererProps>;
   defaultTemplateJson: TemplateJson;

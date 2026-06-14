@@ -28,36 +28,6 @@ const preset: TemplatePreset = {
             "label": "브랜드 이름",
             "editable": true
           },
-          "menu1": {
-            "value": "스튜디오 소개",
-            "type": "text",
-            "label": "메뉴 1",
-            "editable": true
-          },
-          "menu2": {
-            "value": "서비스",
-            "type": "text",
-            "label": "메뉴 2",
-            "editable": true
-          },
-          "menu3": {
-            "value": "포트폴리오",
-            "type": "text",
-            "label": "메뉴 3",
-            "editable": true
-          },
-          "menu4": {
-            "value": "진행 과정",
-            "type": "text",
-            "label": "메뉴 4",
-            "editable": true
-          },
-          "menu5": {
-            "value": "문의",
-            "type": "text",
-            "label": "메뉴 5",
-            "editable": true
-          },
           "ctaText": {
             "value": "무료 상담 신청",
             "type": "text",

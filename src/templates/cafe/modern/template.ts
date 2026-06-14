@@ -32,26 +32,6 @@ const preset: TemplatePreset = {
             "type": "text",
             "label": "보조 텍스트"
           },
-          "menu1": {
-            "value": "Menu",
-            "type": "text",
-            "label": "메뉴 1"
-          },
-          "menu2": {
-            "value": "About",
-            "type": "text",
-            "label": "메뉴 2"
-          },
-          "menu3": {
-            "value": "Space",
-            "type": "text",
-            "label": "메뉴 3"
-          },
-          "menu4": {
-            "value": "Visit",
-            "type": "text",
-            "label": "메뉴 4"
-          },
           "ctaText": {
             "value": "Find Us",
             "type": "text",

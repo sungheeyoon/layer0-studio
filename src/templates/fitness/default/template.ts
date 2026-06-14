@@ -33,30 +33,6 @@ const preset: TemplatePreset = {
             "type": "text",
             "label": "CTA 텍스트",
             "editable": true
-          },
-          "menu1": {
-            "value": "프로그램",
-            "type": "text",
-            "label": "메뉴 1",
-            "editable": true
-          },
-          "menu2": {
-            "value": "시설",
-            "type": "text",
-            "label": "메뉴 2",
-            "editable": true
-          },
-          "menu3": {
-            "value": "트레이너",
-            "type": "text",
-            "label": "메뉴 3",
-            "editable": true
-          },
-          "menu4": {
-            "value": "후기",
-            "type": "text",
-            "label": "메뉴 4",
-            "editable": true
           }
         }
       },

@@ -1,22 +1,16 @@
 'use client';
 
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../interior.module.css';
 import { HomeIcon, ChatIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
+const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
+  const { section } = props;
+  const { navItems } = props as NavSectionProps;
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || '에스파시오';
   const ctaText = getFieldValue(data, 'ctaText') || '무료 상담 신청';
-
-  const menuItems = [
-    { label: getFieldValue(data, 'menu1'), href: '#about' },
-    { label: getFieldValue(data, 'menu2'), href: '#services' },
-    { label: getFieldValue(data, 'menu3'), href: '#portfolio' },
-    { label: getFieldValue(data, 'menu4'), href: '#process' },
-    { label: getFieldValue(data, 'menu5'), href: '#contact' },
-  ].filter(m => m.label);
 
   return (
     <nav className={`${styles.glassNav} fixed top-0 left-0 right-0 z-50`}>
@@ -29,7 +23,7 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
         </a>
 
         <ul className="hidden md:flex items-center gap-8 text-[13px] text-[var(--i-muted)] font-medium list-none p-0 m-0">
-          {menuItems.map((item, i) => (
+          {navItems.map((item, i) => (
             <li key={i}>
               <a href={item.href} className="hover:text-[var(--i-cream)] transition-colors duration-300 no-underline">
                 {item.label}

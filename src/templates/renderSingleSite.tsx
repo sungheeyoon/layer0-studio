@@ -1,7 +1,7 @@
-import React from 'react';
-import { TemplateRendererProps, TemplateLibrary, DesignTokens } from './types';
+import React, { ComponentType } from 'react';
+import { TemplateRendererProps, TemplateLibrary, DesignTokens, NavSectionProps } from './types';
 import { tokensToCssVars } from '@/lib/template/design-tokens';
-import { isSingleTemplate } from '@/domain/entities/template.entity';
+import { isSingleTemplate, deriveNav } from '@/domain/entities/template.entity';
 
 interface RenderSingleSiteProps extends TemplateRendererProps {
   library: TemplateLibrary;
@@ -32,6 +32,10 @@ export function RenderSingleSite({
 }: RenderSingleSiteProps) {
   const sections = isSingleTemplate(siteJson) ? siteJson.sections : [];
 
+  // nav = projection of the sections (anchor scroll). The wrapper `<div
+  // id="section-${id}">` below is the anchor target. See ADR-0007 §3.1.
+  const navItems = deriveNav(sections, (s) => `#section-${s.id}`);
+
   const rootStyle = designTokens
     ? tokensToCssVars(designTokens, siteJson.globalStyles)
     : undefined;
@@ -47,6 +51,20 @@ export function RenderSingleSite({
           return null;
         }
         const Component = entry.Component;
+        const isSelected = selectedSectionId === section.id;
+
+        // Inject the derived menu directly into the known nav section
+        // (`type === 'nav'`); all other sections take plain section props.
+        const inner =
+          section.type === 'nav' ? (
+            React.createElement(Component as ComponentType<NavSectionProps>, {
+              section,
+              isSelected,
+              navItems,
+            })
+          ) : (
+            <Component section={section} isSelected={isSelected} />
+          );
 
         return (
           <div
@@ -60,10 +78,7 @@ export function RenderSingleSite({
             } : {})}
             className={itemClassName?.(section.id) || ''}
           >
-            <Component
-              section={section}
-              isSelected={selectedSectionId === section.id}
-            />
+            {inner}
           </div>
         );
       })}

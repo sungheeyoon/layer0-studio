@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../cafe.module.css';
 import { MapPointIcon, HamburgerIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Navigation: SectionComponent = function Navigation({ section }: TemplateSectionProps) {
+const Navigation: SectionComponent = function Navigation(props: TemplateSectionProps) {
+  const { section } = props;
+  const { navItems } = props as NavSectionProps;
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || 'MONO';
   const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Specialty Coffee';
@@ -20,13 +22,6 @@ const Navigation: SectionComponent = function Navigation({ section }: TemplateSe
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const menuItems = [
-    { label: getFieldValue(data, 'menu1'), href: '#menu' },
-    { label: getFieldValue(data, 'menu2'), href: '#story' },
-    { label: getFieldValue(data, 'menu3'), href: '#space' },
-    { label: getFieldValue(data, 'menu4'), href: '#visit' },
-  ].filter(m => m.label);
 
   return (
     <nav className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ''}`}>
@@ -44,7 +39,7 @@ const Navigation: SectionComponent = function Navigation({ section }: TemplateSe
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-10">
-            {menuItems.map((item, i) => (
+            {navItems.map((item, i) => (
               <a
                 key={i}
                 href={item.href}
@@ -75,7 +70,7 @@ const Navigation: SectionComponent = function Navigation({ section }: TemplateSe
 
       {/* Mobile menu */}
       <div className={`lg:hidden bg-[var(--color-surface)] border-t border-[var(--color-surface-dark)] px-6 py-6 space-y-4 overflow-hidden transition-all duration-400 ${mobOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
-        {menuItems.map((item, i) => (
+        {navItems.map((item, i) => (
           <a
             key={i}
             href={item.href}
