@@ -5,7 +5,7 @@ import { ArrowRightIcon, CupIcon, PieChartIcon } from '../sections/icons';
 
 const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || '메뉴';
+  const label = getFieldValue(data, 'eyebrow') || '메뉴';
   const title = getFieldValue(data, 'title') || '매일 정성껏\n내리는 한 잔';
   const description = getFieldValue(data, 'description') || '';
 
@@ -126,7 +126,7 @@ MenuBento.meta = {
   category: 'menu',
   label: 'Menu (Bento)',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀' },
     description: { type: 'textarea', label: '섹션 설명' },
     items: {

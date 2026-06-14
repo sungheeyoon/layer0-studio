@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const About: SectionComponent = function About({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || 'About Espacio';
+  const label = getFieldValue(data, 'eyebrow') || 'About Espacio';
   const title = getFieldValue(data, 'title') || '';
   const description = getFieldValue(data, 'description') || '';
   const projectTitle = getFieldValue(data, 'projectTitle') || '한남동 타운하우스 — 주방 리노베이션';
@@ -95,7 +95,7 @@ About.meta = {
   category: 'content',
   label: 'Interior About',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '설명' },
     v1Title: { type: 'text', label: '가치 1 제목' },

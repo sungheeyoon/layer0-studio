@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Trainers: SectionComponent = function Trainers({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || '트레이너';
+  const label = getFieldValue(data, 'eyebrow') || '트레이너';
   const title = getFieldValue(data, 'title') || '당신 옆에서\n함께 싸웁니다';
   const description = getFieldValue(data, 'description') || '';
 
@@ -99,7 +99,7 @@ Trainers.meta = {
   category: 'content',
   label: 'Fitness Trainers',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },
     m1Name: { type: 'text', label: 'M1 이름' },

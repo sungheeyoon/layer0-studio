@@ -2,29 +2,22 @@ import React from 'react';
 import { TemplateRendererProps, TemplateLibrary } from '../../types';
 import styles from './corporate.module.css';
 import { corporateDefaultLibrary } from './library';
-import { RenderComposition } from '../../renderComposition';
+import { RenderSingleSite } from '../../renderSingleSite';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = corporateDefaultLibrary;
 
 export const defaultTemplateJson: TemplateJson = {
+  mode: 'single',
   templateKey: 'corporate-default',
   globalStyles: defaultGlobalStyles,
-  pages: [
-    {
-      id: 'home',
-      title: 'Home',
-      slug: '/',
-      order: 0,
-      sections: [], // Empty skeleton; presets provide composition
-    },
-  ],
+  sections: [], // Empty skeleton; presets provide the sections
 };
 
 export default function CorporateDefaultTemplate(props: TemplateRendererProps) {
   return (
-    <RenderComposition
+    <RenderSingleSite
       {...props}
       library={library}
       className={styles.themeRoot}

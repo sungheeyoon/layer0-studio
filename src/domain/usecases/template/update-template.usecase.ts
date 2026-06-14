@@ -20,9 +20,14 @@ export class UpdateTemplateUseCase {
       }
     }
 
-    // Validate JSON if provided
+    // Validate JSON if provided (mode-discriminated union)
     if (data.templateJson) {
-      if (!Array.isArray(data.templateJson.pages) || data.templateJson.pages.length === 0) {
+      const tj = data.templateJson;
+      const shapeOk =
+        tj.mode === 'single'
+          ? Array.isArray(tj.sections) && tj.sections.length > 0
+          : tj.mode === 'multi' && Array.isArray(tj.pages) && tj.pages.length > 0;
+      if (!shapeOk) {
         throw new TemplateError('INVALID_TEMPLATE_JSON');
       }
       if (!data.templateJson.globalStyles) {

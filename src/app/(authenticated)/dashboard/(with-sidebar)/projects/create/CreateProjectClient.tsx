@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Template } from '@/domain/entities/template.entity';
+import { Template, allSections } from '@/domain/entities/template.entity';
 import { selectTemplateAction } from '@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions';
 import { getDomainError } from '@/lib/errors/messages';
 
@@ -33,7 +33,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
     }
   };
 
-  const sectionsCount = template.templateJson?.pages?.[0]?.sections?.length || 0;
+  const sectionsCount = template.templateJson ? allSections(template.templateJson).length : 0;
 
   return (
     <div className="-mx-12 -my-12 px-12 py-12 bg-white min-h-[calc(100vh-3.5rem)] text-on-background">

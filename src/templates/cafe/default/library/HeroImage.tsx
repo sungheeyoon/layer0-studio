@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const HeroImage: SectionComponent = function HeroImage({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || 'Seoul Seongsu — Specialty Coffee';
+  const label = getFieldValue(data, 'eyebrow') || 'Seoul Seongsu — Specialty Coffee';
   const title1 = getFieldValue(data, 'title1') || '천천히,';
   const titleAccent = getFieldValue(data, 'titleAccent') || '제대로';
   const subtitle = getFieldValue(data, 'subtitle') || '— 한 잔의 완성';
@@ -113,7 +113,7 @@ HeroImage.meta = {
   category: 'hero',
   label: 'Hero (Image Background)',
   dataSchema: {
-    label: { type: 'text', label: '상단 라벨' },
+    eyebrow: { type: 'text', label: '상단 라벨' },
     title1: { type: 'text', label: '타이틀 1행' },
     titleAccent: { type: 'text', label: '강조 타이틀' },
     subtitle: { type: 'text', label: '서브타이틀' },

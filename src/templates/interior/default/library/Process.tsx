@@ -14,7 +14,7 @@ const STEP_ICONS = [
 
 const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || 'How We Work';
+  const label = getFieldValue(data, 'eyebrow') || 'How We Work';
   const title = getFieldValue(data, 'title') || '';
 
   const steps = [1, 2, 3, 4, 5, 6].map(n => ({
@@ -67,7 +67,7 @@ Process.meta = {
   category: 'content',
   label: 'Interior Process',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     step1Title: { type: 'text', label: '1단계 제목' },
     step1Desc: { type: 'text', label: '1단계 설명' },

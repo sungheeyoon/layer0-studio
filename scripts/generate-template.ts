@@ -408,24 +408,28 @@ ${entries}
 }
 
 function renderTemplateSeed(t: PlannedTemplate): string {
-  const compEntries = t.composition.map((c, idx) => {
+  const sectionEntries = t.composition.map((c, idx) => {
     const data = t.sections[idx]?.defaultData ?? {};
-    return `    {
-      id: '${c.id}',
-      componentKey: '${c.componentKey}',
-      data: ${JSON.stringify(data, null, 6).replace(/\n/g, '\n      ')},
-    }`;
+    return `      {
+        id: '${c.id}',
+        type: '${c.componentKey}',
+        visible: true,
+        nav: { visible: false, label: '${c.componentKey}' },
+        data: ${JSON.stringify(data, null, 8).replace(/\n/g, '\n        ')},
+      }`;
   }).join(',\n');
   return `import { TemplatePreset } from '../../types';
+import { defaultGlobalStyles } from './tokens';
 
 const preset: TemplatePreset = {
   slug: '${t.templateKey}',
-  composition: [
-${compEntries}
-  ],
-  globalStyles: {
-    primaryColor: '${t.tokens.defaultGlobalStyles.primaryColor}',
-    secondaryColor: '${t.tokens.defaultGlobalStyles.secondaryColor}',
+  templateJson: {
+    mode: 'single',
+    templateKey: '${t.templateKey}',
+    globalStyles: defaultGlobalStyles,
+    sections: [
+${sectionEntries}
+    ],
   },
   thumbnailPath: 'public/thumbnails/template-${t.templateKey}.webp',
   version: '0.1.0',
@@ -462,29 +466,22 @@ function renderIndex(t: PlannedTemplate): string {
   return `import React from 'react';
 import { TemplateRendererProps, TemplateLibrary } from '../../types';
 import { ${libVar} } from './library';
-import { RenderComposition } from '../../renderComposition';
+import { RenderSingleSite } from '../../renderSingleSite';
 import { defaultGlobalStyles, designTokens } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = ${libVar};
 
 export const defaultTemplateJson: TemplateJson = {
+  mode: 'single',
   templateKey: '${t.templateKey}',
   globalStyles: defaultGlobalStyles,
-  pages: [
-    {
-      id: 'home',
-      title: 'Home',
-      slug: '/',
-      order: 0,
-      sections: [],
-    },
-  ],
+  sections: [], // Empty skeleton; presets provide the sections
 };
 
 export default function ${pascal(t.category)}${pascal(t.leaf)}Template(props: TemplateRendererProps) {
   return (
-    <RenderComposition
+    <RenderSingleSite
       {...props}
       library={library}
       designTokens={designTokens}

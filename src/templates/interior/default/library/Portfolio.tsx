@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || 'Portfolio';
+  const label = getFieldValue(data, 'eyebrow') || 'Portfolio';
   const title = getFieldValue(data, 'title') || '';
 
   const projects = [
@@ -147,7 +147,7 @@ Portfolio.meta = {
   category: 'content',
   label: 'Interior Portfolio',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     p1Meta: { type: 'text', label: 'P1 메타' },
     p1Title: { type: 'text', label: 'P1 제목' },

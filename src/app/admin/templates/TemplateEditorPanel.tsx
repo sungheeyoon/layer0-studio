@@ -388,7 +388,7 @@ export default function TemplateEditorPanel({
               return null;
             }
             
-            if (!parsed || !parsed.pages) return null;
+            if (!parsed || (parsed.mode !== 'single' && parsed.mode !== 'multi')) return null;
 
             return (
               <div className="grid grid-cols-12 gap-8">

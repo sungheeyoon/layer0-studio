@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Programs: SectionComponent = function Programs({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || '프로그램';
+  const label = getFieldValue(data, 'eyebrow') || '프로그램';
   const title = getFieldValue(data, 'title') || '당신의 목표에 맞는 프로그램';
   const description = getFieldValue(data, 'description') || '';
 
@@ -134,7 +134,7 @@ Programs.meta = {
   category: 'features',
   label: 'Fitness Programs',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },
     p1Title: { type: 'text', label: 'P1 제목' },

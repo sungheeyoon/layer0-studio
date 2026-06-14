@@ -2,29 +2,22 @@ import React from 'react';
 import { TemplateRendererProps, TemplateLibrary } from '../../types';
 import styles from './medical.module.css';
 import { medicalDefaultLibrary } from './library';
-import { RenderComposition } from '../../renderComposition';
+import { RenderSingleSite } from '../../renderSingleSite';
 import { defaultGlobalStyles } from './tokens';
 import { TemplateJson } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = medicalDefaultLibrary;
 
 export const defaultTemplateJson: TemplateJson = {
+  mode: 'single',
   templateKey: 'medical-default',
   globalStyles: defaultGlobalStyles,
-  pages: [
-    {
-      id: 'home',
-      title: 'Home',
-      slug: '/',
-      order: 0,
-      sections: [], // Empty skeleton; presets provide composition
-    },
-  ],
+  sections: [], // Empty skeleton; presets provide the sections
 };
 
 export default function MedicalDefaultTemplate(props: TemplateRendererProps) {
   return (
-    <RenderComposition
+    <RenderSingleSite
       {...props}
       library={library}
       className={styles.themeRoot}

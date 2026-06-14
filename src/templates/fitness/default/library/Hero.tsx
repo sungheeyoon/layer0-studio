@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || 'Seoul Gangnam — Since 2010';
+  const label = getFieldValue(data, 'eyebrow') || 'Seoul Gangnam — Since 2010';
   const titleLine1 = getFieldValue(data, 'title1') || '한계를';
   const titleLine2 = getFieldValue(data, 'title2') || '다시';
   const titleLine3 = getFieldValue(data, 'title3') || '정의합니다';
@@ -101,7 +101,7 @@ Hero.meta = {
   category: 'hero',
   label: 'Fitness Hero',
   dataSchema: {
-    label: { type: 'text', label: '상단 라벨' },
+    eyebrow: { type: 'text', label: '상단 라벨' },
     title1: { type: 'text', label: '타이틀 1행', required: true },
     title2: { type: 'text', label: '타이틀 2행 (강조)', required: true },
     title3: { type: 'text', label: '타이틀 3행', required: true },

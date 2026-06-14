@@ -127,23 +127,38 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
   }
 
   async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt?: string): Promise<UserSite> {
-    // Extract new asset usages
+    // Extract new asset usages. slot_key namespace (ADR-0007):
+    //   Single:        `${section.id}.${key}`
+    //   Multi page:    `${page.id}.${section.id}.${key}`
+    //   Multi shared:  `shared.${slot}.${section.id}.${key}`
     const newUsages: Array<{ asset_id: string; slot_key: string }> = [];
 
-    if (siteJson && Array.isArray(siteJson.pages)) {
-      for (const page of siteJson.pages) {
-        if (!Array.isArray(page.sections)) continue;
-        for (const section of page.sections) {
-          if (!section.data) continue;
-          for (const [key, field] of Object.entries(section.data)) {
-            const f = field as { type: string; assetId?: string };
-            if (f.type === 'image' && f.assetId) {
-              newUsages.push({
-                asset_id: f.assetId,
-                slot_key: `${page.id}.${section.id}.${key}`,
-              });
-            }
-          }
+    const collectFromSection = (
+      section: { id: string; data?: Record<string, unknown> },
+      prefix: string,
+    ) => {
+      if (!section.data) return;
+      for (const [key, field] of Object.entries(section.data)) {
+        const f = field as { type?: string; assetId?: string };
+        if (f.type === 'image' && f.assetId) {
+          newUsages.push({ asset_id: f.assetId, slot_key: `${prefix}${section.id}.${key}` });
+        }
+      }
+    };
+
+    if (siteJson && siteJson.mode === 'single') {
+      for (const section of siteJson.sections ?? []) {
+        collectFromSection(section, '');
+      }
+    } else if (siteJson && siteJson.mode === 'multi') {
+      for (const slot of ['header', 'footer'] as const) {
+        for (const section of siteJson.shared?.[slot] ?? []) {
+          collectFromSection(section, `shared.${slot}.`);
+        }
+      }
+      for (const page of siteJson.pages ?? []) {
+        for (const section of page.sections ?? []) {
+          collectFromSection(section, `${page.id}.`);
         }
       }
     }

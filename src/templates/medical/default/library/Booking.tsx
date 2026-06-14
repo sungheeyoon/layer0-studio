@@ -5,7 +5,7 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Booking: SectionComponent = function Booking({ section }: TemplateSectionProps) {
   const { data } = section;
-  const label = getFieldValue(data, 'label') || '';
+  const label = getFieldValue(data, 'eyebrow') || '';
   const title = getFieldValue(data, 'title') || '';
   const description = getFieldValue(data, 'description') || '';
   const phone = getFieldValue(data, 'phone') || '';
@@ -72,7 +72,7 @@ Booking.meta = {
   category: 'contact',
   label: 'Medical Booking CTA',
   dataSchema: {
-    label: { type: 'text', label: '섹션 라벨' },
+    eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },
     phone: { type: 'text', label: '전화번호' },
