@@ -1,9 +1,11 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../legal.module.css';
 import { ShieldCheckIcon, ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
+const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
+  const { section } = props;
+  const { navItems } = props as NavSectionProps;
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || '하람';
   const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Law & Tax';
@@ -24,11 +26,13 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
         </a>
 
         <ul className="hidden md:flex items-center gap-1 list-none p-0 m-0">
-          <li><a href="#services" className="px-3.5 py-2 text-sm font-medium text-stone-600 hover:text-[var(--l-navy)] rounded-lg hover:bg-stone-100 transition-all duration-200 no-underline">업무 분야</a></li>
-          <li><a href="#about" className="px-3.5 py-2 text-sm font-medium text-stone-600 hover:text-[var(--l-navy)] rounded-lg hover:bg-stone-100 transition-all duration-200 no-underline">사무소 소개</a></li>
-          <li><a href="#team" className="px-3.5 py-2 text-sm font-medium text-stone-600 hover:text-[var(--l-navy)] rounded-lg hover:bg-stone-100 transition-all duration-200 no-underline">구성원</a></li>
-          <li><a href="#process" className="px-3.5 py-2 text-sm font-medium text-stone-600 hover:text-[var(--l-navy)] rounded-lg hover:bg-stone-100 transition-all duration-200 no-underline">진행 절차</a></li>
-          <li><a href="#faq" className="px-3.5 py-2 text-sm font-medium text-stone-600 hover:text-[var(--l-navy)] rounded-lg hover:bg-stone-100 transition-all duration-200 no-underline">자주 묻는 질문</a></li>
+          {navItems.map((item, i) => (
+            <li key={i}>
+              <a href={item.href} className="px-3.5 py-2 text-sm font-medium text-stone-600 hover:text-[var(--l-navy)] rounded-lg hover:bg-stone-100 transition-all duration-200 no-underline">
+                {item.label}
+              </a>
+            </li>
+          ))}
         </ul>
 
         <div className="flex items-center gap-2">

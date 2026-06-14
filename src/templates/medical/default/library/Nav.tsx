@@ -1,20 +1,15 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
+const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
+  const { section } = props;
+  const { navItems } = props as NavSectionProps;
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || 'ARRC';
   const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Clinic';
   const ctaText = getFieldValue(data, 'ctaText') || '예약하기';
-
-  const menuItems = [
-    { label: getFieldValue(data, 'menu1'), href: '#services' },
-    { label: getFieldValue(data, 'menu2'), href: '#space' },
-    { label: getFieldValue(data, 'menu3'), href: '#team' },
-    { label: getFieldValue(data, 'menu4'), href: '#reviews' },
-  ].filter(m => m.label);
 
   return (
     <nav className={styles.navbar}>
@@ -28,7 +23,7 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-10">
-            {menuItems.map((item, i) => (
+            {navItems.map((item, i) => (
               <a key={i} href={item.href} className="text-[13px] font-medium text-[var(--m-charcoal-mid)] tracking-wide hover:text-[var(--m-charcoal)] transition-colors">
                 {item.label}
               </a>
@@ -57,10 +52,6 @@ Nav.meta = {
   dataSchema: {
     brandName: { type: 'text', label: '브랜드 이름' },
     brandSubtext: { type: 'text', label: '보조 텍스트' },
-    menu1: { type: 'text', label: '메뉴 1' },
-    menu2: { type: 'text', label: '메뉴 2' },
-    menu3: { type: 'text', label: '메뉴 3' },
-    menu4: { type: 'text', label: '메뉴 4' },
     ctaText: { type: 'text', label: 'CTA 텍스트' },
   },
   previewImage: '/component-previews/medical/nav.webp',

@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../fitness.module.css';
 import { DumbbellIcon, HamburgerIcon, ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
-const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
+const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
+  const { section } = props;
+  const { navItems } = props as NavSectionProps;
   const { data } = section;
   const brandName = getFieldValue(data, 'brandName') || 'APEX';
   const ctaText = getFieldValue(data, 'ctaText') || '무료 체험';
@@ -19,13 +21,6 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const menuItems = [
-    { label: getFieldValue(data, 'menu1'), href: '#programs' },
-    { label: getFieldValue(data, 'menu2'), href: '#facility' },
-    { label: getFieldValue(data, 'menu3'), href: '#trainers' },
-    { label: getFieldValue(data, 'menu4'), href: '#reviews' },
-  ].filter(m => m.label);
 
   return (
     <nav className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ''}`}>
@@ -43,7 +38,7 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-10">
-            {menuItems.map((item, i) => (
+            {navItems.map((item, i) => (
               <a
                 key={i}
                 href={item.href}
@@ -74,7 +69,7 @@ const Nav: SectionComponent = function Nav({ section }: TemplateSectionProps) {
 
       {/* Mobile menu */}
       <div className={`lg:hidden bg-[var(--f-surface)] border-t border-[var(--f-border)] px-6 py-6 space-y-4 overflow-hidden transition-all duration-400 ${mobOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
-        {menuItems.map((item, i) => (
+        {navItems.map((item, i) => (
           <a
             key={i}
             href={item.href}

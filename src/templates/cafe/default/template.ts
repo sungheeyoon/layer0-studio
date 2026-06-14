@@ -34,30 +34,6 @@ const preset: TemplatePreset = {
             "label": "보조 텍스트",
             "editable": true
           },
-          "menu1": {
-            "value": "메뉴",
-            "type": "text",
-            "label": "메뉴 1",
-            "editable": true
-          },
-          "menu2": {
-            "value": "카페 소개",
-            "type": "text",
-            "label": "메뉴 2",
-            "editable": true
-          },
-          "menu3": {
-            "value": "공간",
-            "type": "text",
-            "label": "메뉴 3",
-            "editable": true
-          },
-          "menu4": {
-            "value": "방문 안내",
-            "type": "text",
-            "label": "메뉴 4",
-            "editable": true
-          },
           "ctaText": {
             "value": "오시는 길",
             "type": "text",

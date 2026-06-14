@@ -34,66 +34,6 @@ const preset: TemplatePreset = {
             "label": "브랜드 태그라인",
             "editable": true
           },
-          "menu1": {
-            "value": "서비스",
-            "type": "text",
-            "label": "메뉴 1",
-            "editable": true
-          },
-          "menu1Url": {
-            "value": "#services",
-            "type": "url",
-            "label": "메뉴 1 링크",
-            "editable": true
-          },
-          "menu2": {
-            "value": "갤러리",
-            "type": "text",
-            "label": "메뉴 2",
-            "editable": true
-          },
-          "menu2Url": {
-            "value": "#gallery",
-            "type": "url",
-            "label": "메뉴 2 링크",
-            "editable": true
-          },
-          "menu3": {
-            "value": "진행 방식",
-            "type": "text",
-            "label": "메뉴 3",
-            "editable": true
-          },
-          "menu3Url": {
-            "value": "#process",
-            "type": "url",
-            "label": "메뉴 3 링크",
-            "editable": true
-          },
-          "menu4": {
-            "value": "패키지",
-            "type": "text",
-            "label": "메뉴 4",
-            "editable": true
-          },
-          "menu4Url": {
-            "value": "#pricing",
-            "type": "url",
-            "label": "메뉴 4 링크",
-            "editable": true
-          },
-          "menu5": {
-            "value": "후기",
-            "type": "text",
-            "label": "메뉴 5",
-            "editable": true
-          },
-          "menu5Url": {
-            "value": "#reviews",
-            "type": "url",
-            "label": "메뉴 5 링크",
-            "editable": true
-          },
           "ctaText": {
             "value": "상담 예약",
             "type": "text",
