@@ -173,6 +173,75 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     [updateSiteJson]
   );
 
+  // ── Single-mode structure edits (reorder / 2-axis visibility / nav label) ──
+  // nav (type==='nav') is pinned to the top, footer (type==='footer') to the
+  // bottom; both are excluded from reordering. See ADR-0007 §D4 + PLAN §5.
+  const isPinned = useCallback(
+    (section: { type: string }) => section.type === 'nav' || section.type === 'footer',
+    [],
+  );
+
+  // Reorderable band = the contiguous middle (pins live only at the extremes).
+  const [firstReorderable, lastReorderable] = useMemo(() => {
+    let first = -1;
+    let last = -1;
+    sections.forEach((s, i) => {
+      if (isPinned(s)) return;
+      if (first === -1) first = i;
+      last = i;
+    });
+    return [first, last] as const;
+  }, [sections, isPinned]);
+
+  const handleMoveSection = useCallback(
+    (sectionId: string, direction: 'up' | 'down') => {
+      updateSiteJson((json) => {
+        if (!isSingleTemplate(json)) return;
+        const arr = json.sections;
+        const i = arr.findIndex((s) => s.id === sectionId);
+        if (i < 0) return;
+        const target = direction === 'up' ? i - 1 : i + 1;
+        if (target < 0 || target >= arr.length) return;
+        // Never let a section cross a pin (keeps nav top / footer bottom).
+        if (isPinned(arr[i]) || isPinned(arr[target])) return;
+        [arr[i], arr[target]] = [arr[target], arr[i]];
+      });
+    },
+    [updateSiteJson, isPinned],
+  );
+
+  const handleToggleVisible = useCallback(
+    (sectionId: string) => {
+      updateSiteJson((json) => {
+        const section = allSections(json).find((s) => s.id === sectionId);
+        if (section) section.visible = !section.visible;
+      });
+    },
+    [updateSiteJson],
+  );
+
+  const handleToggleNavVisible = useCallback(
+    (sectionId: string) => {
+      updateSiteJson((json) => {
+        if (!isSingleTemplate(json)) return;
+        const section = json.sections.find((s) => s.id === sectionId);
+        if (section) section.nav.visible = !section.nav.visible;
+      });
+    },
+    [updateSiteJson],
+  );
+
+  const handleNavLabelChange = useCallback(
+    (sectionId: string, label: string) => {
+      updateSiteJson((json) => {
+        if (!isSingleTemplate(json)) return;
+        const section = json.sections.find((s) => s.id === sectionId);
+        if (section) section.nav.label = label;
+      });
+    },
+    [updateSiteJson],
+  );
+
   const handleSave = async () => {
     const now = Date.now();
     if (now - lastSaveRef.current < 2000) return;
@@ -304,26 +373,100 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
                   Hierarchy
                 </h3>
-                <ul className="space-y-4">
-                  {sections.map((section) => (
-                    <li
-                      key={section.id}
-                      onClick={() => setSelectedSectionId(section.id)}
-                      className="flex items-center justify-between group cursor-pointer"
-                    >
-                      <span
-                        className={`font-['Inter'] font-light text-xs tracking-wider transition-colors ${selectedSectionId === section.id ? 'text-primary font-medium' : section.visible ? 'text-on-surface' : 'text-outline'
+                <ul className="space-y-3">
+                  {sections.map((section, index) => {
+                    const pinned = isPinned(section);
+                    const isSelected = selectedSectionId === section.id;
+                    return (
+                      <li
+                        key={section.id}
+                        className={`border p-3 transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-outline-variant'
                           }`}
                       >
-                        {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
-                      </span>
-                      <span
-                        className="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-lg"
-                      >
-                        {section.visible ? 'visibility' : 'visibility_off'}
-                      </span>
-                    </li>
-                  ))}
+                        {/* Row 1: reorder · name · page visibility */}
+                        <div className="flex items-center gap-2">
+                          {pinned ? (
+                            <span
+                              className="material-symbols-outlined text-outline text-sm shrink-0"
+                              title={section.type === 'nav' ? 'Pinned to top' : 'Pinned to bottom'}
+                            >
+                              push_pin
+                            </span>
+                          ) : (
+                            <span className="flex flex-col shrink-0 -my-1">
+                              <button
+                                type="button"
+                                aria-label="Move section up"
+                                disabled={index <= firstReorderable}
+                                onClick={() => handleMoveSection(section.id, 'up')}
+                                className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
+                              >
+                                <span className="material-symbols-outlined text-sm">arrow_upward</span>
+                              </button>
+                              <button
+                                type="button"
+                                aria-label="Move section down"
+                                disabled={index >= lastReorderable}
+                                onClick={() => handleMoveSection(section.id, 'down')}
+                                className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
+                              >
+                                <span className="material-symbols-outlined text-sm">arrow_downward</span>
+                              </button>
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSectionId(section.id)}
+                            className={`flex-grow text-left font-['Inter'] font-light text-xs tracking-wider transition-colors ${isSelected ? 'text-primary font-medium' : section.visible ? 'text-on-surface' : 'text-outline'
+                              }`}
+                          >
+                            {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-label={section.visible ? 'Hide section' : 'Show section'}
+                            title={section.visible ? 'Visible on page' : 'Hidden from page'}
+                            onClick={() => handleToggleVisible(section.id)}
+                            className={`shrink-0 transition-colors ${section.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
+                              }`}
+                          >
+                            <span className="material-symbols-outlined text-lg">
+                              {section.visible ? 'visibility' : 'visibility_off'}
+                            </span>
+                          </button>
+                        </div>
+
+                        {/* Row 2: nav projection (2nd axis) — in-menu toggle + label */}
+                        <div className="mt-2 flex items-center gap-2 pl-1">
+                          <button
+                            type="button"
+                            aria-label={section.nav.visible ? 'Remove from menu' : 'Add to menu'}
+                            title={section.nav.visible ? 'Shown in nav menu' : 'Hidden from nav menu'}
+                            onClick={() => handleToggleNavVisible(section.id)}
+                            className={`shrink-0 transition-colors ${section.nav.visible ? 'text-primary' : 'text-outline hover:text-primary'
+                              }`}
+                          >
+                            <span className="material-symbols-outlined text-base">
+                              {section.nav.visible ? 'toggle_on' : 'toggle_off'}
+                            </span>
+                          </button>
+                          <span className="font-['Inter'] text-[0.5625rem] tracking-[0.15em] uppercase text-outline shrink-0">
+                            Menu
+                          </span>
+                          <input
+                            type="text"
+                            value={section.nav.label}
+                            onChange={(e) => handleNavLabelChange(section.id, e.target.value)}
+                            disabled={!section.nav.visible}
+                            placeholder="Menu label"
+                            className="flex-grow min-w-0 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-0.5 font-['Inter'] font-light text-[0.6875rem] disabled:opacity-40 transition-colors"
+                          />
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 
