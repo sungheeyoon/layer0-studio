@@ -3,12 +3,16 @@ import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/container';
 import { loadTemplate } from '@/templates/registry';
 import { SITE_URL } from '@/lib/seo/base-url';
-import { getFieldValue, allSections } from '@/domain/entities/template.entity';
+import {
+  getFieldValue,
+  allSections,
+  isMultiTemplate,
+} from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
 
 interface Props {
-  params: Promise<{ domain: string }>;
+  params: Promise<{ domain: string; slug?: string[] }>;
 }
 
 function buildDescription(siteName: string, homeTitle: string | undefined, heroTitle: string, heroSubtitle: string): string {
@@ -65,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PublicSitePage({ params }: Props) {
-  const { domain } = await params;
+  const { domain, slug } = await params;
   const supabase = await createClient();
   const useCase = createGetPublishedSiteUseCase(supabase);
 
@@ -78,6 +82,20 @@ export default async function PublicSitePage({ params }: Props) {
   }
 
   const { siteJson } = site;
+  const slugPath = (slug ?? []).join('/');
+
+  // Resolve the active page (Multi) or guard against stray slugs (Single).
+  // Empty slug = home (first page). Unknown / non-routable page → 404.
+  let activePageId: string | undefined;
+  if (isMultiTemplate(siteJson)) {
+    const { pages } = siteJson;
+    const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
+    if (!activePage || !activePage.visible) notFound();
+    activePageId = activePage.id;
+  } else if (slugPath !== '') {
+    // Single Sites are one continuous scroll — no sub-paths.
+    notFound();
+  }
 
   const templateKey = siteJson.templateKey || 'corporate-default';
   const templateModule = await loadTemplate(templateKey);
@@ -104,6 +122,8 @@ export default async function PublicSitePage({ params }: Props) {
       <TemplateRenderer
         siteJson={siteJson}
         selectedSectionId={null}
+        activePageId={activePageId}
+        basePath={`/site/${domain}`}
       />
     </main>
   );

@@ -6,6 +6,7 @@ export default defineConfig({
     include: [
       'src/domain/**/*.test.ts',
       'src/lib/**/*.test.ts',
+      'src/templates/**/*.test.tsx',
       'scripts/lib/**/*.test.ts',
     ],
   },

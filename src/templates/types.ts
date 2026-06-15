@@ -104,6 +104,12 @@ export interface TemplateRendererProps {
   selectedSectionId: string | null;
   onSectionClick?: (sectionId: string) => void;
   activePageId?: string; // ID of the page to render
+  /**
+   * URL prefix for Multi page-link nav (e.g. `/site/acme` or `/preview/<id>`).
+   * `deriveNav` builds `${basePath}/${page.slug}` (home → `basePath`). Ignored
+   * by Single (anchor scroll). Defaults to '' — see renderMultiSite.
+   */
+  basePath?: string;
 }
 
 /** Template individual section renderer Props (for components within slots) */

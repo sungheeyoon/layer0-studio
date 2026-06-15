@@ -1,12 +1,13 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetTemplateUseCase } from '@/lib/di/container';
+import { isMultiTemplate } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
 import TemplateClientWrapper from '@/templates/TemplateClientWrapper';
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; slug?: string[] }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function TemplatePreviewPage({ params }: Props) {
-  const { id } = await params;
+  const { id, slug } = await params;
   const supabase = await createClient();
   const useCase = createGetTemplateUseCase(supabase);
 
@@ -39,6 +40,19 @@ export default async function TemplatePreviewPage({ params }: Props) {
   }
 
   const { templateJson } = template;
+  const slugPath = (slug ?? []).join('/');
+
+  // Mirror the public site: empty slug = home (first page); unknown / hidden
+  // page → 404. Single templates have no sub-paths.
+  let activePageId: string | undefined;
+  if (isMultiTemplate(templateJson)) {
+    const { pages } = templateJson;
+    const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
+    if (!activePage || !activePage.visible) notFound();
+    activePageId = activePage.id;
+  } else if (slugPath !== '') {
+    notFound();
+  }
 
   const themeVariables = {
     '--theme-primary': templateJson.globalStyles.primaryColor,
@@ -56,6 +70,8 @@ export default async function TemplatePreviewPage({ params }: Props) {
         templateKey={templateJson.templateKey || 'corporate-default'}
         siteJson={templateJson}
         selectedSectionId={null}
+        activePageId={activePageId}
+        basePath={`/preview/${id}`}
       />
     </main>
   );

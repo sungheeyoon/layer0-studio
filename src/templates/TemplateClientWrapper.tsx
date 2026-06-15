@@ -13,6 +13,7 @@ export default function TemplateClientWrapper({
   siteJson,
   selectedSectionId,
   activePageId,
+  basePath,
 }: TemplateClientWrapperProps) {
   const [TemplateRenderer, setTemplateRenderer] = useState<React.ComponentType<TemplateRendererProps> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +62,7 @@ export default function TemplateClientWrapper({
       siteJson={siteJson}
       selectedSectionId={selectedSectionId}
       activePageId={activePageId}
+      basePath={basePath}
     />
   );
 }
