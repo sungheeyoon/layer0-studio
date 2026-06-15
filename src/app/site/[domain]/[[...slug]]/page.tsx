@@ -7,6 +7,7 @@ import {
   getFieldValue,
   allSections,
   isMultiTemplate,
+  resolveActivePageSeo,
 } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
@@ -27,27 +28,41 @@ function buildDescription(siteName: string, homeTitle: string | undefined, heroT
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { domain } = await params;
+  const { domain, slug } = await params;
   const supabase = await createClient();
   const useCase = createGetPublishedSiteUseCase(supabase);
 
   try {
     const site = await useCase.execute(domain);
     const { siteJson } = site;
+    const slugPath = (slug ?? []).join('/');
 
+    // Resolve the active page (Multi) so SEO is read per-page.
+    let activePageId: string | undefined;
+    if (isMultiTemplate(siteJson)) {
+      const { pages } = siteJson;
+      const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
+      activePageId = activePage?.id;
+    }
+
+    // Explicit PageSeo wins; fall back to hero extraction when none is authored.
+    const seo = resolveActivePageSeo(siteJson, activePageId);
     const heroSection = allSections(siteJson).find(s => s.type === 'hero');
     const heroTitle = getFieldValue(heroSection?.data['title']) || getFieldValue(heroSection?.data['heading']) || '';
     const heroSubtitle = getFieldValue(heroSection?.data['subtitle']) || '';
-    const description = buildDescription(site.siteName, undefined, heroTitle, heroSubtitle);
+    const title = seo?.title || site.siteName;
+    const description = seo?.description || buildDescription(site.siteName, undefined, heroTitle, heroSubtitle);
 
-    const canonical = `${SITE_URL}/site/${domain}`;
+    const canonical = slugPath
+      ? `${SITE_URL}/site/${domain}/${slugPath}`
+      : `${SITE_URL}/site/${domain}`;
 
     return {
-      title: site.siteName,
+      title,
       description,
       alternates: { canonical },
       openGraph: {
-        title: site.siteName,
+        title,
         description,
         type: 'website',
         siteName: site.siteName,
@@ -55,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
       twitter: {
         card: 'summary_large_image',
-        title: site.siteName,
+        title,
         description,
       },
       robots: { index: true, follow: true },

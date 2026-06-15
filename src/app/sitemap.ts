@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import { SITE_URL } from '@/lib/seo/base-url';
+import { TemplateJson, isMultiTemplate } from '@/domain/entities/template.entity';
 
 export const revalidate = 3600;
 
@@ -15,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('user_sites')
-    .select('domain, published_at')
+    .select('domain, published_at, site_json')
     .eq('status', 'active')
     .not('domain', 'is', null)
     .order('published_at', { ascending: false })
@@ -26,12 +27,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return staticEntries;
   }
 
-  const siteEntries: MetadataRoute.Sitemap = (data ?? []).map((row) => ({
-    url: `${SITE_URL}/site/${row.domain}`,
-    lastModified: row.published_at ?? now,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }));
+  const siteEntries: MetadataRoute.Sitemap = [];
+  for (const row of data ?? []) {
+    const base = `${SITE_URL}/site/${row.domain}`;
+    const lastModified = row.published_at ?? now;
+    const siteJson = row.site_json as TemplateJson | null;
+
+    if (siteJson && isMultiTemplate(siteJson)) {
+      // Every routable (visible) Page gets a URL: the first page = home (base),
+      // the rest at `${base}/${slug}`. Pages hidden from the top nav are still
+      // routable, so they are included too.
+      siteJson.pages.forEach((page, index) => {
+        if (!page.visible) return;
+        siteEntries.push({
+          url: index === 0 ? base : `${base}/${page.slug}`,
+          lastModified,
+          changeFrequency: 'weekly',
+          priority: index === 0 ? 0.7 : 0.6,
+        });
+      });
+    } else {
+      // Single Site (or unreadable json) — one continuous scroll at the base.
+      siteEntries.push({ url: base, lastModified, changeFrequency: 'weekly', priority: 0.7 });
+    }
+  }
 
   return [...staticEntries, ...siteEntries];
 }

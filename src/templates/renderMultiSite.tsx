@@ -4,6 +4,7 @@ import { tokensToCssVars } from '@/lib/template/design-tokens';
 import {
   isMultiTemplate,
   deriveNav,
+  deriveFooterNav,
   TemplateSection,
   TemplatePage,
 } from '@/domain/entities/template.entity';
@@ -44,6 +45,8 @@ export function RenderMultiSite({
   const hrefOf = (p: TemplatePage) =>
     p.id === homeId ? basePath || '/' : `${basePath}/${p.slug}`;
   const navItems = deriveNav(pages, hrefOf);
+  // Footer links the reachable-but-not-in-top-nav pages (privacy/terms).
+  const footerItems = deriveFooterNav(pages, hrefOf);
 
   const activePage =
     pages.find((p) => p.id === activePageId) ?? pages[0];
@@ -63,14 +66,18 @@ export function RenderMultiSite({
     const Component = entry.Component;
     const isSelected = selectedSectionId === section.id;
 
-    // Inject the derived page-link menu into the known nav section
-    // (`type === 'nav'`, lives in shared.header); all others take plain props.
+    // Inject the derived page links into the known nav-driving sections: the
+    // top nav (`type === 'nav'`, in shared.header) gets the in-nav pages; the
+    // footer (`type === 'footer'`) gets the reachable-but-hidden pages. All
+    // other sections take plain props. See PLAN_multipage §3.3 / §6 (E).
+    const injected =
+      section.type === 'nav' ? navItems : section.type === 'footer' ? footerItems : null;
     const inner =
-      section.type === 'nav' ? (
+      injected !== null ? (
         React.createElement(Component as ComponentType<NavSectionProps>, {
           section,
           isSelected,
-          navItems,
+          navItems: injected,
         })
       ) : (
         <Component section={section} isSelected={isSelected} />

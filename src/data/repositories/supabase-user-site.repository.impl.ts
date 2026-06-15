@@ -7,6 +7,7 @@ import {
 } from '@/domain/entities/user-site.entity';
 import { TemplateJson } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
+import { collectAssetUsages } from '@/lib/template/asset-usages';
 import { UserSiteRow } from '@/types/database';
 
 export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
@@ -127,41 +128,8 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
   }
 
   async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt?: string): Promise<UserSite> {
-    // Extract new asset usages. slot_key namespace (ADR-0007):
-    //   Single:        `${section.id}.${key}`
-    //   Multi page:    `${page.id}.${section.id}.${key}`
-    //   Multi shared:  `shared.${slot}.${section.id}.${key}`
-    const newUsages: Array<{ asset_id: string; slot_key: string }> = [];
-
-    const collectFromSection = (
-      section: { id: string; data?: Record<string, unknown> },
-      prefix: string,
-    ) => {
-      if (!section.data) return;
-      for (const [key, field] of Object.entries(section.data)) {
-        const f = field as { type?: string; assetId?: string };
-        if (f.type === 'image' && f.assetId) {
-          newUsages.push({ asset_id: f.assetId, slot_key: `${prefix}${section.id}.${key}` });
-        }
-      }
-    };
-
-    if (siteJson && siteJson.mode === 'single') {
-      for (const section of siteJson.sections ?? []) {
-        collectFromSection(section, '');
-      }
-    } else if (siteJson && siteJson.mode === 'multi') {
-      for (const slot of ['header', 'footer'] as const) {
-        for (const section of siteJson.shared?.[slot] ?? []) {
-          collectFromSection(section, `shared.${slot}.`);
-        }
-      }
-      for (const page of siteJson.pages ?? []) {
-        for (const section of page.sections ?? []) {
-          collectFromSection(section, `${page.id}.`);
-        }
-      }
-    }
+    // Extract new asset usages (Single / Multi page / Multi shared slot_keys).
+    const newUsages = collectAssetUsages(siteJson);
 
     // Call Postgres RPC — atomic lock, usage diff, json update
     const { data: rpcResult, error: rpcError } = await this.supabase.rpc('save_site_template_with_lock', {
