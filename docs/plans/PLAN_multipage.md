@@ -1,5 +1,7 @@
 # Plan — Multi-page Sites (전면 개정 v2)
 
+> **✅ 구현 완료 (PR #45–#54).** 이 문서는 이제 **역사적 설계 기록**이다 — Phase 0–3 및 미결항목 (E)/(F)/Page SEO 까지 전부 반영됨. 현행 동작의 정식 요약은 [ADR-0007](../adr/0007-single-multi-site-type-structural-union.md) + `CONTEXT.md`(Site Type/Page/Section/nav projection/Shared/visible·nav.visible glossary)를 본다. 본문 단계 설명은 당시 계획 그대로 두되, 각 Phase·미결항목에 완료 표시를 달았다. 두 가지 사후 보정: ① 마이그레이션은 초안의 "015"가 아니라 실제 **018**(`user_sites`) + **019**(`templates`)로 실행됨, ② 첫 Multi 템플릿은 `corporate-multipage`(최소 예시).
+
 _Single과 Multi를 **생성 시점에 결정되는 독립 Site Type**으로 재정의한다. 기존 RFC의 "single → multi 진화" 전제는 폐기._
 _관련: [ADR-0007](../adr/0007-single-multi-site-type-structural-union.md) (이 RFC의 결정 요약), `CONTEXT.md` (Page/Section/Renderer, "composition" flagged ambiguity), `docs/TEMPLATE_SYSTEM.md`, [ADR-0001](../adr/0001-beta-model-template-isolation.md), [ADR-0002](../adr/0002-templates-source-of-truth-is-code.md), [ADR-0004](../adr/0004-optimistic-concurrency-via-rpc.md)_
 
@@ -109,7 +111,7 @@ function deriveNav<T extends { visible: boolean; nav: { visible: boolean; label:
 ```typescript
 const navItems = deriveNav(sections, s => `#section-${s.id}`);
 ```
-- 섹션 순서 = nav 순서. `href = #section-${id}`는 `renderComposition.tsx`가 이미 DOM에 렌더하는 앵커(id 고정 → reorder에 안 깨짐).
+- 섹션 순서 = nav 순서. `href = #section-${id}`는 `renderSingleSite.tsx`가 이미 DOM에 렌더하는 앵커(id 고정 → reorder에 안 깨짐).
 - **`nav.visible` 자격이 필수인 이유:** visible 섹션이라고 다 nav 타깃이 아니다. cafe-default는 9개 섹션 중 4개(menu/story/space/visit)만 nav 대상 — nav바·hero·marquee·testimonials·footer는 visible이지만 nav 제외. `visible`만으로 파생하면 nav바 자신까지 메뉴에 유입됨.
 
 **Single 2축:**
@@ -167,7 +169,7 @@ interface NavSectionProps extends TemplateSectionProps {
 
 ## 5. 단계별 계획
 
-### Phase 0 — 기반: `composition` 제거 + 타입 유니온 도입
+### Phase 0 — 기반: `composition` 제거 + 타입 유니온 도입 ✅
 - `src/templates/types.ts` — `TemplatePreset`에서 `composition`/`PresetSection` 제거, `mode` 판별 `templateJson` 필수화.
 - `src/lib/template/preset.ts` — `deriveTemplateJsonFromPreset` 삭제(preset이 곧 templateJson).
 - `template.entity.ts` — §2 유니온 도입(base `TemplateSection`(`title`/`editable` 없음) + `SingleSection extends {nav:{visible,label}}` + `TemplatePage{nav:{visible,label}}` / 유니온 `TemplateJson`).
@@ -175,32 +177,32 @@ interface NavSectionProps extends TemplateSectionProps {
 - 호출부 정리: `sync.ts:109`, `scripts/lib/validate-and-capture.ts:134`, `preview/preset/[...key]/page.tsx:30`.
 - 6개 single 템플릿 `template.ts` → `{ mode:'single', sections }`로 변환(eyebrow, 섹션별 `nav:{visible,label}`).
 
-### Phase 1 — Single 경로 완성 (기존 가치 유지)
+### Phase 1 — Single 경로 완성 (기존 가치 유지) ✅
 - `validate.ts` / `update-site-json.usecase` `validateJson` — `mode` 분기 검증. single: `sections` 존재 + 각 섹션 `nav:{visible,label}` 검증. multi: `pages` + 각 page `nav:{visible,label}`/`slug` 검증.
 - `keys.ts` injectKeys/stripKeys — 유니온 대응.
 - **nav projection + 직접 주입 배관**(§3.3), 6개 single `Navigation.tsx` 재작성 — `menu1~N` 하드코딩 앵커 폐기, `navItems` prop 소비.
 - repository asset 루프(`supabase-user-site.repository.impl.ts:133`) — single slot_key `${section.id}.${key}`.
-- **마이그레이션(015) 실행** (§4) — 백업·드라이런.
+- **마이그레이션 실행** (§4) — 실제로는 **018**(`user_sites`)로 실행, 백업·드라이런 후 프로덕션 적용 완료.
 - 에디터(`DynamicEditor.tsx`) single: 섹션 reorder, nav/footer 핀 고정, `section.visible`/`section.nav.visible` 토글, `section.nav.label` 편집.
 
-### Phase 2 — Multi 경로 (신규 능력)
-- 라우팅: `src/app/site/[domain]/page.tsx` → `[[...slug]]/page.tsx` optional catch-all. slug resolve, `visible:false`→`notFound()`. `preview/[id]` 동일.
+### Phase 2 — Multi 경로 (신규 능력) ✅
+- 라우팅: `src/app/site/[domain]/page.tsx` → `[[...slug]]/page.tsx` optional catch-all. slug resolve, `visible:false`→`notFound()`. `preview/[id]` 동일. (프리셋 프리뷰 `preview/preset/[...key]`도 동일하게 보강 — PR #53.)
 - `renderMultiSite` — `header → page.sections → footer` 조립, page projection nav 주입.
-- 첫 multi 템플릿 1개 저작(`shared` + 다중 `pages`).
+- 첫 multi 템플릿 1개 저작(`shared` + 다중 `pages`) — `corporate-multipage`.
 - 에디터 multi: 페이지 탭 + 순서변경 + `page.visible`/`page.nav.visible` 토글 + `page.nav.label` 편집. **페이지 추가/삭제는 금지(미구현).** (이름=`nav.label` 텍스트 편집은 콘텐츠 수정이라 허용; 금지는 페이지 생성·삭제·IA 재설계.)
 
-### Phase 3 — 마무리
-- `PageSeo` 분리(`generateMetadata`가 추출 대신 명시 필드 사용), 사이트맵 전 페이지 포함.
-- **(E) Multi footer 페이지 링크** 결정·구현(§6).
-- 자동저장 RPC가 새 스키마 통과 확인.
+### Phase 3 — 마무리 ✅
+- `PageSeo` 분리(`generateMetadata`가 추출 대신 명시 필드 사용 — `resolveActivePageSeo`), 사이트맵 전 페이지 포함.
+- **(E) Multi footer 페이지 링크** 결정·구현(§6) — `deriveFooterNav`.
+- 자동저장 RPC가 새 스키마(`shared` 포함) 통과 확인.
 
 ---
 
-## 6. 미결 항목
+## 6. 미결 항목 → ✅ 전부 해소됨
 
-- **(E) Multi footer 링크** _(Phase 3)_ — D5의 약관/개인정보(`visible:true, nav.visible:false`)는 "footer로만 접근"이므로 footer도 페이지 링크가 필요. 상단 nav와 **다른 projection**: `pages.filter(p => p.visible && p.nav.visible)`(상단) vs `pages.filter(p => p.visible && !p.nav.visible)`(footer) 같은 분리. multi footer 렌더 단계에서 확정.
-- **Page SEO** _(Phase 3)_ — `PageSeo{title,description}`. multi=per-page, single=top-level. 지금은 `seo?` 자리표시.
-- **(F) Multi `shared` 섹션 asset slot_key** _(Phase 2)_ — §4의 slot_key 재정의는 **single만** 다뤘다. multi `shared.header/footer` 섹션은 page에 안 속하므로 기존 `${page.id}.${section.id}.${key}` 네임스페이스가 안 맞는다. **추천:** page 섹션 = `${page.id}.${section.id}.${key}` 유지, shared 섹션 = `shared.${slot}.${section.id}.${key}`(slot = header|footer). asset 수집 루프(`updateSiteJson`)가 `shared`도 훑도록 확장. multi 저장 경로에서 확정.
+- **(E) Multi footer 링크** — ✅ `deriveFooterNav(pages, hrefOf)` = `pages.filter(p => p.visible && !p.nav.visible)` (상단 nav `deriveNav`의 여집합), `renderMultiSite`가 `type==='footer'` 섹션에 주입. `corporate-multipage`에 Privacy 페이지(`visible:true, nav.visible:false`)로 시연. (`template.entity.ts`, `renderMultiSite.tsx`)
+- **Page SEO** — ✅ `PageSeo{title,description}` 실사용. `resolveActivePageSeo(json, activePageId)` (multi=per-page, single=top-level)를 공개 `generateMetadata`가 소비(per-page canonical 포함), 사이트맵이 라우팅 가능 페이지 전부 열거. 더 이상 placeholder 아님.
+- **(F) Multi `shared` 섹션 asset slot_key** — ✅ slot_key 네임스페이스: single `${section.id}.${key}`, multi page `${page.id}.${section.id}.${key}`, multi shared `shared.${slot}.${section.id}.${key}`. 수집 로직은 순수 헬퍼 `collectAssetUsages()`(`src/lib/template/asset-usages.ts`)로 추출되어 `shared.header/footer`까지 순회(테스트로 고정). 저장 RPC는 JSONB라 `shared` 스키마 그대로 수용.
 
 ---
 
@@ -212,7 +214,7 @@ interface NavSectionProps extends TemplateSectionProps {
 
 1. **유니온 도입 블라스트 반경** — `.pages`를 직접 읽는 곳 ~15군데(`renderComposition`, `DynamicEditor`, `site/[domain]`, repository asset 루프, `validate`, `keys`, create/update usecase, admin 패널 등). 모드 분기를 사이트 엔트리포인트로 모으되, 영속화·검증·키주입·에디터는 별도 fork 축임을 인지.
 2. **공유 섹션 + 자동저장 RPC** — `save_site_template_with_lock`가 유니온 스키마(특히 multi `shared`)를 통과시키는지 확인. asset 루프가 `shared`도 훑는 문제는 §6 (F)로 격상(설계 미결).
-3. **마이그레이션(015)** — 백업·드라이런. v1 대비 위험 낮음(평탄화+리네임).
+3. **마이그레이션(실제 018/019)** — 백업·드라이런. v1 대비 위험 낮음(평탄화+리네임).
 
 ## 9. 작업량 추정 (대략)
 

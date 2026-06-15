@@ -53,6 +53,8 @@ CRON_SECRET=                   # /api/cron/cleanup-assets Bearer 토큰
 
 각 Template 은 `src/templates/<category>/<leaf>/` 안에 자기 토큰·라이브러리·렌더러를 모두 가진 자급식(self-contained) 구조 — Template 간 코드는 *전혀* 공유하지 않습니다 (DRY 보다 isolation 우선, [ADR-0001](docs/adr/0001-beta-model-template-isolation.md)). **코드가 source of truth**, `pnpm template:sync` 가 DB 로 반영 ([ADR-0002](docs/adr/0002-templates-source-of-truth-is-code.md)) — 디렉터리만 추가하면 codegen 이 자동으로 레지스트리에 등록.
 
+Site 는 **Single**(한 스크롤, `sections[]`)과 **Multi**(라우팅되는 `pages[]` + 공유 header/footer) 두 Site Type 으로 나뉘며 생성 시 `mode` 로 고정됩니다 (`TemplateJson` 구조적 유니온, [ADR-0007](docs/adr/0007-single-multi-site-type-structural-union.md)). 현재 10 개 Template(Single 9 + Multi 예시 `corporate-multipage`).
+
 자연어 brief 한 줄로 Template 코드를 LLM 이 통째로 만들어 주는 `pnpm template:generate` 파이프라인도 갖추고 있습니다.
 
 자세한 내용은 [docs/TEMPLATE_SYSTEM.md](docs/TEMPLATE_SYSTEM.md) · [docs/adr/](docs/adr/) · [CONTEXT.md](CONTEXT.md).
