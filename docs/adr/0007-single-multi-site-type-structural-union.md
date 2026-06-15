@@ -1,5 +1,7 @@
 # Single / Multi 는 구조적으로 분리된 Site Type — nav 는 projection
 
+> **Status: Accepted — 구현 완료** (PR #45–#54). `TemplateJson` 유니온·`renderSingleSite`/`renderMultiSite`·`[[...slug]]` 라우팅·양쪽 에디터·nav/footer projection·PageSeo·sitemap·asset slot_key 까지 전부 반영됨. 설계 원문/단계는 [`docs/plans/PLAN_multipage.md`](../plans/PLAN_multipage.md) 참고.
+
 Site 는 **Single** 과 **Multi** 두 개의 독립적인 Site Type 으로 나뉘며, 어느 쪽인지는 **생성(프리셋) 시점에 `mode` 로 고정**된다. Single → Multi 로 *진화* 하는 개념은 존재하지 않는다. `TemplateJson` 은 `mode` 를 판별자로 하는 **구조적 유니온**이다.
 
 ```ts
@@ -38,9 +40,9 @@ nav 객체 모양·필터 규칙(`visible && nav.visible`)·라벨 출처(`nav.l
 
 ## Consequences
 
-- **기존 Single `user_sites` 마이그레이션 필요** (migration 015): `{ pages:[home] }` → `{ mode:'single', sections }` 평탄화, `data.label` 키 → `eyebrow`, nav 섹션 `menu1~N` 제거, 각 섹션 `nav:{visible,label}` 주입, `editable` 제거, slot_key `${page.id}.${section.id}.${key}` → `${section.id}.${key}` (다음 저장 시 RPC self-heal). 위험은 낮음(평탄화+리네임, nav/footer 들어올리기 아님).
+- **기존 Single `user_sites` 마이그레이션 완료** — **migration 018** (`docs/migrations/018_single_site_type.md`, 프로덕션 적용됨; PLAN 초안의 "015" 번호가 아니라 실제로는 018 로 실행, `templates` 테이블 정렬은 **019**): `{ pages:[home] }` → `{ mode:'single', sections }` 평탄화, `data.label` 키 → `eyebrow`, nav 섹션 `menu1~N` 제거, 각 섹션 `nav:{visible,label}` 주입, `editable` 제거, slot_key `${page.id}.${section.id}.${key}` → `${section.id}.${key}` (다음 저장 시 RPC self-heal). 위험은 낮음(평탄화+리네임, nav/footer 들어올리기 아님).
 - **`mode` 분기는 사이트 수준 엔트리포인트에 모으되**, 실제로는 렌더·에디터·검증·영속화(asset slot_key)·키주입 ~5개 축에서 mode-aware fork 가 발생한다 — "의도된 분기"로 수용.
-- **Multi 는 기존 6개 Single 템플릿을 개조하지 않고 새 템플릿으로 출시.** Single 은 새 구조로 마이그레이션되지만 디자인은 유지.
+- **Multi 는 기존 Single 템플릿을 개조하지 않고 새 템플릿으로 출시** — 첫 Multi 템플릿은 `corporate-multipage` (최소 예시: 공유 header/footer + Home·About·Privacy 페이지). Single 9 개는 새 구조로 마이그레이션되었으나 디자인은 유지.
 - nav 컴포넌트는 `type === 'nav'` 로 식별해 `navItems` 를 직접 주입(메타 카테고리 탐색 같은 추가 추상화 없음).
 
 ## 관련

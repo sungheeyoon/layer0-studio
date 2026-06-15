@@ -228,10 +228,10 @@ export const designTokens: DesignTokens = { ... };                 // 풍부한 
 
 → 사용자가 `primaryColor` 만 바꿔도 사이트 전역의 `var(--color-primary)` 참조가 즉시 propagate.
 
-**적용 방법**: Template `index.tsx` 에서 `RenderComposition` 에 `designTokens` prop 전달:
+**적용 방법**: Template `index.tsx` 에서 site 렌더러(Single → `RenderSingleSite`, Multi → `RenderMultiSite`)에 `designTokens` prop 전달:
 
 ```tsx
-<RenderComposition
+<RenderSingleSite
   {...props}
   library={library}
   className={styles.themeRoot}
@@ -268,7 +268,7 @@ src/templates/cafe/default/
 ├── thumbnail.config.ts             # Playwright 캡처 설정
 ├── cafe.module.css                 # 이 Template 전용 CSS (다른 Template 와 공유 안 됨)
 ├── template.ts                     # ← 이 디렉터리의 Preset (= Source of Truth)
-└── index.tsx                       # TemplateRenderer (RenderComposition 위임), library/defaultTemplateJson export
+└── index.tsx                       # TemplateRenderer (RenderSingleSite/RenderMultiSite 위임), library/defaultTemplateJson export
 ```
 
 ### 3.1 β 모델의 핵심 약속 (ADR-0001)
@@ -287,11 +287,13 @@ src/templates/cafe/default/
 - `presetSlugs` — `templateKey[]`
 - `templateCategories` — `templateKey → category`
 
-`loadTemplate(templateKey)` 헬퍼 (`src/templates/registry.ts`) 가 `templateMap` 을 wrapping. **Backward-compat shim**: bare legacy key (예: `'cafe'`) 가 들어오면 `${key}-default` 로 fallback (migration 015–017 이 user_sites 의 templateKey 를 슬러그 형태로 정렬할 때까지의 임시 보호막).
+`loadTemplate(templateKey)` 헬퍼 (`src/templates/registry.ts`) 가 `templateMap` 을 wrapping. **Backward-compat shim**: bare legacy key (예: `'cafe'`) 가 들어오면 `${key}-default` 로 fallback (migration 015–017 이 user_sites 의 templateKey 를 슬러그 형태로 정렬한 뒤로는 사실상 잔존 보호막).
+
+> **Single / Multi Site Type (구현 완료, ADR-0007):** `TemplateJson` 은 `mode` 판별 구조적 유니온이다 — Single 은 `sections[]`(앵커 nav), Multi 는 `shared:{header,footer}` + `pages[]`(페이지 링크 nav). 렌더는 `renderSingleSite.tsx` / `renderMultiSite.tsx`, Multi 공개 경로는 `/site/[domain]/[[...slug]]`. 데이터 모델·nav projection·2축(`visible`/`nav.visible`)·PageSeo·asset slot_key 의 정식 설명은 [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md) 과 `CONTEXT.md` 글로서리를 본다 (이 문서의 예시는 대부분 Single 기준으로 쓰여 있다).
 
 ### 3.3 미래 구조 방향 (footnote, ADR-0001)
 
-현재 `library/` 는 *과도기 아티팩트*. multi-page 가 본격 확장되면 `<templateDir>/pages/<page>/sections/<Section>.tsx` 구조로 옮겨갈 가능성이 있다. 그래서 글로서리 (CONTEXT.md) 에 "Library" 를 도메인 용어로 굳히지 않음.
+현재 `library/` 는 *과도기 아티팩트*. multi-page 는 **데이터 모델 차원**(ADR-0007 유니온)으로 이미 출시됐지만, 디렉터리를 `<templateDir>/pages/<page>/sections/<Section>.tsx` 로 옮기는 **코드 구조 재편은 아직 미결**(ADR-0001 의 future direction) — `renderMultiSite` 는 평탄한 `library/` 를 그대로 쓴다. 그래서 글로서리 (CONTEXT.md) 에 "Library" 를 도메인 용어로 굳히지 않음.
 
 ---
 
@@ -307,12 +309,12 @@ loadTemplate(templateKey)             ← src/templates/registry.ts (+ legacy sh
 TemplateRenderer (templates/<cat>/<leaf>/index.tsx)
     │  designTokens prop 으로 root 에 CSS var 주입 (ADR-0005)
     ▼
-RenderComposition                     ← src/templates/renderComposition.tsx
-    │  page = siteJson.pages.find(activePageId) ?? pages[0]
-    │  page.sections.map((section) => library[section.type])
+RenderSingleSite / RenderMultiSite    ← src/templates/renderSingleSite.tsx · renderMultiSite.tsx
+    │  Single: siteJson.sections        Multi: shared.header → active page.sections → shared.footer
+    │  sections.map((section) => library[section.type]); nav = deriveNav(source, hrefOf)
     │
     ▼
-<Component section={section} />        // SectionComponent
+<Component section={section} />        // SectionComponent (nav/footer 엔 navItems 주입)
 ```
 
 핵심 규약:
@@ -662,7 +664,7 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
    `.webp`/`.jpg` 어긋나면 sync 가 옛 파일을 업로드하거나 로컬 경로 문자열을 그대로 DB 에 박는다. 두 곳을 항상 일치.
 
 2. **`componentKey` 변경 = 사용자 사이트 깨짐**
-   `user_sites.site_json` 의 `section.type` 이 매칭 안 되면 `RenderComposition` 이 console.warn + skip → 화면 빈칸. componentKey 는 **영원히** 변경 금지. 새 컴포넌트는 새 key 로.
+   `user_sites.site_json` 의 `section.type` 이 매칭 안 되면 site 렌더러(`renderSingleSite`/`renderMultiSite`)가 console.warn + skip → 화면 빈칸. componentKey 는 **영원히** 변경 금지. 새 컴포넌트는 새 key 로.
 
 3. **모든 `value` 는 string**
    `type: 'number'` 도 `value: '42'`. 컴포넌트에서 `Number(field.value)` 필요. validate 가 `NON_STRING_FIELD_VALUE` 로 잡음.
@@ -677,13 +679,13 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
    필수 필드를 빠뜨려도 sync 통과하고 런타임에 빈 값. `dataSchema` 에 명시할 것.
 
 7. **`templateKey` 누락 / legacy 'cafe' → backward-compat shim**
-   `loadTemplate('cafe')` 가 들어오면 `'cafe-default'` 로 fallback (`registry.ts`). 의도된 동작 — migration 015 / 016 / 017 이 user_sites 의 templateKey 를 슬러그 형태로 정렬할 때까지의 보호막. 디버깅 시간 낭비 흔함.
+   `loadTemplate('cafe')` 가 들어오면 `'cafe-default'` 로 fallback (`registry.ts`). 의도된 동작 — migration 015 / 016 / 017 이 user_sites 의 templateKey 를 슬러그 형태로 정렬한 뒤로는 잔존 보호막. 디버깅 시간 낭비 흔함.
 
 8. **`editable: false` 는 UI 만 숨김**
    서버 가드 없음. 사용자가 JSON 직접 수정하면 변경 가능 — 진짜 잠금이 필요하면 use case 레이어에 추가해야 함.
 
 9. **Sync 는 user_sites 를 안 건드린다**
-   `templates` 만 update. 이미 발행된 UserSite 는 옛 데이터 그대로. 강제 마이그가 필요하면 별도 SQL (참고: 012 / 015 / 016 / 017).
+   `templates` 만 update. 이미 발행된 UserSite 는 옛 데이터 그대로. 강제 마이그가 필요하면 별도 SQL (참고: 012 / 015 / 016 / 017, 그리고 Single→union 백필 **018**(`user_sites`) / **019**(`templates`)).
 
 10. **`_generated.ts` 수정 금지**
     수동 편집해도 다음 `predev` / `prebuild` 에서 덮어씀. 새 Template 추가는 디렉터리 / 파일만 만들면 됨.
@@ -711,10 +713,10 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 | 무엇 | 어디 |
 |---|---|
 | `TemplateJson` / `TemplateSection` / `TemplateField` 타입 | `src/domain/entities/template.entity.ts` |
-| `TemplatePreset` / `PresetSection` / `SectionComponent` / `TemplateModule` / `DesignTokens` 타입 | `src/templates/types.ts` |
+| `TemplatePreset` / `SectionComponent` / `TemplateModule` / `DesignTokens` / `NavSectionProps` 타입 | `src/templates/types.ts` (`PresetSection`/`composition` 은 ADR-0007 때 제거됨) |
 | 자동생성 레지스트리 | `src/templates/_generated.ts` (커밋, 수정 금지) |
 | 동적 import 헬퍼 | `src/templates/registry.ts` (`loadTemplate(templateKey)` + legacy shim) |
-| 범용 렌더러 | `src/templates/renderComposition.tsx` |
+| Site 렌더러 (mode 별) | `src/templates/renderSingleSite.tsx` · `src/templates/renderMultiSite.tsx` |
 | Template 1 개 reference | `src/templates/cafe/default/` (rich design tokens 적용 demo), `src/templates/corporate/default/` (가장 단순) |
 | Validate 규칙 | `src/lib/template/validate.ts` (+ `__tests__/validate.test.ts`) |
 | Inline-tokens 스캐너 | `src/lib/template/inline-tokens.ts` |
