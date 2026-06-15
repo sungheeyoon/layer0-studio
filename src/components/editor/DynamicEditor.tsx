@@ -394,6 +394,16 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setActiveTab('content');
   }, []);
 
+  // Inside the editor the rendered template's links must stay inert — Multi page
+  // links (and Single anchors) shouldn't navigate the editor away. Neutralise
+  // their default in the capture phase (next/link honours e.defaultPrevented);
+  // the click still bubbles to section selection. Page switching uses the tabs.
+  const handlePreviewLinkGuard = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a')) {
+      e.preventDefault();
+    }
+  }, []);
+
   const themeVariables = useMemo(() => ({
     '--theme-primary': siteJson.globalStyles.primaryColor,
     '--theme-secondary': siteJson.globalStyles.secondaryColor,
@@ -799,7 +809,11 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         </div>
 
         <div className="flex-grow overflow-y-auto custom-scrollbar transform-gpu">
-          <div style={themeVariables} className="min-h-full bg-white shadow-2xl">
+          <div
+            style={themeVariables}
+            className="min-h-full bg-white shadow-2xl"
+            onClickCapture={handlePreviewLinkGuard}
+          >
             {loadingError ? (
               <div className="flex flex-col items-center justify-center h-[50vh] p-8 text-center">
                 <span className="material-symbols-outlined text-error text-4xl mb-4">error</span>
