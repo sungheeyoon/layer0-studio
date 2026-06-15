@@ -6,8 +6,10 @@ import {
   TemplateJson,
   TemplateGlobalStyles,
   TemplateField,
+  TemplateSection,
   ArrayTemplateField,
   isSingleTemplate,
+  isMultiTemplate,
   allSections,
 } from '@/domain/entities/template.entity';
 import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
@@ -26,12 +28,41 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const [siteJson, setSiteJson] = useState<TemplateJson>(() => injectKeys(site.siteJson));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
-  // Single-mode sites carry their sections directly (one continuous scroll).
-  // Multi-mode editing (page tabs) is a separate entrypoint — Phase 2.
-  const sections = useMemo(
+  const isMulti = isMultiTemplate(siteJson);
+
+  // Multi sites edit one page at a time (page tabs switch the context). The
+  // active page also drives the live preview (`activePageId` → renderer).
+  const [activePageId, setActivePageId] = useState<string | undefined>(() =>
+    isMultiTemplate(site.siteJson) ? site.siteJson.pages[0]?.id : undefined,
+  );
+
+  // Single sites carry their sections directly (one continuous scroll); they
+  // own the rich per-section nav controls (#41).
+  const singleSections = useMemo(
     () => (isSingleTemplate(siteJson) ? siteJson.sections : []),
     [siteJson],
   );
+
+  // Multi page-management source: array order = nav order.
+  const pages = useMemo(
+    () => (isMultiTemplate(siteJson) ? siteJson.pages : []),
+    [siteJson],
+  );
+  const activePage = useMemo(
+    () => pages.find((p) => p.id === activePageId) ?? pages[0],
+    [pages, activePageId],
+  );
+
+  // The sections shown in the Hierarchy / Parameters panel: Single → its
+  // sections; Multi → shared header + the active page's sections + shared footer
+  // (so the brand, page body and footer of the previewed page are all editable).
+  const sections = useMemo<TemplateSection[]>(() => {
+    if (isSingleTemplate(siteJson)) return siteJson.sections;
+    if (isMultiTemplate(siteJson) && activePage) {
+      return [...siteJson.shared.header, ...activePage.sections, ...siteJson.shared.footer];
+    }
+    return [];
+  }, [siteJson, activePage]);
 
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
     sections[0]?.id ?? null
@@ -185,13 +216,13 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const [firstReorderable, lastReorderable] = useMemo(() => {
     let first = -1;
     let last = -1;
-    sections.forEach((s, i) => {
+    singleSections.forEach((s, i) => {
       if (isPinned(s)) return;
       if (first === -1) first = i;
       last = i;
     });
     return [first, last] as const;
-  }, [sections, isPinned]);
+  }, [singleSections, isPinned]);
 
   const handleMoveSection = useCallback(
     (sectionId: string, direction: 'up' | 'down') => {
@@ -237,6 +268,71 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         if (!isSingleTemplate(json)) return;
         const section = json.sections.find((s) => s.id === sectionId);
         if (section) section.nav.label = label;
+      });
+    },
+    [updateSiteJson],
+  );
+
+  // ── Multi-mode page management (reorder / 2-axis visibility / nav label) ──
+  // pages[] array order = nav + render order. No create/delete (ADR-0007 §0,
+  // PLAN §5 Phase 2). Page.visible = routable (false → 404); page.nav.visible =
+  // shown in the top nav. nav.label doubles as the page name (always editable).
+  const handleSelectPage = useCallback((pageId: string) => {
+    setActivePageId(pageId);
+    setActiveTab('content');
+    // Re-anchor the section selection to the newly active page's view.
+    const json = siteJsonRef.current;
+    if (isMultiTemplate(json)) {
+      const page = json.pages.find((p) => p.id === pageId);
+      setSelectedSectionId(
+        json.shared.header[0]?.id ?? page?.sections[0]?.id ?? json.shared.footer[0]?.id ?? null,
+      );
+    }
+  }, []);
+
+  const handleMovePage = useCallback(
+    (pageId: string, direction: 'up' | 'down') => {
+      updateSiteJson((json) => {
+        if (!isMultiTemplate(json)) return;
+        const arr = json.pages;
+        const i = arr.findIndex((p) => p.id === pageId);
+        if (i < 0) return;
+        const target = direction === 'up' ? i - 1 : i + 1;
+        if (target < 0 || target >= arr.length) return;
+        [arr[i], arr[target]] = [arr[target], arr[i]];
+      });
+    },
+    [updateSiteJson],
+  );
+
+  const handleTogglePageVisible = useCallback(
+    (pageId: string) => {
+      updateSiteJson((json) => {
+        if (!isMultiTemplate(json)) return;
+        const page = json.pages.find((p) => p.id === pageId);
+        if (page) page.visible = !page.visible;
+      });
+    },
+    [updateSiteJson],
+  );
+
+  const handleTogglePageNavVisible = useCallback(
+    (pageId: string) => {
+      updateSiteJson((json) => {
+        if (!isMultiTemplate(json)) return;
+        const page = json.pages.find((p) => p.id === pageId);
+        if (page) page.nav.visible = !page.nav.visible;
+      });
+    },
+    [updateSiteJson],
+  );
+
+  const handlePageNavLabelChange = useCallback(
+    (pageId: string, label: string) => {
+      updateSiteJson((json) => {
+        if (!isMultiTemplate(json)) return;
+        const page = json.pages.find((p) => p.id === pageId);
+        if (page) page.nav.label = label;
       });
     },
     [updateSiteJson],
@@ -368,13 +464,140 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         <div className="flex-grow overflow-y-auto p-6 custom-scrollbar">
           {activeTab === 'content' ? (
             <div className="space-y-12">
+              {/* Pages (Multi only) — page management: reorder + 2-axis + label */}
+              {isMulti && (
+                <div>
+                  <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
+                    Pages
+                  </h3>
+                  <ul className="space-y-3">
+                    {pages.map((page, index) => {
+                      const isActive = page.id === activePageId;
+                      return (
+                        <li
+                          key={page.id}
+                          className={`border p-3 transition-colors ${isActive ? 'border-primary bg-primary/5' : 'border-outline-variant'
+                            }`}
+                        >
+                          {/* Row 1: reorder · page name (switch context) · routable */}
+                          <div className="flex items-center gap-2">
+                            <span className="flex flex-col shrink-0 -my-1">
+                              <button
+                                type="button"
+                                aria-label="Move page up"
+                                disabled={index === 0}
+                                onClick={() => handleMovePage(page.id, 'up')}
+                                className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
+                              >
+                                <span className="material-symbols-outlined text-sm">arrow_upward</span>
+                              </button>
+                              <button
+                                type="button"
+                                aria-label="Move page down"
+                                disabled={index === pages.length - 1}
+                                onClick={() => handleMovePage(page.id, 'down')}
+                                className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
+                              >
+                                <span className="material-symbols-outlined text-sm">arrow_downward</span>
+                              </button>
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => handleSelectPage(page.id)}
+                              className={`flex-grow text-left font-['Inter'] font-light text-xs tracking-wider transition-colors ${isActive ? 'text-primary font-medium' : page.visible ? 'text-on-surface' : 'text-outline'
+                                }`}
+                            >
+                              {page.nav.label || '(untitled page)'}
+                            </button>
+
+                            <button
+                              type="button"
+                              aria-label={page.visible ? 'Make page unroutable' : 'Make page routable'}
+                              title={page.visible ? 'Routable' : 'Returns 404 (data kept)'}
+                              onClick={() => handleTogglePageVisible(page.id)}
+                              className={`shrink-0 transition-colors ${page.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
+                                }`}
+                            >
+                              <span className="material-symbols-outlined text-lg">
+                                {page.visible ? 'public' : 'public_off'}
+                              </span>
+                            </button>
+                          </div>
+
+                          {/* Row 2: nav projection (2nd axis) — in-menu toggle + page name */}
+                          <div className="mt-2 flex items-center gap-2 pl-1">
+                            <button
+                              type="button"
+                              aria-label={page.nav.visible ? 'Remove from menu' : 'Add to menu'}
+                              title={page.nav.visible ? 'Shown in top nav' : 'Hidden from top nav'}
+                              onClick={() => handleTogglePageNavVisible(page.id)}
+                              className={`shrink-0 transition-colors ${page.nav.visible ? 'text-primary' : 'text-outline hover:text-primary'
+                                }`}
+                            >
+                              <span className="material-symbols-outlined text-base">
+                                {page.nav.visible ? 'toggle_on' : 'toggle_off'}
+                              </span>
+                            </button>
+                            <span className="font-['Inter'] text-[0.5625rem] tracking-[0.15em] uppercase text-outline shrink-0">
+                              Menu
+                            </span>
+                            <input
+                              type="text"
+                              value={page.nav.label}
+                              onChange={(e) => handlePageNavLabelChange(page.id, e.target.value)}
+                              placeholder="Page name"
+                              className="flex-grow min-w-0 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-0.5 font-['Inter'] font-light text-[0.6875rem] transition-colors"
+                            />
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
               {/* Hierarchy */}
               <div>
                 <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                  Hierarchy
+                  {isMulti ? `Sections // ${activePage?.nav.label ?? ''}` : 'Hierarchy'}
                 </h3>
+                {isMulti ? (
+                  <ul className="space-y-2">
+                    {sections.map((section) => {
+                      const isSelected = selectedSectionId === section.id;
+                      return (
+                        <li
+                          key={section.id}
+                          className="flex items-center gap-2"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSectionId(section.id)}
+                            className={`flex-grow text-left font-['Inter'] font-light text-xs tracking-wider transition-colors ${isSelected ? 'text-primary font-medium' : section.visible ? 'text-on-surface' : 'text-outline'
+                              }`}
+                          >
+                            {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={section.visible ? 'Hide section' : 'Show section'}
+                            title={section.visible ? 'Visible on page' : 'Hidden from page'}
+                            onClick={() => handleToggleVisible(section.id)}
+                            className={`shrink-0 transition-colors ${section.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
+                              }`}
+                          >
+                            <span className="material-symbols-outlined text-lg">
+                              {section.visible ? 'visibility' : 'visibility_off'}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
                 <ul className="space-y-3">
-                  {sections.map((section, index) => {
+                  {singleSections.map((section, index) => {
                     const pinned = isPinned(section);
                     const isSelected = selectedSectionId === section.id;
                     return (
@@ -468,6 +691,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                     );
                   })}
                 </ul>
+                )}
               </div>
 
               {/* Parameters */}
@@ -587,6 +811,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 siteJson={siteJson}
                 selectedSectionId={selectedSectionId}
                 onSectionClick={handleSectionClick}
+                activePageId={activePageId}
               />
             ) : (
               <div className="flex items-center justify-center h-[50vh] text-outline font-light text-sm tracking-widest uppercase animate-pulse">
