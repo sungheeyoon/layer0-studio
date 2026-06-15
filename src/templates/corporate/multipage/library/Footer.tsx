@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
@@ -20,13 +21,13 @@ const Footer: SectionComponent = function Footer(props: TemplateSectionProps) {
         {navItems?.length > 0 && (
           <nav className="flex items-center gap-6">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className="text-slate-500 no-underline transition-colors hover:text-slate-900"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
         )}
