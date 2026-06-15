@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
@@ -18,22 +19,22 @@ const Navigation: SectionComponent = function Navigation(props: TemplateSectionP
       className="sticky top-0 z-50 border-b border-black/10 bg-white/90 backdrop-blur"
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <a
+        <Link
           href={navItems[0]?.href ?? '/'}
           className="text-lg font-semibold tracking-tight no-underline"
           style={{ color: 'var(--theme-primary)' }}
         >
           {brandName}
-        </a>
+        </Link>
         <nav className="flex items-center gap-8">
           {navItems.map((item) => (
-            <a
+            <Link
               key={item.href}
               href={item.href}
               className="text-sm font-medium text-slate-600 no-underline transition-colors hover:text-slate-900"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>
