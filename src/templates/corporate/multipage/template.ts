@@ -50,6 +50,11 @@ const preset: TemplatePreset = {
         slug: 'home',
         visible: true,
         nav: { visible: true, label: 'Home' },
+        seo: {
+          title: 'Acme — dependable software studio',
+          description:
+            'Acme is a small studio shipping dependable web products for growing teams.',
+        },
         sections: [
           {
             id: 'home-hero',
@@ -77,6 +82,10 @@ const preset: TemplatePreset = {
         slug: 'about',
         visible: true,
         nav: { visible: true, label: 'About' },
+        seo: {
+          title: 'About — Acme',
+          description: 'Meet the team behind Acme and how we work.',
+        },
         sections: [
           {
             id: 'about-intro',
@@ -94,6 +103,35 @@ const preset: TemplatePreset = {
                 label: 'Body',
                 value:
                   'Founded in 2026, we partner with founders to take ideas from sketch to production without the bloat.',
+              },
+            },
+          },
+        ],
+      },
+      {
+        // Reachable (routable) but kept out of the top nav — linked from the
+        // footer only. Demonstrates the visible / nav.visible split (ADR-0007).
+        id: 'page-privacy',
+        slug: 'privacy',
+        visible: true,
+        nav: { visible: false, label: 'Privacy' },
+        seo: {
+          title: 'Privacy Policy — Acme',
+          description: 'How Acme handles your data.',
+        },
+        sections: [
+          {
+            id: 'privacy-body',
+            type: 'content',
+            visible: true,
+            data: {
+              eyebrow: { type: 'text', label: 'Eyebrow', value: 'Legal' },
+              heading: { type: 'text', label: 'Heading', value: 'Privacy Policy' },
+              body: {
+                type: 'textarea',
+                label: 'Body',
+                value:
+                  'We collect the minimum necessary to run the service and never sell your data.',
               },
             },
           },

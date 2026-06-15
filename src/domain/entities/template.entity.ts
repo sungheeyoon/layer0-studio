@@ -182,6 +182,36 @@ export function deriveNav<T extends { visible: boolean; nav: NavMeta }>(
     .map((x) => ({ label: x.nav.label, href: hrefOf(x) }));
 }
 
+/**
+ * The explicit SEO for the page being served: Multi → the active page's `seo`
+ * (falls back to the first/home page), Single → the Site-level `seo`. Returns
+ * `undefined` when none is authored, so callers can fall back to extraction.
+ * See ADR-0007 / PLAN_multipage §5 Phase 3.
+ */
+export function resolveActivePageSeo(
+  json: TemplateJson,
+  activePageId?: string,
+): PageSeo | undefined {
+  if (json.mode === 'single') return json.seo;
+  const page = json.pages.find((p) => p.id === activePageId) ?? json.pages[0];
+  return page?.seo;
+}
+
+/**
+ * Multi footer page links — the complement of the top nav: pages that are
+ * reachable (`visible`) but deliberately kept out of the top nav
+ * (`!nav.visible`), e.g. privacy / terms. Same shape as `deriveNav`.
+ * See PLAN_multipage §6 (E).
+ */
+export function deriveFooterNav(
+  pages: TemplatePage[],
+  hrefOf: (p: TemplatePage) => string,
+): Array<{ label: string; href: string }> {
+  return pages
+    .filter((p) => p.visible && !p.nav.visible)
+    .map((p) => ({ label: p.nav.label, href: hrefOf(p) }));
+}
+
 export interface Template {
   id: string;
   name: string;

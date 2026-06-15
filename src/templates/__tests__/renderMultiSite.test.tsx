@@ -53,4 +53,14 @@ describe('RenderMultiSite — Multi tracer assembly', () => {
     expect(html.indexOf('>Home<')).toBeLessThan(html.indexOf('>About<'));
     expect(html.indexOf('>Home<')).toBeGreaterThanOrEqual(0);
   });
+
+  it('top nav excludes the privacy page; the footer links it (E)', () => {
+    const html = render('page-home');
+    // The privacy page is visible:true but nav.visible:false → not in the top
+    // nav, but reachable via the footer link.
+    expect(html).toContain(`href="${BASE}/privacy"`);
+    expect(html).toContain('>Privacy<');
+    // Only one occurrence (footer), not duplicated into the top nav.
+    expect(html.split('>Privacy<').length - 1).toBe(1);
+  });
 });
