@@ -23,7 +23,7 @@ export default function AdminProjectTable({ sites: initialSites }: AdminProjectT
     setSavingDomainId(siteId);
     setDomainError(null);
     const result = await adminUpdateSiteDomainAction(siteId, editingDomain.value);
-    if (result.error) {
+    if ('error' in result) {
       setDomainError({ siteId, message: getAdminDomainError(result.error) });
     } else {
       setSites(prev => prev.map(s => s.id === siteId ? { ...s, domain: editingDomain.value || null } : s));
@@ -36,7 +36,7 @@ export default function AdminProjectTable({ sites: initialSites }: AdminProjectT
     setProcessingId(siteId);
     setActionError(null);
     const result = await terminateSiteAction(siteId);
-    if (result.error) {
+    if ('error' in result) {
       setActionError({ siteId, message: getAdminActionError(result.error) });
     } else {
       setSites(prev => prev.filter(s => s.id !== siteId));
@@ -50,7 +50,7 @@ export default function AdminProjectTable({ sites: initialSites }: AdminProjectT
     setProcessingId(siteId);
     setActionError(null);
     const result = await updateSiteStatusAction(siteId, newStatus as 'draft' | 'active' | 'suspended');
-    if (result.error) {
+    if ('error' in result) {
       setActionError({ siteId, message: getAdminActionError(result.error) });
     } else {
       setSites(prev => prev.map(s => s.id === siteId ? { ...s, status: newStatus as UserSite['status'] } : s));

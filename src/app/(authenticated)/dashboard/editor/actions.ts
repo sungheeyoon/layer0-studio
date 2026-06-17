@@ -1,6 +1,5 @@
 'use server';
 
-import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/server';
 import {
   createGetUserSiteUseCase,
@@ -11,32 +10,7 @@ import {
 import { TemplateJson } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';
-import { AssetValidationError } from '@/domain/entities/asset.entity';
-
-type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
-
-async function withUser<T>(
-  handler: (user: User, supabase: SupabaseServerClient) => Promise<T>
-): Promise<T | { error: string }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'UNAUTHORIZED' };
-  try {
-    return await handler(user, supabase);
-  } catch (err) {
-    if (err instanceof TemplateError) {
-      if (err.issues?.length) {
-        console.warn(
-          '[editor] %s: %s',
-          err.code,
-          err.issues.map((i) => `[${i.code}] ${i.path ?? ''}`).join(', '),
-        );
-      }
-      return { error: err.code };
-    }
-    return { error: 'UNKNOWN' };
-  }
-}
+import { withUser } from '@/lib/actions/server-action';
 
 export async function loadSiteAction(siteId: string) {
   const supabase = await createClient();
@@ -136,15 +110,10 @@ export async function initUploadAction(
   size: number,
 ) {
   return withUser(async (user, supabase) => {
-    try {
-      const useCase = createAssetUploadUseCase(supabase);
-      const asset = await useCase.executeInit({ userId: user.id, filename, mimeType, size });
-      const uploadPath = `${user.id}/${asset.id}/${filename}`;
-      return { success: true as const, assetId: asset.id, uploadPath };
-    } catch (err) {
-      if (err instanceof AssetValidationError) return { error: err.message };
-      throw err;
-    }
+    const useCase = createAssetUploadUseCase(supabase);
+    const asset = await useCase.executeInit({ userId: user.id, filename, mimeType, size });
+    const uploadPath = `${user.id}/${asset.id}/${filename}`;
+    return { success: true as const, assetId: asset.id, uploadPath };
   });
 }
 
