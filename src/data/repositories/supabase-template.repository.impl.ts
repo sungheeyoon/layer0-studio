@@ -6,6 +6,7 @@ import {
   UpdateTemplateDto,
 } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
+import { classifySupabaseError, isNotFoundError } from '@/data/errors/supabase-error.adapter';
 import { TemplateRow } from '@/types/database';
 
 export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
@@ -120,7 +121,7 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') return null;
+      if (isNotFoundError(error)) return null;
       console.error('[SupabaseTemplateRepo::findById]', error.message);
       throw new TemplateError('UNKNOWN');
     }
@@ -136,7 +137,7 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') return null;
+      if (isNotFoundError(error)) return null;
       console.error('[SupabaseTemplateRepo::findBySlug]', error.message);
       throw new TemplateError('UNKNOWN');
     }
@@ -163,7 +164,7 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
 
     if (error) {
       console.error('[SupabaseTemplateRepo::create]', error.message);
-      if (error.message.includes('duplicate key') || error.message.includes('unique')) {
+      if (classifySupabaseError(error) === 'UNIQUE_VIOLATION') {
         throw new TemplateError('TEMPLATE_SLUG_EXISTS');
       }
       throw new TemplateError('UNKNOWN');
@@ -193,10 +194,11 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
 
     if (error) {
       console.error('[SupabaseTemplateRepo::update]', error.message);
-      if (error.code === 'PGRST116') {
+      const kind = classifySupabaseError(error);
+      if (kind === 'NOT_FOUND') {
         throw new TemplateError('TEMPLATE_NOT_FOUND');
       }
-      if (error.message.includes('duplicate key') || error.message.includes('unique')) {
+      if (kind === 'UNIQUE_VIOLATION') {
         throw new TemplateError('TEMPLATE_SLUG_EXISTS');
       }
       throw new TemplateError('UNKNOWN');
