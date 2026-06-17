@@ -15,8 +15,8 @@ export default function LoginPage() {
     startTransition(async () => {
       const result = await loginAction(formData);
 
-      if (!result.success) {
-        setError(getAuthError(result.code));
+      if ('error' in result) {
+        setError(getAuthError(result.error));
       } else {
         setError(null);
         router.push('/templates');

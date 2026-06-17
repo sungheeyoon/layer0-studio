@@ -35,7 +35,7 @@ export default function SettingsClient() {
 
     startTransition(async () => {
       const result = await changePasswordAction(password);
-      if (result.error) {
+      if ('error' in result) {
         setPasswordError(result.error);
       } else {
         setPasswordSuccess(true);

@@ -2,33 +2,16 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { createSignupUseCase } from '@/lib/di/container';
-import { AuthError } from '@/domain/errors/auth.error';
+import { withAction } from '@/lib/actions/server-action';
 
 export async function signupAction(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  const supabase = await createClient();
-  const signupUseCase = createSignupUseCase(supabase);
-
-  try {
+  return withAction(async () => {
+    const supabase = await createClient();
+    const signupUseCase = createSignupUseCase(supabase);
     const user = await signupUseCase.execute(email, password);
-
-    return {
-      success: true,
-      user,
-    };
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return {
-        success: false,
-        code: error.code,
-      };
-    }
-
-    return {
-      success: false,
-      code: 'UNKNOWN',
-    };
-  }
+    return { success: true as const, user };
+  });
 }

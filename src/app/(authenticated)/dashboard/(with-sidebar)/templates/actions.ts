@@ -8,9 +8,9 @@ import {
   createSiteWriteUseCase,
   createDeleteUserSiteUseCase,
 } from '@/lib/di/container';
-import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { withUser } from '@/lib/actions/server-action';
 
 export async function listActiveTemplatesAction() {
   const supabase = await createClient();
@@ -43,14 +43,7 @@ export async function listMySitesAction() {
 }
 
 export async function selectTemplateAction(templateId: string, siteName: string, urlSlug?: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'UNAUTHORIZED' };
-  }
-
-  try {
+  return withUser(async (user, supabase) => {
     const useCase = createCreateSiteFromTemplateUseCase(supabase);
     const site = await useCase.execute({
       userId: user.id,
@@ -63,22 +56,14 @@ export async function selectTemplateAction(templateId: string, siteName: string,
         const siteWrite = createSiteWriteUseCase(supabase);
         await siteWrite.setDomain(site.id, user.id, urlSlug, site.updatedAt);
       } catch (domainErr) {
+        // Roll back the just-created site, then let withUser map the cause.
         const deleteUseCase = createDeleteUserSiteUseCase(supabase);
         await deleteUseCase.execute(site.id, user.id);
-        if (domainErr instanceof TemplateError) {
-          return { error: domainErr.code };
-        }
-        return { error: 'UNKNOWN' };
+        throw domainErr;
       }
     }
 
     revalidatePath('/templates');
     redirect(`/dashboard/editor?siteId=${site.id}`);
-  } catch (err) {
-    if (err instanceof TemplateError) {
-      return { error: err.code };
-    }
-    // redirect throws a special Next.js error, rethrow it
-    throw err;
-  }
+  });
 }

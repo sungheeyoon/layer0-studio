@@ -14,8 +14,8 @@ export default function SignupPage() {
   async function handleSubmit(formData: FormData) {
     const result = await signupAction(formData);
 
-    if (!result.success) {
-      setError(getAuthError(result.code));
+    if ('error' in result) {
+      setError(getAuthError(result.error));
     } else {
       setError(null);
       const email = formData.get('email') as string;
