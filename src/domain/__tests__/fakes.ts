@@ -1,6 +1,7 @@
 import { IUserSiteRepository } from '../repositories/user-site.repository';
 import { UserSite, CreateUserSiteDto, UpdateUserSiteDto } from '../entities/user-site.entity';
 import { TemplateJson, SinglePageTemplate } from '../entities/template.entity';
+import { TemplateError } from '../errors/template.error';
 import {
   SiteContentValidator,
   SiteContentValidationIssue,
@@ -104,17 +105,40 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return site;
   }
 
-  async update(id: string, data: UpdateUserSiteDto): Promise<UserSite> {
-    const idx = this.sites.findIndex(s => s.id === id);
-    this.sites[idx] = { ...this.sites[idx], ...data, updatedAt: new Date().toISOString() };
+  async update(id: string, data: UpdateUserSiteDto, expectedUpdatedAt: string | null): Promise<UserSite> {
+    const idx = this.guardVersion(id, expectedUpdatedAt);
+    this.sites[idx] = { ...this.sites[idx], ...data, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
 
-  async updateSiteJson(id: string, siteJson: TemplateJson): Promise<UserSite> {
-    const idx = this.sites.findIndex(s => s.id === id);
-    this.sites[idx] = { ...this.sites[idx], siteJson, updatedAt: new Date().toISOString() };
+  async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt: string): Promise<UserSite> {
+    const idx = this.guardVersion(id, expectedUpdatedAt);
+    this.sites[idx] = { ...this.sites[idx], siteJson, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
+
+  /**
+   * Mirror the real repo's guarded write: a missing row throws SITE_NOT_FOUND;
+   * a token that no longer matches throws STALE_VERSION. `null` is an explicit
+   * force (no version check). Returns the matched index on success.
+   */
+  private guardVersion(id: string, expectedUpdatedAt: string | null): number {
+    const idx = this.sites.findIndex(s => s.id === id);
+    if (idx === -1) {
+      throw new TemplateError('SITE_NOT_FOUND');
+    }
+    if (expectedUpdatedAt !== null && this.sites[idx].updatedAt !== expectedUpdatedAt) {
+      throw new TemplateError('STALE_VERSION');
+    }
+    return idx;
+  }
+
+  /** Always advance the version so a reused token becomes stale on the next write. */
+  private nextUpdatedAt() {
+    return new Date(Date.now() + ++this.tick).toISOString();
+  }
+
+  private tick = 0;
 
   async delete(id: string) {
     this.sites = this.sites.filter(s => s.id !== id);

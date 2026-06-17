@@ -25,7 +25,7 @@ import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTemplate } from '@/templates/registry';
 import { SectionDataSchema, TemplateModule } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
-import { getSiteError } from '@/lib/errors/messages';
+import { getSiteError, isStaleConflict } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
 
 interface DynamicEditorProps {
@@ -120,7 +120,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       setAutoSaveStatus('saving');
       const result = await saveSiteJsonAction(site.id, stripKeys(siteJsonRef.current), knownUpdatedAtRef.current);
       if (result && 'error' in result) {
-        if (result.error === 'STALE_VERSION') {
+        if (isStaleConflict(result)) {
           setConflictDetected(true);
         } else {
           setAutoSaveStatus('error');
@@ -297,7 +297,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setSaving(true);
     const result = await saveSiteJsonAction(site.id, stripKeys(siteJson), knownUpdatedAtRef.current);
     if (result && 'error' in result) {
-      if (result.error === 'STALE_VERSION') {
+      if (isStaleConflict(result)) {
         setConflictDetected(true);
       } else {
         setActionError(getSiteError(result.error, `Save failed: ${result.error}`));
@@ -314,20 +314,30 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setSaving(true);
     const saveResult = await saveSiteJsonAction(site.id, stripKeys(siteJson), knownUpdatedAtRef.current);
     if (saveResult && 'error' in saveResult) {
-      if (saveResult.error === 'STALE_VERSION') {
+      // Any save failure must abort the publish — otherwise we'd publish stale
+      // content and silently drop the user's unsaved edit.
+      if (isStaleConflict(saveResult)) {
         setConflictDetected(true);
-        setSaving(false);
-        return;
+      } else {
+        setActionError(getSiteError(saveResult.error, `저장 실패: ${saveResult.error}`));
       }
+      setSaving(false);
+      return;
     } else if (saveResult && 'updatedAt' in saveResult) {
       applySuccessfulSave(saveResult.updatedAt);
     }
     setPublishing(true);
-    const result = await publishSiteAction(site.id);
+    const result = await publishSiteAction(site.id, knownUpdatedAtRef.current);
 
     if (result && 'error' in result) {
-      setActionError(getSiteError(result.error, `발행 실패: ${result.error}`));
+      if (isStaleConflict(result)) {
+        setConflictDetected(true);
+      } else {
+        setActionError(getSiteError(result.error, `발행 실패: ${result.error}`));
+      }
     } else {
+      // Publish bumps updated_at; keep the token fresh for the next save.
+      if ('updatedAt' in result) applySuccessfulSave(result.updatedAt);
       if (site.domain) {
         setPublishedUrl(`/site/${site.domain}`);
       } else {

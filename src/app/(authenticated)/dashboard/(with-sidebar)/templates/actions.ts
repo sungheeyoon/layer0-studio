@@ -5,7 +5,7 @@ import {
   createListTemplatesUseCase,
   createCreateSiteFromTemplateUseCase,
   createListUserSitesUseCase,
-  createUpdateSiteDomainUseCase,
+  createSiteWriteUseCase,
   createDeleteUserSiteUseCase,
 } from '@/lib/di/container';
 import { TemplateError } from '@/domain/errors/template.error';
@@ -60,8 +60,8 @@ export async function selectTemplateAction(templateId: string, siteName: string,
 
     if (urlSlug) {
       try {
-        const domainUseCase = createUpdateSiteDomainUseCase(supabase);
-        await domainUseCase.execute(site.id, urlSlug, user.id);
+        const siteWrite = createSiteWriteUseCase(supabase);
+        await siteWrite.setDomain(site.id, user.id, urlSlug, site.updatedAt);
       } catch (domainErr) {
         const deleteUseCase = createDeleteUserSiteUseCase(supabase);
         await deleteUseCase.execute(site.id, user.id);

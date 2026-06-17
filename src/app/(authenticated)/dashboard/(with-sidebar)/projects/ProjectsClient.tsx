@@ -11,12 +11,19 @@ import {
   updateSiteNameAction,
   unpublishSiteAction,
 } from "@/app/(authenticated)/dashboard/editor/actions";
-import { getDomainError, getSiteError } from "@/lib/errors/messages";
+import { getDomainError, getSiteError, isStaleConflict } from "@/lib/errors/messages";
 import { useDashboardData } from "../DashboardDataProvider";
 
 export default function ProjectsClient() {
   const router = useRouter();
   const { sites, patchSite, removeSite } = useDashboardData();
+
+  // The optimistic-concurrency token must come from the freshest copy of the
+  // site, not the snapshot captured when the settings panel opened — otherwise
+  // a retry after a STALE_VERSION refresh (which updates `sites`) would send the
+  // same stale token and fail again.
+  const freshToken = (id: string, fallback: string) =>
+    sites.find((s) => s.id === id)?.updatedAt ?? fallback;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSite, setSelectedSite] = useState<UserSite | null>(sites[0] || null);
   const [settingsSite, setSettingsSite] = useState<UserSite | null>(null);
@@ -70,13 +77,14 @@ export default function ProjectsClient() {
     setDomainVerified(false);
 
     try {
-      const result = await updateSiteDomainAction(settingsSite.id, editDomain);
+      const result = await updateSiteDomainAction(settingsSite.id, editDomain, freshToken(settingsSite.id, settingsSite.updatedAt));
       if ('error' in result) {
         setDomainError(getDomainError(result.error));
+        if (isStaleConflict(result)) router.refresh();
       } else if (result.domain) {
         setDomainVerified(true);
-        setSettingsSite({ ...settingsSite, domain: result.domain });
-        patchSite(settingsSite.id, { domain: result.domain });
+        setSettingsSite({ ...settingsSite, domain: result.domain, updatedAt: result.updatedAt });
+        patchSite(settingsSite.id, { domain: result.domain, updatedAt: result.updatedAt });
       }
     } catch {
       setDomainError('An unexpected error occurred.');
@@ -93,14 +101,15 @@ export default function ProjectsClient() {
     setSaveNameError(null);
     setSaveNameSuccess(false);
 
-    const result = await updateSiteNameAction(settingsSite.id, editSiteName);
+    const result = await updateSiteNameAction(settingsSite.id, editSiteName, freshToken(settingsSite.id, settingsSite.updatedAt));
     if ('error' in result) {
-      setSaveNameError('이름 저장에 실패했습니다.');
+      setSaveNameError(getSiteError(result.error, '이름 저장에 실패했습니다.'));
+      if (isStaleConflict(result)) router.refresh();
     } else {
       setSaveNameSuccess(true);
       const trimmed = editSiteName.trim();
-      setSettingsSite({ ...settingsSite, siteName: trimmed });
-      patchSite(settingsSite.id, { siteName: trimmed });
+      setSettingsSite({ ...settingsSite, siteName: trimmed, updatedAt: result.updatedAt });
+      patchSite(settingsSite.id, { siteName: trimmed, updatedAt: result.updatedAt });
       router.refresh();
     }
     setIsSavingName(false);
@@ -112,16 +121,18 @@ export default function ProjectsClient() {
     setStatusError(null);
 
     const isActive = settingsSite.status === 'active';
+    const token = freshToken(settingsSite.id, settingsSite.updatedAt);
     const result = isActive
-      ? await unpublishSiteAction(settingsSite.id)
-      : await publishSiteAction(settingsSite.id);
+      ? await unpublishSiteAction(settingsSite.id, token)
+      : await publishSiteAction(settingsSite.id, token);
 
-    if (result.error) {
+    if ('error' in result) {
       setStatusError(getSiteError(result.error, '상태 변경에 실패했습니다.'));
+      if (isStaleConflict(result)) router.refresh();
     } else {
       const newStatus = (isActive ? 'draft' : 'active') as UserSite['status'];
-      setSettingsSite({ ...settingsSite, status: newStatus });
-      patchSite(settingsSite.id, { status: newStatus });
+      setSettingsSite({ ...settingsSite, status: newStatus, updatedAt: result.updatedAt });
+      patchSite(settingsSite.id, { status: newStatus, updatedAt: result.updatedAt });
       router.refresh();
     }
     setIsTogglingStatus(false);
