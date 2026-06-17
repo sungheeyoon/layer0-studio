@@ -1,9 +1,13 @@
 import { IUserSiteRepository } from '../../repositories/user-site.repository';
 import { TemplateJson, allSections } from '../../entities/template.entity';
 import { TemplateError } from '../../errors/template.error';
+import { SiteContentValidator } from '../ports/site-content-validator.port';
 
 export class UpdateSiteJsonUseCase {
-  constructor(private userSiteRepository: IUserSiteRepository) {}
+  constructor(
+    private userSiteRepository: IUserSiteRepository,
+    private validator: SiteContentValidator,
+  ) {}
 
   /**
    * Replace the site's JSON (Ownership check required)
@@ -17,8 +21,8 @@ export class UpdateSiteJsonUseCase {
       throw new TemplateError('SITE_ACCESS_DENIED');
     }
 
-    // Validate JSON structure
-    this.validateJson(siteJson);
+    // Validate content against the Template library (single source of truth)
+    await this.validate(siteJson);
 
     return this.userSiteRepository.updateSiteJson(siteId, siteJson, expectedUpdatedAt);
   }
@@ -32,8 +36,8 @@ export class UpdateSiteJsonUseCase {
       throw new TemplateError('SITE_NOT_FOUND');
     }
 
-    // Validate JSON structure
-    this.validateJson(siteJson);
+    // Validate content against the Template library (single source of truth)
+    await this.validate(siteJson);
 
     return this.userSiteRepository.updateSiteJson(siteId, siteJson);
   }
@@ -83,24 +87,22 @@ export class UpdateSiteJsonUseCase {
 
     field.value = value;
 
+    // Validate the resulting content too — the partial path must not be able to
+    // introduce invalid data (e.g. a non-hex color field value).
+    await this.validate(updatedJson);
+
     return this.userSiteRepository.updateSiteJson(siteId, updatedJson);
   }
 
-  private validateJson(siteJson: TemplateJson) {
-    if (siteJson.mode === 'single') {
-      if (!Array.isArray(siteJson.sections) || siteJson.sections.length === 0) {
-        throw new TemplateError('INVALID_TEMPLATE_JSON');
-      }
-    } else if (siteJson.mode === 'multi') {
-      if (!Array.isArray(siteJson.pages) || siteJson.pages.length === 0) {
-        throw new TemplateError('INVALID_TEMPLATE_JSON');
-      }
-    } else {
-      throw new TemplateError('INVALID_TEMPLATE_JSON');
-    }
-
-    if (!siteJson.globalStyles) {
-      throw new TemplateError('INVALID_TEMPLATE_JSON');
+  /**
+   * Run the library-aware validator and reject the save if there are any blocking
+   * errors. Warnings do not block (matches the Sync pipeline). The structured
+   * issues ride along on the error for server-side logging.
+   */
+  private async validate(siteJson: TemplateJson) {
+    const { errors } = await this.validator.validate(siteJson);
+    if (errors.length > 0) {
+      throw new TemplateError('INVALID_TEMPLATE_JSON', errors);
     }
   }
 }

@@ -15,6 +15,7 @@ export const DOMAIN_ERRORS: Record<string, string> = {
 
 export const SITE_ERRORS: Record<string, string> = {
   RATE_LIMITED: '잠시 후 다시 시도해주세요 (30초 제한).',
+  INVALID_TEMPLATE_JSON: '저장할 수 없는 콘텐츠입니다. 입력값을 확인해주세요.',
 };
 
 export const ADMIN_DOMAIN_ERRORS: Record<string, string> = {

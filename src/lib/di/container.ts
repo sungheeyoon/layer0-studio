@@ -32,6 +32,11 @@ import { AdminUpdateSiteUseCase } from '@/domain/usecases/user-site/admin-update
 import { SupabaseAssetRepositoryImpl } from '@/data/repositories/supabase-asset.repository.impl';
 import { AssetUploadUseCase } from '@/domain/usecases/asset-upload.usecase';
 
+// Validation (library-aware Site-content validator — single source of truth)
+import { LibraryAwareSiteContentValidator } from '@/lib/template/site-content-validator';
+
+const siteContentValidator = new LibraryAwareSiteContentValidator();
+
 // --- Auth UseCases -----------------------------------------------------------
 
 export const createLoginUseCase = (supabase: SupabaseClient) => {
@@ -73,12 +78,12 @@ export const createGetTemplateUseCase = (supabase: SupabaseClient) => {
 
 export const createCreateTemplateUseCase = (supabase: SupabaseClient) => {
   const repository = new SupabaseTemplateRepositoryImpl(supabase);
-  return new CreateTemplateUseCase(repository);
+  return new CreateTemplateUseCase(repository, siteContentValidator);
 };
 
 export const createUpdateTemplateUseCase = (supabase: SupabaseClient) => {
   const repository = new SupabaseTemplateRepositoryImpl(supabase);
-  return new UpdateTemplateUseCase(repository);
+  return new UpdateTemplateUseCase(repository, siteContentValidator);
 };
 
 export const createDeleteTemplateUseCase = (supabase: SupabaseClient) => {
@@ -106,7 +111,7 @@ export const createCreateSiteFromTemplateUseCase = (supabase: SupabaseClient) =>
 
 export const createUpdateSiteJsonUseCase = (supabase: SupabaseClient) => {
   const repository = new SupabaseUserSiteRepositoryImpl(supabase);
-  return new UpdateSiteJsonUseCase(repository);
+  return new UpdateSiteJsonUseCase(repository, siteContentValidator);
 };
 
 export const createDeleteUserSiteUseCase = (supabase: SupabaseClient) => {

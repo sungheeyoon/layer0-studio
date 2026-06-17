@@ -1,16 +1,17 @@
 import { TemplateJson, TemplateSection, TemplateField } from '@/domain/entities/template.entity';
+import {
+  SiteContentValidationIssue,
+  SiteContentValidationResult,
+} from '@/domain/usecases/ports/site-content-validator.port';
 import { TemplateLibrary, SectionDataSchema } from '@/templates/types';
 
-export interface ValidationIssue {
-  code: string;
-  message: string;
-  path?: string;
-}
-
-export interface ValidationResult {
-  errors: ValidationIssue[];
-  warnings: ValidationIssue[];
-}
+/**
+ * The validation result vocabulary is owned by the domain port
+ * (`SiteContentValidator`). These aliases preserve the historical names used
+ * across the template/sync code without duplicating the contract.
+ */
+export type ValidationIssue = SiteContentValidationIssue;
+export type ValidationResult = SiteContentValidationResult;
 
 export interface SlotDefinition {
   type: string;
@@ -217,6 +218,17 @@ export function validateTemplateJson(
             err(
               'NON_STRING_FIELD_VALUE',
               `data field "${fieldKey}" value must be a string (got ${typeof field.value})`,
+              fieldRef,
+            );
+          }
+
+          // Rule 11: color fields must hold a hex value (blocking).
+          // The editor color picker emits hex; a non-hex value silently breaks
+          // the token mechanism it feeds (ADR-0005).
+          if (field.type === 'color' && typeof field.value === 'string' && !HEX_RE.test(field.value)) {
+            err(
+              'INVALID_COLOR_FIELD',
+              `color field "${fieldKey}" value "${field.value}" is not a hex color`,
               fieldRef,
             );
           }

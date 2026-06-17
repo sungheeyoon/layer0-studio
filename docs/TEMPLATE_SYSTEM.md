@@ -377,7 +377,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 
 ## 6. Validate 규칙 카탈로그
 
-`src/lib/template/validate.ts` — `validateTemplateJson(json, options)`. sync 전, `pnpm test`, 어드민 Save 에서 모두 호출.
+`src/lib/template/validate.ts` — `validateTemplateJson(json, options)`. **Site-content 유효성의 단일 소스.** sync 전, `pnpm test`, 어드민 Save, 그리고 **에디터 저장 경로**에서 모두 호출 (#56). 도메인 유스케이스는 `SiteContentValidator` 포트(`src/domain/usecases/ports/site-content-validator.port.ts`)를 통해 호출하고, `LibraryAwareSiteContentValidator`(`src/lib/template/site-content-validator.ts`) 어댑터가 `templateKey` 로 라이브러리를 로드해 이 함수에 위임한다. errors 가 하나라도 있으면 `TemplateError('INVALID_TEMPLATE_JSON')` 로 저장 거부.
 
 옵션:
 
@@ -405,6 +405,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 | `FIELD_TYPE_MISMATCH` | `field.type !== schema[field].type` |
 | `MISSING_FIELD_TYPE` / `MISSING_FIELD_LABEL` / `MISSING_FIELD_VALUE` | 필수 메타 누락 |
 | `NON_STRING_FIELD_VALUE` | `value` 가 string 아님 (array 타입 제외) |
+| `INVALID_COLOR_FIELD` | `type: 'color'` 필드 `value` 가 hex 아님 (블로킹 — globalStyles 의 `NON_HEX_COLOR` warning 과 달리 에러) |
 | `NON_ARRAY_FIELD_VALUE` | `type: 'array'` 인데 `items` 가 배열이 아니거나 누락 |
 | `MISSING_ITEM_SCHEMA` | schema 에서 `type: 'array'` 인데 `itemSchema` 가 정의 안 됨 |
 | `ARRAY_ITEMS_BELOW_MIN` / `ARRAY_ITEMS_ABOVE_MAX` | minItems/maxItems 제약 위반 |

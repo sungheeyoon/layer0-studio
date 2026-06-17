@@ -1,6 +1,10 @@
 import { IUserSiteRepository } from '../repositories/user-site.repository';
 import { UserSite, CreateUserSiteDto, UpdateUserSiteDto } from '../entities/user-site.entity';
 import { TemplateJson, SinglePageTemplate } from '../entities/template.entity';
+import {
+  SiteContentValidator,
+  SiteContentValidationIssue,
+} from '../usecases/ports/site-content-validator.port';
 
 export function makeTemplateJson(overrides: Partial<SinglePageTemplate> = {}): TemplateJson {
   return {
@@ -44,6 +48,22 @@ export function makeSite(overrides: Partial<UserSite> = {}): UserSite {
     updatedAt: new Date().toISOString(),
     ...overrides,
   };
+}
+
+/**
+ * Fake validator for use-case tests. Defaults to "always valid"; pass errors to
+ * simulate the library-aware validator rejecting content. Records each json it
+ * was asked to validate so tests can assert the partial-update path validates too.
+ */
+export class FakeSiteContentValidator implements SiteContentValidator {
+  validated: TemplateJson[] = [];
+
+  constructor(private errors: SiteContentValidationIssue[] = []) {}
+
+  async validate(json: TemplateJson) {
+    this.validated.push(json);
+    return { errors: this.errors, warnings: [] };
+  }
 }
 
 export class FakeUserSiteRepo implements IUserSiteRepository {

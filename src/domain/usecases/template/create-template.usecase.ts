@@ -1,6 +1,7 @@
 import { ITemplateRepository } from '../../repositories/template.repository';
 import { TemplateJson } from '../../entities/template.entity';
 import { TemplateError } from '../../errors/template.error';
+import { SiteContentValidator } from '../ports/site-content-validator.port';
 
 interface CreateTemplateInput {
   name: string;
@@ -15,7 +16,10 @@ interface CreateTemplateInput {
 }
 
 export class CreateTemplateUseCase {
-  constructor(private templateRepository: ITemplateRepository) {}
+  constructor(
+    private templateRepository: ITemplateRepository,
+    private validator: SiteContentValidator,
+  ) {}
 
   async execute(input: CreateTemplateInput) {
     // Validate slug uniqueness
@@ -24,18 +28,10 @@ export class CreateTemplateUseCase {
       throw new TemplateError('TEMPLATE_SLUG_EXISTS');
     }
 
-    // Validate JSON structure (mode-discriminated union)
-    const tj = input.templateJson;
-    const shapeOk =
-      tj.mode === 'single'
-        ? Array.isArray(tj.sections) && tj.sections.length > 0
-        : tj.mode === 'multi' && Array.isArray(tj.pages) && tj.pages.length > 0;
-    if (!shapeOk) {
-      throw new TemplateError('INVALID_TEMPLATE_JSON');
-    }
-
-    if (!input.templateJson.globalStyles) {
-      throw new TemplateError('INVALID_TEMPLATE_JSON');
+    // Validate content against the Template library (single source of truth)
+    const { errors } = await this.validator.validate(input.templateJson);
+    if (errors.length > 0) {
+      throw new TemplateError('INVALID_TEMPLATE_JSON', errors);
     }
 
     return this.templateRepository.create(input);

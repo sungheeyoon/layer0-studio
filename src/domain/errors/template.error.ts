@@ -11,8 +11,15 @@ export type TemplateErrorCode =
   | 'UNSUPPORTED_FIELD_TYPE'
   | 'UNKNOWN';
 
+import { SiteContentValidationIssue } from '../usecases/ports/site-content-validator.port';
+
 export class TemplateError extends Error {
-  constructor(public code: TemplateErrorCode) {
+  /**
+   * @param issues Optional structured validation findings, set when `code` is
+   *   `INVALID_TEMPLATE_JSON`. Surfaced for logging/debugging; the client maps
+   *   only `code` to a user-facing message.
+   */
+  constructor(public code: TemplateErrorCode, public issues?: SiteContentValidationIssue[]) {
     super(code);
   }
 }
