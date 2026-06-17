@@ -12,6 +12,14 @@ import {
   isMultiTemplate,
   allSections,
 } from '@/domain/entities/template.entity';
+import {
+  MoveDirection,
+  isSinglePinned,
+  moveNavItem,
+  toggleNavItemVisible,
+  toggleNavItemNavVisible,
+  relabelNavItem,
+} from '@/domain/entities/ordered-nav-list';
 import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTemplate } from '@/templates/registry';
@@ -207,44 +215,55 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     [updateSiteJson]
   );
 
-  // ── Single-mode structure edits (reorder / 2-axis visibility / nav label) ──
-  // nav (type==='nav') is pinned to the top, footer (type==='footer') to the
-  // bottom; both are excluded from reordering. See ADR-0007 §D4 + PLAN §5.
-  const isPinned = useCallback(
-    (section: { type: string }) => section.type === 'nav' || section.type === 'footer',
-    [],
-  );
+  // ── Nav-list edits (reorder / 2-axis visibility / nav label) ──────────────
+  // The write-side mirror of `deriveNav`: one set of handlers for both Site
+  // Types, delegating to the mode-agnostic `ordered-nav-list` module (Single
+  // operates on `sections` with the nav/footer pin rule, Multi on `pages`).
+  // See ADR-0007 §D4 + PLAN §5.
 
-  // Reorderable band = the contiguous middle (pins live only at the extremes).
+  // Reorderable band = the contiguous middle (Single pins live at the extremes).
   const [firstReorderable, lastReorderable] = useMemo(() => {
     let first = -1;
     let last = -1;
     singleSections.forEach((s, i) => {
-      if (isPinned(s)) return;
+      if (isSinglePinned(s)) return;
       if (first === -1) first = i;
       last = i;
     });
     return [first, last] as const;
-  }, [singleSections, isPinned]);
+  }, [singleSections]);
 
-  const handleMoveSection = useCallback(
-    (sectionId: string, direction: 'up' | 'down') => {
-      updateSiteJson((json) => {
-        if (!isSingleTemplate(json)) return;
-        const arr = json.sections;
-        const i = arr.findIndex((s) => s.id === sectionId);
-        if (i < 0) return;
-        const target = direction === 'up' ? i - 1 : i + 1;
-        if (target < 0 || target >= arr.length) return;
-        // Never let a section cross a pin (keeps nav top / footer bottom).
-        if (isPinned(arr[i]) || isPinned(arr[target])) return;
-        [arr[i], arr[target]] = [arr[target], arr[i]];
-      });
+  const handleMoveNavItem = useCallback(
+    (id: string, direction: MoveDirection) => {
+      updateSiteJson((json) => moveNavItem(json, id, direction));
     },
-    [updateSiteJson, isPinned],
+    [updateSiteJson],
   );
 
-  const handleToggleVisible = useCallback(
+  const handleToggleNavItemVisible = useCallback(
+    (id: string) => {
+      updateSiteJson((json) => toggleNavItemVisible(json, id));
+    },
+    [updateSiteJson],
+  );
+
+  const handleToggleNavItemNavVisible = useCallback(
+    (id: string) => {
+      updateSiteJson((json) => toggleNavItemNavVisible(json, id));
+    },
+    [updateSiteJson],
+  );
+
+  const handleRelabelNavItem = useCallback(
+    (id: string, label: string) => {
+      updateSiteJson((json) => relabelNavItem(json, id, label));
+    },
+    [updateSiteJson],
+  );
+
+  // Multi inner-section visibility (shared header/footer + page sections). These
+  // are base sections with no nav, so they stay outside the nav-list module.
+  const handleToggleSectionVisible = useCallback(
     (sectionId: string) => {
       updateSiteJson((json) => {
         const section = allSections(json).find((s) => s.id === sectionId);
@@ -254,32 +273,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     [updateSiteJson],
   );
 
-  const handleToggleNavVisible = useCallback(
-    (sectionId: string) => {
-      updateSiteJson((json) => {
-        if (!isSingleTemplate(json)) return;
-        const section = json.sections.find((s) => s.id === sectionId);
-        if (section) section.nav.visible = !section.nav.visible;
-      });
-    },
-    [updateSiteJson],
-  );
-
-  const handleNavLabelChange = useCallback(
-    (sectionId: string, label: string) => {
-      updateSiteJson((json) => {
-        if (!isSingleTemplate(json)) return;
-        const section = json.sections.find((s) => s.id === sectionId);
-        if (section) section.nav.label = label;
-      });
-    },
-    [updateSiteJson],
-  );
-
-  // ── Multi-mode page management (reorder / 2-axis visibility / nav label) ──
-  // pages[] array order = nav + render order. No create/delete (ADR-0007 §0,
-  // PLAN §5 Phase 2). Page.visible = routable (false → 404); page.nav.visible =
-  // shown in the top nav. nav.label doubles as the page name (always editable).
+  // ── Multi-mode page selection (UI-only — switches the edited/previewed page).
   const handleSelectPage = useCallback((pageId: string) => {
     setActivePageId(pageId);
     setActiveTab('content');
@@ -292,54 +286,6 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       );
     }
   }, []);
-
-  const handleMovePage = useCallback(
-    (pageId: string, direction: 'up' | 'down') => {
-      updateSiteJson((json) => {
-        if (!isMultiTemplate(json)) return;
-        const arr = json.pages;
-        const i = arr.findIndex((p) => p.id === pageId);
-        if (i < 0) return;
-        const target = direction === 'up' ? i - 1 : i + 1;
-        if (target < 0 || target >= arr.length) return;
-        [arr[i], arr[target]] = [arr[target], arr[i]];
-      });
-    },
-    [updateSiteJson],
-  );
-
-  const handleTogglePageVisible = useCallback(
-    (pageId: string) => {
-      updateSiteJson((json) => {
-        if (!isMultiTemplate(json)) return;
-        const page = json.pages.find((p) => p.id === pageId);
-        if (page) page.visible = !page.visible;
-      });
-    },
-    [updateSiteJson],
-  );
-
-  const handleTogglePageNavVisible = useCallback(
-    (pageId: string) => {
-      updateSiteJson((json) => {
-        if (!isMultiTemplate(json)) return;
-        const page = json.pages.find((p) => p.id === pageId);
-        if (page) page.nav.visible = !page.nav.visible;
-      });
-    },
-    [updateSiteJson],
-  );
-
-  const handlePageNavLabelChange = useCallback(
-    (pageId: string, label: string) => {
-      updateSiteJson((json) => {
-        if (!isMultiTemplate(json)) return;
-        const page = json.pages.find((p) => p.id === pageId);
-        if (page) page.nav.label = label;
-      });
-    },
-    [updateSiteJson],
-  );
 
   const handleSave = async () => {
     const now = Date.now();
@@ -499,7 +445,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                 type="button"
                                 aria-label="Move page up"
                                 disabled={index === 0}
-                                onClick={() => handleMovePage(page.id, 'up')}
+                                onClick={() => handleMoveNavItem(page.id, 'up')}
                                 className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
                               >
                                 <span className="material-symbols-outlined text-sm">arrow_upward</span>
@@ -508,7 +454,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                 type="button"
                                 aria-label="Move page down"
                                 disabled={index === pages.length - 1}
-                                onClick={() => handleMovePage(page.id, 'down')}
+                                onClick={() => handleMoveNavItem(page.id, 'down')}
                                 className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
                               >
                                 <span className="material-symbols-outlined text-sm">arrow_downward</span>
@@ -528,7 +474,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                               type="button"
                               aria-label={page.visible ? 'Make page unroutable' : 'Make page routable'}
                               title={page.visible ? 'Routable' : 'Returns 404 (data kept)'}
-                              onClick={() => handleTogglePageVisible(page.id)}
+                              onClick={() => handleToggleNavItemVisible(page.id)}
                               className={`shrink-0 transition-colors ${page.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
                                 }`}
                             >
@@ -544,7 +490,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                               type="button"
                               aria-label={page.nav.visible ? 'Remove from menu' : 'Add to menu'}
                               title={page.nav.visible ? 'Shown in top nav' : 'Hidden from top nav'}
-                              onClick={() => handleTogglePageNavVisible(page.id)}
+                              onClick={() => handleToggleNavItemNavVisible(page.id)}
                               className={`shrink-0 transition-colors ${page.nav.visible ? 'text-primary' : 'text-outline hover:text-primary'
                                 }`}
                             >
@@ -558,7 +504,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             <input
                               type="text"
                               value={page.nav.label}
-                              onChange={(e) => handlePageNavLabelChange(page.id, e.target.value)}
+                              onChange={(e) => handleRelabelNavItem(page.id, e.target.value)}
                               placeholder="Page name"
                               className="flex-grow min-w-0 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-0.5 font-['Inter'] font-light text-[0.6875rem] transition-colors"
                             />
@@ -596,7 +542,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             type="button"
                             aria-label={section.visible ? 'Hide section' : 'Show section'}
                             title={section.visible ? 'Visible on page' : 'Hidden from page'}
-                            onClick={() => handleToggleVisible(section.id)}
+                            onClick={() => handleToggleSectionVisible(section.id)}
                             className={`shrink-0 transition-colors ${section.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
                               }`}
                           >
@@ -611,7 +557,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 ) : (
                 <ul className="space-y-3">
                   {singleSections.map((section, index) => {
-                    const pinned = isPinned(section);
+                    const pinned = isSinglePinned(section);
                     const isSelected = selectedSectionId === section.id;
                     return (
                       <li
@@ -634,7 +580,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                 type="button"
                                 aria-label="Move section up"
                                 disabled={index <= firstReorderable}
-                                onClick={() => handleMoveSection(section.id, 'up')}
+                                onClick={() => handleMoveNavItem(section.id, 'up')}
                                 className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
                               >
                                 <span className="material-symbols-outlined text-sm">arrow_upward</span>
@@ -643,7 +589,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                 type="button"
                                 aria-label="Move section down"
                                 disabled={index >= lastReorderable}
-                                onClick={() => handleMoveSection(section.id, 'down')}
+                                onClick={() => handleMoveNavItem(section.id, 'down')}
                                 className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
                               >
                                 <span className="material-symbols-outlined text-sm">arrow_downward</span>
@@ -664,7 +610,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             type="button"
                             aria-label={section.visible ? 'Hide section' : 'Show section'}
                             title={section.visible ? 'Visible on page' : 'Hidden from page'}
-                            onClick={() => handleToggleVisible(section.id)}
+                            onClick={() => handleToggleNavItemVisible(section.id)}
                             className={`shrink-0 transition-colors ${section.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
                               }`}
                           >
@@ -680,7 +626,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             type="button"
                             aria-label={section.nav.visible ? 'Remove from menu' : 'Add to menu'}
                             title={section.nav.visible ? 'Shown in nav menu' : 'Hidden from nav menu'}
-                            onClick={() => handleToggleNavVisible(section.id)}
+                            onClick={() => handleToggleNavItemNavVisible(section.id)}
                             className={`shrink-0 transition-colors ${section.nav.visible ? 'text-primary' : 'text-outline hover:text-primary'
                               }`}
                           >
@@ -694,7 +640,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                           <input
                             type="text"
                             value={section.nav.label}
-                            onChange={(e) => handleNavLabelChange(section.id, e.target.value)}
+                            onChange={(e) => handleRelabelNavItem(section.id, e.target.value)}
                             disabled={!section.nav.visible}
                             placeholder="Menu label"
                             className="flex-grow min-w-0 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-0.5 font-['Inter'] font-light text-[0.6875rem] disabled:opacity-40 transition-colors"
