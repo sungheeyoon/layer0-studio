@@ -98,7 +98,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     return this.mapRow(data);
   }
 
-  async update(id: string, dto: UpdateUserSiteDto): Promise<UserSite> {
+  async update(id: string, dto: UpdateUserSiteDto, expectedUpdatedAt: string): Promise<UserSite> {
     const updatePayload: Record<string, unknown> = {};
     if (dto.templateId !== undefined) updatePayload.template_id = dto.templateId;
     if (dto.siteName !== undefined) updatePayload.site_name = dto.siteName;
@@ -109,25 +109,31 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     if (dto.publishedAt !== undefined) updatePayload.published_at = dto.publishedAt;
     updatePayload.updated_at = new Date().toISOString();
 
+    // Optimistic-concurrency compare-and-swap: the WHERE only matches if the row
+    // still carries the version the caller read. A no-match means another writer
+    // bumped updated_at in the meantime. Callers (SiteWriteUseCase / AdminUpdateSite)
+    // verify existence + ownership immediately before, so PGRST116 here is staleness,
+    // not a missing row — surfaces the editor Conflict modal (ADR-0004).
     const { data, error } = await this.supabase
       .from('user_sites')
       .update(updatePayload)
       .eq('id', id)
+      .eq('updated_at', expectedUpdatedAt)
       .select()
       .single();
 
     if (error) {
-      console.error('[SupabaseUserSiteRepo::update]', error.message);
       if (error.code === 'PGRST116') {
-        throw new TemplateError('SITE_NOT_FOUND');
+        throw new TemplateError('STALE_VERSION');
       }
+      console.error('[SupabaseUserSiteRepo::update]', error.message);
       throw new TemplateError('UNKNOWN');
     }
 
     return this.mapRow(data);
   }
 
-  async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt?: string): Promise<UserSite> {
+  async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt: string): Promise<UserSite> {
     // Extract new asset usages (Single / Multi page / Multi shared slot_keys).
     const newUsages = collectAssetUsages(siteJson);
 
@@ -136,7 +142,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       p_site_id: id,
       p_new_json: siteJson,
       p_new_usages: newUsages,
-      p_expected_updated_at: expectedUpdatedAt ?? null,
+      p_expected_updated_at: expectedUpdatedAt,
     });
 
     if (rpcError) {

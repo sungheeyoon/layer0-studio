@@ -70,13 +70,14 @@ export default function ProjectsClient() {
     setDomainVerified(false);
 
     try {
-      const result = await updateSiteDomainAction(settingsSite.id, editDomain);
+      const result = await updateSiteDomainAction(settingsSite.id, editDomain, settingsSite.updatedAt);
       if ('error' in result) {
         setDomainError(getDomainError(result.error));
+        if (result.error === 'STALE_VERSION') router.refresh();
       } else if (result.domain) {
         setDomainVerified(true);
-        setSettingsSite({ ...settingsSite, domain: result.domain });
-        patchSite(settingsSite.id, { domain: result.domain });
+        setSettingsSite({ ...settingsSite, domain: result.domain, updatedAt: result.updatedAt });
+        patchSite(settingsSite.id, { domain: result.domain, updatedAt: result.updatedAt });
       }
     } catch {
       setDomainError('An unexpected error occurred.');
@@ -93,14 +94,15 @@ export default function ProjectsClient() {
     setSaveNameError(null);
     setSaveNameSuccess(false);
 
-    const result = await updateSiteNameAction(settingsSite.id, editSiteName);
+    const result = await updateSiteNameAction(settingsSite.id, editSiteName, settingsSite.updatedAt);
     if ('error' in result) {
-      setSaveNameError('이름 저장에 실패했습니다.');
+      setSaveNameError(getSiteError(result.error, '이름 저장에 실패했습니다.'));
+      if (result.error === 'STALE_VERSION') router.refresh();
     } else {
       setSaveNameSuccess(true);
       const trimmed = editSiteName.trim();
-      setSettingsSite({ ...settingsSite, siteName: trimmed });
-      patchSite(settingsSite.id, { siteName: trimmed });
+      setSettingsSite({ ...settingsSite, siteName: trimmed, updatedAt: result.updatedAt });
+      patchSite(settingsSite.id, { siteName: trimmed, updatedAt: result.updatedAt });
       router.refresh();
     }
     setIsSavingName(false);
@@ -113,15 +115,16 @@ export default function ProjectsClient() {
 
     const isActive = settingsSite.status === 'active';
     const result = isActive
-      ? await unpublishSiteAction(settingsSite.id)
-      : await publishSiteAction(settingsSite.id);
+      ? await unpublishSiteAction(settingsSite.id, settingsSite.updatedAt)
+      : await publishSiteAction(settingsSite.id, settingsSite.updatedAt);
 
-    if (result.error) {
+    if ('error' in result) {
       setStatusError(getSiteError(result.error, '상태 변경에 실패했습니다.'));
+      if (result.error === 'STALE_VERSION') router.refresh();
     } else {
       const newStatus = (isActive ? 'draft' : 'active') as UserSite['status'];
-      setSettingsSite({ ...settingsSite, status: newStatus });
-      patchSite(settingsSite.id, { status: newStatus });
+      setSettingsSite({ ...settingsSite, status: newStatus, updatedAt: result.updatedAt });
+      patchSite(settingsSite.id, { status: newStatus, updatedAt: result.updatedAt });
       router.refresh();
     }
     setIsTogglingStatus(false);

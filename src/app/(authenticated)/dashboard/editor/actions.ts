@@ -4,13 +4,10 @@ import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/server';
 import {
   createGetUserSiteUseCase,
-  createUpdateSiteJsonUseCase,
+  createSiteWriteUseCase,
   createDeleteUserSiteUseCase,
-  createPublishSiteUseCase,
-  createUpdateSiteDomainUseCase,
   createAssetUploadUseCase,
 } from '@/lib/di/container';
-import { SupabaseUserSiteRepositoryImpl } from '@/data/repositories/supabase-user-site.repository.impl';
 import { TemplateJson } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';
@@ -60,10 +57,10 @@ export async function loadSiteAction(siteId: string) {
   }
 }
 
-export async function saveSiteJsonAction(siteId: string, siteJson: TemplateJson, expectedUpdatedAt?: string) {
+export async function saveSiteJsonAction(siteId: string, siteJson: TemplateJson, expectedUpdatedAt: string) {
   return withUser(async (user, supabase) => {
-    const useCase = createUpdateSiteJsonUseCase(supabase);
-    const site = await useCase.execute(siteId, siteJson, user.id, expectedUpdatedAt);
+    const useCase = createSiteWriteUseCase(supabase);
+    const site = await useCase.saveJson(siteId, user.id, siteJson, expectedUpdatedAt);
     revalidatePath('/dashboard/editor');
     return { success: true as const, updatedAt: site.updatedAt };
   });
@@ -74,16 +71,17 @@ export async function updateSiteFieldAction(
   sectionId: string,
   fieldKey: string,
   value: string,
+  expectedUpdatedAt: string,
   pageId?: string,
 ) {
   return withUser(async (user, supabase) => {
-    const useCase = createUpdateSiteJsonUseCase(supabase);
-    const site = await useCase.executeFieldUpdate(siteId, sectionId, fieldKey, value, user.id, pageId);
+    const useCase = createSiteWriteUseCase(supabase);
+    const site = await useCase.updateField(siteId, user.id, sectionId, fieldKey, value, expectedUpdatedAt, pageId);
     return { success: true as const, site };
   });
 }
 
-export async function publishSiteAction(siteId: string) {
+export async function publishSiteAction(siteId: string, expectedUpdatedAt: string) {
   return withUser(async (user, supabase) => {
     const { data: latestPublish } = await supabase
       .from('user_sites')
@@ -99,20 +97,20 @@ export async function publishSiteAction(siteId: string) {
       if (elapsed < 30) return { error: 'RATE_LIMITED' as const };
     }
 
-    const useCase = createPublishSiteUseCase(supabase);
-    const site = await useCase.execute(siteId, user.id);
+    const useCase = createSiteWriteUseCase(supabase);
+    const site = await useCase.publish(siteId, user.id, expectedUpdatedAt);
     revalidatePath('/dashboard/editor');
     if (site.domain) revalidatePath(`/site/${site.domain}`);
-    return { success: true as const };
+    return { success: true as const, updatedAt: site.updatedAt };
   });
 }
 
-export async function updateSiteDomainAction(siteId: string, domain: string) {
+export async function updateSiteDomainAction(siteId: string, domain: string, expectedUpdatedAt: string) {
   return withUser(async (user, supabase) => {
-    const useCase = createUpdateSiteDomainUseCase(supabase);
-    const site = await useCase.execute(siteId, domain, user.id);
+    const useCase = createSiteWriteUseCase(supabase);
+    const site = await useCase.setDomain(siteId, user.id, domain, expectedUpdatedAt);
     revalidatePath('/dashboard/editor');
-    return { success: true as const, domain: site.domain };
+    return { success: true as const, domain: site.domain, updatedAt: site.updatedAt };
   });
 }
 
@@ -125,29 +123,25 @@ export async function deleteSiteAction(siteId: string) {
   });
 }
 
-export async function updateSiteNameAction(siteId: string, siteName: string) {
+export async function updateSiteNameAction(siteId: string, siteName: string, expectedUpdatedAt: string) {
   const trimmed = siteName.trim();
   if (!trimmed) return { error: 'INVALID_NAME' };
   return withUser(async (user, supabase) => {
-    const repo = new SupabaseUserSiteRepositoryImpl(supabase);
-    const site = await repo.findById(siteId);
-    if (!site || site.userId !== user.id) return { error: 'SITE_ACCESS_DENIED' as const };
-    await repo.update(siteId, { siteName: trimmed });
+    const useCase = createSiteWriteUseCase(supabase);
+    const site = await useCase.rename(siteId, user.id, trimmed, expectedUpdatedAt);
     revalidatePath('/dashboard/projects');
-    return { success: true as const };
+    return { success: true as const, updatedAt: site.updatedAt };
   });
 }
 
-export async function unpublishSiteAction(siteId: string) {
+export async function unpublishSiteAction(siteId: string, expectedUpdatedAt: string) {
   return withUser(async (user, supabase) => {
-    const repo = new SupabaseUserSiteRepositoryImpl(supabase);
-    const site = await repo.findById(siteId);
-    if (!site || site.userId !== user.id) return { error: 'SITE_ACCESS_DENIED' as const };
-    const updated = await repo.update(siteId, { status: 'draft' });
+    const useCase = createSiteWriteUseCase(supabase);
+    const site = await useCase.unpublish(siteId, user.id, expectedUpdatedAt);
     revalidatePath('/dashboard/projects');
     revalidatePath('/dashboard/editor');
     if (site.domain) revalidatePath(`/site/${site.domain}`);
-    return { success: true as const, site: updated };
+    return { success: true as const, updatedAt: site.updatedAt };
   });
 }
 

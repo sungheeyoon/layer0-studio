@@ -14,7 +14,9 @@ export class AdminUpdateSiteUseCase {
       updateData.publishedAt = new Date().toISOString();
     }
 
-    return this.userSiteRepo.update(siteId, updateData);
+    // Admin is a deliberate ownership-bypass tool; pass the just-read version so
+    // the guarded write goes through (force-via-fresh-read).
+    return this.userSiteRepo.update(siteId, updateData, site.updatedAt);
   }
 
   async updateDomain(siteId: string, domain: string) {
@@ -34,6 +36,6 @@ export class AdminUpdateSiteUseCase {
       throw new TemplateError('DOMAIN_TAKEN');
     }
 
-    return this.userSiteRepo.update(siteId, { domain: slug });
+    return this.userSiteRepo.update(siteId, { domain: slug }, site.updatedAt);
   }
 }

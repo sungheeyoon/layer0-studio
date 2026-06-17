@@ -1,6 +1,7 @@
 import { IUserSiteRepository } from '../repositories/user-site.repository';
 import { UserSite, CreateUserSiteDto, UpdateUserSiteDto } from '../entities/user-site.entity';
 import { TemplateJson, SinglePageTemplate } from '../entities/template.entity';
+import { TemplateError } from '../errors/template.error';
 import {
   SiteContentValidator,
   SiteContentValidationIssue,
@@ -104,17 +105,36 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return site;
   }
 
-  async update(id: string, data: UpdateUserSiteDto): Promise<UserSite> {
+  async update(id: string, data: UpdateUserSiteDto, expectedUpdatedAt: string): Promise<UserSite> {
     const idx = this.sites.findIndex(s => s.id === id);
-    this.sites[idx] = { ...this.sites[idx], ...data, updatedAt: new Date().toISOString() };
+    this.guardVersion(idx, expectedUpdatedAt);
+    this.sites[idx] = { ...this.sites[idx], ...data, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
 
-  async updateSiteJson(id: string, siteJson: TemplateJson): Promise<UserSite> {
+  async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt: string): Promise<UserSite> {
     const idx = this.sites.findIndex(s => s.id === id);
-    this.sites[idx] = { ...this.sites[idx], siteJson, updatedAt: new Date().toISOString() };
+    this.guardVersion(idx, expectedUpdatedAt);
+    this.sites[idx] = { ...this.sites[idx], siteJson, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
+
+  /**
+   * Mirror the optimistic-concurrency compare-and-swap of the real repo: a write
+   * whose token no longer matches the stored row throws STALE_VERSION.
+   */
+  private guardVersion(idx: number, expectedUpdatedAt: string) {
+    if (this.sites[idx].updatedAt !== expectedUpdatedAt) {
+      throw new TemplateError('STALE_VERSION');
+    }
+  }
+
+  /** Always advance the version so a reused token becomes stale on the next write. */
+  private nextUpdatedAt() {
+    return new Date(Date.now() + ++this.tick).toISOString();
+  }
+
+  private tick = 0;
 
   async delete(id: string) {
     this.sites = this.sites.filter(s => s.id !== id);

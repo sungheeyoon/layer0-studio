@@ -323,11 +323,17 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       applySuccessfulSave(saveResult.updatedAt);
     }
     setPublishing(true);
-    const result = await publishSiteAction(site.id);
+    const result = await publishSiteAction(site.id, knownUpdatedAtRef.current);
 
     if (result && 'error' in result) {
-      setActionError(getSiteError(result.error, `발행 실패: ${result.error}`));
+      if (result.error === 'STALE_VERSION') {
+        setConflictDetected(true);
+      } else {
+        setActionError(getSiteError(result.error, `발행 실패: ${result.error}`));
+      }
     } else {
+      // Publish bumps updated_at; keep the token fresh for the next save.
+      if ('updatedAt' in result) applySuccessfulSave(result.updatedAt);
       if (site.domain) {
         setPublishedUrl(`/site/${site.domain}`);
       } else {

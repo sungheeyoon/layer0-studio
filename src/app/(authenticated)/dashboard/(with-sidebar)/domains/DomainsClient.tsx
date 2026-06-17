@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { updateSiteDomainAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import { getDomainError } from '@/lib/errors/messages';
 import { useDashboardData } from '../DashboardDataProvider';
 
 export default function DomainsClient() {
+  const router = useRouter();
   const { sites, patchSite } = useDashboardData();
   const [editingDomain, setEditingDomain] = useState<{ siteId: string; value: string } | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -13,14 +15,17 @@ export default function DomainsClient() {
 
   const handleSaveDomain = async (siteId: string) => {
     if (!editingDomain || editingDomain.siteId !== siteId) return;
+    const site = sites.find((s) => s.id === siteId);
+    if (!site) return;
     setSavingId(siteId);
     setDomainError(null);
 
-    const result = await updateSiteDomainAction(siteId, editingDomain.value);
+    const result = await updateSiteDomainAction(siteId, editingDomain.value, site.updatedAt);
     if (result && 'error' in result) {
       setDomainError({ siteId, message: getDomainError(result.error) });
+      if (result.error === 'STALE_VERSION') router.refresh();
     } else if (result && 'domain' in result && result.domain) {
-      patchSite(siteId, { domain: result.domain ?? null });
+      patchSite(siteId, { domain: result.domain ?? null, updatedAt: result.updatedAt });
       setEditingDomain(null);
     }
     setSavingId(null);
