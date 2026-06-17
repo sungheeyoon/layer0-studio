@@ -66,21 +66,6 @@ export async function saveSiteJsonAction(siteId: string, siteJson: TemplateJson,
   });
 }
 
-export async function updateSiteFieldAction(
-  siteId: string,
-  sectionId: string,
-  fieldKey: string,
-  value: string,
-  expectedUpdatedAt: string,
-  pageId?: string,
-) {
-  return withUser(async (user, supabase) => {
-    const useCase = createSiteWriteUseCase(supabase);
-    const site = await useCase.updateField(siteId, user.id, sectionId, fieldKey, value, expectedUpdatedAt, pageId);
-    return { success: true as const, site };
-  });
-}
-
 export async function publishSiteAction(siteId: string, expectedUpdatedAt: string) {
   return withUser(async (user, supabase) => {
     const { data: latestPublish } = await supabase

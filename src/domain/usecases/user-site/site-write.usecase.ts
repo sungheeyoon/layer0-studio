@@ -1,5 +1,5 @@
 import { IUserSiteRepository } from '../../repositories/user-site.repository';
-import { TemplateJson, allSections } from '../../entities/template.entity';
+import { TemplateJson } from '../../entities/template.entity';
 import { UserSite, validateDomainSlug } from '../../entities/user-site.entity';
 import { TemplateError } from '../../errors/template.error';
 import { SiteContentValidator } from '../ports/site-content-validator.port';
@@ -46,45 +46,6 @@ export class SiteWriteUseCase {
     await this.loadOwned(siteId, userId);
     await this.validate(siteJson);
     return this.userSiteRepo.updateSiteJson(siteId, siteJson, expectedUpdatedAt);
-  }
-
-  /** Update an individual field within an individual section. */
-  async updateField(
-    siteId: string,
-    userId: string,
-    sectionId: string,
-    fieldKey: string,
-    value: string,
-    expectedUpdatedAt: string,
-    pageId?: string,
-  ): Promise<UserSite> {
-    const site = await this.loadOwned(siteId, userId);
-
-    // Deep copy current JSON before mutating.
-    const updatedJson: TemplateJson = structuredClone(site.siteJson);
-
-    // Section ids are unique across the whole template (Single: sections[];
-    // Multi: shared + every page) so a flat lookup is safe. pageId stays a
-    // (Multi-only) hint and is not required for the lookup.
-    void pageId;
-    const section = allSections(updatedJson).find(s => s.id === sectionId);
-
-    if (!section || !section.data[fieldKey]) {
-      throw new TemplateError('UNKNOWN');
-    }
-
-    const field = section.data[fieldKey];
-    if (field.type === 'array') {
-      // Partial array updates are not supported via this path.
-      throw new TemplateError('UNSUPPORTED_FIELD_TYPE');
-    }
-
-    field.value = value;
-
-    // The partial path must not be able to introduce invalid data either.
-    await this.validate(updatedJson);
-
-    return this.userSiteRepo.updateSiteJson(siteId, updatedJson, expectedUpdatedAt);
   }
 
   /** Rename the Site. */

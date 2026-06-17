@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateSiteDomainAction } from '@/app/(authenticated)/dashboard/editor/actions';
-import { getDomainError } from '@/lib/errors/messages';
+import { getDomainError, isStaleConflict } from '@/lib/errors/messages';
 import { useDashboardData } from '../DashboardDataProvider';
 
 export default function DomainsClient() {
@@ -23,7 +23,7 @@ export default function DomainsClient() {
     const result = await updateSiteDomainAction(siteId, editingDomain.value, site.updatedAt);
     if (result && 'error' in result) {
       setDomainError({ siteId, message: getDomainError(result.error) });
-      if (result.error === 'STALE_VERSION') router.refresh();
+      if (isStaleConflict(result)) router.refresh();
     } else if (result && 'domain' in result && result.domain) {
       patchSite(siteId, { domain: result.domain ?? null, updatedAt: result.updatedAt });
       setEditingDomain(null);

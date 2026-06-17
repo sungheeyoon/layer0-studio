@@ -98,7 +98,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     return this.mapRow(data);
   }
 
-  async update(id: string, dto: UpdateUserSiteDto, expectedUpdatedAt: string): Promise<UserSite> {
+  async update(id: string, dto: UpdateUserSiteDto, expectedUpdatedAt: string | null): Promise<UserSite> {
     const updatePayload: Record<string, unknown> = {};
     if (dto.templateId !== undefined) updatePayload.template_id = dto.templateId;
     if (dto.siteName !== undefined) updatePayload.site_name = dto.siteName;
@@ -109,22 +109,25 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     if (dto.publishedAt !== undefined) updatePayload.published_at = dto.publishedAt;
     updatePayload.updated_at = new Date().toISOString();
 
-    // Optimistic-concurrency compare-and-swap: the WHERE only matches if the row
-    // still carries the version the caller read. A no-match means another writer
-    // bumped updated_at in the meantime. Callers (SiteWriteUseCase / AdminUpdateSite)
-    // verify existence + ownership immediately before, so PGRST116 here is staleness,
-    // not a missing row — surfaces the editor Conflict modal (ADR-0004).
-    const { data, error } = await this.supabase
-      .from('user_sites')
-      .update(updatePayload)
-      .eq('id', id)
-      .eq('updated_at', expectedUpdatedAt)
-      .select()
-      .single();
+    // Optimistic-concurrency compare-and-swap: when a token is given, the WHERE
+    // only matches if the row still carries the version the caller read. `null`
+    // is an explicit admin bypass (no version filter). See ADR-0004.
+    let query = this.supabase.from('user_sites').update(updatePayload).eq('id', id);
+    if (expectedUpdatedAt !== null) {
+      query = query.eq('updated_at', expectedUpdatedAt);
+    }
+    const { data, error } = await query.select().single();
 
     if (error) {
       if (error.code === 'PGRST116') {
-        throw new TemplateError('STALE_VERSION');
+        // No row matched. Disambiguate a version conflict from a genuinely
+        // missing row (e.g. deleted between the caller's ownership check and
+        // here) so the two report distinct, honest codes.
+        if (expectedUpdatedAt !== null) {
+          const stillExists = await this.findById(id);
+          throw new TemplateError(stillExists ? 'STALE_VERSION' : 'SITE_NOT_FOUND');
+        }
+        throw new TemplateError('SITE_NOT_FOUND');
       }
       console.error('[SupabaseUserSiteRepo::update]', error.message);
       throw new TemplateError('UNKNOWN');

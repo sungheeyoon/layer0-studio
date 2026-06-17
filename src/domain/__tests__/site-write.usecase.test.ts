@@ -4,7 +4,6 @@ import { FakeUserSiteRepo, FakeSiteContentValidator, makeSite, makeTemplateJson 
 import {
   TemplateJson,
   SinglePageTemplate,
-  TextTemplateField,
   ArrayTemplateField,
 } from '../entities/template.entity';
 import { SiteContentValidationIssue } from '../usecases/ports/site-content-validator.port';
@@ -20,27 +19,6 @@ function setup(siteOverrides: Partial<UserSite> = {}, validatorErrors: SiteConte
   return { uc, repo, token: site.updatedAt };
 }
 
-function makeTwoSectionJson(): TemplateJson {
-  return makeTemplateJson({
-    sections: [
-      {
-        id: 'section-a',
-        type: 'hero',
-        visible: true,
-        nav: { visible: false, label: 'Hero' },
-        data: { title: { type: 'text', label: 'Title', value: 'Section1', editable: true } },
-      },
-      {
-        id: 'section-b',
-        type: 'text',
-        visible: true,
-        nav: { visible: false, label: 'Text' },
-        data: { body: { type: 'textarea', label: 'Body', value: 'Section2', editable: true } },
-      },
-    ],
-  });
-}
-
 // --- Ownership matrix (shared across every method) ---------------------------
 //
 // Each guarded write must reject a missing site (SITE_NOT_FOUND) and a non-owner
@@ -52,7 +30,6 @@ describe('SiteWriteUseCase — ownership guard', () => {
     ['publish', (uc, id, u, t) => uc.publish(id, u, t)],
     ['unpublish', (uc, id, u, t) => uc.unpublish(id, u, t)],
     ['setDomain', (uc, id, u, t) => uc.setDomain(id, u, 'myshop', t)],
-    ['updateField', (uc, id, u, t) => uc.updateField(id, u, 'section-1', 'title', 'X', t)],
   ];
 
   for (const [name, call] of callers) {
@@ -195,65 +172,5 @@ describe('SiteWriteUseCase.setDomain — validation', () => {
     const { uc, token } = setup({ domain: 'myshop' });
     const result = await uc.setDomain('site-1', 'user-1', 'myshop', token);
     expect(result.domain).toBe('myshop');
-  });
-});
-
-// --- updateField -------------------------------------------------------------
-describe('SiteWriteUseCase.updateField', () => {
-  it('updates a field by section id (flat lookup, any order)', async () => {
-    const json = makeTwoSectionJson();
-    const site = makeSite({ id: 'site-1', userId: 'user-1', siteJson: json });
-    const repo = new FakeUserSiteRepo([site]);
-    const uc = new SiteWriteUseCase(repo, new FakeSiteContentValidator());
-    const result = await uc.updateField('site-1', 'user-1', 'section-b', 'body', 'New Body', site.updatedAt);
-    expect((asSingle(result.siteJson).sections[1].data.body as TextTemplateField).value).toBe('New Body');
-  });
-
-  it('throws UNKNOWN when the section or field is not found', async () => {
-    const { uc, token } = setup();
-    await expect(uc.updateField('site-1', 'user-1', 'nope', 'title', 'X', token))
-      .rejects.toMatchObject({ code: 'UNKNOWN' });
-  });
-
-  it('throws UNSUPPORTED_FIELD_TYPE for an array field', async () => {
-    const json = makeTemplateJson({
-      sections: [
-        {
-          id: 'section-1',
-          type: 'menu',
-          visible: true,
-          nav: { visible: false, label: 'Menu' },
-          data: { items: { type: 'array', label: 'Items', items: [] } },
-        },
-      ],
-    });
-    const site = makeSite({ id: 'site-1', userId: 'user-1', siteJson: json });
-    const repo = new FakeUserSiteRepo([site]);
-    const uc = new SiteWriteUseCase(repo, new FakeSiteContentValidator());
-    await expect(uc.updateField('site-1', 'user-1', 'section-1', 'items', '[]', site.updatedAt))
-      .rejects.toMatchObject({ code: 'UNSUPPORTED_FIELD_TYPE' });
-  });
-
-  it('does not mutate the original siteJson (structuredClone guard)', async () => {
-    const json = makeTemplateJson();
-    const original = (asSingle(json).sections[0].data.title as TextTemplateField).value;
-    const site = makeSite({ id: 'site-1', userId: 'user-1', siteJson: json });
-    const repo = new FakeUserSiteRepo([site]);
-    const uc = new SiteWriteUseCase(repo, new FakeSiteContentValidator());
-    await uc.updateField('site-1', 'user-1', 'section-1', 'title', 'Changed', site.updatedAt);
-    expect((asSingle(json).sections[0].data.title as TextTemplateField).value).toBe(original);
-  });
-
-  it('runs the validator on the resulting JSON', async () => {
-    const json = makeTwoSectionJson();
-    const site = makeSite({ id: 'site-1', userId: 'user-1', siteJson: json });
-    const repo = new FakeUserSiteRepo([site]);
-    const validator = new FakeSiteContentValidator([
-      { code: 'INVALID_COLOR_FIELD', message: 'not hex', path: 'sections[0].data.title' },
-    ]);
-    const uc = new SiteWriteUseCase(repo, validator);
-    await expect(uc.updateField('site-1', 'user-1', 'section-a', 'title', 'oops', site.updatedAt))
-      .rejects.toMatchObject({ code: 'INVALID_TEMPLATE_JSON' });
-    expect(validator.validated).toHaveLength(1);
   });
 });

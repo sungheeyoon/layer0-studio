@@ -23,6 +23,7 @@ export const SITE_ERRORS: Record<string, string> = {
 export const ADMIN_DOMAIN_ERRORS: Record<string, string> = {
   DOMAIN_TAKEN: 'Domain already in use',
   INVALID_DOMAIN: 'Invalid domain format (min 3 chars, alphanumeric/hyphen)',
+  STALE_VERSION: 'This site was modified elsewhere. Refresh and try again.',
 };
 
 export const ADMIN_ACTION_ERRORS: Record<string, string> = {
@@ -30,7 +31,22 @@ export const ADMIN_ACTION_ERRORS: Record<string, string> = {
   SITE_ACCESS_DENIED: 'Access denied',
   FORBIDDEN: 'Admin permission required',
   UNSUPPORTED_FIELD_TYPE: 'This field type does not support partial updates',
+  STALE_VERSION: 'This site was modified elsewhere. Refresh and try again.',
 };
+
+/**
+ * True when a Server Action result is an optimistic-concurrency conflict.
+ * Centralizes the STALE_VERSION check so save/publish/metadata paths don't each
+ * re-implement it (and can't drift from the Conflict-modal / refresh flow).
+ */
+export function isStaleConflict(result: unknown): boolean {
+  return (
+    !!result &&
+    typeof result === 'object' &&
+    'error' in result &&
+    (result as { error?: unknown }).error === 'STALE_VERSION'
+  );
+}
 
 export function getAuthError(code: string | undefined): string {
   return AUTH_ERRORS[code ?? 'UNKNOWN'] ?? AUTH_ERRORS.UNKNOWN;

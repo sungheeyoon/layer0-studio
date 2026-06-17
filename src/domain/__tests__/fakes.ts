@@ -105,28 +105,32 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return site;
   }
 
-  async update(id: string, data: UpdateUserSiteDto, expectedUpdatedAt: string): Promise<UserSite> {
-    const idx = this.sites.findIndex(s => s.id === id);
-    this.guardVersion(idx, expectedUpdatedAt);
+  async update(id: string, data: UpdateUserSiteDto, expectedUpdatedAt: string | null): Promise<UserSite> {
+    const idx = this.guardVersion(id, expectedUpdatedAt);
     this.sites[idx] = { ...this.sites[idx], ...data, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
 
   async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt: string): Promise<UserSite> {
-    const idx = this.sites.findIndex(s => s.id === id);
-    this.guardVersion(idx, expectedUpdatedAt);
+    const idx = this.guardVersion(id, expectedUpdatedAt);
     this.sites[idx] = { ...this.sites[idx], siteJson, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
 
   /**
-   * Mirror the optimistic-concurrency compare-and-swap of the real repo: a write
-   * whose token no longer matches the stored row throws STALE_VERSION.
+   * Mirror the real repo's guarded write: a missing row throws SITE_NOT_FOUND;
+   * a token that no longer matches throws STALE_VERSION. `null` is an explicit
+   * force (no version check). Returns the matched index on success.
    */
-  private guardVersion(idx: number, expectedUpdatedAt: string) {
-    if (this.sites[idx].updatedAt !== expectedUpdatedAt) {
+  private guardVersion(id: string, expectedUpdatedAt: string | null): number {
+    const idx = this.sites.findIndex(s => s.id === id);
+    if (idx === -1) {
+      throw new TemplateError('SITE_NOT_FOUND');
+    }
+    if (expectedUpdatedAt !== null && this.sites[idx].updatedAt !== expectedUpdatedAt) {
       throw new TemplateError('STALE_VERSION');
     }
+    return idx;
   }
 
   /** Always advance the version so a reused token becomes stale on the next write. */

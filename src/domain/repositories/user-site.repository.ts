@@ -6,7 +6,12 @@ export interface IUserSiteRepository {
   findById(id: string): Promise<UserSite | null>;
   findAll(): Promise<UserSite[]>;
   create(data: CreateUserSiteDto): Promise<UserSite>;
-  update(id: string, data: UpdateUserSiteDto, expectedUpdatedAt: string): Promise<UserSite>;
+  /**
+   * Version-guarded metadata write. `expectedUpdatedAt` is required so a silent
+   * overwrite cannot be expressed by omitting it; pass `null` to *explicitly*
+   * bypass the optimistic-concurrency check (admin force path).
+   */
+  update(id: string, data: UpdateUserSiteDto, expectedUpdatedAt: string | null): Promise<UserSite>;
   updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt: string): Promise<UserSite>;
   delete(id: string): Promise<void>;
   findByDomain(domain: string): Promise<UserSite | null>;
