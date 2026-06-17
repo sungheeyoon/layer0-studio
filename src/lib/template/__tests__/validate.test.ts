@@ -90,6 +90,22 @@ describe('validateTemplateJson — structure', () => {
   });
 });
 
+describe('validateTemplateJson — color fields (#56)', () => {
+  it('errors when a color field value is not hex', () => {
+    const json = minimalJson();
+    json.sections[0].data.accent = { type: 'color', label: 'Accent', value: 'red', editable: true };
+    const result = validateTemplateJson(json);
+    expect(result.errors.some((e) => e.code === 'INVALID_COLOR_FIELD')).toBe(true);
+  });
+
+  it('passes when a color field value is a valid hex', () => {
+    const json = minimalJson();
+    json.sections[0].data.accent = { type: 'color', label: 'Accent', value: '#ff0066', editable: true };
+    const result = validateTemplateJson(json);
+    expect(result.errors.filter((e) => e.code === 'INVALID_COLOR_FIELD')).toHaveLength(0);
+  });
+});
+
 describe('validateTemplateJson — templateKey', () => {
   it('errors when templateKey is not in availableTemplateKeys', () => {
     const result = validateTemplateJson(minimalJson(), { availableTemplateKeys: ['cafe'] });

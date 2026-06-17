@@ -27,7 +27,16 @@ async function withUser<T>(
   try {
     return await handler(user, supabase);
   } catch (err) {
-    if (err instanceof TemplateError) return { error: err.code };
+    if (err instanceof TemplateError) {
+      if (err.issues?.length) {
+        console.warn(
+          '[editor] %s: %s',
+          err.code,
+          err.issues.map((i) => `[${i.code}] ${i.path ?? ''}`).join(', '),
+        );
+      }
+      return { error: err.code };
+    }
     return { error: 'UNKNOWN' };
   }
 }

@@ -116,6 +116,9 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           setConflictDetected(true);
         } else {
           setAutoSaveStatus('error');
+          if (result.error === 'INVALID_TEMPLATE_JSON') {
+            setActionError(getSiteError(result.error, '저장에 실패했습니다.'));
+          }
         }
       } else if (result && 'updatedAt' in result) {
         applySuccessfulSave(result.updatedAt);
@@ -351,7 +354,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       if (result.error === 'STALE_VERSION') {
         setConflictDetected(true);
       } else {
-        setActionError(`Save failed: ${result.error}`);
+        setActionError(getSiteError(result.error, `Save failed: ${result.error}`));
       }
     } else if (result && 'updatedAt' in result) {
       applySuccessfulSave(result.updatedAt);

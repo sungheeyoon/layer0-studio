@@ -1,9 +1,13 @@
 import { ITemplateRepository } from '../../repositories/template.repository';
 import { UpdateTemplateDto } from '../../entities/template.entity';
 import { TemplateError } from '../../errors/template.error';
+import { SiteContentValidator } from '../ports/site-content-validator.port';
 
 export class UpdateTemplateUseCase {
-  constructor(private templateRepository: ITemplateRepository) {}
+  constructor(
+    private templateRepository: ITemplateRepository,
+    private validator: SiteContentValidator,
+  ) {}
 
   async execute(id: string, data: UpdateTemplateDto) {
     // Check template exists
@@ -20,18 +24,11 @@ export class UpdateTemplateUseCase {
       }
     }
 
-    // Validate JSON if provided (mode-discriminated union)
+    // Validate content against the Template library (single source of truth)
     if (data.templateJson) {
-      const tj = data.templateJson;
-      const shapeOk =
-        tj.mode === 'single'
-          ? Array.isArray(tj.sections) && tj.sections.length > 0
-          : tj.mode === 'multi' && Array.isArray(tj.pages) && tj.pages.length > 0;
-      if (!shapeOk) {
-        throw new TemplateError('INVALID_TEMPLATE_JSON');
-      }
-      if (!data.templateJson.globalStyles) {
-        throw new TemplateError('INVALID_TEMPLATE_JSON');
+      const { errors } = await this.validator.validate(data.templateJson);
+      if (errors.length > 0) {
+        throw new TemplateError('INVALID_TEMPLATE_JSON', errors);
       }
     }
 
