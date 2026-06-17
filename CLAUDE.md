@@ -55,7 +55,7 @@ src/middleware.ts ← Supabase session refresh on every request (excludes static
 src/types/database.ts ← Generated Supabase DB types
 ```
 
-**DI pattern:** Every Server Action or Server Component calls a `create*UseCase(supabase)` factory from `src/lib/di/container.ts`, which builds the repository and injects it into the use case. There is no singleton container; a fresh Supabase client is passed in per request.
+**DI pattern:** Every Server Action or Server Component calls a `create*UseCase(supabase)` factory from `src/lib/di/container.ts`, which builds the repository and injects it into the use case. There is no singleton container; a fresh Supabase client is passed in per request. The per-use-case factories are kept explicit **on purpose** — not collapsed behind a generic resolver (see [ADR-0008](./docs/adr/0008-keep-explicit-di-factories.md)).
 
 **Error pattern:** Domain layer throws typed errors (`src/domain/errors/*.ts`) with stable `code` strings. Server Actions return `{ success: false, code }` and the client maps the code to a Korean message via `src/lib/errors/messages.ts`. Never hard-code user-facing strings in Server Actions or use cases.
 
