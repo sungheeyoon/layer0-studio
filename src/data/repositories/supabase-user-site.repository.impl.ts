@@ -7,6 +7,7 @@ import {
 } from '@/domain/entities/user-site.entity';
 import { TemplateJson } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
+import { isNotFoundError } from '@/data/errors/supabase-error.adapter';
 import { collectAssetUsages } from '@/lib/template/asset-usages';
 import { UserSiteRow } from '@/types/database';
 
@@ -52,7 +53,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') return null;
+      if (isNotFoundError(error)) return null;
       console.error('[SupabaseUserSiteRepo::findById]', error.message);
       throw new TemplateError('UNKNOWN');
     }
@@ -119,7 +120,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     const { data, error } = await query.select().single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (isNotFoundError(error)) {
         // No row matched. Disambiguate a version conflict from a genuinely
         // missing row (e.g. deleted between the caller's ownership check and
         // here) so the two report distinct, honest codes.
@@ -192,7 +193,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') return null; // not found
+      if (isNotFoundError(error)) return null; // not found
       console.error('[SupabaseUserSiteRepo::findByDomain]', error.message);
       throw new TemplateError('UNKNOWN');
     }
@@ -209,7 +210,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') return null; // not found
+      if (isNotFoundError(error)) return null; // not found
       console.error('[SupabaseUserSiteRepo::findByUserIdAndName]', error.message);
       throw new TemplateError('UNKNOWN');
     }

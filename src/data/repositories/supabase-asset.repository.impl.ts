@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AssetRepository } from '@/domain/repositories/asset.repository';
 import { Asset, CreateAssetDto } from '@/domain/entities/asset.entity';
+import { isNotFoundError } from '@/data/errors/supabase-error.adapter';
 import { AssetRow } from '@/types/database';
 
 export class SupabaseAssetRepositoryImpl implements AssetRepository {
@@ -94,7 +95,7 @@ export class SupabaseAssetRepositoryImpl implements AssetRepository {
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') return null;
+      if (isNotFoundError(error)) return null;
       console.error('[SupabaseAssetRepo::findById]', error.message);
       throw new Error('Database error');
     }

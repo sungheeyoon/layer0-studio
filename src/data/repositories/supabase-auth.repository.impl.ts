@@ -2,6 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IAuthRepository } from '@/domain/repositories/auth.repository';
 import { User } from '@/domain/entities/user.entity';
 import { AuthError } from '@/domain/errors/auth.error';
+import { classifySupabaseError } from '@/data/errors/supabase-error.adapter';
 
 export class SupabaseAuthRepositoryImpl implements IAuthRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -14,7 +15,7 @@ export class SupabaseAuthRepositoryImpl implements IAuthRepository {
 
     if (error) {
       console.error('[Supabase::login] Error:', error.message);
-      if (error.message.includes('Email not confirmed')) {
+      if (classifySupabaseError(error) === 'EMAIL_NOT_CONFIRMED') {
         throw new AuthError('EMAIL_NOT_CONFIRMED');
       }
       throw new AuthError('WRONG_CREDENTIALS');
