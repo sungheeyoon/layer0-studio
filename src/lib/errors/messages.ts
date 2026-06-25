@@ -4,6 +4,7 @@ export const AUTH_ERRORS: Record<string, string> = {
   USER_ALREADY_EXISTS: '이미 사용 중인 이메일입니다.',
   WRONG_CREDENTIALS: '이메일 또는 비밀번호가 올바르지 않습니다.',
   EMAIL_NOT_CONFIRMED: '이메일 확인이 필요합니다. 받은 메일함을 확인해주세요.',
+  OAUTH_FAILED: 'SNS 로그인에 실패했습니다. 다시 시도해주세요.',
   UNKNOWN: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
 };
 

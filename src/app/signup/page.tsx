@@ -1,10 +1,11 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signupAction } from "./actions";
 import { getAuthError } from "@/lib/errors/messages";
+import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
@@ -167,6 +168,13 @@ export default function SignupPage() {
                 </Link>
               </div>
             </form>
+
+            {/* Social Login */}
+            <div className="mt-10">
+              <Suspense fallback={null}>
+                <OAuthButtons />
+              </Suspense>
+            </div>
           </div>
 
           {/* Right Visual Accent */}

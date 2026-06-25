@@ -1,13 +1,20 @@
 'use client';
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginAction } from "./actions";
 import { getAuthError } from "@/lib/errors/messages";
+import { safeNextPath } from "@/lib/auth/safe-next";
+import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
-export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null);
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get('error');
+  const next = searchParams.get('next');
+  const [error, setError] = useState<string | null>(
+    urlError ? getAuthError(urlError.toUpperCase()) : null
+  );
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -19,7 +26,7 @@ export default function LoginPage() {
         setError(getAuthError(result.error));
       } else {
         setError(null);
-        router.push('/templates');
+        router.push(safeNextPath(next));
       }
     });
   }
@@ -132,6 +139,11 @@ export default function LoginPage() {
             </div>
           </form>
 
+          {/* Social Login */}
+          <div className="mt-12">
+            <OAuthButtons />
+          </div>
+
           {/* Technical Metadata Footer */}
           <div className="mt-24 pt-8 border-t border-zinc-100 grid grid-cols-2 gap-4">
             <div>
@@ -159,5 +171,13 @@ export default function LoginPage() {
         </div>
       </footer>
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }
