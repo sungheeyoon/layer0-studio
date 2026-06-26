@@ -4,12 +4,15 @@ import { useState } from 'react';
 import { Template, allSections } from '@/domain/entities/template.entity';
 import { selectTemplateAction } from '@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions';
 import { getDomainError } from '@/lib/errors/messages';
+import { useDictionary, useLocale } from '@/lib/i18n/provider';
 
 interface CreateProjectClientProps {
   template: Template;
 }
 
 export default function CreateProjectClient({ template }: CreateProjectClientProps) {
+  const locale = useLocale();
+  const t = useDictionary().dashboard.create;
   const [siteName, setSiteName] = useState('');
   const [urlSlug, setUrlSlug] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,7 +20,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
 
   const handleProvision = async () => {
     if (!siteName) {
-      setProvisionError('사이트 이름을 입력해주세요.');
+      setProvisionError(t.nameRequired);
       return;
     }
     setProvisionError(null);
@@ -25,7 +28,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
     try {
       const result = await selectTemplateAction(template.id, siteName, urlSlug);
       if (result?.error) {
-        setProvisionError(getDomainError(result.error));
+        setProvisionError(getDomainError(result.error, locale));
         setIsSubmitting(false);
       }
     } catch {
@@ -64,7 +67,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
               </div>
               <div className="space-y-12">
                 <div className="group relative">
-                  <label className="block text-[10px] tracking-[0.1em] font-light text-neutral-400 uppercase mb-2">Site Name</label>
+                  <label className="block text-[10px] tracking-[0.1em] font-light text-neutral-400 uppercase mb-2">{t.siteName}</label>
                   <input
                     type="text"
                     value={siteName}
@@ -76,7 +79,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
                 </div>
 
                 <div className="group relative">
-                  <label className="block text-[10px] tracking-[0.1em] font-light text-neutral-400 uppercase mb-2">URL Slug</label>
+                  <label className="block text-[10px] tracking-[0.1em] font-light text-neutral-400 uppercase mb-2">{t.urlSlug}</label>
                   <div className="flex items-center border-b border-outline-variant focus-within:border-primary">
                     <input
                       type="text"
@@ -134,7 +137,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
                 className="bg-primary text-on-primary w-full h-16 flex items-center justify-between px-8 group transition-all hover:bg-neutral-800 disabled:opacity-50"
               >
                 <span className="text-sm font-medium tracking-[0.3em] uppercase">
-                  {isSubmitting ? 'PROVISIONING...' : 'PROVISION_PROJECT'}
+                  {isSubmitting ? t.provisioning : t.provision}
                 </span>
                 <span className="material-symbols-outlined transition-transform group-hover:translate-x-2" style={{ fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24", fontSize: '18px' }}>arrow_forward</span>
               </button>

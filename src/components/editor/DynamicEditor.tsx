@@ -27,12 +27,14 @@ import { SectionDataSchema, TemplateModule } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
 import { getSiteError, isStaleConflict } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
+import { useLocale } from '@/lib/i18n/provider';
 
 interface DynamicEditorProps {
   site: UserSite;
 }
 
 export default function DynamicEditor({ site }: DynamicEditorProps) {
+  const locale = useLocale();
   const [siteJson, setSiteJson] = useState<TemplateJson>(() => injectKeys(site.siteJson));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
@@ -125,14 +127,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         } else {
           setAutoSaveStatus('error');
           if (result.error === 'INVALID_TEMPLATE_JSON') {
-            setActionError(getSiteError(result.error, '저장에 실패했습니다.'));
+            setActionError(getSiteError(result.error, locale, '저장에 실패했습니다.'));
           }
         }
       } else if (result && 'updatedAt' in result) {
         applySuccessfulSave(result.updatedAt);
       }
     }, 4000);
-  }, [site.id, applySuccessfulSave]);
+  }, [site.id, applySuccessfulSave, locale]);
 
   const [templateModule, setTemplateModule] = useState<TemplateModule | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
@@ -300,7 +302,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       if (isStaleConflict(result)) {
         setConflictDetected(true);
       } else {
-        setActionError(getSiteError(result.error, `Save failed: ${result.error}`));
+        setActionError(getSiteError(result.error, locale, `Save failed: ${result.error}`));
       }
     } else if (result && 'updatedAt' in result) {
       applySuccessfulSave(result.updatedAt);
@@ -319,7 +321,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       if (isStaleConflict(saveResult)) {
         setConflictDetected(true);
       } else {
-        setActionError(getSiteError(saveResult.error, `저장 실패: ${saveResult.error}`));
+        setActionError(getSiteError(saveResult.error, locale, `저장 실패: ${saveResult.error}`));
       }
       setSaving(false);
       return;
@@ -333,7 +335,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       if (isStaleConflict(result)) {
         setConflictDetected(true);
       } else {
-        setActionError(getSiteError(result.error, `발행 실패: ${result.error}`));
+        setActionError(getSiteError(result.error, locale, `발행 실패: ${result.error}`));
       }
     } else {
       // Publish bumps updated_at; keep the token fresh for the next save.

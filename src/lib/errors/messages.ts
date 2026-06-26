@@ -37,17 +37,43 @@ export const AUTH_ERRORS: Record<string, Record<Locale, string>> = {
   },
 };
 
-export const DOMAIN_ERRORS: Record<string, string> = {
-  DOMAIN_TAKEN: '이미 사용 중인 도메인입니다.',
-  INVALID_DOMAIN: '도메인 형식이 올바르지 않거나 예약된 단어입니다 (최소 3자, 영문/숫자/하이픈).',
-  NAME_TAKEN: '이미 사용 중인 사이트 이름입니다.',
-  STALE_VERSION: '다른 곳에서 먼저 수정되었습니다. 새로고침 후 다시 시도해주세요.',
+export const DOMAIN_ERRORS: Record<string, Record<Locale, string>> = {
+  DOMAIN_TAKEN: {
+    ko: '이미 사용 중인 도메인입니다.',
+    en: 'This domain is already in use.',
+  },
+  INVALID_DOMAIN: {
+    ko: '도메인 형식이 올바르지 않거나 예약된 단어입니다 (최소 3자, 영문/숫자/하이픈).',
+    en: 'Invalid or reserved domain format (min 3 chars; letters, numbers, hyphens).',
+  },
+  NAME_TAKEN: {
+    ko: '이미 사용 중인 사이트 이름입니다.',
+    en: 'This site name is already in use.',
+  },
+  STALE_VERSION: {
+    ko: '다른 곳에서 먼저 수정되었습니다. 새로고침 후 다시 시도해주세요.',
+    en: 'This was modified elsewhere. Refresh and try again.',
+  },
 };
 
-export const SITE_ERRORS: Record<string, string> = {
-  RATE_LIMITED: '잠시 후 다시 시도해주세요 (30초 제한).',
-  INVALID_TEMPLATE_JSON: '저장할 수 없는 콘텐츠입니다. 입력값을 확인해주세요.',
-  STALE_VERSION: '다른 곳에서 먼저 수정되었습니다. 새로고침 후 다시 시도해주세요.',
+export const SITE_ERRORS: Record<string, Record<Locale, string>> = {
+  RATE_LIMITED: {
+    ko: '잠시 후 다시 시도해주세요 (30초 제한).',
+    en: 'Please try again shortly (30-second limit).',
+  },
+  INVALID_TEMPLATE_JSON: {
+    ko: '저장할 수 없는 콘텐츠입니다. 입력값을 확인해주세요.',
+    en: 'This content cannot be saved. Please check your input.',
+  },
+  STALE_VERSION: {
+    ko: '다른 곳에서 먼저 수정되었습니다. 새로고침 후 다시 시도해주세요.',
+    en: 'This was modified elsewhere. Refresh and try again.',
+  },
+};
+
+const UNKNOWN_ERROR: Record<Locale, string> = {
+  ko: '알 수 없는 오류입니다.',
+  en: 'An unknown error occurred.',
 };
 
 export const ADMIN_DOMAIN_ERRORS: Record<string, string> = {
@@ -82,12 +108,12 @@ export function getAuthError(code: string | undefined, locale: Locale): string {
   return (AUTH_ERRORS[code ?? 'UNKNOWN'] ?? AUTH_ERRORS.UNKNOWN)[locale];
 }
 
-export function getDomainError(code: string | undefined): string {
-  return DOMAIN_ERRORS[code ?? ''] ?? code ?? '알 수 없는 오류입니다.';
+export function getDomainError(code: string | undefined, locale: Locale): string {
+  return DOMAIN_ERRORS[code ?? '']?.[locale] ?? code ?? UNKNOWN_ERROR[locale];
 }
 
-export function getSiteError(code: string | undefined, fallback: string): string {
-  return SITE_ERRORS[code ?? ''] ?? fallback;
+export function getSiteError(code: string | undefined, locale: Locale, fallback: string): string {
+  return SITE_ERRORS[code ?? '']?.[locale] ?? fallback;
 }
 
 export function getAdminDomainError(code: string | undefined): string {

@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useDictionary } from "@/lib/i18n/provider";
 
 const navItems = [
-  { name: "OVERVIEW", href: "/dashboard", icon: "grid_view", exact: true },
-  { name: "TEMPLATES", href: "/dashboard/templates", icon: "layers" },
-  { name: "PROJECTS", href: "/dashboard/projects", icon: "folder_open" },
-  { name: "DOMAINS", href: "/dashboard/domains", icon: "language" },
-  { name: "SETTINGS", href: "/dashboard/settings", icon: "settings" },
-];
+  { key: "overview", href: "/dashboard", icon: "grid_view", exact: true },
+  { key: "templates", href: "/dashboard/templates", icon: "layers" },
+  { key: "projects", href: "/dashboard/projects", icon: "folder_open" },
+  { key: "domains", href: "/dashboard/domains", icon: "language" },
+  { key: "settings", href: "/dashboard/settings", icon: "settings" },
+] as const;
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const t = useDictionary().dashboard.sidebar;
 
   return (
     <aside className="fixed left-0 top-0 flex flex-col h-full py-8 bg-[#f3f3f3] dark:bg-zinc-900 w-64 border-none z-50">
@@ -22,13 +24,13 @@ export default function Sidebar() {
       </div>
       <nav className="flex-1 flex flex-col gap-1">
         {navItems.map((item) => {
-          const isActive = item.exact 
-            ? pathname === item.href 
+          const isActive = 'exact' in item && item.exact
+            ? pathname === item.href
             : pathname.startsWith(item.href);
           
           return (
             <Link
-              key={item.name}
+              key={item.key}
               href={item.href}
               className={`group relative flex items-center px-6 py-3 font-['Inter'] font-light uppercase tracking-[0.1em] text-[0.6875rem] transition-colors duration-75 ${
                 isActive
@@ -39,7 +41,7 @@ export default function Sidebar() {
               <span className="material-symbols-outlined mr-4" data-icon={item.icon}>
                 {item.icon}
               </span>
-              <span>{item.name}</span>
+              <span>{t[item.key]}</span>
             </Link>
           );
         })}
