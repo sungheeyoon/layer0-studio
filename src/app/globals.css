@@ -39,6 +39,12 @@
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
 
+  /* Status semantics — saved/healthy (green) and warning (amber). ADR-0011. */
+  --success: oklch(0.627 0.17 149.21);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.666 0.179 58.318);
+  --warning-foreground: oklch(0.205 0 0);
+
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   /* Indigo-500 (#6366F1) focus ring */
@@ -86,6 +92,12 @@
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
 
+  /* Status semantics — lighter on dark surfaces. */
+  --success: oklch(0.7 0.15 149.21);
+  --success-foreground: oklch(0.205 0 0);
+  --warning: oklch(0.769 0.15 70);
+  --warning-foreground: oklch(0.205 0 0);
+
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.585 0.233 277.117);
@@ -123,6 +135,10 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

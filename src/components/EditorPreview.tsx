@@ -49,9 +49,9 @@ export default function EditorPreview() {
             {/* Mock Left Sidebar */}
             <div className="hidden w-[240px] flex-col border-r border-border md:flex">
               <div className="flex gap-2 border-b border-border p-4">
-                <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
+                <div className="h-2.5 w-2.5 rounded-full bg-destructive" />
+                <div className="h-2.5 w-2.5 rounded-full bg-warning" />
+                <div className="h-2.5 w-2.5 rounded-full bg-success" />
               </div>
               <div className="flex border-b border-border">
                 <div className="flex-1 border-b-2 border-primary py-3 text-center text-xs font-semibold text-primary">

@@ -727,10 +727,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               <span className="text-muted-foreground">{t.autosave.saving}</span>
             )}
             {autoSaveStatus === 'saved' && (
-              <span className="text-green-600 dark:text-green-500">{t.autosave.saved}</span>
+              <span className="text-success">{t.autosave.saved}</span>
             )}
             {autoSaveStatus === 'error' && (
-              <span className="text-amber-600 dark:text-amber-500">{t.autosave.failed}</span>
+              <span className="text-warning">{t.autosave.failed}</span>
             )}
             {isDirty && autoSaveStatus === 'idle' && (
               <span className="text-muted-foreground">{t.autosave.unsaved}</span>
@@ -759,9 +759,9 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           </Button>
 
           {publishedUrl === 'NO_DOMAIN' && (
-            <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-4 text-center text-xs leading-relaxed text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-500">
+            <div className="mt-4 rounded-md border border-warning/30 bg-warning/10 p-4 text-center text-xs leading-relaxed text-warning">
               {t.published.line1}
-              <a href="/dashboard/domains" className="mx-1 font-medium underline hover:text-amber-900 dark:hover:text-amber-400">
+              <a href="/dashboard/domains" className="mx-1 font-medium underline hover:text-warning/80">
                 {t.published.setDomainLink}
               </a>
               {t.published.line2}

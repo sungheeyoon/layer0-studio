@@ -6,9 +6,12 @@
  * bg-card, border-border, bg-primary, …) — ADR-0011.
  *
  * This rule flags, inside className string/template literals:
- *   1. Raw Tailwind palette grays with a numeric scale
- *      (text-zinc-400, bg-neutral-100, border-slate-200, …) — these bypass
- *      the token system and were the source of the WCAG-AA contrast misses.
+ *   1. Raw Tailwind palette colors with a numeric scale — both grays
+ *      (text-zinc-400, bg-neutral-100, …) AND chromatic palettes
+ *      (text-red-500, bg-blue-400, text-amber-600, …). These bypass the token
+ *      system; use a semantic token instead (text-destructive for reds,
+ *      text-success / text-warning for status greens / ambers, bg-primary for
+ *      brand indigo, …). The grays were the original WCAG-AA contrast source.
  *   2. Legacy Material-Design-3 utility stems that no longer resolve to a
  *      real token after the @theme rewrite (text-outline, bg-surface,
  *      text-on-surface, *-container, *-fixed, …).
@@ -27,11 +30,12 @@
 const UTIL =
   "text|bg|border|ring|fill|stroke|divide|from|via|to|outline|placeholder|caret|accent|decoration|ring-offset|shadow";
 
-// 1. Raw palette grays with numeric scale.
-const RAW_GRAY_RE = new RegExp(
-  `\\b(?:${UTIL})-(?:zinc|neutral|gray|slate|stone)-\\d{1,3}\\b`,
-  "g",
-);
+// 1. Raw Tailwind palette colors with numeric scale — grays + chromatics.
+//    Semantic tokens (primary/destructive/success/warning/muted/…) carry no
+//    numeric scale, so they never match.
+const PALETTE =
+  "slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose";
+const RAW_GRAY_RE = new RegExp(`\\b(?:${UTIL})-(?:${PALETTE})-\\d{1,3}\\b`, "g");
 
 // 2. Legacy MD3 utility stems (unique to the old dump — no shadcn collision).
 const MD3_STEM =
