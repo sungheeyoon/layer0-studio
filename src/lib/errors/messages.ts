@@ -15,6 +15,10 @@ export const AUTH_ERRORS: Record<string, Record<Locale, string>> = {
     ko: '비밀번호는 6자 이상이어야 합니다.',
     en: 'Password must be at least 6 characters.',
   },
+  PASSWORDS_DO_NOT_MATCH: {
+    ko: '비밀번호가 일치하지 않습니다.',
+    en: 'Passwords do not match.',
+  },
   USER_ALREADY_EXISTS: {
     ko: '이미 사용 중인 이메일입니다.',
     en: 'This email is already in use.',
