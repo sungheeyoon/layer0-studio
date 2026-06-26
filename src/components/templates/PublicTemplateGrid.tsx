@@ -7,6 +7,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { listPaginatedTemplatesAction } from '@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useDictionary } from '@/lib/i18n/provider';
+import { categoryLabel } from '@/lib/i18n/category-label';
 
 interface PublicTemplateGridProps {
   templates: Template[];
@@ -16,6 +18,7 @@ interface PublicTemplateGridProps {
 
 export default function PublicTemplateGrid({ templates: initialTemplates, categories, initialTotal }: PublicTemplateGridProps) {
   const router = useRouter();
+  const t = useDictionary().templatesCatalog;
   const [selectingId, setSelectingId] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
@@ -56,9 +59,9 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
     <main className="min-h-screen px-6 pb-24 pt-32 md:px-10">
       {/* Header */}
       <header className="mx-auto mb-16 max-w-6xl">
-        <h1 className="text-display">Templates</h1>
+        <h1 className="text-display">{t.title}</h1>
         <p className="text-body mt-4 max-w-xl text-muted-foreground">
-          Start with a template. Customize later.
+          {t.subtitle}
         </p>
       </header>
 
@@ -69,7 +72,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
           size="sm"
           onClick={() => handleCategoryChange(null)}
         >
-          All
+          {t.all}
         </Button>
         {categories.map((cat) => (
           <Button
@@ -78,7 +81,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
             size="sm"
             onClick={() => handleCategoryChange(cat)}
           >
-            {cat}
+            {categoryLabel(t.categoryLabels, cat)}
           </Button>
         ))}
       </div>
@@ -97,7 +100,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <span className="text-caption text-muted-foreground">No preview</span>
+                  <span className="text-caption text-muted-foreground">{t.noPreview}</span>
                 </div>
               )}
 
@@ -108,18 +111,18 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
                   disabled={selectingId === template.id}
                   className="w-full"
                 >
-                  {selectingId === template.id ? 'Loading…' : 'Use Template'}
+                  {selectingId === template.id ? t.loading : t.useTemplate}
                 </Button>
                 <Button asChild variant="secondary" className="w-full">
                   <a href={`/preview/${template.id}`} target="_blank" rel="noopener noreferrer">
-                    Preview
+                    {t.preview}
                   </a>
                 </Button>
               </div>
 
               {/* Category badge */}
               <div className="absolute right-4 top-4">
-                <Badge variant="secondary">{template.category || 'Standard'}</Badge>
+                <Badge variant="secondary">{template.category ? categoryLabel(t.categoryLabels, template.category) : t.generalCategory}</Badge>
               </div>
             </div>
 
@@ -141,7 +144,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
             size="icon-sm"
             onClick={() => handlePageChange(page - 1)}
             disabled={page === 1 || isPending}
-            aria-label="Previous page"
+            aria-label={t.previousPage}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -153,7 +156,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
             size="icon-sm"
             onClick={() => handlePageChange(page + 1)}
             disabled={page === totalPages || isPending}
-            aria-label="Next page"
+            aria-label={t.nextPage}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

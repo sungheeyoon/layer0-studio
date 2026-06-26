@@ -24,10 +24,11 @@ export default function Hero({
         </span>
         <h1 className="text-display mx-auto max-w-3xl text-balance">
           {copy.titleLine1}{" "}
-          <span className="text-primary">{copy.titleEmphasis}</span>{" "}
+          <span className="text-primary">{copy.titleEmphasis}</span>
+          <br />
           {copy.titleLine3}
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-body text-muted-foreground">
+        <p className="mx-auto mt-6 max-w-3xl text-balance text-body text-muted-foreground">
           {copy.description}
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">

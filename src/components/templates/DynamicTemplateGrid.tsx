@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { listPaginatedTemplatesAction } from '@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions';
 import { useDictionary } from '@/lib/i18n/provider';
+import { categoryLabel } from '@/lib/i18n/category-label';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -30,6 +31,7 @@ interface DynamicTemplateGridProps {
 export default function DynamicTemplateGrid({ templates: initialTemplates, mySites, categories, initialTotal }: DynamicTemplateGridProps) {
   const router = useRouter();
   const t = useDictionary().dashboard.templates;
+  const categoryLabels = useDictionary().templatesCatalog.categoryLabels;
   const [selectingId, setSelectingId] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
@@ -95,7 +97,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
           <SelectContent>
             <SelectItem value={ALL_CATEGORIES}>{t.allCategories}</SelectItem>
             {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              <SelectItem key={cat} value={cat}>{categoryLabel(categoryLabels, cat)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -124,7 +126,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
               <div className="space-y-2">
                 <h3 className="text-title">{template.name}</h3>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">{template.category || t.generalCategory}</Badge>
+                  <Badge variant="secondary">{template.category ? categoryLabel(categoryLabels, template.category) : t.generalCategory}</Badge>
                   <Badge variant="outline">{t.templateTag}</Badge>
                 </div>
               </div>
