@@ -80,6 +80,12 @@ src/types/database.ts ← Generated Supabase DB types
 | `/preview/[id]` | Preview before publishing |
 | `/api/cron/cleanup-assets` | Cron job: orphan asset cleanup via Supabase RPCs (Bearer `CRON_SECRET`). Schedule: `0 3 * * *` (daily 03:00 UTC) — free Vercel plan limit (1 cron/day) |
 
+### Studio UI / design system
+
+> **Any work touching Studio chrome UI (a page, component, color, button, icon, font, or `globals.css`): read `docs/DESIGN_SYSTEM.md` FIRST.** That doc is the single source of truth for the visual layer (ADR-0011) — semantic token vocabulary, the shadcn primitives in `src/components/ui/`, lucide icons, Pretendard, light/dark rules, and how to add a token. Color is enforced: ESLint `local/no-raw-color-classes` is at **error** severity, so raw Tailwind palette classes (`text-zinc-400`, `bg-red-500`, …) and legacy MD3/font utilities **fail the build** in chrome.
+>
+> Scope: "chrome" = landing/auth/dashboard/editor/settings/admin/legal/error. It does **NOT** include the published-Site renderers in `src/templates/**` — those keep their own per-Template design tokens ([ADR-0005](./docs/adr/0005-design-tokens-gradual-migration.md)) and are exempt from the chrome system. Don't cross the streams.
+
 ### Template system
 
 > **Any work touching templates / presets / sync / validate / thumbnail capture: read `docs/TEMPLATE_SYSTEM.md` FIRST.** That doc is the single source of truth — concepts, data model, sync pipeline, validate rules, extension scenarios, gotchas, and code map. The summary here is just a pointer.
