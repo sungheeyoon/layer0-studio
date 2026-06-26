@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { headers } from "next/headers";
 import Navbar from "@/components/Navbar";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import ConditionalLayoutWrapper from "@/components/ConditionalLayoutWrapper";
 import { SITE_URL } from "@/lib/seo/base-url";
+import { subdomainFor } from "@/lib/subdomain";
 import "./globals.css";
+
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -43,7 +47,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCurrentUser();
+  // A Subdomain (`<slug>.<root>`) is a sessionless, read-only public origin
+  // (ADR-0009): it serves only the published Site — no platform Navbar (its
+  // /login·/signup·/templates links 404 here) and no auth lookup, keeping
+  // getUser calls at 0. The middleware already skips updateSession for these;
+  // gating getCurrentUser here keeps the whole request session-free.
+  const host = (await headers()).get("host") ?? "";
+  const isPublicSiteOrigin = subdomainFor(host, ROOT_DOMAIN).kind === "site";
+  const user = isPublicSiteOrigin ? null : await getCurrentUser();
+
   return (
     <html lang="en" className="light">
       <head>
@@ -53,9 +65,11 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${inter.variable} bg-surface font-body text-on-surface antialiased`}>
-        <ConditionalLayoutWrapper>
-          <Navbar user={user} />
-        </ConditionalLayoutWrapper>
+        {!isPublicSiteOrigin && (
+          <ConditionalLayoutWrapper>
+            <Navbar user={user} />
+          </ConditionalLayoutWrapper>
+        )}
         {children}
       </body>
     </html>

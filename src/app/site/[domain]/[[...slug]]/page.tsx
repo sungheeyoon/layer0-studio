@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/container';
 import { loadTemplate } from '@/templates/registry';
-import { SITE_URL } from '@/lib/seo/base-url';
 import {
   getFieldValue,
   allSections,
@@ -53,9 +52,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = seo?.title || site.siteName;
     const description = seo?.description || buildDescription(site.siteName, undefined, heroTitle, heroSubtitle);
 
-    const canonical = slugPath
-      ? `${SITE_URL}/site/${domain}/${slugPath}`
-      : `${SITE_URL}/site/${domain}`;
+    // The public origin is the Site's subdomain (ADR-0009). `domain` is the
+    // label that the middleware extracted from the host before rewriting here.
+    const origin = `https://${domain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'}`;
+    const canonical = slugPath ? `${origin}/${slugPath}` : origin;
 
     return {
       title,
@@ -138,7 +138,7 @@ export default async function PublicSitePage({ params }: Props) {
         siteJson={siteJson}
         selectedSectionId={null}
         activePageId={activePageId}
-        basePath={`/site/${domain}`}
+        basePath=""
       />
     </main>
   );
