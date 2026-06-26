@@ -1,37 +1,39 @@
 'use client';
 
+import { useDictionary } from "@/lib/i18n/provider";
+
 export default function EditorPreview() {
+  const t = useDictionary().landing.editorPreview;
   return (
     <section className="bg-surface-container-low py-32 px-10 border-b border-surface-container relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-12 gap-8 mb-20 items-end">
           <div className="col-span-12 lg:col-span-5">
             <h2 className="text-4xl md:text-5xl font-light text-primary mb-8 tracking-tight">
-              Edit Visually. <br/>
-              <span className="text-outline">Change Everything.</span>
+              {t.title} <br/>
+              <span className="text-outline">{t.titleEmphasis}</span>
             </h2>
             <p className="text-outline font-light text-sm mb-12 max-w-sm leading-relaxed">
-              Modify text, images, and layouts in real-time. No complex menus or coding required. 
-              Our intuitive editor gives you direct control over every detail of your site.
+              {t.description}
             </p>
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-2">
-                <span className="text-[0.625rem] font-mono text-primary uppercase tracking-widest">Experience</span>
-                <p className="text-xl font-light tracking-tight">Real-time Editing</p>
+                <span className="text-[0.625rem] font-mono text-primary uppercase tracking-widest">{t.experienceLabel}</span>
+                <p className="text-xl font-light tracking-tight">{t.experienceValue}</p>
               </div>
               <div className="space-y-2">
-                <span className="text-[0.625rem] font-mono text-primary uppercase tracking-widest">Feedback</span>
-                <p className="text-xl font-light tracking-tight">Instant Preview</p>
+                <span className="text-[0.625rem] font-mono text-primary uppercase tracking-widest">{t.feedbackLabel}</span>
+                <p className="text-xl font-light tracking-tight">{t.feedbackValue}</p>
               </div>
             </div>
           </div>
           <div className="hidden lg:block lg:col-span-7">
             <div className="flex justify-end gap-4 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-outline-variant">
-              <span>01 Select Template</span>
+              <span>{t.step1}</span>
               <span>/</span>
-              <span>02 Customize Content</span>
+              <span>{t.step2}</span>
               <span>/</span>
-              <span>03 Go Live</span>
+              <span>{t.step3}</span>
             </div>
           </div>
         </div>

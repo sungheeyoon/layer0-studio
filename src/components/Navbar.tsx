@@ -1,12 +1,15 @@
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
 import ProfileDropdown from "./ProfileDropdown";
+import { LocaleToggle } from "./LocaleToggle";
+import type { Messages } from "@/lib/i18n/messages/ko";
 
 interface NavbarProps {
   user: User | null;
+  copy: Messages["nav"];
 }
 
-export default function Navbar({ user }: NavbarProps) {
+export default function Navbar({ user, copy }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 w-full h-16 px-10 flex justify-between items-center bg-[#f9f9f9] dark:bg-[#121212] border-b border-[#eeeeee] dark:border-[#222222] z-50">
       <Link href="/" className="flex items-center">
@@ -19,10 +22,11 @@ export default function Navbar({ user }: NavbarProps) {
           className="text-[#777777] dark:text-[#999999] hover:text-[#1a1a1a] dark:hover:text-[#ffffff] transition-colors duration-150"
           href="/templates"
         >
-          Templates
+          {copy.templates}
         </Link>
       </div>
       <div className="flex items-center gap-6 font-['Inter'] font-light tracking-[0.05em] uppercase text-[0.6875rem]">
+        <LocaleToggle className="flex gap-2" />
         {user ? (
           <div className="flex items-center gap-6">
             <Link
@@ -36,8 +40,8 @@ export default function Navbar({ user }: NavbarProps) {
           </div>
         ) : (
           <>
-            <Link className="text-[#777777] hover:text-[#1a1a1a]" href="/login">Sign In</Link>
-            <Link className="bg-primary text-on-primary px-6 py-2" href="/signup">Get Started</Link>
+            <Link className="text-[#777777] hover:text-[#1a1a1a]" href="/login">{copy.signIn}</Link>
+            <Link className="bg-primary text-on-primary px-6 py-2" href="/signup">{copy.getStarted}</Link>
           </>
         )}
       </div>
