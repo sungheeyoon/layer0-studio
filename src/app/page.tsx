@@ -4,18 +4,21 @@ import Features from "@/components/Features";
 import Footer from "@/components/Footer";
 import EditorPreview from "@/components/EditorPreview";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionary";
 
 export default async function Home() {
-  const user = await getCurrentUser();
+  const [user, locale] = await Promise.all([getCurrentUser(), getLocale()]);
+  const t = getDictionary(locale).landing;
   const primaryCtaHref = user ? "/dashboard" : "/signup";
-  const primaryCtaLabel = user ? "Open Dashboard" : "Get Started";
+  const primaryCtaLabel = user ? t.cta.authed : t.cta.guest;
 
   return (
     <>
       <main className="pt-16 min-h-screen">
-        <Hero />
+        <Hero copy={t.hero} ctaLabel={t.common.browseTemplates} />
 
-        <Features />
+        <Features copy={t.features} />
 
         <EditorPreview />
 
@@ -23,32 +26,32 @@ export default async function Home() {
         <section className="py-32 px-10 border-b border-surface-container">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-baseline mb-20 gap-8">
-              <h2 className="text-4xl font-light text-primary tracking-tight">How It Works. <br /><span className="text-outline">From idea to live site.</span></h2>
+              <h2 className="text-4xl font-light text-primary tracking-tight">{t.howItWorks.title} <br /><span className="text-outline">{t.howItWorks.subtitle}</span></h2>
               <p className="text-outline font-light text-sm max-w-sm">
-                Follow three simple steps to build and launch your professional presence globally.
+                {t.howItWorks.lead}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-px bg-outline-variant border border-outline-variant">
               <div className="md:col-span-4 bg-surface p-12">
                 <span className="text-[3rem] font-thin text-tertiary leading-none mb-8 block">01</span>
-                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">Choose a Template</h4>
+                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">{t.howItWorks.chooseTitle}</h4>
                 <p className="text-outline font-light text-sm leading-relaxed">
-                  Start with a professionally designed layout. Each template is ready-to-use and optimized for all devices.
+                  {t.howItWorks.chooseBody}
                 </p>
               </div>
               <div className="md:col-span-4 bg-surface p-12">
                 <span className="text-[3rem] font-thin text-tertiary leading-none mb-8 block">02</span>
-                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">Customize Your Content</h4>
+                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">{t.howItWorks.customizeTitle}</h4>
                 <p className="text-outline font-light text-sm leading-relaxed">
-                  Edit text, images, and styles in seconds using our visual editor. See your changes instantly as you work.
+                  {t.howItWorks.customizeBody}
                 </p>
               </div>
               <div className="md:col-span-4 bg-surface p-12">
                 <span className="text-[3rem] font-thin text-tertiary leading-none mb-8 block">03</span>
-                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">Publish Instantly</h4>
+                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">{t.howItWorks.publishTitle}</h4>
                 <p className="text-outline font-light text-sm leading-relaxed">
-                  Go live with one click. Your site is deployed to a high-speed global network for the best user experience.
+                  {t.howItWorks.publishBody}
                 </p>
               </div>
             </div>
@@ -60,7 +63,7 @@ export default async function Home() {
           <div className="max-w-7xl mx-auto flex flex-col">
             <div className="flex justify-between items-end mb-16">
               <div>
-                <h2 className="text-3xl font-light mb-4 text-primary tracking-tight">Templates You Can Start With.</h2>
+                <h2 className="text-3xl font-light mb-4 text-primary tracking-tight">{t.templates.title}</h2>
                 <p className="text-outline text-[0.625rem] uppercase tracking-[0.3em]">Curated Library // Available: 01</p>
               </div>
               <div className="hidden md:block">
@@ -68,7 +71,7 @@ export default async function Home() {
                   href="/templates"
                   className="text-[0.6875rem] font-medium uppercase tracking-widest border-b border-primary pb-1"
                 >
-                  Browse all templates
+                  {t.templates.browseAll}
                 </Link>
               </div>
             </div>
@@ -85,34 +88,32 @@ export default async function Home() {
                       src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
                     />
                     <div className="absolute top-6 left-6 bg-primary text-white px-4 py-2 text-[10px] uppercase tracking-[0.2em]">
-                      Best for Business
+                      {t.templates.bestForBusiness}
                     </div>
                   </div>
                 </div>
               </div>
               <div className="lg:col-span-5 flex flex-col justify-center">
-                <h3 className="text-2xl font-light mb-6 text-primary tracking-tight">The Corporate Layout.</h3>
+                <h3 className="text-2xl font-light mb-6 text-primary tracking-tight">{t.templates.corporateTitle}</h3>
                 <p className="text-outline font-light text-sm leading-relaxed mb-8">
-                  A professional foundation for businesses and services.
-                  Includes high-impact sections for your story, features,
-                  and contact information.
+                  {t.templates.corporateBody}
                 </p>
                 <ul className="space-y-4 mb-10">
                   <li className="flex items-center gap-4 text-[0.625rem] uppercase tracking-widest text-on-surface">
-                    <span className="w-1.5 h-1.5 bg-tertiary"></span> Portfolio ready
+                    <span className="w-1.5 h-1.5 bg-tertiary"></span> {t.templates.bullet1}
                   </li>
                   <li className="flex items-center gap-4 text-[0.625rem] uppercase tracking-widest text-on-surface">
-                    <span className="w-1.5 h-1.5 bg-tertiary"></span> Business landing page
+                    <span className="w-1.5 h-1.5 bg-tertiary"></span> {t.templates.bullet2}
                   </li>
                   <li className="flex items-center gap-4 text-[0.625rem] uppercase tracking-widest text-on-surface">
-                    <span className="w-1.5 h-1.5 bg-tertiary"></span> Fully responsive
+                    <span className="w-1.5 h-1.5 bg-tertiary"></span> {t.templates.bullet3}
                   </li>
                 </ul>
                 <Link
                   href="/templates"
                   className="w-max border border-outline px-10 py-4 text-[0.6875rem] font-medium uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all"
                 >
-                  Use This Template
+                  {t.templates.useThis}
                 </Link>
               </div>
             </div>
@@ -124,8 +125,8 @@ export default async function Home() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-24 bg-outline-variant"></div>
 
           <h2 className="text-5xl md:text-7xl font-light mb-12 tracking-tightest max-w-4xl text-primary">
-            Create Your Site <br />
-            <span className="italic text-outline-variant">In Minutes.</span>
+            {t.finalCta.titleLine1} <br />
+            <span className="italic text-outline-variant">{t.finalCta.titleEmphasis}</span>
           </h2>
           <div className="flex flex-col md:flex-row gap-6">
             <Link
@@ -138,7 +139,7 @@ export default async function Home() {
               href="/templates"
               className="border border-outline px-16 py-6 text-[0.75rem] font-medium uppercase tracking-[0.3em] hover:bg-surface-container transition-all"
             >
-              Browse Templates
+              {t.common.browseTemplates}
             </Link>
           </div>
 
@@ -147,7 +148,7 @@ export default async function Home() {
           </div>
         </section>
       </main>
-      <Footer />
+      <Footer copy={t.footer} />
     </>
   );
 }

@@ -59,7 +59,7 @@ export default async function RootLayout({
       <body className={`${inter.variable} bg-surface font-body text-on-surface antialiased`}>
         <I18nProvider locale={locale} dictionary={dictionary}>
           <ConditionalLayoutWrapper>
-            <Navbar user={user} />
+            <Navbar user={user} copy={dictionary.nav} />
           </ConditionalLayoutWrapper>
           {children}
         </I18nProvider>

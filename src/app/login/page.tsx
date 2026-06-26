@@ -8,7 +8,6 @@ import { getAuthError } from "@/lib/errors/messages";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { useDictionary, useLocale } from "@/lib/i18n/provider";
-import { LocaleToggle } from "@/components/LocaleToggle";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -46,10 +45,6 @@ function LoginForm() {
 
         {/* Login Container */}
         <div className="w-full max-w-[420px] px-8 py-12 bg-surface z-10">
-          {/* Language switch */}
-          <div className="flex justify-end mb-6">
-            <LocaleToggle className="flex gap-3" />
-          </div>
           {/* Branding/Identity */}
           <div className="mb-20">
             <div className="flex items-center gap-2 mb-2">

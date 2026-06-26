@@ -1,6 +1,13 @@
 import Link from "next/link";
+import type { Messages } from "@/lib/i18n/messages/ko";
 
-export default function Hero() {
+export default function Hero({
+  copy,
+  ctaLabel,
+}: {
+  copy: Messages["landing"]["hero"];
+  ctaLabel: string;
+}) {
   return (
     <section className="relative min-h-[90vh] grid-blueprint border-b border-surface-container flex items-center px-10 overflow-hidden">
       <div className="max-w-7xl mx-auto w-full grid grid-cols-12 gap-8 relative z-10">
@@ -10,21 +17,20 @@ export default function Hero() {
             Production-Ready Architecture v1.0.4
           </span>
           <h1 className="text-primary font-['Inter'] font-light text-6xl md:text-8xl lg:text-9xl leading-[0.95] tracking-tightest mb-12">
-            Build Websites <br/>
-            <span className="text-outline-variant italic text-5xl md:text-7xl lg:text-8xl">Without Code</span> <br/>
-            Using Templates.
+            {copy.titleLine1} <br/>
+            <span className="text-outline-variant italic text-5xl md:text-7xl lg:text-8xl">{copy.titleEmphasis}</span> <br/>
+            {copy.titleLine3}
           </h1>
           <div className="flex flex-col md:flex-row gap-12 items-start md:items-center">
             <Link
               href="/templates"
               className="bg-primary text-on-primary px-12 py-5 font-medium text-[0.75rem] tracking-[0.2em] uppercase hover:brightness-110 transition-all shadow-xl"
             >
-              Browse Templates
+              {ctaLabel}
             </Link>
             <div className="max-w-md border-l border-outline-variant pl-8 py-2">
               <p className="text-outline font-light text-sm leading-relaxed">
-                Choose a template, customize your content, and launch instantly. 
-                High-fidelity digital experiences with no code required.
+                {copy.description}
               </p>
             </div>
           </div>

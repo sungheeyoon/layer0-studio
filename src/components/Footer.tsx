@@ -1,6 +1,11 @@
 import Link from "next/link";
+import type { Messages } from "@/lib/i18n/messages/ko";
 
-export default function Footer() {
+export default function Footer({
+  copy,
+}: {
+  copy: Messages["landing"]["footer"];
+}) {
   return (
     <footer className="bg-[#f9f9f9] dark:bg-[#121212] border-t border-[#eeeeee] dark:border-[#222222] flex flex-col md:flex-row justify-between items-center px-10 py-10 w-full mt-auto font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-[#777777] dark:text-[#999999]">
       <div className="flex flex-col md:flex-row items-center gap-10">
@@ -11,16 +16,16 @@ export default function Footer() {
       </div>
       <div className="flex gap-8 mt-6 md:mt-0">
         <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="/legal/terms">
-          Terms
+          {copy.terms}
         </Link>
         <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="/legal/privacy">
-          Privacy
+          {copy.privacy}
         </Link>
         <span className="opacity-40 cursor-not-allowed select-none" aria-disabled="true">
-          Security
+          {copy.security}
         </span>
         <span className="opacity-40 cursor-not-allowed select-none" aria-disabled="true">
-          Status
+          {copy.status}
         </span>
       </div>
     </footer>
