@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { SITE_URL } from "@/lib/seo/base-url";
+import { useDictionary } from "@/lib/i18n/provider";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dict = useDictionary();
+  const t = dict.auth.forgotPassword;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,7 +25,7 @@ export default function ForgotPasswordPage() {
     });
 
     if (resetError) {
-      setError('요청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      setError(t.requestError);
       setIsLoading(false);
     } else {
       setSent(true);
@@ -36,16 +39,16 @@ export default function ForgotPasswordPage() {
           <div className="w-1 h-1 bg-tertiary mx-auto mb-8"></div>
           <h2 className="font-headline text-2xl font-thin tracking-tight text-primary uppercase mb-4">LINK_SENT</h2>
           <p className="font-body text-sm font-light text-outline leading-relaxed mb-2">
-            비밀번호 재설정 링크가 발송되었습니다.
+            {t.sentLine1}
           </p>
           <p className="font-body text-sm font-light text-outline leading-relaxed mb-8">
-            <span className="text-primary font-medium">{email}</span>의 메일함을 확인해주세요.
+            {t.sentLine2Prefix}<span className="text-primary font-medium">{email}</span>{t.sentLine2Suffix}
           </p>
           <Link
             href="/login"
             className="font-label text-[0.6rem] font-light tracking-[0.1em] text-outline hover:text-primary border-b border-transparent hover:border-primary pb-0.5 transition-colors duration-200 uppercase"
           >
-            LOGIN_PAGE →
+            {t.sentLoginLink}
           </Link>
         </div>
       </main>
@@ -66,7 +69,7 @@ export default function ForgotPasswordPage() {
               <span className="font-label text-[10px] font-medium tracking-[0.2em] uppercase text-zinc-500">Password_Recovery</span>
             </div>
             <h1 className="font-headline text-5xl font-thin tracking-tight text-zinc-900 mb-2">RESET_KEY</h1>
-            <p className="font-body text-xs font-light tracking-wider text-zinc-400">비밀번호 재설정 링크를 이메일로 발송합니다.</p>
+            <p className="font-body text-xs font-light tracking-wider text-zinc-400">{t.subtitle}</p>
           </div>
 
           <form className="space-y-12" onSubmit={handleSubmit}>
@@ -75,7 +78,7 @@ export default function ForgotPasswordPage() {
                 className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
                 htmlFor="email"
               >
-                USER_EMAIL
+                {t.emailLabel}
               </label>
               <div className="relative flex items-center">
                 <input
@@ -95,7 +98,7 @@ export default function ForgotPasswordPage() {
             <div className="pt-8 flex flex-col gap-6">
               {error && (
                 <div className="text-red-500 font-label text-[10px] tracking-widest uppercase">
-                  ERROR: {error}
+                  {dict.auth.common.errorPrefix}: {error}
                 </div>
               )}
               <button
@@ -103,7 +106,7 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 disabled={isLoading}
               >
-                <span>{isLoading ? 'SENDING...' : 'SEND_RESET_LINK'}</span>
+                <span>{isLoading ? t.submitting : t.submit}</span>
                 <span className="w-[4px] h-[4px] bg-tertiary-fixed"></span>
               </button>
 
@@ -111,7 +114,7 @@ export default function ForgotPasswordPage() {
                 className="font-label text-[9px] font-light tracking-[0.1em] uppercase text-zinc-400 hover:text-zinc-900 transition-colors border-b border-transparent hover:border-zinc-900 pb-0.5 self-start"
                 href="/login"
               >
-                ← BACK_TO_LOGIN
+                {t.backToLogin}
               </Link>
             </div>
           </form>
