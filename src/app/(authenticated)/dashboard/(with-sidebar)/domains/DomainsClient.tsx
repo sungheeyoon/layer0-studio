@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation';
 import { updateSiteDomainAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import { getDomainError, isStaleConflict } from '@/lib/errors/messages';
 import { useDashboardData } from '../DashboardDataProvider';
+import { useDictionary, useLocale } from '@/lib/i18n/provider';
 
 export default function DomainsClient() {
   const router = useRouter();
   const { sites, patchSite } = useDashboardData();
+  const locale = useLocale();
+  const t = useDictionary().dashboard.domains;
   const [editingDomain, setEditingDomain] = useState<{ siteId: string; value: string } | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<{ siteId: string; message: string } | null>(null);
@@ -22,7 +25,7 @@ export default function DomainsClient() {
 
     const result = await updateSiteDomainAction(siteId, editingDomain.value, site.updatedAt);
     if (result && 'error' in result) {
-      setDomainError({ siteId, message: getDomainError(result.error) });
+      setDomainError({ siteId, message: getDomainError(result.error, locale) });
       if (isStaleConflict(result)) router.refresh();
     } else if (result && 'domain' in result && result.domain) {
       patchSite(siteId, { domain: result.domain ?? null, updatedAt: result.updatedAt });
@@ -34,7 +37,7 @@ export default function DomainsClient() {
   return (
     <div className="space-y-4">
       {sites.length === 0 ? (
-        <p className="text-outline font-light italic">No sites created yet.</p>
+        <p className="text-outline font-light italic">{t.noSites}</p>
       ) : (
         sites.map((site) => {
           const isEditing = editingDomain?.siteId === site.id;
@@ -59,9 +62,9 @@ export default function DomainsClient() {
 
               <div className="flex flex-col md:items-end gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-outline font-medium">Domain:</span>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-outline font-medium">{t.domainLabel}:</span>
                   <span className={`font-mono text-sm ${site.domain ? 'text-on-surface' : 'text-amber-500 italic'}`}>
-                    {site.domain || 'no-domain-set'}
+                    {site.domain || t.noDomainSet}
                   </span>
                 </div>
 
@@ -85,13 +88,13 @@ export default function DomainsClient() {
                         disabled={isSaving}
                         className="bg-primary text-on-primary px-4 py-1.5 text-[10px] uppercase tracking-widest font-medium hover:brightness-110 transition-all disabled:opacity-50"
                       >
-                        {isSaving ? '...' : 'Save'}
+                        {isSaving ? '...' : t.save}
                       </button>
                       <button
                         onClick={() => { setEditingDomain(null); setDomainError(null); }}
                         className="border border-outline px-4 py-1.5 text-[10px] uppercase tracking-widest font-medium hover:bg-surface-container transition-all"
                       >
-                        Cancel
+                        {t.cancel}
                       </button>
                     </div>
                     {thisError && (
@@ -107,7 +110,7 @@ export default function DomainsClient() {
                       }}
                       className="bg-primary text-on-primary px-4 py-2 text-[10px] uppercase tracking-widest font-medium hover:brightness-110 transition-all"
                     >
-                      Change Domain
+                      {t.changeDomain}
                     </button>
                     {site.domain && (
                       <a
@@ -115,7 +118,7 @@ export default function DomainsClient() {
                         target="_blank"
                         className="border border-outline px-4 py-2 text-[10px] uppercase tracking-widest font-medium hover:bg-surface-container transition-all"
                       >
-                        View Site
+                        {t.viewSite}
                       </a>
                     )}
                   </div>

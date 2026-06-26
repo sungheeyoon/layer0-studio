@@ -4,9 +4,11 @@ import { UserSite } from "@/domain/entities/user-site.entity";
 import Link from "next/link";
 import { useState } from "react";
 import { useDashboardData } from "./DashboardDataProvider";
+import { useDictionary } from "@/lib/i18n/provider";
 
 export default function DashboardClient() {
   const { sites } = useDashboardData();
+  const t = useDictionary().dashboard;
   const [selectedSite, setSelectedSite] = useState<UserSite | null>(sites[0] || null);
 
   const formatDate = (dateString: string) => {
@@ -27,17 +29,17 @@ export default function DashboardClient() {
       {/* Section 1: Site Summary */}
       <section className="mb-24">
         <header className="mb-8 flex items-baseline justify-between border-b border-zinc-300 dark:border-zinc-700 pb-2">
-          <h2 className="font-['Inter'] font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500">Site Summary (SYSTEM_METRICS)</h2>
+          <h2 className="font-['Inter'] font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500">{t.home.siteSummary} (SYSTEM_METRICS)</h2>
         </header>
 
         <div className="grid grid-cols-12 gap-px bg-zinc-200 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
           <div className="col-span-4 bg-white dark:bg-zinc-900/50 py-8">
-            <p className="font-['Inter'] font-medium text-[10px] uppercase tracking-widest text-zinc-400 mb-4 px-12">Total Sites</p>
+            <p className="font-['Inter'] font-medium text-[10px] uppercase tracking-widest text-zinc-400 mb-4 px-12">{t.home.totalSites}</p>
             <p className="text-[5rem] leading-none font-thin tracking-tighter text-zinc-900 dark:text-zinc-100 px-12">{String(totalSites).padStart(2, '0')}</p>
           </div>
 
           <div className="col-span-4 bg-white dark:bg-zinc-900/50 py-8 border-l border-zinc-200 dark:border-zinc-800">
-            <p className="font-['Inter'] font-medium text-[10px] uppercase tracking-widest text-zinc-400 mb-4 pl-12">Active Nodes</p>
+            <p className="font-['Inter'] font-medium text-[10px] uppercase tracking-widest text-zinc-400 mb-4 pl-12">{t.home.activeNodes}</p>
             <div className="flex items-baseline gap-4 pl-12">
               <p className="text-[5rem] leading-none font-thin tracking-tighter text-zinc-900 dark:text-zinc-100">{String(activeNodes).padStart(2, '0')}</p>
               <div className="w-1 h-1 bg-[#7d000c] mb-3"></div>
@@ -45,7 +47,7 @@ export default function DashboardClient() {
           </div>
 
           <div className="col-span-4 bg-white dark:bg-zinc-900/50 py-8 border-l border-zinc-200 dark:border-zinc-800">
-            <p className="font-['Inter'] font-medium text-[10px] uppercase tracking-widest text-zinc-400 mb-4 pl-12">Draft States</p>
+            <p className="font-['Inter'] font-medium text-[10px] uppercase tracking-widest text-zinc-400 mb-4 pl-12">{t.home.draftStates}</p>
             <p className="text-[5rem] leading-none font-thin tracking-tighter text-zinc-900 dark:text-zinc-100 pl-12">{String(draftStates).padStart(2, '0')}</p>
           </div>
         </div>
@@ -56,7 +58,7 @@ export default function DashboardClient() {
         {/* Recent Activity Card */}
         <section className="col-span-7">
           <header className="mb-6 flex items-baseline justify-between border-b border-zinc-300 dark:border-zinc-700 pb-2">
-            <h2 className="font-['Inter'] font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500">Recent Activity (NODE_HIGHLIGHT)</h2>
+            <h2 className="font-['Inter'] font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500">{t.home.recentActivity} (NODE_HIGHLIGHT)</h2>
           </header>
 
           <div className="bg-[#f3f3f3] dark:bg-zinc-800/50 p-10 border border-zinc-200 dark:border-zinc-700 relative group min-h-[340px]">
@@ -75,23 +77,23 @@ export default function DashboardClient() {
 
                     <div className="grid grid-cols-2 gap-8 mb-12">
                       <div>
-                        <span className="block font-['Inter'] font-medium text-[9px] uppercase tracking-widest text-zinc-400 mb-1">LAST_MODIFIED</span>
+                        <span className="block font-['Inter'] font-medium text-[9px] uppercase tracking-widest text-zinc-400 mb-1">{t.home.lastModified}</span>
                         <span className="block font-['Inter'] font-light text-xs text-zinc-900 dark:text-zinc-300">{formatDate(selectedSite.updatedAt)}</span>
                       </div>
                       <div>
-                        <span className="block font-['Inter'] font-medium text-[9px] uppercase tracking-widest text-zinc-400 mb-1">STATUS</span>
-                        <span className="block font-['Inter'] font-light text-xs text-zinc-900 dark:text-zinc-300">{selectedSite.status === 'active' ? 'PUBLISHED' : 'DRAFT'}</span>
+                        <span className="block font-['Inter'] font-medium text-[9px] uppercase tracking-widest text-zinc-400 mb-1">{t.home.status}</span>
+                        <span className="block font-['Inter'] font-light text-xs text-zinc-900 dark:text-zinc-300">{selectedSite.status === 'active' ? t.common.published : t.common.draft}</span>
                       </div>
                     </div>
                   </div>
 
                   <Link href={`/dashboard/editor?siteId=${selectedSite.id}`} className="w-max bg-black dark:bg-white text-white dark:text-black font-['Inter'] font-medium text-[10px] uppercase tracking-[0.15em] py-4 px-10 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all inline-block">
-                    CONTINUE_EDITING
+                    {t.home.continueEditing}
                   </Link>
                 </>
               ) : (
                 <div className="py-12 text-zinc-500 font-light text-sm uppercase tracking-widest">
-                  No recent projects found.
+                  {t.home.noRecent}
                 </div>
               )}
             </div>
@@ -101,14 +103,14 @@ export default function DashboardClient() {
         {/* Quick Actions */}
         <section className="col-span-5">
           <header className="mb-6 border-b border-zinc-300 dark:border-zinc-700 pb-2">
-            <h2 className="font-['Inter'] font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500">Quick Actions (QUICK_EXECUTION)</h2>
+            <h2 className="font-['Inter'] font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500">{t.home.quickActions} (QUICK_EXECUTION)</h2>
           </header>
 
           <div className="space-y-4">
             <Link href="/dashboard/templates" className="w-full flex items-center justify-between group p-6 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 transition-colors hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black dark:text-white">
               <div className="flex flex-col items-start">
                 <span className="font-['Inter'] font-medium text-[10px] tracking-[0.15em] uppercase text-zinc-400 group-hover:text-zinc-500 dark:group-hover:text-zinc-400">BROWSE_RESOURCES</span>
-                <span className="text-lg font-thin tracking-tight mt-1">BROWSE_TEMPLATES</span>
+                <span className="text-lg font-thin tracking-tight mt-1">{t.home.browseTemplates}</span>
               </div>
               <span className="material-symbols-outlined font-thin text-3xl" data-icon="dashboard_customize">dashboard_customize</span>
             </Link>
@@ -130,9 +132,9 @@ export default function DashboardClient() {
       {/* Section 4: Site Registry Summary */}
       <section>
         <header className="mb-8 flex items-baseline justify-between border-b border-zinc-300 dark:border-zinc-700 pb-2">
-          <h2 className="font-['Inter'] font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500">Site List (SITE_REGISTRY_SUMMARY)</h2>
+          <h2 className="font-['Inter'] font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500">{t.home.siteList} (SITE_REGISTRY_SUMMARY)</h2>
           <Link href="/dashboard/projects" className="font-['Inter'] font-medium text-[10px] uppercase tracking-[0.2em] text-zinc-900 dark:text-white border-b border-zinc-900/0 hover:border-zinc-900 dark:hover:border-white transition-all py-1">
-            VIEW_ALL
+            {t.home.viewAll}
           </Link>
         </header>
 
@@ -140,15 +142,15 @@ export default function DashboardClient() {
         <div className="grid grid-cols-12 gap-y-1">
           {/* Grid Header Labels */}
           <div className="col-span-12 grid grid-cols-12 pb-4 border-b border-zinc-200 dark:border-zinc-800 px-4">
-            <div className="col-span-5 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Project Identification</div>
-            <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Status</div>
-            <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Last Modification</div>
-            <div className="col-span-3 text-right text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Execution</div>
+            <div className="col-span-5 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colProject}</div>
+            <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colStatus}</div>
+            <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colLastMod}</div>
+            <div className="col-span-3 text-right text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colExecution}</div>
           </div>
 
           {sites.length === 0 && (
             <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
-              No projects found. Provision a new project to begin.
+              {t.home.noProjects}
             </div>
           )}
 
@@ -190,7 +192,7 @@ export default function DashboardClient() {
                 <div className="col-span-2 flex items-center gap-3">
                   <div className={`w-1 h-1 ${isPublished ? 'bg-[#7d000c]' : 'bg-zinc-300 dark:bg-zinc-600'}`}></div>
                   <span className={`text-[0.6875rem] font-medium uppercase tracking-widest ${!isPublished && 'text-zinc-400'}`}>
-                    {isPublished ? 'PUBLISHED' : 'DRAFT'}
+                    {isPublished ? t.common.published : t.common.draft}
                   </span>
                 </div>
                 <div className="col-span-2">
@@ -206,7 +208,7 @@ export default function DashboardClient() {
                       rel="noopener noreferrer"
                       className="border border-zinc-300 dark:border-zinc-700 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                     >
-                      View
+                      {t.common.view}
                     </a>
                   ) : (
                     <Link
@@ -214,14 +216,14 @@ export default function DashboardClient() {
                       target="_blank"
                       className="border border-zinc-300 dark:border-zinc-700 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                     >
-                      Preview
+                      {t.common.preview}
                     </Link>
                   )}
                   <Link
                     href={`/dashboard/editor?siteId=${site.id}`}
                     className="bg-black text-white dark:bg-white dark:text-black h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
                   >
-                    Edit
+                    {t.common.edit}
                   </Link>
                 </div>
               </div>

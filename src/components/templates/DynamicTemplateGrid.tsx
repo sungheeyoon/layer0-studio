@@ -5,6 +5,7 @@ import { UserSite } from '@/domain/entities/user-site.entity';
 import { useState, useTransition, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { listPaginatedTemplatesAction } from '@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions';
+import { useDictionary } from '@/lib/i18n/provider';
 
 interface DynamicTemplateGridProps {
   templates: Template[];
@@ -15,6 +16,7 @@ interface DynamicTemplateGridProps {
 
 export default function DynamicTemplateGrid({ templates: initialTemplates, mySites, categories, initialTotal }: DynamicTemplateGridProps) {
   const router = useRouter();
+  const t = useDictionary().dashboard.templates;
   const [selectingId, setSelectingId] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
@@ -71,7 +73,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
     return (
       <div className="py-20 text-center">
         <p className="font-['Inter'] font-light text-sm text-on-surface-variant">
-          No templates available yet.
+          {t.noTemplates}
         </p>
       </div>
     );
@@ -82,10 +84,9 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
       {/* Header Actions */}
       <div className="flex justify-between items-end mb-16">
         <div className="max-w-2xl">
-          <h1 className="text-5xl font-thin tracking-tight text-black dark:text-white mb-4 uppercase">Node_Library</h1>
+          <h1 className="text-5xl font-thin tracking-tight text-black dark:text-white mb-4 uppercase">{t.title}</h1>
           <p className="text-xs font-light text-neutral-500 tracking-wide leading-relaxed max-w-md">
-            Precision-engineered layout modules for rapid architectural deployment.
-            Select a base node to initialize environment variables.
+            {t.description}
           </p>
         </div>
         <div className="flex gap-4">
@@ -95,7 +96,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
               className={`h-10 px-6 border border-outline flex items-center gap-4 text-[10px] font-medium tracking-widest uppercase hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all ${isPending ? 'opacity-50' : ''} text-black dark:text-white`}
               disabled={isPending}
             >
-              {selectedCategory ? `CATEGORY: ${selectedCategory}` : 'Filter_Category'}
+              {selectedCategory ? `${t.categoryPrefix}${selectedCategory}` : t.filterCategory}
               <span className="material-symbols-outlined !text-[14px]">expand_more</span>
             </button>
             {isDropdownOpen && (
@@ -104,7 +105,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
                   onClick={() => handleCategoryChange(null)}
                   className={`w-full text-left px-4 py-3 text-[10px] font-medium tracking-widest uppercase hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors ${!selectedCategory ? 'text-black dark:text-white' : 'text-neutral-500'}`}
                 >
-                  ALL_CATEGORIES
+                  {t.allCategories}
                 </button>
                 {categories.map((cat) => (
                   <button
@@ -135,7 +136,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-neutral-200 dark:bg-zinc-800">
-                  <span className="text-neutral-400 text-xs tracking-widest uppercase">No Image</span>
+                  <span className="text-neutral-400 text-xs tracking-widest uppercase">{t.noImage}</span>
                 </div>
               )}
               <div className="absolute top-4 left-4 bg-white dark:bg-zinc-900 px-2 py-1 text-[9px] font-bold tracking-widest uppercase text-black dark:text-white">
@@ -149,8 +150,8 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6">
-              <span className="text-[9px] border border-outline-variant px-2 py-0.5 text-neutral-500 font-light tracking-tighter uppercase">{template.category || 'General'}</span>
-              <span className="text-[9px] border border-outline-variant px-2 py-0.5 text-neutral-500 font-light tracking-tighter uppercase">Template</span>
+              <span className="text-[9px] border border-outline-variant px-2 py-0.5 text-neutral-500 font-light tracking-tighter uppercase">{template.category || t.generalCategory}</span>
+              <span className="text-[9px] border border-outline-variant px-2 py-0.5 text-neutral-500 font-light tracking-tighter uppercase">{t.templateTag}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-4 border-t border-neutral-200 dark:border-zinc-800 pt-4">
@@ -170,7 +171,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
                 disabled={selectingId === template.id}
                 className="h-9 border border-black dark:border-white bg-black text-white dark:bg-white dark:text-black text-[9px] font-light tracking-[0.2em] uppercase hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors disabled:opacity-50"
               >
-                {selectingId === template.id ? 'INITIALIZING...' : 'SELECT'}
+                {selectingId === template.id ? t.initializing : t.select}
               </button>
               <a
                 href={`/preview/${template.id}`}
@@ -178,7 +179,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
                 rel="noopener noreferrer"
                 className="h-9 border border-black dark:border-white bg-transparent text-black dark:text-white text-[9px] font-light tracking-[0.2em] uppercase hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center"
               >
-                PREVIEW
+                {t.preview}
               </a>
             </div>
           </div>
@@ -197,7 +198,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
             disabled={page === 1 || isPending}
             className="hover:text-black dark:hover:text-white transition-colors disabled:opacity-50"
           >
-            PREV_MODULE
+            {t.prev}
           </button>
           <span className="text-black dark:text-white">
             PAGE_{String(page).padStart(2, '0')}_OF_{String(totalPages).padStart(2, '0')}
@@ -207,7 +208,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
             disabled={page === totalPages || isPending}
             className="hover:text-black dark:hover:text-white transition-colors disabled:opacity-50"
           >
-            NEXT_MODULE
+            {t.next}
           </button>
         </div>
       </div>

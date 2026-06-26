@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useTransition } from "react";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { logoutAction } from "@/app/login/actions";
+import { useDictionary } from "@/lib/i18n/provider";
 
 interface ProfileDropdownProps {
   user: User;
@@ -14,6 +15,7 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const t = useDictionary().dashboard.profile;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -61,19 +63,19 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
             <li>
               <Link className="flex items-center px-4 py-3 gap-3 font-['Inter'] font-light tracking-[0.1em] uppercase text-[11px] text-primary dark:text-white hover:bg-surface-container transition-colors duration-75" href="#">
                 <span className="material-symbols-outlined text-sm">person</span>
-                USER_PROFILE
+                {t.userProfile}
               </Link>
             </li>
             <li>
               <Link className="flex items-center px-4 py-3 gap-3 font-['Inter'] font-light tracking-[0.1em] uppercase text-[11px] text-primary dark:text-white hover:bg-surface-container transition-colors duration-75" href="#">
                 <span className="material-symbols-outlined text-sm">encrypted</span>
-                SECURITY_SETTINGS
+                {t.securitySettings}
               </Link>
             </li>
             <li>
               <Link className="flex items-center px-4 py-3 gap-3 font-['Inter'] font-light tracking-[0.1em] uppercase text-[11px] text-primary dark:text-white hover:bg-surface-container transition-colors duration-75" href="#">
                 <span className="material-symbols-outlined text-sm">account_balance_wallet</span>
-                BILLING_PROTOCOL
+                {t.billing}
               </Link>
             </li>
             <li className="mt-2 border-t border-outline-variant/20">
@@ -88,7 +90,7 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
                   ) : (
                     <span className="material-symbols-outlined text-sm">power_settings_new</span>
                   )}
-                  {isPending ? "TERMINATING..." : "TERMINATE_SESSION"}
+                  {isPending ? t.loggingOut : t.logout}
                 </span>
                 <div className="w-[4px] h-[4px] bg-[#7d000c]"></div>
               </button>

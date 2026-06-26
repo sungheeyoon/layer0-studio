@@ -13,10 +13,13 @@ import {
 } from "@/app/(authenticated)/dashboard/editor/actions";
 import { getDomainError, getSiteError, isStaleConflict } from "@/lib/errors/messages";
 import { useDashboardData } from "../DashboardDataProvider";
+import { useDictionary, useLocale } from "@/lib/i18n/provider";
 
 export default function ProjectsClient() {
   const router = useRouter();
   const { sites, patchSite, removeSite } = useDashboardData();
+  const locale = useLocale();
+  const t = useDictionary().dashboard;
 
   // The optimistic-concurrency token must come from the freshest copy of the
   // site, not the snapshot captured when the settings panel opened — otherwise
@@ -79,7 +82,7 @@ export default function ProjectsClient() {
     try {
       const result = await updateSiteDomainAction(settingsSite.id, editDomain, freshToken(settingsSite.id, settingsSite.updatedAt));
       if ('error' in result) {
-        setDomainError(getDomainError(result.error));
+        setDomainError(getDomainError(result.error, locale));
         if (isStaleConflict(result)) router.refresh();
       } else if (result.domain) {
         setDomainVerified(true);
@@ -87,7 +90,7 @@ export default function ProjectsClient() {
         patchSite(settingsSite.id, { domain: result.domain, updatedAt: result.updatedAt });
       }
     } catch {
-      setDomainError('An unexpected error occurred.');
+      setDomainError(t.common.unexpectedError);
     } finally {
       setIsVerifying(false);
     }
@@ -103,7 +106,7 @@ export default function ProjectsClient() {
 
     const result = await updateSiteNameAction(settingsSite.id, editSiteName, freshToken(settingsSite.id, settingsSite.updatedAt));
     if ('error' in result) {
-      setSaveNameError(getSiteError(result.error, '이름 저장에 실패했습니다.'));
+      setSaveNameError(getSiteError(result.error, locale, t.projects.saveNameFailed));
       if (isStaleConflict(result)) router.refresh();
     } else {
       setSaveNameSuccess(true);
@@ -127,7 +130,7 @@ export default function ProjectsClient() {
       : await publishSiteAction(settingsSite.id, token);
 
     if ('error' in result) {
-      setStatusError(getSiteError(result.error, '상태 변경에 실패했습니다.'));
+      setStatusError(getSiteError(result.error, locale, t.projects.statusFailed));
       if (isStaleConflict(result)) router.refresh();
     } else {
       const newStatus = (isActive ? 'draft' : 'active') as UserSite['status'];
@@ -146,7 +149,7 @@ export default function ProjectsClient() {
     const deletedId = settingsSite.id;
     const result = await deleteSiteAction(deletedId);
     if ('error' in result) {
-      setDeleteError('삭제에 실패했습니다. 다시 시도해주세요.');
+      setDeleteError(t.projects.deleteFailed);
       setIsDeleting(false);
     } else {
       removeSite(deletedId);
@@ -177,15 +180,14 @@ export default function ProjectsClient() {
       {/* Header Section */}
       <div className="mb-12 flex justify-between items-end">
         <div className="max-w-2xl">
-          <h2 className="text-4xl font-light tracking-tight mb-4 uppercase text-black dark:text-white">Project Inventory</h2>
+          <h2 className="text-4xl font-light tracking-tight mb-4 uppercase text-black dark:text-white">{t.projects.title}</h2>
           <p className="text-[0.875rem] text-zinc-500 font-light max-w-md leading-relaxed">
-            Active management of technical instances and architectural prototypes.
-            Manage deployment states, URL mapping, and core structural configurations.
+            {t.projects.description}
           </p>
         </div>
         <div className="flex flex-col items-end gap-3">
           <div className="text-right">
-            <span className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400 block mb-1">Last Sync</span>
+            <span className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400 block mb-1">{t.projects.lastSync}</span>
             <span className="text-[0.875rem] font-light text-black dark:text-white">{currentSyncTime}</span>
           </div>
           {/* Search */}
@@ -195,7 +197,7 @@ export default function ProjectsClient() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="SEARCH_PROJECTS..."
+              placeholder={t.projects.searchPlaceholder}
               className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 pl-8 pr-4 py-2 text-[0.6875rem] font-light uppercase tracking-widest text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-black dark:focus:border-white w-52 transition-colors"
             />
             {searchQuery && (
@@ -214,21 +216,21 @@ export default function ProjectsClient() {
       <div className="grid grid-cols-12 gap-y-1">
         {/* Grid Header Labels */}
         <div className="col-span-12 grid grid-cols-12 pb-4 border-b border-zinc-200 dark:border-zinc-800 px-4">
-          <div className="col-span-5 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Project Identification</div>
-          <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Status</div>
-          <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Last Modification</div>
-          <div className="col-span-3 text-right text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">Execution</div>
+          <div className="col-span-5 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colProject}</div>
+          <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colStatus}</div>
+          <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colLastMod}</div>
+          <div className="col-span-3 text-right text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colExecution}</div>
         </div>
 
         {sites.length === 0 && (
           <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
-            No projects found. Provision a new project to begin.
+            {t.projects.noProjects}
           </div>
         )}
 
         {sites.length > 0 && filteredSites.length === 0 && (
           <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
-            No projects match &ldquo;{searchQuery}&rdquo;
+            {t.projects.noMatchPrefix}&ldquo;{searchQuery}&rdquo;
           </div>
         )}
 
@@ -270,7 +272,7 @@ export default function ProjectsClient() {
               <div className="col-span-2 flex items-center gap-3">
                 <div className={`w-1 h-1 ${isPublished ? 'bg-[#7d000c]' : 'bg-zinc-300 dark:bg-zinc-600'}`}></div>
                 <span className={`text-[0.6875rem] font-medium uppercase tracking-widest ${!isPublished && 'text-zinc-400'}`}>
-                  {isPublished ? 'PUBLISHED' : 'DRAFT'}
+                  {isPublished ? t.common.published : t.common.draft}
                 </span>
               </div>
               <div className="col-span-2">
@@ -295,7 +297,7 @@ export default function ProjectsClient() {
                     rel="noopener noreferrer"
                     className="border border-zinc-300 dark:border-zinc-700 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                   >
-                    View
+                    {t.common.view}
                   </a>
                 ) : (
                   <Link
@@ -303,14 +305,14 @@ export default function ProjectsClient() {
                     target="_blank"
                     className="border border-zinc-300 dark:border-zinc-700 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                   >
-                    Preview
+                    {t.common.preview}
                   </Link>
                 )}
                 <Link
                   href={`/dashboard/editor?siteId=${site.id}`}
                   className="bg-black text-white dark:bg-white dark:text-black h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
                 >
-                  Edit
+                  {t.common.edit}
                 </Link>
               </div>
             </div>
@@ -325,19 +327,19 @@ export default function ProjectsClient() {
             <span className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6">Active_System_Metadata</span>
             <div className="space-y-4">
               <div className="flex justify-between items-end border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">Core Template</span>
+                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">{t.projects.coreTemplate}</span>
                 <span className="text-sm font-medium uppercase tracking-tighter text-black dark:text-white">
                   {selectedSite.templateId ? `TPL_${selectedSite.templateId.substring(0, 8)}` : 'CUSTOM_BUILD'}
                 </span>
               </div>
               <div className="flex justify-between items-end border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">Creation Date</span>
+                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">{t.projects.creationDate}</span>
                 <span className="text-sm font-medium uppercase tracking-tighter text-black dark:text-white">
                   {formatDate(selectedSite.createdAt).split(' ')[0]}
                 </span>
               </div>
               <div className="flex justify-between items-end border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">Instance UUID</span>
+                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">{t.projects.instanceUuid}</span>
                 <span className="text-sm font-medium uppercase tracking-tighter text-black dark:text-white">
                   {selectedSite.id.substring(0, 12).toUpperCase()}
                 </span>
@@ -375,7 +377,7 @@ export default function ProjectsClient() {
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121212]">
               <div>
-                <h2 className="text-xl font-light tracking-widest uppercase text-black dark:text-white">Project Configuration</h2>
+                <h2 className="text-xl font-light tracking-widest uppercase text-black dark:text-white">{t.projects.configuration}</h2>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="w-1.5 h-1.5 bg-[#7d000c]"></span>
                   <span className="text-[0.625rem] font-medium tracking-[0.2em] text-zinc-500 uppercase">{settingsSite.id}</span>
@@ -397,21 +399,21 @@ export default function ProjectsClient() {
                   onClick={() => scrollToSection('settings-basic-info')}
                   className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center justify-between group"
                 >
-                  <span>Basic Info</span>
+                  <span>{t.projects.basicInfo}</span>
                   <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
                 </button>
                 <button
                   onClick={() => scrollToSection('settings-domain')}
                   className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-500 hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 transition-colors flex items-center justify-between group"
                 >
-                  <span>Domain & URL</span>
+                  <span>{t.projects.domainUrl}</span>
                   <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
                 </button>
                 <button
                   onClick={() => scrollToSection('settings-status')}
                   className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-500 hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 transition-colors flex items-center justify-between group"
                 >
-                  <span>Status</span>
+                  <span>{t.common.colStatus}</span>
                   <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
                 </button>
                 <div className="pt-6 mt-6 border-t border-zinc-200 dark:border-zinc-800">
@@ -419,7 +421,7 @@ export default function ProjectsClient() {
                     onClick={() => scrollToSection('settings-danger')}
                     className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center justify-between group"
                   >
-                    <span>Danger Zone</span>
+                    <span>{t.projects.dangerZone}</span>
                     <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-100 text-red-600">warning</span>
                   </button>
                 </div>
@@ -431,11 +433,11 @@ export default function ProjectsClient() {
                   <section id="settings-basic-info">
                     <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined !text-[1rem]">tune</span>
-                      Basic Info
+                      {t.projects.basicInfo}
                     </h3>
                     <div className="space-y-6 bg-white dark:bg-[#121212] p-6 border border-zinc-200 dark:border-zinc-800">
                       <div>
-                        <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">Site Name</label>
+                        <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">{t.projects.siteName}</label>
                         <input
                           type="text"
                           value={editSiteName}
@@ -447,7 +449,7 @@ export default function ProjectsClient() {
                           className="w-full bg-transparent border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm font-light text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition-all placeholder:text-zinc-400"
                         />
                         {saveNameError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{saveNameError}</p>}
-                        {saveNameSuccess && <p className="text-[0.6875rem] text-green-500 mt-2 font-light">이름이 저장되었습니다.</p>}
+                        {saveNameSuccess && <p className="text-[0.6875rem] text-green-500 mt-2 font-light">{t.projects.nameSaved}</p>}
                       </div>
                     </div>
                   </section>
@@ -455,11 +457,11 @@ export default function ProjectsClient() {
                   <section id="settings-domain">
                     <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined !text-[1rem]">router</span>
-                      Domain & URL
+                      {t.projects.domainUrl}
                     </h3>
                     <div className="space-y-6 bg-white dark:bg-[#121212] p-6 border border-zinc-200 dark:border-zinc-800">
                       <div>
-                        <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">Primary Domain</label>
+                        <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">{t.projects.primaryDomain}</label>
                         <div className="flex">
                           <input
                             type="text"
@@ -469,7 +471,7 @@ export default function ProjectsClient() {
                               setDomainVerified(false);
                               setDomainError(null);
                             }}
-                            placeholder="Enter custom domain..."
+                            placeholder={t.projects.domainPlaceholder}
                             className={`flex-1 bg-transparent border ${domainError ? 'border-red-500' : domainVerified ? 'border-green-500' : 'border-zinc-300 dark:border-zinc-700'} px-4 py-3 text-sm font-light text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition-all placeholder:text-zinc-400`}
                           />
                           <button
@@ -477,14 +479,14 @@ export default function ProjectsClient() {
                             disabled={isVerifying || !editDomain}
                             className="border border-l-0 border-zinc-300 dark:border-zinc-700 px-6 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-[#f3f3f3] dark:hover:bg-zinc-800 transition-colors text-black dark:text-white disabled:opacity-50"
                           >
-                            {isVerifying ? 'Verifying...' : 'Verify'}
+                            {isVerifying ? t.projects.verifying : t.projects.verify}
                           </button>
                         </div>
                         {domainError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light tracking-wide">{domainError}</p>}
-                        {domainVerified && <p className="text-[0.6875rem] text-green-500 mt-2 font-light tracking-wide">도메인이 성공적으로 설정되었습니다.</p>}
+                        {domainVerified && <p className="text-[0.6875rem] text-green-500 mt-2 font-light tracking-wide">{t.projects.domainSet}</p>}
                         {!domainError && !domainVerified && (
                           <p className="text-[0.6875rem] text-zinc-500 mt-2 font-light tracking-wide">
-                            Leave blank to use the default internal routing: internal.id/{settingsSite.id.substring(0, 8)}
+                            {t.projects.domainHintPrefix}internal.id/{settingsSite.id.substring(0, 8)}
                           </p>
                         )}
                       </div>
@@ -494,13 +496,13 @@ export default function ProjectsClient() {
                   <section id="settings-status">
                     <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined !text-[1rem]">power_settings_new</span>
-                      Execution Status
+                      {t.projects.executionStatus}
                     </h3>
                     <div className="flex items-center justify-between p-6 bg-white dark:bg-[#121212] border border-zinc-200 dark:border-zinc-800">
                       <div>
-                        <span className="block text-[0.75rem] font-medium uppercase tracking-widest text-black dark:text-white mb-1">Production State</span>
+                        <span className="block text-[0.75rem] font-medium uppercase tracking-widest text-black dark:text-white mb-1">{t.projects.productionState}</span>
                         <span className="block text-[0.6875rem] font-light text-zinc-500">
-                          Currently {settingsSite.status === 'active' ? 'published and globally accessible' : 'in local draft execution mode'}.
+                          {settingsSite.status === 'active' ? t.projects.statusPublishedDesc : t.projects.statusDraftDesc}
                         </span>
                         {statusError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{statusError}</p>}
                       </div>
@@ -509,7 +511,7 @@ export default function ProjectsClient() {
                         disabled={isTogglingStatus}
                         className="border border-zinc-300 dark:border-zinc-700 px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors disabled:opacity-50"
                       >
-                        {isTogglingStatus ? 'Processing...' : settingsSite.status === 'active' ? 'Suspend Instance' : 'Publish Instance'}
+                        {isTogglingStatus ? t.projects.processing : settingsSite.status === 'active' ? t.projects.suspend : t.projects.publish}
                       </button>
                     </div>
                   </section>
@@ -517,32 +519,32 @@ export default function ProjectsClient() {
                   <section id="settings-danger">
                     <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-red-500 block mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined !text-[1rem]">warning</span>
-                      Danger Zone
+                      {t.projects.dangerZone}
                     </h3>
                     <div className="flex items-center justify-between p-6 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50">
                       <div>
-                        <span className="block text-[0.75rem] font-medium uppercase tracking-widest text-red-600 dark:text-red-400 mb-1">Delete Project</span>
+                        <span className="block text-[0.75rem] font-medium uppercase tracking-widest text-red-600 dark:text-red-400 mb-1">{t.projects.deleteProject}</span>
                         <span className="block text-[0.6875rem] font-light text-red-500/80 dark:text-red-400/80 max-w-sm">
-                          Permanently remove this project and all its associated data. This action cannot be undone.
+                          {t.projects.deleteWarn}
                         </span>
                         {deleteError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{deleteError}</p>}
                       </div>
                       {showDeleteConfirm ? (
                         <div className="flex flex-col gap-2 items-end">
-                          <span className="text-[0.6875rem] text-red-600 font-medium uppercase tracking-widest">확인하시겠습니까?</span>
+                          <span className="text-[0.6875rem] text-red-600 font-medium uppercase tracking-widest">{t.projects.confirmPrompt}</span>
                           <div className="flex gap-2">
                             <button
                               onClick={() => setShowDeleteConfirm(false)}
                               className="border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                             >
-                              Cancel
+                              {t.projects.cancel}
                             </button>
                             <button
                               onClick={handleDelete}
                               disabled={isDeleting}
                               className="border border-red-500 bg-red-600 text-white px-4 py-2 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-red-700 transition-colors disabled:opacity-50"
                             >
-                              {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+                              {isDeleting ? t.projects.deleting : t.projects.confirmDelete}
                             </button>
                           </div>
                         </div>
@@ -551,7 +553,7 @@ export default function ProjectsClient() {
                           onClick={() => setShowDeleteConfirm(true)}
                           className="border border-red-200 dark:border-red-900/50 bg-white dark:bg-black px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-red-600 dark:text-red-500 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white transition-colors"
                         >
-                          Delete Site
+                          {t.projects.deleteSite}
                         </button>
                       )}
                     </div>
@@ -563,21 +565,21 @@ export default function ProjectsClient() {
             {/* Footer */}
             <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-white dark:bg-[#121212]">
               <div className="text-[0.625rem] font-light text-zinc-400 tracking-widest uppercase hidden sm:block">
-                {isNameDirty ? 'Site name changes pending' : 'No pending changes'}
+                {isNameDirty ? t.projects.pendingChanges : t.projects.noPending}
               </div>
               <div className="flex gap-4 w-full sm:w-auto justify-end">
                 <button
                   onClick={() => setSettingsSite(null)}
                   className="px-6 py-3 border border-transparent text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors"
                 >
-                  Close
+                  {t.projects.close}
                 </button>
                 <button
                   onClick={handleCommitName}
                   disabled={!isNameDirty || isSavingName}
                   className="px-8 py-3 bg-black text-white dark:bg-white dark:text-black text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {isSavingName ? 'Saving...' : 'Commit Changes'}
+                  {isSavingName ? t.projects.saving : t.projects.commit}
                 </button>
               </div>
             </div>
