@@ -66,7 +66,7 @@ _Avoid_: file, upload, image (in domain talk).
 An authenticated principal. Role is either `user` (the default) or `admin`.
 
 **Subdomain**:
-The slug a User picks to publish their Site under — the `myshop` in `myshop.layer0.studio`. Stored in `user_sites.domain`; validated by `validateDomainSlug`; rejects entries in `RESERVED_DOMAINS`. Lowercase letters, digits, hyphens; 3–50 chars; no leading/trailing hyphen.
+The slug a User picks to publish their Site under — the `myshop` in `myshop.layer0.studio`. Stored in `user_sites.domain`; validated by `validateDomainSlug`; rejects entries in `RESERVED_DOMAINS`. Lowercase letters, digits, hyphens; 3–50 chars; no leading/trailing hyphen. **Required to Publish** (a Site without a Subdomain cannot go Live — `DOMAIN_REQUIRED`). The Subdomain is the Site's **read-only public origin**: it serves the published result and never the editor — editing happens only on the apex dashboard (where the login session lives, host-only), so a Subdomain is sessionless. A request to `<slug>.layer0.studio` is internally **rewritten** by middleware to the shared `/site/[domain]` renderer (the path is internal, never the public URL); platform paths (`/api`, `/dashboard`, …) on a Subdomain — and apex `/site/*` direct access — 404. See [ADR-0009](./docs/adr/0009-subdomain-public-serving.md).
 _Avoid_: domain (overloaded — see Flagged ambiguities), slug, hostname, URL.
 
 **Publish** (verb):
