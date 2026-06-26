@@ -27,7 +27,7 @@ import { SectionDataSchema, TemplateModule } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
 import { getSiteError, isStaleConflict } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
-import { useLocale } from '@/lib/i18n/provider';
+import { useLocale, useDictionary } from '@/lib/i18n/provider';
 
 interface DynamicEditorProps {
   site: UserSite;
@@ -35,6 +35,7 @@ interface DynamicEditorProps {
 
 export default function DynamicEditor({ site }: DynamicEditorProps) {
   const locale = useLocale();
+  const t = useDictionary().editor;
   const [siteJson, setSiteJson] = useState<TemplateJson>(() => injectKeys(site.siteJson));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
@@ -127,14 +128,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         } else {
           setAutoSaveStatus('error');
           if (result.error === 'INVALID_TEMPLATE_JSON') {
-            setActionError(getSiteError(result.error, locale, '저장에 실패했습니다.'));
+            setActionError(getSiteError(result.error, locale, t.saveFailedFallback));
           }
         }
       } else if (result && 'updatedAt' in result) {
         applySuccessfulSave(result.updatedAt);
       }
     }, 4000);
-  }, [site.id, applySuccessfulSave, locale]);
+  }, [site.id, applySuccessfulSave, locale, t.saveFailedFallback]);
 
   const [templateModule, setTemplateModule] = useState<TemplateModule | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
@@ -148,7 +149,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
       const timeoutId = setTimeout(() => {
         if (mounted && !loaded) {
-          setLoadingError('Theme loading timed out. Please check your connection or theme configuration.');
+          setLoadingError(t.loadError.timeout);
         }
       }, 10000);
 
@@ -160,20 +161,20 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
             loaded = true;
             setTemplateModule(mod);
           } else {
-            setLoadingError(`Theme "${siteJson.templateKey}" not found.`);
+            setLoadingError(`${t.loadError.notFoundPrefix}${siteJson.templateKey}${t.loadError.notFoundSuffix}`);
           }
         }
       } catch (err) {
         clearTimeout(timeoutId);
         if (mounted) {
-          setLoadingError('Failed to load theme renderer.');
+          setLoadingError(t.loadError.failed);
           console.error('Theme load error:', err);
         }
       }
     };
     fetchTheme();
     return () => { mounted = false; };
-  }, [siteJson.templateKey]);
+  }, [siteJson.templateKey, t.loadError]);
 
   const TemplateRenderer = templateModule?.default;
 
@@ -302,7 +303,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       if (isStaleConflict(result)) {
         setConflictDetected(true);
       } else {
-        setActionError(getSiteError(result.error, locale, `Save failed: ${result.error}`));
+        setActionError(getSiteError(result.error, locale, t.saveFailedFallback));
       }
     } else if (result && 'updatedAt' in result) {
       applySuccessfulSave(result.updatedAt);
@@ -321,7 +322,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       if (isStaleConflict(saveResult)) {
         setConflictDetected(true);
       } else {
-        setActionError(getSiteError(saveResult.error, locale, `저장 실패: ${saveResult.error}`));
+        setActionError(getSiteError(saveResult.error, locale, t.saveFailedFallback));
       }
       setSaving(false);
       return;
@@ -335,7 +336,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       if (isStaleConflict(result)) {
         setConflictDetected(true);
       } else {
-        setActionError(getSiteError(result.error, locale, `발행 실패: ${result.error}`));
+        setActionError(getSiteError(result.error, locale, t.publishFailedFallback));
       }
     } else {
       // Publish bumps updated_at; keep the token fresh for the next save.
@@ -389,23 +390,23 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           <div className="bg-surface border border-outline-variant p-8 max-w-sm w-full mx-4 shadow-2xl">
             <span className="material-symbols-outlined text-amber-500 text-3xl mb-4 block">sync_problem</span>
             <h2 className="font-['Inter'] font-medium text-sm tracking-widest uppercase text-on-surface mb-3">
-              Conflict Detected
+              {t.conflict.title}
             </h2>
             <p className="font-['Inter'] font-light text-xs text-outline leading-relaxed mb-6">
-              This site was saved from another tab or device. Reloading will load the latest version — your current unsaved changes will be lost.
+              {t.conflict.body}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => window.location.reload()}
                 className="flex-1 bg-primary text-on-primary h-10 font-['Inter'] font-medium text-[0.6875rem] tracking-[0.2em] uppercase hover:brightness-110 transition-all"
               >
-                Reload
+                {t.conflict.reload}
               </button>
               <button
                 onClick={() => setConflictDetected(false)}
                 className="flex-1 border border-outline h-10 font-['Inter'] font-light text-[0.6875rem] tracking-[0.1em] uppercase hover:bg-surface-container transition-colors"
               >
-                Keep Editing
+                {t.conflict.keepEditing}
               </button>
             </div>
           </div>
@@ -421,14 +422,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
             className={`flex-1 py-4 text-[0.6875rem] tracking-[0.2em] uppercase font-medium transition-colors ${activeTab === 'content' ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-primary'
               }`}
           >
-            Content
+            {t.tabs.content}
           </button>
           <button
             onClick={() => setActiveTab('design')}
             className={`flex-1 py-4 text-[0.6875rem] tracking-[0.2em] uppercase font-medium transition-colors ${activeTab === 'design' ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-primary'
               }`}
           >
-            Design
+            {t.tabs.design}
           </button>
         </div>
 
@@ -439,7 +440,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               {isMulti && (
                 <div>
                   <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                    Pages
+                    {t.pages.heading}
                   </h3>
                   <ul className="space-y-3">
                     {pages.map((page, index) => {
@@ -455,7 +456,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             <span className="flex flex-col shrink-0 -my-1">
                               <button
                                 type="button"
-                                aria-label="Move page up"
+                                aria-label={t.pages.moveUp}
                                 disabled={index === 0}
                                 onClick={() => handleMoveNavItem(page.id, 'up')}
                                 className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
@@ -464,7 +465,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                               </button>
                               <button
                                 type="button"
-                                aria-label="Move page down"
+                                aria-label={t.pages.moveDown}
                                 disabled={index === pages.length - 1}
                                 onClick={() => handleMoveNavItem(page.id, 'down')}
                                 className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
@@ -484,8 +485,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
                             <button
                               type="button"
-                              aria-label={page.visible ? 'Make page unroutable' : 'Make page routable'}
-                              title={page.visible ? 'Routable' : 'Returns 404 (data kept)'}
+                              aria-label={page.visible ? t.pages.makeUnroutable : t.pages.makeRoutable}
+                              title={page.visible ? t.pages.routableTitle : t.pages.unroutableTitle}
                               onClick={() => handleToggleNavItemVisible(page.id)}
                               className={`shrink-0 transition-colors ${page.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
                                 }`}
@@ -500,8 +501,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                           <div className="mt-2 flex items-center gap-2 pl-1">
                             <button
                               type="button"
-                              aria-label={page.nav.visible ? 'Remove from menu' : 'Add to menu'}
-                              title={page.nav.visible ? 'Shown in top nav' : 'Hidden from top nav'}
+                              aria-label={page.nav.visible ? t.pages.removeFromMenu : t.pages.addToMenu}
+                              title={page.nav.visible ? t.pages.inTopNavTitle : t.pages.notInTopNavTitle}
                               onClick={() => handleToggleNavItemNavVisible(page.id)}
                               className={`shrink-0 transition-colors ${page.nav.visible ? 'text-primary' : 'text-outline hover:text-primary'
                                 }`}
@@ -517,7 +518,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                               type="text"
                               value={page.nav.label}
                               onChange={(e) => handleRelabelNavItem(page.id, e.target.value)}
-                              placeholder="Page name"
+                              placeholder={t.pages.namePlaceholder}
                               className="flex-grow min-w-0 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-0.5 font-['Inter'] font-light text-[0.6875rem] transition-colors"
                             />
                           </div>
@@ -531,7 +532,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               {/* Hierarchy */}
               <div>
                 <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                  {isMulti ? `Sections // ${activePage?.nav.label ?? ''}` : 'Hierarchy'}
+                  {isMulti ? `${t.sections.sectionsLabel} // ${activePage?.nav.label ?? ''}` : t.sections.hierarchy}
                 </h3>
                 {isMulti ? (
                   <ul className="space-y-2">
@@ -552,8 +553,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                           </button>
                           <button
                             type="button"
-                            aria-label={section.visible ? 'Hide section' : 'Show section'}
-                            title={section.visible ? 'Visible on page' : 'Hidden from page'}
+                            aria-label={section.visible ? t.sections.hide : t.sections.show}
+                            title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
                             onClick={() => handleToggleSectionVisible(section.id)}
                             className={`shrink-0 transition-colors ${section.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
                               }`}
@@ -582,7 +583,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                           {pinned ? (
                             <span
                               className="material-symbols-outlined text-outline text-sm shrink-0"
-                              title={section.type === 'nav' ? 'Pinned to top' : 'Pinned to bottom'}
+                              title={section.type === 'nav' ? t.sections.pinnedTop : t.sections.pinnedBottom}
                             >
                               push_pin
                             </span>
@@ -590,7 +591,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             <span className="flex flex-col shrink-0 -my-1">
                               <button
                                 type="button"
-                                aria-label="Move section up"
+                                aria-label={t.sections.moveUp}
                                 disabled={index <= firstReorderable}
                                 onClick={() => handleMoveNavItem(section.id, 'up')}
                                 className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
@@ -599,7 +600,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                               </button>
                               <button
                                 type="button"
-                                aria-label="Move section down"
+                                aria-label={t.sections.moveDown}
                                 disabled={index >= lastReorderable}
                                 onClick={() => handleMoveNavItem(section.id, 'down')}
                                 className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
@@ -620,8 +621,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
                           <button
                             type="button"
-                            aria-label={section.visible ? 'Hide section' : 'Show section'}
-                            title={section.visible ? 'Visible on page' : 'Hidden from page'}
+                            aria-label={section.visible ? t.sections.hide : t.sections.show}
+                            title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
                             onClick={() => handleToggleNavItemVisible(section.id)}
                             className={`shrink-0 transition-colors ${section.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
                               }`}
@@ -636,8 +637,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                         <div className="mt-2 flex items-center gap-2 pl-1">
                           <button
                             type="button"
-                            aria-label={section.nav.visible ? 'Remove from menu' : 'Add to menu'}
-                            title={section.nav.visible ? 'Shown in nav menu' : 'Hidden from nav menu'}
+                            aria-label={section.nav.visible ? t.sections.removeFromMenu : t.sections.addToMenu}
+                            title={section.nav.visible ? t.sections.inNavMenuTitle : t.sections.notInNavMenuTitle}
                             onClick={() => handleToggleNavItemNavVisible(section.id)}
                             className={`shrink-0 transition-colors ${section.nav.visible ? 'text-primary' : 'text-outline hover:text-primary'
                               }`}
@@ -647,14 +648,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             </span>
                           </button>
                           <span className="font-['Inter'] text-[0.5625rem] tracking-[0.15em] uppercase text-outline shrink-0">
-                            Menu
+                            {t.sections.menu}
                           </span>
                           <input
                             type="text"
                             value={section.nav.label}
                             onChange={(e) => handleRelabelNavItem(section.id, e.target.value)}
                             disabled={!section.nav.visible}
-                            placeholder="Menu label"
+                            placeholder={t.sections.menuLabelPlaceholder}
                             className="flex-grow min-w-0 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-0.5 font-['Inter'] font-light text-[0.6875rem] disabled:opacity-40 transition-colors"
                           />
                         </div>
@@ -669,7 +670,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               {selectedSection && (
                 <div>
                   <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                    Parameters // {selectedSection.type}
+                    {`${t.parameters} // ${selectedSection.type}`}
                   </h3>
                   <div className="space-y-8">
                     {Object.entries(selectedSection.data)
@@ -695,7 +696,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           ) : (
             <div className="space-y-12">
               <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                Global Design
+                {t.design.globalHeading}
               </h3>
               <GlobalStylesEditor
                 globalStyles={siteJson.globalStyles}
@@ -709,16 +710,16 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         <div className="p-6 border-t border-outline-variant bg-surface-container-low">
           <div className="mb-3 h-4 flex items-center">
             {autoSaveStatus === 'saving' && (
-              <span className="text-[10px] tracking-widest uppercase text-outline animate-pulse">Saving…</span>
+              <span className="text-[10px] tracking-widest uppercase text-outline animate-pulse">{t.autosave.saving}</span>
             )}
             {autoSaveStatus === 'saved' && (
-              <span className="text-[10px] tracking-widest uppercase text-green-600">✓ Saved</span>
+              <span className="text-[10px] tracking-widest uppercase text-green-600">{t.autosave.saved}</span>
             )}
             {autoSaveStatus === 'error' && (
-              <span className="text-[10px] tracking-widest uppercase text-amber-600">Auto-save failed — save manually</span>
+              <span className="text-[10px] tracking-widest uppercase text-amber-600">{t.autosave.failed}</span>
             )}
             {isDirty && autoSaveStatus === 'idle' && (
-              <span className="text-[10px] tracking-widest uppercase text-outline">● Unsaved changes</span>
+              <span className="text-[10px] tracking-widest uppercase text-outline">{t.autosave.unsaved}</span>
             )}
           </div>
           {actionError && (
@@ -731,23 +732,23 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
             disabled={publishing || saving}
             className="w-full bg-primary text-on-primary h-12 font-['Inter'] font-medium text-[0.6875rem] tracking-[0.2em] uppercase flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:brightness-110"
           >
-            {publishing ? 'Publishing...' : saving ? 'Saving...' : 'Publish Changes'}
+            {publishing ? t.actions.publishing : saving ? t.actions.saving : t.actions.publish}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
             className="w-full border border-outline mt-2 h-10 font-['Inter'] font-light text-[0.6875rem] tracking-[0.1em] uppercase hover:bg-surface-container transition-colors disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save Draft'}
+            {saving ? t.actions.saving : t.actions.saveDraft}
           </button>
 
           {publishedUrl === 'NO_DOMAIN' && (
             <div className="mt-4 p-4 text-[10px] uppercase tracking-widest text-amber-600 border border-amber-300 bg-amber-50 leading-relaxed text-center">
-              Published!
-              <a href="/dashboard/domains" className="underline ml-1 font-bold hover:text-amber-800 transition-colors">
-                Set a domain in Domains
+              {t.published.line1}
+              <a href="/dashboard/domains" className="underline mx-1 font-bold hover:text-amber-800 transition-colors">
+                {t.published.setDomainLink}
               </a>
-              to go live.
+              {t.published.line2}
             </div>
           )}
           {publishedUrl && publishedUrl !== 'NO_DOMAIN' && (
@@ -757,7 +758,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               className="mt-4 flex items-center justify-center gap-2 p-4 text-[10px] uppercase tracking-widest text-green-700 border border-green-300 bg-green-50 hover:bg-green-100 transition-colors"
             >
               <span className="material-symbols-outlined text-sm">open_in_new</span>
-              View Published Site
+              {t.published.viewSite}
             </a>
           )}
         </div>
@@ -766,7 +767,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       {/* Right Panel: Live Preview */}
       <section className="flex-grow bg-surface-container-lowest relative blueprint-grid border border-outline-variant overflow-hidden flex flex-col p-6">
         <div className="absolute top-0 left-0 bg-primary text-on-primary px-3 py-1.5 text-[10px] font-medium tracking-[0.15em] z-50">
-          LIVE PREVIEW
+          {t.preview.label}
         </div>
 
         <div className="flex-grow overflow-y-auto custom-scrollbar transform-gpu">
@@ -778,7 +779,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
             {loadingError ? (
               <div className="flex flex-col items-center justify-center h-[50vh] p-8 text-center">
                 <span className="material-symbols-outlined text-error text-4xl mb-4">error</span>
-                <p className="text-error font-medium mb-2">Theme Load Error</p>
+                <p className="text-error font-medium mb-2">{t.loadError.heading}</p>
                 <p className="text-outline text-sm max-w-xs">{loadingError}</p>
               </div>
             ) : TemplateRenderer ? (
@@ -790,7 +791,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               />
             ) : (
               <div className="flex items-center justify-center h-[50vh] text-outline font-light text-sm tracking-widest uppercase animate-pulse">
-                Loading Theme Renderer...
+                {t.preview.loadingRenderer}
               </div>
             )}
           </div>
@@ -812,6 +813,7 @@ interface DynamicFieldProps {
 }
 
 function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError }: DynamicFieldProps) {
+  const t = useDictionary().editor;
   const [isUploading, setIsUploading] = useState(false);
   const baseInputClass =
     "w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 pb-1 font-['Inter'] font-light text-xs transition-colors";
@@ -837,7 +839,7 @@ function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError
 
       onChange(confirmRes.publicUrl, initRes.assetId);
     } catch (err: unknown) {
-      onError(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      onError(`${t.field.uploadFailedPrefix}${err instanceof Error ? err.message : 'Unknown error'}`);
       console.error('[ASSET_UPLOAD_ERROR]', err);
     } finally {
       setIsUploading(false);
@@ -922,7 +924,7 @@ function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError
             />
           </div>
           {isUploading && (
-            <div className="text-xs text-primary animate-pulse mt-1">Uploading...</div>
+            <div className="text-xs text-primary animate-pulse mt-1">{t.field.uploading}</div>
           )}
           {value && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -960,12 +962,13 @@ function ArrayField({
   onChange: (value: ArrayTemplateField['items']) => void;
   onError: (msg: string) => void;
 }) {
+  const t = useDictionary().editor;
   const items = field.items || [];
 
   const handleAddItem = () => {
     if (!itemSchema) return;
     if (maxItems !== undefined && items.length >= maxItems) {
-      onError(`Maximum ${maxItems} items allowed`);
+      onError(`${t.field.maxItemsErrorPrefix}${maxItems}${t.field.maxItemsErrorSuffix}`);
       return;
     }
 
@@ -991,7 +994,7 @@ function ArrayField({
 
   const handleRemoveItem = (index: number) => {
     if (minItems !== undefined && items.length <= minItems) {
-      onError(`Minimum ${minItems} items required`);
+      onError(`${t.field.minItemsErrorPrefix}${minItems}${t.field.minItemsErrorSuffix}`);
       return;
     }
     const next = [...items];
@@ -1033,7 +1036,7 @@ function ArrayField({
           onClick={handleAddItem}
           disabled={maxItems !== undefined && items.length >= maxItems}
           className="text-primary hover:text-primary/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          title={maxItems !== undefined && items.length >= maxItems ? `Max ${maxItems} reached` : 'Add Item'}
+          title={maxItems !== undefined && items.length >= maxItems ? `${t.field.maxReachedPrefix}${maxItems}${t.field.maxReachedSuffix}` : t.field.addItem}
         >
           <span className="material-symbols-outlined text-lg">add_circle</span>
         </button>
@@ -1064,7 +1067,7 @@ function ArrayField({
                 onClick={() => handleRemoveItem(index)}
                 disabled={minItems !== undefined && items.length <= minItems}
                 className="text-outline hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title={minItems !== undefined && items.length <= minItems ? `Min ${minItems} required` : 'Delete'}
+                title={minItems !== undefined && items.length <= minItems ? `${t.field.minRequiredPrefix}${minItems}${t.field.minRequiredSuffix}` : t.field.delete}
               >
                 <span className="material-symbols-outlined text-sm">delete</span>
               </button>
@@ -1090,12 +1093,12 @@ function ArrayField({
 
         {items.length === 0 && (
           <div className="py-8 border border-dashed border-outline-variant text-center">
-            <p className="text-[10px] uppercase tracking-widest text-outline">No items yet</p>
+            <p className="text-[10px] uppercase tracking-widest text-outline">{t.field.noItems}</p>
             <button
               onClick={handleAddItem}
               className="mt-2 text-primary text-[10px] uppercase tracking-widest font-medium hover:underline"
             >
-              + Add first item
+              {t.field.addFirstItem}
             </button>
           </div>
         )}

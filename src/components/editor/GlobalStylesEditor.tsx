@@ -1,6 +1,7 @@
 'use client';
 
 import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
+import { useDictionary } from '@/lib/i18n/provider';
 
 interface GlobalStylesEditorProps {
   globalStyles: TemplateGlobalStyles;
@@ -8,6 +9,7 @@ interface GlobalStylesEditorProps {
 }
 
 export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalStylesEditorProps) {
+  const t = useDictionary().editor.design;
   const fontOptions = ['Inter', 'Playfair Display', 'Roboto', 'Noto Sans KR', 'Montserrat'];
   const layoutOptions = ['asymmetric', 'centered', 'full-width'];
 
@@ -19,7 +21,7 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
       {/* Primary Color */}
       <div className="relative">
         <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          Primary Color
+          {t.primaryColor}
         </label>
         <div className="flex items-center gap-2">
           <input
@@ -40,7 +42,7 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
       {/* Secondary Color */}
       <div className="relative">
         <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          Secondary Color
+          {t.secondaryColor}
         </label>
         <div className="flex items-center gap-2">
           <input
@@ -61,7 +63,7 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
       {/* Font Family */}
       <div className="relative">
         <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          Font Family
+          {t.fontFamily}
         </label>
         <select
           className={baseInputClass}
@@ -77,21 +79,21 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
       {/* Font Size */}
       <div className="relative">
         <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          Base Font Size
+          {t.baseFontSize}
         </label>
         <input
           type="text"
           className={baseInputClass}
           value={globalStyles.fontSize}
           onChange={(e) => onChange('fontSize', e.target.value)}
-          placeholder="e.g. 16px"
+          placeholder={t.fontSizePlaceholder}
         />
       </div>
 
       {/* Layout */}
       <div className="relative">
         <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          Layout Style
+          {t.layoutStyle}
         </label>
         <select
           className={baseInputClass}
