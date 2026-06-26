@@ -4,6 +4,7 @@ import { UserSite } from "@/domain/entities/user-site.entity";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Search, Settings as SettingsIcon, X } from "lucide-react";
 import {
   updateSiteDomainAction,
   publishSiteAction,
@@ -14,6 +15,19 @@ import {
 import { getDomainError, getSiteError, isStaleConflict } from "@/lib/errors/messages";
 import { useDashboardData } from "../DashboardDataProvider";
 import { useDictionary, useLocale } from "@/lib/i18n/provider";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function ProjectsClient() {
   const router = useRouter();
@@ -159,10 +173,6 @@ export default function ProjectsClient() {
     }
   };
 
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -172,420 +182,266 @@ export default function ProjectsClient() {
     }
   };
 
-  const currentSyncTime = formatDate(new Date().toISOString()) + " UTC";
   const isNameDirty = settingsSite && editSiteName.trim() !== settingsSite.siteName;
 
   return (
-    <div className="w-full">
-      {/* Header Section */}
-      <div className="mb-12 flex justify-between items-end">
+    <div className="w-full max-w-[1400px]">
+      {/* Header */}
+      <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
-          <h2 className="text-4xl font-light tracking-tight mb-4 uppercase text-black dark:text-white">{t.projects.title}</h2>
-          <p className="text-[0.875rem] text-zinc-500 font-light max-w-md leading-relaxed">
+          <h1 className="text-heading">{t.projects.title}</h1>
+          <p className="text-body mt-2 max-w-md text-muted-foreground">
             {t.projects.description}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-3">
-          <div className="text-right">
-            <span className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400 block mb-1">{t.projects.lastSync}</span>
-            <span className="text-[0.875rem] font-light text-black dark:text-white">{currentSyncTime}</span>
-          </div>
-          {/* Search */}
-          <div className="relative flex items-center">
-            <span className="material-symbols-outlined text-zinc-400 absolute left-3 !text-[1rem]">search</span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.projects.searchPlaceholder}
-              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 pl-8 pr-4 py-2 text-[0.6875rem] font-light uppercase tracking-widest text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-black dark:focus:border-white w-52 transition-colors"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 text-zinc-400 hover:text-black dark:hover:text-white"
-              >
-                <span className="material-symbols-outlined !text-[0.875rem]">close</span>
-              </button>
-            )}
-          </div>
+        <div className="relative w-full sm:w-64">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t.projects.searchPlaceholder}
+            className="pl-9 pr-9"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Project Grid */}
-      <div className="grid grid-cols-12 gap-y-1">
-        {/* Grid Header Labels */}
-        <div className="col-span-12 grid grid-cols-12 pb-4 border-b border-zinc-200 dark:border-zinc-800 px-4">
-          <div className="col-span-5 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colProject}</div>
-          <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colStatus}</div>
-          <div className="col-span-2 text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colLastMod}</div>
-          <div className="col-span-3 text-right text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-zinc-400">{t.common.colExecution}</div>
+      {/* Project table */}
+      <div className="overflow-hidden rounded-lg border border-border">
+        <div className="grid grid-cols-12 border-b border-border bg-muted/50 px-4 py-3">
+          <div className="text-caption col-span-5 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colProject}</div>
+          <div className="text-caption col-span-2 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colStatus}</div>
+          <div className="text-caption col-span-2 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colLastMod}</div>
+          <div className="text-caption col-span-3 text-right font-medium uppercase tracking-wider text-muted-foreground">{t.common.colExecution}</div>
         </div>
 
         {sites.length === 0 && (
-          <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
+          <div className="text-body py-12 text-center text-muted-foreground">
             {t.projects.noProjects}
           </div>
         )}
 
         {sites.length > 0 && filteredSites.length === 0 && (
-          <div className="col-span-12 py-12 text-center text-zinc-500 font-light text-sm uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800">
+          <div className="text-body py-12 text-center text-muted-foreground">
             {t.projects.noMatchPrefix}&ldquo;{searchQuery}&rdquo;
           </div>
         )}
 
-        {filteredSites.map((site, index) => {
+        {filteredSites.map((site) => {
           const isPublished = site.status === 'active';
 
           return (
             <div
               key={site.id}
-              className="col-span-12 grid grid-cols-12 py-6 items-center px-4 hover:bg-[#f3f3f3] dark:hover:bg-zinc-800/50 transition-colors group cursor-pointer"
+              className="group grid grid-cols-12 items-center border-b border-border px-4 py-4 transition-colors last:border-b-0 hover:bg-muted/50"
               onMouseEnter={() => setSelectedSite(site)}
             >
-              <div className="col-span-5 flex items-center gap-6">
-                {/* Wireframe Thumbnail */}
-                <div className="w-32 h-20 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 relative overflow-hidden flex items-center justify-center grid-blueprint">
-                  {index % 3 === 0 ? (
-                    <div className="w-24 h-12 border border-black/10 dark:border-white/10 flex flex-col justify-between p-1">
-                      <div className="h-1 bg-black/20 dark:bg-white/20 w-8"></div>
-                      <div className="h-4 bg-black/5 dark:bg-white/5 w-full"></div>
-                    </div>
-                  ) : index % 3 === 1 ? (
-                    <div className="w-20 h-14 border border-black/10 dark:border-white/10 flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-full border border-black/5 dark:border-white/5"></div>
-                    </div>
-                  ) : (
-                    <div className="w-10 h-10 bg-black/5 dark:bg-white/5 rotate-45"></div>
-                  )}
-                  <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium tracking-widest uppercase text-black dark:text-white truncate max-w-[200px]">
-                    {site.siteName}
-                  </span>
-                  <span className="text-[0.75rem] text-zinc-500 tracking-tight font-light truncate max-w-[200px]">
-                    {site.domain || `internal.id/${site.id.substring(0, 8)}`}
-                  </span>
-                </div>
-              </div>
-              <div className="col-span-2 flex items-center gap-3">
-                <div className={`w-1 h-1 ${isPublished ? 'bg-[#7d000c]' : 'bg-zinc-300 dark:bg-zinc-600'}`}></div>
-                <span className={`text-[0.6875rem] font-medium uppercase tracking-widest ${!isPublished && 'text-zinc-400'}`}>
-                  {isPublished ? t.common.published : t.common.draft}
+              <div className="col-span-5 flex flex-col">
+                <span className="text-body truncate font-medium">{site.siteName}</span>
+                <span className="text-caption truncate text-muted-foreground">
+                  {site.domain || `internal.id/${site.id.substring(0, 8)}`}
                 </span>
               </div>
               <div className="col-span-2">
-                <span className="text-[0.75rem] font-light text-zinc-600 dark:text-zinc-400">
-                  {formatDate(site.updatedAt)}
-                </span>
+                <Badge variant={isPublished ? "default" : "secondary"}>
+                  {isPublished ? t.common.published : t.common.draft}
+                </Badge>
+              </div>
+              <div className="col-span-2">
+                <span className="text-caption text-muted-foreground">{formatDate(site.updatedAt)}</span>
               </div>
               <div className="col-span-3 flex justify-end gap-2">
-                <button
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label={t.projects.configuration}
                   onClick={(e) => {
                     e.stopPropagation();
                     setSettingsSite(site);
                   }}
-                  className="border border-zinc-300 dark:border-zinc-700 h-8 px-2 flex items-center justify-center hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                 >
-                  <span className="material-symbols-outlined !text-[1rem]">settings</span>
-                </button>
+                  <SettingsIcon className="h-4 w-4" />
+                </Button>
                 {isPublished && site.domain ? (
-                  <a
-                    href={`/site/${site.domain}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border border-zinc-300 dark:border-zinc-700 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
-                  >
-                    {t.common.view}
-                  </a>
+                  <Button asChild variant="outline" size="sm">
+                    <a href={`/site/${site.domain}`} target="_blank" rel="noopener noreferrer">
+                      {t.common.view}
+                    </a>
+                  </Button>
                 ) : (
-                  <Link
-                    href={`/preview/${site.id}`}
-                    target="_blank"
-                    className="border border-zinc-300 dark:border-zinc-700 h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
-                  >
-                    {t.common.preview}
-                  </Link>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/preview/${site.id}`} target="_blank">
+                      {t.common.preview}
+                    </Link>
+                  </Button>
                 )}
-                <Link
-                  href={`/dashboard/editor?siteId=${site.id}`}
-                  className="bg-black text-white dark:bg-white dark:text-black h-8 px-4 flex items-center justify-center text-[0.625rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
-                >
-                  {t.common.edit}
-                </Link>
+                <Button asChild size="sm">
+                  <Link href={`/dashboard/editor?siteId=${site.id}`}>{t.common.edit}</Link>
+                </Button>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Detail Drawer / Inset View */}
+      {/* Detail metadata */}
       {selectedSite && (
-        <div className="mt-24 pt-12 border-t border-zinc-200 dark:border-zinc-800 grid grid-cols-12 gap-8">
-          <div className="col-span-4">
-            <span className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6">Active_System_Metadata</span>
-            <div className="space-y-4">
-              <div className="flex justify-between items-end border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">{t.projects.coreTemplate}</span>
-                <span className="text-sm font-medium uppercase tracking-tighter text-black dark:text-white">
-                  {selectedSite.templateId ? `TPL_${selectedSite.templateId.substring(0, 8)}` : 'CUSTOM_BUILD'}
-                </span>
-              </div>
-              <div className="flex justify-between items-end border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">{t.projects.creationDate}</span>
-                <span className="text-sm font-medium uppercase tracking-tighter text-black dark:text-white">
-                  {formatDate(selectedSite.createdAt).split(' ')[0]}
-                </span>
-              </div>
-              <div className="flex justify-between items-end border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                <span className="text-[0.75rem] uppercase tracking-widest text-zinc-500">{t.projects.instanceUuid}</span>
-                <span className="text-sm font-medium uppercase tracking-tighter text-black dark:text-white">
-                  {selectedSite.id.substring(0, 12).toUpperCase()}
-                </span>
-              </div>
+        <Card className="mt-10 p-6">
+          <h2 className="text-caption mb-4 font-medium uppercase tracking-wider text-muted-foreground">
+            {selectedSite.siteName}
+          </h2>
+          <dl className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-3">
+            <div className="flex items-center justify-between border-b border-border pb-2">
+              <dt className="text-caption text-muted-foreground">{t.projects.coreTemplate}</dt>
+              <dd className="text-body font-medium">{selectedSite.templateId ?? '—'}</dd>
             </div>
-          </div>
-          <div className="col-span-8 bg-[#f3f3f3] dark:bg-zinc-900 p-8 flex flex-col justify-between grid-blueprint min-h-[300px]">
-            <div>
-              <span className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-2">Structural Preview // ACTIVE</span>
-              <h3 className="text-2xl font-light uppercase tracking-tight text-black dark:text-white">{selectedSite.siteName}.sys</h3>
+            <div className="flex items-center justify-between border-b border-border pb-2">
+              <dt className="text-caption text-muted-foreground">{t.projects.creationDate}</dt>
+              <dd className="text-body font-medium">{formatDate(selectedSite.createdAt).split(' ')[0]}</dd>
             </div>
-            <div className="grid grid-cols-3 gap-8">
-              <div className="aspect-square border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-black/50 p-4">
-                <div className="h-full w-full border-t border-l border-black/10 dark:border-white/10 flex items-center justify-center">
-                  <span className="text-[0.5rem] uppercase text-zinc-400">Layout_A</span>
-                </div>
-              </div>
-              <div className="aspect-square border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-black/50 p-4">
-                <div className="h-full w-full border-t border-l border-black/10 dark:border-white/10 flex items-center justify-center">
-                  <span className="text-[0.5rem] uppercase text-zinc-400">Layout_B</span>
-                </div>
-              </div>
-              <div className="aspect-square border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-black/50 p-4 flex items-center justify-center">
-                <span className="material-symbols-outlined text-zinc-300 dark:text-zinc-700">add</span>
-              </div>
+            <div className="flex items-center justify-between border-b border-border pb-2">
+              <dt className="text-caption text-muted-foreground">{t.projects.instanceUuid}</dt>
+              <dd className="text-body font-medium">{selectedSite.id.substring(0, 12)}</dd>
             </div>
-          </div>
-        </div>
+          </dl>
+        </Card>
       )}
 
-      {/* Settings Modal */}
-      {settingsSite && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-4xl bg-[#f9f9f9] dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800 shadow-2xl flex flex-col max-h-[90vh]">
-            {/* Header */}
-            <div className="flex justify-between items-center p-6 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121212]">
-              <div>
-                <h2 className="text-xl font-light tracking-widest uppercase text-black dark:text-white">{t.projects.configuration}</h2>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="w-1.5 h-1.5 bg-[#7d000c]"></span>
-                  <span className="text-[0.625rem] font-medium tracking-[0.2em] text-zinc-500 uppercase">{settingsSite.id}</span>
-                </div>
-              </div>
-              <button
-                onClick={() => setSettingsSite(null)}
-                className="text-zinc-400 hover:text-black dark:hover:text-white transition-colors w-10 h-10 flex items-center justify-center border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
-              >
-                <span className="material-symbols-outlined font-light">close</span>
-              </button>
-            </div>
+      {/* Settings dialog */}
+      <Dialog open={!!settingsSite} onOpenChange={(open) => !open && setSettingsSite(null)}>
+        <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto sm:max-w-2xl">
+          {settingsSite && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t.projects.configuration}</DialogTitle>
+                <DialogDescription>{settingsSite.id}</DialogDescription>
+              </DialogHeader>
 
-            {/* Content Body */}
-            <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-              {/* Settings Sidebar */}
-              <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121212] p-6 space-y-1">
-                <button
-                  onClick={() => scrollToSection('settings-basic-info')}
-                  className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center justify-between group"
-                >
-                  <span>{t.projects.basicInfo}</span>
-                  <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
-                </button>
-                <button
-                  onClick={() => scrollToSection('settings-domain')}
-                  className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-500 hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 transition-colors flex items-center justify-between group"
-                >
-                  <span>{t.projects.domainUrl}</span>
-                  <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
-                </button>
-                <button
-                  onClick={() => scrollToSection('settings-status')}
-                  className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-500 hover:bg-[#f3f3f3] dark:hover:bg-zinc-900 transition-colors flex items-center justify-between group"
-                >
-                  <span>{t.common.colStatus}</span>
-                  <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-50">chevron_right</span>
-                </button>
-                <div className="pt-6 mt-6 border-t border-zinc-200 dark:border-zinc-800">
-                  <button
-                    onClick={() => scrollToSection('settings-danger')}
-                    className="w-full text-left px-4 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center justify-between group"
-                  >
-                    <span>{t.projects.dangerZone}</span>
-                    <span className="material-symbols-outlined !text-[1rem] opacity-0 group-hover:opacity-100 text-red-600">warning</span>
-                  </button>
-                </div>
-              </div>
+              <div className="mt-6 space-y-8">
+                {/* Basic info */}
+                <section className="space-y-3">
+                  <h3 className="text-title">{t.projects.basicInfo}</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="site-name">{t.projects.siteName}</Label>
+                    <Input
+                      id="site-name"
+                      type="text"
+                      value={editSiteName}
+                      onChange={(e) => {
+                        setEditSiteName(e.target.value);
+                        setSaveNameError(null);
+                        setSaveNameSuccess(false);
+                      }}
+                    />
+                    {saveNameError && <p className="text-caption text-destructive">{saveNameError}</p>}
+                    {saveNameSuccess && <p className="text-caption text-primary">{t.projects.nameSaved}</p>}
+                  </div>
+                </section>
 
-              {/* Settings Form Area */}
-              <div className="flex-1 overflow-y-auto p-8 grid-blueprint bg-[#f9f9f9] dark:bg-[#0a0a0a]">
-                <div className="max-w-2xl space-y-12">
-                  <section id="settings-basic-info">
-                    <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
-                      <span className="material-symbols-outlined !text-[1rem]">tune</span>
-                      {t.projects.basicInfo}
-                    </h3>
-                    <div className="space-y-6 bg-white dark:bg-[#121212] p-6 border border-zinc-200 dark:border-zinc-800">
-                      <div>
-                        <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">{t.projects.siteName}</label>
-                        <input
-                          type="text"
-                          value={editSiteName}
-                          onChange={(e) => {
-                            setEditSiteName(e.target.value);
-                            setSaveNameError(null);
-                            setSaveNameSuccess(false);
-                          }}
-                          className="w-full bg-transparent border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm font-light text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition-all placeholder:text-zinc-400"
-                        />
-                        {saveNameError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{saveNameError}</p>}
-                        {saveNameSuccess && <p className="text-[0.6875rem] text-green-500 mt-2 font-light">{t.projects.nameSaved}</p>}
-                      </div>
-                    </div>
-                  </section>
-
-                  <section id="settings-domain">
-                    <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
-                      <span className="material-symbols-outlined !text-[1rem]">router</span>
-                      {t.projects.domainUrl}
-                    </h3>
-                    <div className="space-y-6 bg-white dark:bg-[#121212] p-6 border border-zinc-200 dark:border-zinc-800">
-                      <div>
-                        <label className="block text-[0.6875rem] font-medium uppercase tracking-widest text-black dark:text-white mb-3">{t.projects.primaryDomain}</label>
-                        <div className="flex">
-                          <input
-                            type="text"
-                            value={editDomain}
-                            onChange={(e) => {
-                              setEditDomain(e.target.value);
-                              setDomainVerified(false);
-                              setDomainError(null);
-                            }}
-                            placeholder={t.projects.domainPlaceholder}
-                            className={`flex-1 bg-transparent border ${domainError ? 'border-red-500' : domainVerified ? 'border-green-500' : 'border-zinc-300 dark:border-zinc-700'} px-4 py-3 text-sm font-light text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition-all placeholder:text-zinc-400`}
-                          />
-                          <button
-                            onClick={handleVerifyDomain}
-                            disabled={isVerifying || !editDomain}
-                            className="border border-l-0 border-zinc-300 dark:border-zinc-700 px-6 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-[#f3f3f3] dark:hover:bg-zinc-800 transition-colors text-black dark:text-white disabled:opacity-50"
-                          >
-                            {isVerifying ? t.projects.verifying : t.projects.verify}
-                          </button>
-                        </div>
-                        {domainError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light tracking-wide">{domainError}</p>}
-                        {domainVerified && <p className="text-[0.6875rem] text-green-500 mt-2 font-light tracking-wide">{t.projects.domainSet}</p>}
-                        {!domainError && !domainVerified && (
-                          <p className="text-[0.6875rem] text-zinc-500 mt-2 font-light tracking-wide">
-                            {t.projects.domainHintPrefix}internal.id/{settingsSite.id.substring(0, 8)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </section>
-
-                  <section id="settings-status">
-                    <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zinc-400 block mb-6 flex items-center gap-3">
-                      <span className="material-symbols-outlined !text-[1rem]">power_settings_new</span>
-                      {t.projects.executionStatus}
-                    </h3>
-                    <div className="flex items-center justify-between p-6 bg-white dark:bg-[#121212] border border-zinc-200 dark:border-zinc-800">
-                      <div>
-                        <span className="block text-[0.75rem] font-medium uppercase tracking-widest text-black dark:text-white mb-1">{t.projects.productionState}</span>
-                        <span className="block text-[0.6875rem] font-light text-zinc-500">
-                          {settingsSite.status === 'active' ? t.projects.statusPublishedDesc : t.projects.statusDraftDesc}
-                        </span>
-                        {statusError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{statusError}</p>}
-                      </div>
-                      <button
-                        onClick={handleToggleStatus}
-                        disabled={isTogglingStatus}
-                        className="border border-zinc-300 dark:border-zinc-700 px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors disabled:opacity-50"
+                {/* Domain */}
+                <section className="space-y-3">
+                  <h3 className="text-title">{t.projects.domainUrl}</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="site-domain">{t.projects.primaryDomain}</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="site-domain"
+                        type="text"
+                        value={editDomain}
+                        onChange={(e) => {
+                          setEditDomain(e.target.value);
+                          setDomainVerified(false);
+                          setDomainError(null);
+                        }}
+                        placeholder={t.projects.domainPlaceholder}
+                        aria-invalid={!!domainError}
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={handleVerifyDomain}
+                        disabled={isVerifying || !editDomain}
                       >
-                        {isTogglingStatus ? t.projects.processing : settingsSite.status === 'active' ? t.projects.suspend : t.projects.publish}
-                      </button>
+                        {isVerifying ? t.projects.verifying : t.projects.verify}
+                      </Button>
                     </div>
-                  </section>
+                    {domainError && <p className="text-caption text-destructive">{domainError}</p>}
+                    {domainVerified && <p className="text-caption text-primary">{t.projects.domainSet}</p>}
+                    {!domainError && !domainVerified && (
+                      <p className="text-caption text-muted-foreground">
+                        {t.projects.domainHintPrefix}internal.id/{settingsSite.id.substring(0, 8)}
+                      </p>
+                    )}
+                  </div>
+                </section>
 
-                  <section id="settings-danger">
-                    <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-red-500 block mb-6 flex items-center gap-3">
-                      <span className="material-symbols-outlined !text-[1rem]">warning</span>
-                      {t.projects.dangerZone}
-                    </h3>
-                    <div className="flex items-center justify-between p-6 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50">
-                      <div>
-                        <span className="block text-[0.75rem] font-medium uppercase tracking-widest text-red-600 dark:text-red-400 mb-1">{t.projects.deleteProject}</span>
-                        <span className="block text-[0.6875rem] font-light text-red-500/80 dark:text-red-400/80 max-w-sm">
-                          {t.projects.deleteWarn}
-                        </span>
-                        {deleteError && <p className="text-[0.6875rem] text-red-500 mt-2 font-light">{deleteError}</p>}
-                      </div>
-                      {showDeleteConfirm ? (
-                        <div className="flex flex-col gap-2 items-end">
-                          <span className="text-[0.6875rem] text-red-600 font-medium uppercase tracking-widest">{t.projects.confirmPrompt}</span>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => setShowDeleteConfirm(false)}
-                              className="border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-[0.6875rem] font-medium uppercase tracking-widest text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                            >
-                              {t.projects.cancel}
-                            </button>
-                            <button
-                              onClick={handleDelete}
-                              disabled={isDeleting}
-                              className="border border-red-500 bg-red-600 text-white px-4 py-2 text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-red-700 transition-colors disabled:opacity-50"
-                            >
-                              {isDeleting ? t.projects.deleting : t.projects.confirmDelete}
-                            </button>
-                          </div>
+                {/* Status */}
+                <section className="space-y-3">
+                  <h3 className="text-title">{t.projects.executionStatus}</h3>
+                  <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
+                    <div>
+                      <p className="text-body font-medium">{t.projects.productionState}</p>
+                      <p className="text-caption text-muted-foreground">
+                        {settingsSite.status === 'active' ? t.projects.statusPublishedDesc : t.projects.statusDraftDesc}
+                      </p>
+                      {statusError && <p className="text-caption mt-1 text-destructive">{statusError}</p>}
+                    </div>
+                    <Button variant="outline" onClick={handleToggleStatus} disabled={isTogglingStatus}>
+                      {isTogglingStatus ? t.projects.processing : settingsSite.status === 'active' ? t.projects.suspend : t.projects.publish}
+                    </Button>
+                  </div>
+                </section>
+
+                {/* Danger zone */}
+                <section className="space-y-3">
+                  <h3 className="text-title text-destructive">{t.projects.dangerZone}</h3>
+                  <div className="flex items-center justify-between gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+                    <div>
+                      <p className="text-body font-medium text-destructive">{t.projects.deleteProject}</p>
+                      <p className="text-caption max-w-sm text-muted-foreground">{t.projects.deleteWarn}</p>
+                      {deleteError && <p className="text-caption mt-1 text-destructive">{deleteError}</p>}
+                    </div>
+                    {showDeleteConfirm ? (
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="text-caption font-medium text-destructive">{t.projects.confirmPrompt}</span>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(false)}>
+                            {t.projects.cancel}
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isDeleting}>
+                            {isDeleting ? t.projects.deleting : t.projects.confirmDelete}
+                          </Button>
                         </div>
-                      ) : (
-                        <button
-                          onClick={() => setShowDeleteConfirm(true)}
-                          className="border border-red-200 dark:border-red-900/50 bg-white dark:bg-black px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-widest text-red-600 dark:text-red-500 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white transition-colors"
-                        >
-                          {t.projects.deleteSite}
-                        </button>
-                      )}
-                    </div>
-                  </section>
-                </div>
+                      </div>
+                    ) : (
+                      <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+                        {t.projects.deleteSite}
+                      </Button>
+                    )}
+                  </div>
+                </section>
               </div>
-            </div>
 
-            {/* Footer */}
-            <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-white dark:bg-[#121212]">
-              <div className="text-[0.625rem] font-light text-zinc-400 tracking-widest uppercase hidden sm:block">
-                {isNameDirty ? t.projects.pendingChanges : t.projects.noPending}
-              </div>
-              <div className="flex gap-4 w-full sm:w-auto justify-end">
-                <button
-                  onClick={() => setSettingsSite(null)}
-                  className="px-6 py-3 border border-transparent text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors"
-                >
+              <DialogFooter className="mt-8">
+                <Button variant="ghost" onClick={() => setSettingsSite(null)}>
                   {t.projects.close}
-                </button>
-                <button
-                  onClick={handleCommitName}
-                  disabled={!isNameDirty || isSavingName}
-                  className="px-8 py-3 bg-black text-white dark:bg-white dark:text-black text-[0.6875rem] font-medium uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                >
+                </Button>
+                <Button onClick={handleCommitName} disabled={!isNameDirty || isSavingName}>
                   {isSavingName ? t.projects.saving : t.projects.commit}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

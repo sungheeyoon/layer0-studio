@@ -3,10 +3,15 @@
 import Link from "next/link";
 import { Suspense, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { loginAction } from "./actions";
 import { getAuthError } from "@/lib/errors/messages";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useDictionary, useLocale } from "@/lib/i18n/provider";
 
 function LoginForm() {
@@ -35,145 +40,51 @@ function LoginForm() {
   }
 
   return (
-    <>
-      {/* Main Canvas */}
-      <main className="relative min-h-screen blueprint-grid flex flex-col items-center justify-center pt-12">
-        {/* Background Layering: Asymmetric subtle element */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.05] flex items-center justify-center overflow-hidden">
-          <div className="text-[30vw] md:text-[25vw] font-bold tracking-tighter text-black select-none leading-none">L0</div>
+    <AuthShell
+      title={t.title}
+      subtitle={t.subtitle}
+      footer={
+        <>
+          <Link href="/signup" className="font-medium text-foreground hover:underline">
+            {t.signupLink}
+          </Link>
+        </>
+      }
+    >
+      <form className="space-y-4" action={handleSubmit}>
+        <div className="space-y-2">
+          <Label htmlFor="email">{t.emailLabel}</Label>
+          <Input id="email" name="email" type="email" placeholder="user@example.com" required />
         </div>
-
-        {/* Login Container */}
-        <div className="w-full max-w-[420px] px-8 py-12 bg-surface z-10">
-          {/* Branding/Identity */}
-          <div className="mb-20">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-1 h-1 bg-tertiary"></span>
-              <span className="font-label text-[10px] font-medium tracking-[0.2em] uppercase text-zinc-500">Identity_Verification</span>
-            </div>
-            <h1 className="font-headline text-5xl font-thin tracking-tight text-zinc-900 mb-2">ACCESS_GATE</h1>
-            <p className="font-body text-xs font-light tracking-wider text-zinc-400">LAYER0 STUDIO CENTRAL AUTHENTICATION</p>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">{t.passwordLabel}</Label>
+            <Link
+              href="/forgot-password"
+              className="text-caption text-muted-foreground hover:text-foreground"
+            >
+              {t.forgotLink}
+            </Link>
           </div>
-
-          {/* Login Form */}
-          <form className="space-y-12" action={handleSubmit}>
-            {/* Email Field */}
-            <div className="group relative">
-              <label
-                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
-                htmlFor="email"
-              >
-                {t.emailLabel}
-              </label>
-              <div className="relative flex items-center">
-                <input
-                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200 px-2"
-                  id="email"
-                  name="email"
-                  placeholder="user@example.com"
-                  type="email"
-                  required
-                />
-                {/* Tertiary Square Status Dot on Focus */}
-                <div className="absolute right-2 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div className="group relative">
-              <label
-                className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
-                htmlFor="password"
-              >
-                {t.passwordLabel}
-              </label>
-              <div className="relative flex items-center">
-                <input
-                  className="w-full h-10 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary font-body text-sm font-light tracking-widest text-zinc-900 placeholder:text-zinc-200 px-2"
-                  id="password"
-                  name="password"
-                  placeholder="••••••••••••"
-                  type="password"
-                  required
-                />
-                <div className="absolute right-2 top-0 w-1 h-1 bg-tertiary opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="pt-8 flex flex-col gap-6">
-              {error && (
-                <div className="text-red-500 font-label text-[10px] tracking-widest uppercase">
-                  {t.errorPrefix}: {error}
-                </div>
-              )}
-              <button
-                className="w-full h-12 bg-primary text-on-primary font-label text-[11px] font-medium tracking-[0.2em] uppercase active:scale-[0.98] transition-transform flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
-                type="submit"
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <>
-                    <span className="w-[10px] h-[10px] border border-on-primary border-t-transparent rounded-full animate-spin"></span>
-                    <span>{t.submitting}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{t.submit}</span>
-                    <span className="w-[4px] h-[4px] bg-tertiary-fixed"></span>
-                  </>
-                )}
-              </button>
-              
-              <div className="flex justify-between items-center">
-                <Link
-                  className="font-label text-[9px] font-light tracking-[0.1em] uppercase text-zinc-400 hover:text-zinc-900 transition-colors border-b border-transparent hover:border-zinc-900 pb-0.5"
-                  href="/forgot-password"
-                >
-                  {t.forgotLink}
-                </Link>
-                <Link 
-                  className="font-label text-[9px] font-light tracking-[0.1em] uppercase text-zinc-400 hover:text-zinc-900 transition-colors border-b border-transparent hover:border-zinc-900 pb-0.5" 
-                  href="/signup"
-                >
-                  {t.signupLink}
-                </Link>
-              </div>
-            </div>
-          </form>
-
-          {/* Social Login */}
-          <div className="mt-12">
-            <OAuthButtons />
-          </div>
-
-          {/* Technical Metadata Footer */}
-          <div className="mt-24 pt-8 border-t border-zinc-100 grid grid-cols-2 gap-4">
-            <div>
-              <span className="block font-label text-[8px] tracking-widest text-zinc-400 uppercase">Latency</span>
-              <span className="block font-body text-[10px] font-light text-zinc-600">12.4ms [STABLE]</span>
-            </div>
-            <div>
-              <span className="block font-label text-[8px] tracking-widest text-zinc-400 uppercase">Encryption</span>
-              <span className="block font-body text-[10px] font-light text-zinc-600">AES_256_GCM</span>
-            </div>
-          </div>
+          <Input id="password" name="password" type="password" placeholder="••••••••" required />
         </div>
 
-        {/* Decorative Blueprint Element */}
-        <div className="absolute bottom-12 right-12 text-zinc-200 hidden md:block">
-          <div className="font-label text-[10px] font-light tracking-[0.3em] uppercase mb-4 [writing-mode:vertical-lr]">SYSTEM_VERSION_2.4.0</div>
-          <div className="w-px h-32 bg-zinc-200 mx-auto"></div>
-        </div>
-      </main>
+        {error && (
+          <p className="text-sm text-destructive">
+            {t.errorPrefix}: {error}
+          </p>
+        )}
 
-      {/* Side Footer / Legal Focus Shell */}
-      <footer className="fixed bottom-0 left-0 w-full px-6 py-4 flex justify-between items-end pointer-events-none">
-        <div className="font-label text-[8px] tracking-widest text-zinc-300 uppercase pointer-events-auto">
-          © 2024 LAYER0_STUDIO_CORP. ALL RIGHTS RESERVED.
-        </div>
-      </footer>
-    </>
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+          {isPending ? t.submitting : t.submit}
+        </Button>
+      </form>
+
+      <div className="mt-6">
+        <OAuthButtons />
+      </div>
+    </AuthShell>
   );
 }
 

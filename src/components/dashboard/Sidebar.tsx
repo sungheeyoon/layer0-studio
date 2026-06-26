@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FolderOpen, Globe, LayoutGrid, Layers, Settings } from "lucide-react";
 import { useDictionary } from "@/lib/i18n/provider";
 
 const navItems = [
-  { key: "overview", href: "/dashboard", icon: "grid_view", exact: true },
-  { key: "templates", href: "/dashboard/templates", icon: "layers" },
-  { key: "projects", href: "/dashboard/projects", icon: "folder_open" },
-  { key: "domains", href: "/dashboard/domains", icon: "language" },
-  { key: "settings", href: "/dashboard/settings", icon: "settings" },
+  { key: "overview", href: "/dashboard", icon: LayoutGrid, exact: true },
+  { key: "templates", href: "/dashboard/templates", icon: Layers },
+  { key: "projects", href: "/dashboard/projects", icon: FolderOpen },
+  { key: "domains", href: "/dashboard/domains", icon: Globe },
+  { key: "settings", href: "/dashboard/settings", icon: Settings },
 ] as const;
 
 export default function Sidebar() {
@@ -17,51 +18,38 @@ export default function Sidebar() {
   const t = useDictionary().dashboard.sidebar;
 
   return (
-    <aside className="fixed left-0 top-0 flex flex-col h-full py-8 bg-[#f3f3f3] dark:bg-zinc-900 w-64 border-none z-50">
-      <div className="px-6 mb-12">
-        <h1 className="text-lg font-thin tracking-[0.15em] text-black dark:text-white uppercase">Layer0_Studio</h1>
-        <p className="font-['Inter'] font-light uppercase tracking-[0.1em] text-[0.6875rem] text-zinc-500 mt-1">V.2.4.0_STABLE</p>
+    <aside className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar py-8">
+      <div className="px-6 mb-10">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-primary" />
+          <span className="text-title font-semibold tracking-tight text-sidebar-foreground">
+            Layer0 Studio
+          </span>
+        </Link>
       </div>
-      <nav className="flex-1 flex flex-col gap-1">
+      <nav className="flex-1 flex flex-col gap-1 px-3">
         {navItems.map((item) => {
           const isActive = 'exact' in item && item.exact
             ? pathname === item.href
             : pathname.startsWith(item.href);
-          
+          const Icon = item.icon;
+
           return (
             <Link
               key={item.key}
               href={item.href}
-              className={`group relative flex items-center px-6 py-3 font-['Inter'] font-light uppercase tracking-[0.1em] text-[0.6875rem] transition-colors duration-75 ${
+              className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
                 isActive
-                  ? "bg-[#eeeeee] dark:bg-zinc-800 text-black dark:text-white font-medium before:content-[''] before:absolute before:right-4 before:w-1 before:h-1 before:bg-[#7d000c]"
-                  : "text-zinc-500 dark:text-zinc-500 hover:bg-[#eeeeee] dark:hover:bg-zinc-800"
+                  ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
               }`}
             >
-              <span className="material-symbols-outlined mr-4" data-icon={item.icon}>
-                {item.icon}
-              </span>
+              <Icon className="h-4 w-4" />
               <span>{t[item.key]}</span>
             </Link>
           );
         })}
       </nav>
-      <div className="px-6 mt-auto">
-        <div className="flex items-center gap-3 py-4">
-          <div className="w-8 h-8 bg-zinc-300 flex items-center justify-center overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              alt="User Avatar" 
-              className="w-full h-full object-cover" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzoZ6E-cCWlzDBn51jc5t-OIG0zOWXUTJlA1RfTxKaKnzXGElnQS2jV_Ms6OrDVpvSqSduOlSsLpcF2VL-Byn9bimapOcZwJ4JN8yzL7CPb152K63gwrr6XqbJ86tgfoq4vgbODo23QiyF5DTcR-S8N3cyzgArAbQgn1rykczNgPlZ16C8VI9899WhuVZMuuffIiuBjVImJvOqsNRdJxA5fOOeUIsxAS47oQrSXY6M2zzpoJOoqfZFr7bgQy6XAdgaMLlgBbeOdJd2"
-            />
-          </div>
-          <div className="overflow-hidden">
-            <p className="font-['Inter'] font-light uppercase tracking-[0.1em] text-[0.6875rem] truncate">User ID: 8829-X</p>
-            <div className="w-1 h-1 bg-[#7d000c] mt-1"></div>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

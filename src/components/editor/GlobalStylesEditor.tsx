@@ -2,6 +2,15 @@
 
 import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
 import { useDictionary } from '@/lib/i18n/provider';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface GlobalStylesEditorProps {
   globalStyles: TemplateGlobalStyles;
@@ -13,26 +22,21 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
   const fontOptions = ['Inter', 'Playfair Display', 'Roboto', 'Noto Sans KR', 'Montserrat'];
   const layoutOptions = ['asymmetric', 'centered', 'full-width'];
 
-  const baseInputClass =
-    "w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 pb-1 font-['Inter'] font-light text-xs";
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Primary Color */}
-      <div className="relative">
-        <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          {t.primaryColor}
-        </label>
+      <div className="space-y-2">
+        <Label htmlFor="primaryColor">{t.primaryColor}</Label>
         <div className="flex items-center gap-2">
           <input
+            id="primaryColor"
             type="color"
             value={globalStyles.primaryColor}
             onChange={(e) => onChange('primaryColor', e.target.value)}
-            className="w-8 h-8 border border-outline-variant cursor-pointer"
+            className="size-9 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
           />
-          <input
-            type="text"
-            className={baseInputClass}
+          <Input
+            className="font-mono"
             value={globalStyles.primaryColor}
             onChange={(e) => onChange('primaryColor', e.target.value)}
           />
@@ -40,20 +44,18 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
       </div>
 
       {/* Secondary Color */}
-      <div className="relative">
-        <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          {t.secondaryColor}
-        </label>
+      <div className="space-y-2">
+        <Label htmlFor="secondaryColor">{t.secondaryColor}</Label>
         <div className="flex items-center gap-2">
           <input
+            id="secondaryColor"
             type="color"
             value={globalStyles.secondaryColor}
             onChange={(e) => onChange('secondaryColor', e.target.value)}
-            className="w-8 h-8 border border-outline-variant cursor-pointer"
+            className="size-9 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
           />
-          <input
-            type="text"
-            className={baseInputClass}
+          <Input
+            className="font-mono"
             value={globalStyles.secondaryColor}
             onChange={(e) => onChange('secondaryColor', e.target.value)}
           />
@@ -61,29 +63,25 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
       </div>
 
       {/* Font Family */}
-      <div className="relative">
-        <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          {t.fontFamily}
-        </label>
-        <select
-          className={baseInputClass}
-          value={globalStyles.fontFamily}
-          onChange={(e) => onChange('fontFamily', e.target.value)}
-        >
-          {fontOptions.map((font) => (
-            <option key={font} value={font}>{font}</option>
-          ))}
-        </select>
+      <div className="space-y-2">
+        <Label>{t.fontFamily}</Label>
+        <Select value={globalStyles.fontFamily} onValueChange={(v) => onChange('fontFamily', v)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {fontOptions.map((font) => (
+              <SelectItem key={font} value={font}>{font}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Font Size */}
-      <div className="relative">
-        <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          {t.baseFontSize}
-        </label>
-        <input
-          type="text"
-          className={baseInputClass}
+      <div className="space-y-2">
+        <Label htmlFor="fontSize">{t.baseFontSize}</Label>
+        <Input
+          id="fontSize"
           value={globalStyles.fontSize}
           onChange={(e) => onChange('fontSize', e.target.value)}
           placeholder={t.fontSizePlaceholder}
@@ -91,19 +89,18 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
       </div>
 
       {/* Layout */}
-      <div className="relative">
-        <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2">
-          {t.layoutStyle}
-        </label>
-        <select
-          className={baseInputClass}
-          value={globalStyles.layout}
-          onChange={(e) => onChange('layout', e.target.value)}
-        >
-          {layoutOptions.map((layout) => (
-            <option key={layout} value={layout}>{layout}</option>
-          ))}
-        </select>
+      <div className="space-y-2">
+        <Label>{t.layoutStyle}</Label>
+        <Select value={globalStyles.layout} onValueChange={(v) => onChange('layout', v)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {layoutOptions.map((layout) => (
+              <SelectItem key={layout} value={layout}>{layout}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

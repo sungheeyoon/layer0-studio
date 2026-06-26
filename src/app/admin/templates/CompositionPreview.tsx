@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { TemplateJson, allSections } from '@/domain/entities/template.entity';
 import { templateMap } from '@/templates/_generated';
 import { TemplateLibrary } from '@/templates/types';
+import { Badge } from '@/components/ui/badge';
 
 interface CompositionPreviewProps {
   templateJson: TemplateJson;
@@ -36,11 +37,9 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="text-[10px] font-medium uppercase tracking-widest text-neutral-500">
-          Section Composition
-        </h4>
-        {loading && <span className="text-[9px] animate-pulse text-neutral-400">Loading Metadata...</span>}
+      <div className="flex items-center justify-between">
+        <h4 className="text-xs font-medium text-muted-foreground">Section composition</h4>
+        {loading && <span className="animate-pulse text-xs text-muted-foreground">Loading metadata...</span>}
       </div>
 
       <div className="space-y-2">
@@ -49,52 +48,48 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
           const meta = entry?.meta;
 
           return (
-            <div 
+            <div
               key={section.id}
-              className="group flex items-start gap-4 p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:border-black dark:hover:border-white transition-colors"
+              className="flex items-start gap-4 rounded-md border border-border bg-card p-3 transition-colors hover:border-foreground/30"
             >
-              <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 text-[10px] font-mono text-neutral-400">
+              <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-muted font-mono text-xs text-muted-foreground">
                 {String(index + 1).padStart(2, '0')}
               </div>
-              
-              <div className="flex-grow min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-medium truncate">
+
+              <div className="min-w-0 flex-grow">
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="truncate text-sm font-medium">
                     {meta?.label || section.type}
                   </span>
                   {meta?.category && (
-                    <span className="px-1.5 py-0.5 bg-neutral-100 dark:bg-neutral-800 text-[8px] uppercase tracking-tighter text-neutral-500 rounded">
+                    <Badge variant="outline" className="text-[10px]">
                       {meta.category}
-                    </span>
+                    </Badge>
                   )}
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <code className="text-[9px] text-neutral-400 font-mono">
-                    ID: {section.id}
-                  </code>
-                  <span className="text-neutral-300 dark:text-neutral-700">|</span>
-                  <code className="text-[9px] text-neutral-400 font-mono">
-                    KEY: {section.type}
-                  </code>
+
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <code className="font-mono">ID: {section.id}</code>
+                  <span className="text-border">|</span>
+                  <code className="font-mono">KEY: {section.type}</code>
                 </div>
 
                 {/* Data Fields Summary */}
                 {meta?.dataSchema && (
-                  <div className="mt-2 pt-2 border-t border-neutral-100 dark:border-neutral-800 flex flex-wrap gap-x-3 gap-y-1">
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 border-t border-border pt-2">
                     {Object.entries(meta.dataSchema).map(([key, schema]) => (
                       <div key={key} className="flex items-center gap-1">
-                        <span className="text-[9px] text-neutral-500">{key}</span>
-                        <span className="text-[8px] text-neutral-300 font-mono">[{schema.type}{schema.required ? '*' : ''}]</span>
+                        <span className="text-xs text-muted-foreground">{key}</span>
+                        <span className="font-mono text-[10px] text-muted-foreground/70">[{schema.type}{schema.required ? '*' : ''}]</span>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Status Indicator */}
-              <div className="flex-shrink-0 flex items-center h-6">
-                <div className={`w-1 h-1 rounded-full ${section.visible ? 'bg-[#7d000c]' : 'bg-neutral-300'}`} />
+              {/* Visibility Indicator */}
+              <div className="flex h-6 flex-shrink-0 items-center">
+                <span className={`h-1.5 w-1.5 rounded-full ${section.visible ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
               </div>
             </div>
           );
@@ -102,8 +97,8 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
       </div>
 
       {!library && !loading && (
-        <p className="text-[9px] text-neutral-400 italic">
-          Metadata library not available for this theme. Using legacy slot validation.
+        <p className="text-xs italic text-muted-foreground">
+          Metadata library not available for this template. Using legacy slot validation.
         </p>
       )}
     </div>

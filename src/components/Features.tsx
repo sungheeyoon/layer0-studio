@@ -1,3 +1,5 @@
+import { LayoutGrid, MousePointerClick, Rocket } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import type { Messages } from "@/lib/i18n/messages/ko";
 
 export default function Features({
@@ -5,42 +7,26 @@ export default function Features({
 }: {
   copy: Messages["landing"]["features"];
 }) {
+  const items = [
+    { icon: LayoutGrid, ...copy.layouts },
+    { icon: MousePointerClick, ...copy.editing },
+    { icon: Rocket, ...copy.publishing },
+  ];
+
   return (
-    <section className="py-32 px-10 border-b border-surface-container bg-surface">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-24 relative">
-        {/* Vertical separators for desktop */}
-        <div className="hidden md:block absolute top-0 left-1/3 w-px h-full bg-outline-variant opacity-20"></div>
-        <div className="hidden md:block absolute top-0 left-2/3 w-px h-full bg-outline-variant opacity-20"></div>
-
-        <div className="space-y-8 group">
-          <div className="text-tertiary text-[0.625rem] tracking-[0.3em] font-bold uppercase flex items-center gap-2">
-            <span className="w-1 h-1 bg-tertiary"></span> 01 / BLUEPRINT
-          </div>
-          <h3 className="text-3xl font-light text-primary tracking-tight">{copy.layouts.title}</h3>
-          <p className="text-outline font-light leading-relaxed text-sm">
-            {copy.layouts.body}
-          </p>
-        </div>
-
-        <div className="space-y-8 group">
-          <div className="text-tertiary text-[0.625rem] tracking-[0.3em] font-bold uppercase flex items-center gap-2">
-            <span className="w-1 h-1 bg-tertiary"></span> 02 / CONTROL
-          </div>
-          <h3 className="text-3xl font-light text-primary tracking-tight">{copy.editing.title}</h3>
-          <p className="text-outline font-light leading-relaxed text-sm">
-            {copy.editing.body}
-          </p>
-        </div>
-
-        <div className="space-y-8 group">
-          <div className="text-tertiary text-[0.625rem] tracking-[0.3em] font-bold uppercase flex items-center gap-2">
-            <span className="w-1 h-1 bg-tertiary"></span> 03 / DEPLOY
-          </div>
-          <h3 className="text-3xl font-light text-primary tracking-tight">{copy.publishing.title}</h3>
-          <p className="text-outline font-light leading-relaxed text-sm">
-            {copy.publishing.body}
-          </p>
-        </div>
+    <section className="border-b border-border px-6 py-24 md:px-10">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
+        {items.map(({ icon: Icon, title, body }) => (
+          <Card key={title} className="border-border">
+            <CardContent className="flex flex-col gap-4 p-8">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Icon className="h-5 w-5" />
+              </span>
+              <h3 className="text-title">{title}</h3>
+              <p className="text-body text-muted-foreground">{body}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </section>
   );

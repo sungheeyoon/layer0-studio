@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { ArrowRight, Check } from "lucide-react";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import Footer from "@/components/Footer";
 import EditorPreview from "@/components/EditorPreview";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
@@ -13,138 +16,118 @@ export default async function Home() {
   const primaryCtaHref = user ? "/dashboard" : "/signup";
   const primaryCtaLabel = user ? t.cta.authed : t.cta.guest;
 
+  const steps = [
+    { n: "01", title: t.howItWorks.chooseTitle, body: t.howItWorks.chooseBody },
+    { n: "02", title: t.howItWorks.customizeTitle, body: t.howItWorks.customizeBody },
+    { n: "03", title: t.howItWorks.publishTitle, body: t.howItWorks.publishBody },
+  ];
+
   return (
     <>
-      <main className="pt-16 min-h-screen">
+      <main className="min-h-screen pt-16">
         <Hero copy={t.hero} ctaLabel={t.common.browseTemplates} />
 
         <Features copy={t.features} />
 
         <EditorPreview />
 
-        {/* How It Works (Steps) - User Centric Flow */}
-        <section className="py-32 px-10 border-b border-surface-container">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-baseline mb-20 gap-8">
-              <h2 className="text-4xl font-light text-primary tracking-tight">{t.howItWorks.title} <br /><span className="text-outline">{t.howItWorks.subtitle}</span></h2>
-              <p className="text-outline font-light text-sm max-w-sm">
+        {/* How It Works */}
+        <section className="border-b border-border px-6 py-24 md:px-10">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-16 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+              <h2 className="text-heading">
+                {t.howItWorks.title}{" "}
+                <span className="text-muted-foreground">{t.howItWorks.subtitle}</span>
+              </h2>
+              <p className="max-w-sm text-body text-muted-foreground">
                 {t.howItWorks.lead}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-px bg-outline-variant border border-outline-variant">
-              <div className="md:col-span-4 bg-surface p-12">
-                <span className="text-[3rem] font-thin text-tertiary leading-none mb-8 block">01</span>
-                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">{t.howItWorks.chooseTitle}</h4>
-                <p className="text-outline font-light text-sm leading-relaxed">
-                  {t.howItWorks.chooseBody}
-                </p>
-              </div>
-              <div className="md:col-span-4 bg-surface p-12">
-                <span className="text-[3rem] font-thin text-tertiary leading-none mb-8 block">02</span>
-                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">{t.howItWorks.customizeTitle}</h4>
-                <p className="text-outline font-light text-sm leading-relaxed">
-                  {t.howItWorks.customizeBody}
-                </p>
-              </div>
-              <div className="md:col-span-4 bg-surface p-12">
-                <span className="text-[3rem] font-thin text-tertiary leading-none mb-8 block">03</span>
-                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-primary">{t.howItWorks.publishTitle}</h4>
-                <p className="text-outline font-light text-sm leading-relaxed">
-                  {t.howItWorks.publishBody}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {steps.map((step) => (
+                <Card key={step.n} className="border-border">
+                  <CardContent className="p-8">
+                    <span className="mb-6 block text-4xl font-light text-primary">
+                      {step.n}
+                    </span>
+                    <h3 className="text-title mb-3">{step.title}</h3>
+                    <p className="text-body text-muted-foreground">{step.body}</p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Template Preview - Result Oriented */}
-        <section className="py-32 px-10 bg-surface-container-highest/30">
-          <div className="max-w-7xl mx-auto flex flex-col">
-            <div className="flex justify-between items-end mb-16">
-              <div>
-                <h2 className="text-3xl font-light mb-4 text-primary tracking-tight">{t.templates.title}</h2>
-                <p className="text-outline text-[0.625rem] uppercase tracking-[0.3em]">Curated Library // Available: 01</p>
-              </div>
-              <div className="hidden md:block">
-                <Link
-                  href="/templates"
-                  className="text-[0.6875rem] font-medium uppercase tracking-widest border-b border-primary pb-1"
-                >
+        {/* Template Preview */}
+        <section className="border-b border-border bg-muted/30 px-6 py-24 md:px-10">
+          <div className="mx-auto flex max-w-6xl flex-col">
+            <div className="mb-12 flex items-end justify-between">
+              <h2 className="text-heading">{t.templates.title}</h2>
+              <Button asChild variant="link" className="hidden md:inline-flex">
+                <Link href="/templates">
                   {t.templates.browseAll}
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
-              </div>
+              </Button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
               <div className="lg:col-span-7">
-                <div className="bg-white border border-outline-variant p-2 shadow-xl group cursor-pointer">
-                  <div className="aspect-video bg-surface-container-low overflow-hidden relative">
-                    <div className="absolute inset-0 grid-blueprint opacity-20"></div>
+                <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                  <div className="relative aspect-video overflow-hidden bg-muted">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      alt="Corporate Blueprint"
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                      alt={t.templates.corporateTitle}
+                      className="h-full w-full scale-105 object-cover transition-transform duration-700 hover:scale-100"
                       src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
                     />
-                    <div className="absolute top-6 left-6 bg-primary text-white px-4 py-2 text-[10px] uppercase tracking-[0.2em]">
+                    <div className="absolute left-4 top-4 rounded-md bg-primary px-3 py-1.5 text-caption uppercase tracking-wide text-primary-foreground">
                       {t.templates.bestForBusiness}
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="lg:col-span-5 flex flex-col justify-center">
-                <h3 className="text-2xl font-light mb-6 text-primary tracking-tight">{t.templates.corporateTitle}</h3>
-                <p className="text-outline font-light text-sm leading-relaxed mb-8">
+              <div className="flex flex-col justify-center lg:col-span-5">
+                <h3 className="text-title mb-4">{t.templates.corporateTitle}</h3>
+                <p className="mb-8 text-body text-muted-foreground">
                   {t.templates.corporateBody}
                 </p>
-                <ul className="space-y-4 mb-10">
-                  <li className="flex items-center gap-4 text-[0.625rem] uppercase tracking-widest text-on-surface">
-                    <span className="w-1.5 h-1.5 bg-tertiary"></span> {t.templates.bullet1}
-                  </li>
-                  <li className="flex items-center gap-4 text-[0.625rem] uppercase tracking-widest text-on-surface">
-                    <span className="w-1.5 h-1.5 bg-tertiary"></span> {t.templates.bullet2}
-                  </li>
-                  <li className="flex items-center gap-4 text-[0.625rem] uppercase tracking-widest text-on-surface">
-                    <span className="w-1.5 h-1.5 bg-tertiary"></span> {t.templates.bullet3}
-                  </li>
+                <ul className="mb-10 space-y-3">
+                  {[t.templates.bullet1, t.templates.bullet2, t.templates.bullet3].map(
+                    (bullet) => (
+                      <li key={bullet} className="flex items-center gap-3 text-body">
+                        <Check className="h-4 w-4 shrink-0 text-primary" />
+                        {bullet}
+                      </li>
+                    ),
+                  )}
                 </ul>
-                <Link
-                  href="/templates"
-                  className="w-max border border-outline px-10 py-4 text-[0.6875rem] font-medium uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all"
-                >
-                  {t.templates.useThis}
-                </Link>
+                <Button asChild variant="outline" className="w-max">
+                  <Link href="/templates">{t.templates.useThis}</Link>
+                </Button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* CTA Section - Direct and Actionable */}
-        <section className="py-48 px-10 grid-blueprint flex flex-col items-center justify-center text-center border-t border-surface-container overflow-hidden relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-24 bg-outline-variant"></div>
-
-          <h2 className="text-5xl md:text-7xl font-light mb-12 tracking-tightest max-w-4xl text-primary">
-            {t.finalCta.titleLine1} <br />
-            <span className="italic text-outline-variant">{t.finalCta.titleEmphasis}</span>
+        {/* Final CTA */}
+        <section className="flex flex-col items-center justify-center border-t border-border px-6 py-32 text-center md:px-10">
+          <h2 className="text-display mb-10 max-w-3xl text-balance">
+            {t.finalCta.titleLine1}{" "}
+            <span className="text-primary">{t.finalCta.titleEmphasis}</span>
           </h2>
-          <div className="flex flex-col md:flex-row gap-6">
-            <Link
-              href={primaryCtaHref}
-              className="bg-primary text-on-primary px-16 py-6 text-[0.75rem] font-medium uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-2xl"
-            >
-              {primaryCtaLabel}
-            </Link>
-            <Link
-              href="/templates"
-              className="border border-outline px-16 py-6 text-[0.75rem] font-medium uppercase tracking-[0.3em] hover:bg-surface-container transition-all"
-            >
-              {t.common.browseTemplates}
-            </Link>
-          </div>
-
-          <div className="mt-20 text-[0.625rem] font-mono text-outline uppercase tracking-[0.4em] opacity-40">
-            System_v1.0.4 // Production_Ready
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg">
+              <Link href={primaryCtaHref}>
+                {primaryCtaLabel}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/templates">{t.common.browseTemplates}</Link>
+            </Button>
           </div>
         </section>
       </main>

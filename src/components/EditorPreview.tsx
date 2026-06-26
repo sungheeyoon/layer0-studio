@@ -1,34 +1,39 @@
 'use client';
 
+import { Eye, MousePointerClick } from "lucide-react";
 import { useDictionary } from "@/lib/i18n/provider";
 
 export default function EditorPreview() {
   const t = useDictionary().landing.editorPreview;
   return (
-    <section className="bg-surface-container-low py-32 px-10 border-b border-surface-container relative overflow-hidden">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-12 gap-8 mb-20 items-end">
-          <div className="col-span-12 lg:col-span-5">
-            <h2 className="text-4xl md:text-5xl font-light text-primary mb-8 tracking-tight">
-              {t.title} <br/>
-              <span className="text-outline">{t.titleEmphasis}</span>
+    <section className="border-b border-border bg-muted/30 px-6 py-24 md:px-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-12 grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <h2 className="text-heading">
+              {t.title}{" "}
+              <span className="text-muted-foreground">{t.titleEmphasis}</span>
             </h2>
-            <p className="text-outline font-light text-sm mb-12 max-w-sm leading-relaxed">
+            <p className="mt-4 max-w-sm text-body text-muted-foreground">
               {t.description}
             </p>
-            <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-2">
-                <span className="text-[0.625rem] font-mono text-primary uppercase tracking-widest">{t.experienceLabel}</span>
-                <p className="text-xl font-light tracking-tight">{t.experienceValue}</p>
+            <div className="mt-8 grid grid-cols-2 gap-6">
+              <div>
+                <span className="text-caption uppercase tracking-wide text-primary">
+                  {t.experienceLabel}
+                </span>
+                <p className="text-title">{t.experienceValue}</p>
               </div>
-              <div className="space-y-2">
-                <span className="text-[0.625rem] font-mono text-primary uppercase tracking-widest">{t.feedbackLabel}</span>
-                <p className="text-xl font-light tracking-tight">{t.feedbackValue}</p>
+              <div>
+                <span className="text-caption uppercase tracking-wide text-primary">
+                  {t.feedbackLabel}
+                </span>
+                <p className="text-title">{t.feedbackValue}</p>
               </div>
             </div>
           </div>
-          <div className="hidden lg:block lg:col-span-7">
-            <div className="flex justify-end gap-4 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-outline-variant">
+          <div className="hidden lg:col-span-7 lg:block">
+            <div className="flex justify-end gap-3 text-caption uppercase tracking-wide text-muted-foreground">
               <span>{t.step1}</span>
               <span>/</span>
               <span>{t.step2}</span>
@@ -39,110 +44,118 @@ export default function EditorPreview() {
         </div>
 
         {/* Mock Editor UI */}
-        <div className="relative bg-white border border-outline-variant shadow-2xl p-1 rounded-sm overflow-hidden group">
-          <div className="bg-surface border border-outline-variant flex h-[600px] overflow-hidden">
+        <div className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
+          <div className="flex h-[600px] overflow-hidden">
             {/* Mock Left Sidebar */}
-            <div className="w-[240px] border-r border-outline-variant flex flex-col hidden md:flex">
-              <div className="p-4 border-b border-outline-variant flex gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-400"></div>
-                <div className="w-2 h-2 rounded-full bg-amber-400"></div>
-                <div className="w-2 h-2 rounded-full bg-green-400"></div>
+            <div className="hidden w-[240px] flex-col border-r border-border md:flex">
+              <div className="flex gap-2 border-b border-border p-4">
+                <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
+                <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
               </div>
-              <div className="flex border-b border-outline-variant">
-                <div className="flex-1 py-3 text-[10px] uppercase font-bold text-center border-b-2 border-primary text-primary">Content</div>
-                <div className="flex-1 py-3 text-[10px] uppercase font-medium text-center text-outline opacity-50">Design</div>
+              <div className="flex border-b border-border">
+                <div className="flex-1 border-b-2 border-primary py-3 text-center text-xs font-semibold text-primary">
+                  Content
+                </div>
+                <div className="flex-1 py-3 text-center text-xs font-medium text-muted-foreground">
+                  Design
+                </div>
               </div>
-              <div className="p-6 space-y-8">
+              <div className="space-y-8 p-6">
                 <div>
-                  <div className="text-[9px] uppercase tracking-widest text-outline mb-4">Sections</div>
+                  <div className="mb-4 text-caption uppercase tracking-wide text-muted-foreground">
+                    Sections
+                  </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-primary font-medium">Hero</span>
-                      <span className="material-symbols-outlined text-xs">visibility</span>
+                      <span className="text-sm font-medium text-foreground">Hero</span>
+                      <Eye className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <div className="flex items-center justify-between opacity-50">
-                      <span className="text-[11px]">About</span>
-                      <span className="material-symbols-outlined text-xs">visibility</span>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span className="text-sm">About</span>
+                      <Eye className="h-4 w-4" />
                     </div>
-                    <div className="flex items-center justify-between opacity-50">
-                      <span className="text-[11px]">Features</span>
-                      <span className="material-symbols-outlined text-xs">visibility</span>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span className="text-sm">Features</span>
+                      <Eye className="h-4 w-4" />
                     </div>
                   </div>
                 </div>
                 <div>
-                  <div className="text-[9px] uppercase tracking-widest text-outline mb-4">Properties</div>
+                  <div className="mb-4 text-caption uppercase tracking-wide text-muted-foreground">
+                    Properties
+                  </div>
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <div className="text-[9px] text-outline uppercase tracking-tighter">Title</div>
-                      <div className="h-6 border-b border-outline-variant flex items-center text-[11px] text-on-surface">Digital Portfolio</div>
+                      <div className="text-caption uppercase text-muted-foreground">Title</div>
+                      <div className="flex h-7 items-center border-b border-border text-sm text-foreground">
+                        Digital Portfolio
+                      </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[9px] text-outline uppercase tracking-tighter">Theme Color</div>
+                      <div className="text-caption uppercase text-muted-foreground">Theme Color</div>
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-tertiary"></div>
-                        <div className="text-[11px] text-on-surface">#7D000C</div>
+                        <div className="h-4 w-4 rounded bg-primary" />
+                        <div className="text-sm text-foreground">#4F46E5</div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="mt-auto p-4 border-t border-outline-variant">
-                <div className="bg-primary text-white text-[10px] uppercase font-medium tracking-widest py-3 text-center cursor-pointer hover:brightness-110 transition-all">
+              <div className="mt-auto border-t border-border p-4">
+                <div className="cursor-pointer rounded-md bg-primary py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-primary-foreground transition-all hover:bg-primary/90">
                   Publish Site
                 </div>
               </div>
             </div>
 
             {/* Mock Canvas Area */}
-            <div className="flex-grow bg-surface-container-lowest relative blueprint-grid overflow-hidden p-8 flex flex-col">
-              <div className="absolute top-4 left-4 flex gap-2">
-                 <div className="px-3 py-1 bg-primary text-white text-[9px] uppercase tracking-widest">Live Preview</div>
-                 <div className="px-3 py-1 border border-outline-variant text-outline text-[9px] uppercase tracking-widest bg-white">Desktop</div>
-              </div>
-              
-              <div className="mt-12 bg-white shadow-xl flex-grow overflow-hidden flex flex-col rounded-sm border border-outline-variant">
-                <div className="h-8 bg-[#f5f5f5] border-b border-outline-variant flex items-center px-4 gap-2">
-                   <div className="w-2 h-2 rounded-full bg-zinc-300"></div>
-                   <div className="h-3 bg-zinc-200 w-32 rounded-full"></div>
+            <div className="relative flex flex-grow flex-col overflow-hidden bg-muted/40 p-8">
+              <div className="absolute left-4 top-4 flex gap-2">
+                <div className="rounded bg-primary px-3 py-1 text-caption uppercase tracking-wide text-primary-foreground">
+                  Live Preview
                 </div>
-                <div className="p-12 space-y-12 group-hover:opacity-100 transition-all duration-700">
+                <div className="rounded border border-border bg-card px-3 py-1 text-caption uppercase tracking-wide text-muted-foreground">
+                  Desktop
+                </div>
+              </div>
+
+              <div className="mt-12 flex flex-grow flex-col overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+                <div className="flex h-8 items-center gap-2 border-b border-border bg-muted px-4">
+                  <div className="h-2 w-2 rounded-full bg-border" />
+                  <div className="h-3 w-32 rounded-full bg-border" />
+                </div>
+                <div className="space-y-12 p-12">
                   <div className="space-y-4">
-                    <div className="h-2 bg-tertiary w-16"></div>
-                    <div className="text-4xl font-light text-primary tracking-tight">Digital Portfolio</div>
-                    <div className="text-sm text-outline font-light max-w-sm">Designing high-performance web experiences.</div>
+                    <div className="h-2 w-16 bg-primary" />
+                    <div className="text-heading text-foreground">Digital Portfolio</div>
+                    <div className="max-w-sm text-sm text-muted-foreground">
+                      Designing high-performance web experiences.
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-6">
-                    <div className="aspect-square bg-surface-container border border-outline-variant p-4 flex flex-col justify-end">
-                       <div className="h-2 bg-primary w-1/2 mb-2"></div>
-                       <div className="h-1 bg-outline-variant w-full"></div>
-                    </div>
-                    <div className="aspect-square bg-surface-container border border-outline-variant p-4 flex flex-col justify-end">
-                       <div className="h-2 bg-primary w-1/2 mb-2"></div>
-                       <div className="h-1 bg-outline-variant w-full"></div>
-                    </div>
-                    <div className="aspect-square bg-surface-container border border-outline-variant p-4 flex flex-col justify-end">
-                       <div className="h-2 bg-primary w-1/2 mb-2"></div>
-                       <div className="h-1 bg-outline-variant w-full"></div>
-                    </div>
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="flex aspect-square flex-col justify-end rounded-md border border-border bg-muted/40 p-4"
+                      >
+                        <div className="mb-2 h-2 w-1/2 bg-primary" />
+                        <div className="h-1 w-full bg-border" />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-              
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                 <div className="bg-tertiary text-white p-4 rounded-full shadow-2xl animate-bounce">
-                    <span className="material-symbols-outlined text-4xl">touch_app</span>
-                 </div>
+
+              <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="animate-bounce rounded-full bg-primary p-4 text-primary-foreground shadow-2xl">
+                  <MousePointerClick className="h-8 w-8" />
+                </div>
               </div>
             </div>
           </div>
-          <div className="absolute inset-0 border-[10px] border-primary/5 pointer-events-none"></div>
         </div>
       </div>
-      
-      {/* Decorative lines */}
-      <div className="absolute top-0 right-[20%] w-px h-full bg-outline-variant opacity-30"></div>
-      <div className="absolute bottom-[20%] left-0 w-full h-px bg-outline-variant opacity-30"></div>
     </section>
   );
 }

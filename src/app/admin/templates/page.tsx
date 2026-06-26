@@ -10,11 +10,11 @@ export default async function TemplatesPage() {
   const canPublish = user?.app_metadata?.canPublishTemplates === true;
 
   if ('error' in templates) {
-    return <div className="p-8 text-error">Error: {templates.error}</div>;
+    return <div className="p-8 text-destructive">Error: {templates.error}</div>;
   }
 
   return (
-    <main className="h-[calc(100vh-48px)] grid grid-cols-12 overflow-hidden text-on-surface bg-background">
+    <main className="h-[calc(100vh-3.5rem)] grid grid-cols-12 overflow-hidden text-foreground bg-background">
       <TemplatesClientWrapper templates={templates} canPublish={canPublish} />
     </main>
   );

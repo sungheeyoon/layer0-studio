@@ -22,21 +22,11 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background text-foreground">
       <AdminSidebar />
       <AdminTopNav />
-      {/* Background Grid Simulation */}
-      <div className="fixed inset-0 pointer-events-none z-[-1] opacity-[0.03]">
-        <div
-          className="w-full h-full"
-          style={{
-            backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        ></div>
-      </div>
-      {/* ml-64: sidebar width, pt-12: top nav height (h-12 = 3rem = 48px) */}
-      <div className="ml-64 pt-12">
+      {/* ml-64: sidebar width, pt-14: top nav height (h-14 = 3.5rem = 56px) */}
+      <div className="ml-64 pt-14">
         {children}
       </div>
     </div>

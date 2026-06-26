@@ -33,8 +33,10 @@ export function LocaleToggle({ className }: { className?: string }) {
           onClick={() => select(locale)}
           disabled={isPending}
           aria-pressed={locale === active}
-          className={`font-label text-[10px] font-medium tracking-[0.15em] uppercase transition-colors disabled:opacity-50 ${
-            locale === active ? 'text-zinc-900' : 'text-zinc-400 hover:text-zinc-600'
+          className={`rounded-md px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide transition-colors disabled:opacity-50 ${
+            locale === active
+              ? 'text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
         >
           {locale}

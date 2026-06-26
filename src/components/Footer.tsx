@@ -7,24 +7,25 @@ export default function Footer({
   copy: Messages["landing"]["footer"];
 }) {
   return (
-    <footer className="bg-[#f9f9f9] dark:bg-[#121212] border-t border-[#eeeeee] dark:border-[#222222] flex flex-col md:flex-row justify-between items-center px-10 py-10 w-full mt-auto font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-[#777777] dark:text-[#999999]">
-      <div className="flex flex-col md:flex-row items-center gap-10">
-        <span className="text-on-surface font-medium flex items-center gap-1 before:content-[''] before:w-1 before:h-1 before:bg-[#7d000c]">
+    <footer className="mt-auto flex w-full flex-col items-center justify-between gap-6 border-t border-border bg-background px-6 py-10 text-caption text-muted-foreground md:flex-row md:px-10">
+      <div className="flex flex-col items-center gap-6 md:flex-row md:gap-8">
+        <span className="flex items-center gap-2 font-medium text-foreground">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
           Layer0 Studio
         </span>
-        <span>© 2024 LAYER0 STUDIO. ALL RIGHTS RESERVED.</span>
+        <span>© 2024 Layer0 Studio. All rights reserved.</span>
       </div>
-      <div className="flex gap-8 mt-6 md:mt-0">
-        <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="/legal/terms">
+      <div className="flex items-center gap-6">
+        <Link className="transition-colors hover:text-foreground" href="/legal/terms">
           {copy.terms}
         </Link>
-        <Link className="hover:text-[#1a1a1a] dark:hover:text-[#ffffff]" href="/legal/privacy">
+        <Link className="transition-colors hover:text-foreground" href="/legal/privacy">
           {copy.privacy}
         </Link>
-        <span className="opacity-40 cursor-not-allowed select-none" aria-disabled="true">
+        <span className="cursor-not-allowed select-none opacity-50" aria-disabled="true">
           {copy.security}
         </span>
-        <span className="opacity-40 cursor-not-allowed select-none" aria-disabled="true">
+        <span className="cursor-not-allowed select-none opacity-50" aria-disabled="true">
           {copy.status}
         </span>
       </div>

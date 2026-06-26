@@ -2,6 +2,9 @@ import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
 import ProfileDropdown from "./ProfileDropdown";
 import { LocaleToggle } from "./LocaleToggle";
+import { ThemeToggle } from "./ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import type { Messages } from "@/lib/i18n/messages/ko";
 
 interface NavbarProps {
@@ -11,38 +14,43 @@ interface NavbarProps {
 
 export default function Navbar({ user, copy }: NavbarProps) {
   return (
-    <nav className="fixed top-0 left-0 w-full h-16 px-10 flex justify-between items-center bg-[#f9f9f9] dark:bg-[#121212] border-b border-[#eeeeee] dark:border-[#222222] z-50">
-      <Link href="/" className="flex items-center">
-        <div className="font-['Inter'] font-medium text-sm tracking-[0.1em] uppercase text-[#1a1a1a] dark:text-[#eeeeee] flex items-center gap-1 before:content-[''] before:w-1 before:h-1 before:bg-[#7d000c]">
+    <nav className="fixed top-0 left-0 z-50 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md md:px-10">
+      <Link href="/" className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-primary" />
+        <span className="text-title font-semibold tracking-tight">
           Layer0 Studio
-        </div>
+        </span>
       </Link>
-      <div className="hidden md:flex items-center gap-10 font-['Inter'] font-light tracking-[0.05em] uppercase text-[0.6875rem]">
+
+      <div className="hidden items-center gap-8 text-sm md:flex">
         <Link
-          className="text-[#777777] dark:text-[#999999] hover:text-[#1a1a1a] dark:hover:text-[#ffffff] transition-colors duration-150"
           href="/templates"
+          className="text-muted-foreground transition-colors hover:text-foreground"
         >
           {copy.templates}
         </Link>
       </div>
-      <div className="flex items-center gap-6 font-['Inter'] font-light tracking-[0.05em] uppercase text-[0.6875rem]">
-        <LocaleToggle className="flex gap-2" />
+
+      <div className="flex items-center gap-3">
+        <LocaleToggle className="flex gap-1" />
+        <ThemeToggle />
+        <Separator orientation="vertical" className="h-5" />
         {user ? (
-          <div className="flex items-center gap-6">
-            <Link
-              className="flex items-center gap-2 group cursor-pointer"
-              href="/dashboard"
-            >
-              <span className="w-[4px] h-[4px] bg-zinc-300 group-hover:bg-primary transition-colors"></span>
-              <span className="font-sans font-light tracking-[0.1em] text-[11px] uppercase text-zinc-500 group-hover:text-zinc-900 transition-colors">GO_TO_DASHBOARD</span>
-            </Link>
+          <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Link href="/dashboard">{copy.dashboard}</Link>
+            </Button>
             <ProfileDropdown user={user} />
           </div>
         ) : (
-          <>
-            <Link className="text-[#777777] hover:text-[#1a1a1a]" href="/login">{copy.signIn}</Link>
-            <Link className="bg-primary text-on-primary px-6 py-2" href="/signup">{copy.getStarted}</Link>
-          </>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/login">{copy.signIn}</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/signup">{copy.getStarted}</Link>
+            </Button>
+          </div>
         )}
       </div>
     </nav>

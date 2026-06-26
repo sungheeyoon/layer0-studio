@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import noInlineDesignTokens from "./eslint-rules/no-inline-design-tokens.mjs";
+import noRawColorClasses from "./eslint-rules/no-raw-color-classes.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -48,6 +49,21 @@ const eslintConfig = defineConfig([
     },
     rules: {
       "local/no-inline-design-tokens": "error",
+    },
+  },
+  // Studio chrome must use shadcn semantic tokens, not raw grays / legacy MD3
+  // utilities (ADR-0011). Scope: src/app + src/components, except generated
+  // shadcn primitives (src/components/ui) and templates (own rule above).
+  // Flipped to 'error' once every surface was migrated (count → 0) — the guard
+  // now enforces the token vocabulary on all future chrome changes.
+  {
+    files: ["src/app/**/*.tsx", "src/components/**/*.tsx"],
+    ignores: ["src/components/ui/**", "src/templates/**"],
+    plugins: {
+      local: { rules: { "no-raw-color-classes": noRawColorClasses } },
+    },
+    rules: {
+      "local/no-raw-color-classes": "error",
     },
   },
 ]);

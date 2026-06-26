@@ -1,18 +1,21 @@
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { getLocale } from '@/lib/i18n/server';
+import { getDictionary } from '@/lib/i18n/dictionary';
 
-export default function EditorLayout({ children }: { children: React.ReactNode }) {
+export default async function EditorLayout({ children }: { children: React.ReactNode }) {
+  const t = getDictionary(await getLocale()).editor;
+
   return (
-    <div className="h-screen w-full flex flex-col bg-surface">
-      <div className="h-12 shrink-0 flex items-center justify-between px-4 border-b bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-        <Link 
-          href="/dashboard" 
-          className="text-xs uppercase tracking-widest font-medium hover:text-primary transition-colors flex items-center gap-2"
+    <div className="flex h-screen w-full flex-col bg-background">
+      <div className="flex h-12 shrink-0 items-center border-b border-border bg-card px-4">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          <span className="text-lg">←</span> Back to Dashboard
+          <ArrowLeft className="size-4" />
+          {t.backToDashboard}
         </Link>
-        <div className="flex items-center gap-4">
-          {/* We can add editor-specific top bar items here if needed */}
-        </div>
       </div>
       <div className="flex-1 overflow-hidden">
         {children}

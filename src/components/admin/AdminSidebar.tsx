@@ -2,62 +2,70 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Globe,
+  Layers,
+  LayoutDashboard,
+  FolderOpen,
+  Settings,
+  SquarePen,
+} from "lucide-react";
+
+const navItems = [
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
+  { name: "Templates", href: "/admin/templates", icon: Layers },
+  { name: "Projects", href: "/admin/projects", icon: FolderOpen },
+  { name: "Editor", href: "/admin/editor", icon: SquarePen },
+  { name: "Domains", href: "/admin/domains", icon: Globe },
+] as const;
 
 export default function AdminSidebar() {
   const pathname = usePathname();
 
-  const navItems = [
-    { name: "DASHBOARD", href: "/admin", icon: "dashboard" },
-    { name: "TEMPLATES", href: "/admin/templates", icon: "extension" },
-    { name: "PROJECTS", href: "/admin/projects", icon: "folder_open" },
-    { name: "CONTENT_EDITOR", href: "/admin/editor", icon: "edit_note" },
-    { name: "DOMAINS", href: "/admin/domains", icon: "language" },
-  ];
-
   return (
-    <aside className="flex flex-col h-screen fixed left-0 top-0 bg-neutral-100 dark:bg-neutral-900 border-r border-neutral-300 dark:border-neutral-800 w-64 z-50">
-      <div className="px-6 py-8 flex flex-col gap-1">
-        <span className="text-sm font-medium tracking-[0.2em] text-neutral-900 dark:text-neutral-100">
-          ARCHITECT_OS
-        </span>
-        <span className="font-['Inter'] font-light tracking-[0.1em] text-[0.6875rem] uppercase text-neutral-500">
-          VER_2.0.4
-        </span>
+    <aside className="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar py-8">
+      <div className="px-6 mb-10">
+        <Link href="/admin" className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-primary" />
+          <span className="text-title font-semibold tracking-tight text-sidebar-foreground">
+            Layer0 Admin
+          </span>
+        </Link>
       </div>
-      <nav className="flex-1 px-0 mt-8">
-        <ul className="flex flex-col h-full">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-            return (
-              <li key={item.name} className="group">
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-4 px-6 py-3 font-['Inter'] font-light tracking-[0.1em] text-[0.6875rem] uppercase transition-colors duration-75 ${
-                    isActive
-                      ? "border-l-2 border-neutral-900 dark:border-neutral-100 bg-neutral-200 dark:bg-neutral-800 font-medium text-neutral-900 dark:text-neutral-100"
-                      : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-200 dark:hover:bg-neutral-800"
-                  }`}
-                >
-                  <span className="material-symbols-outlined" data-icon={item.icon}>
-                    {item.icon}
-                  </span>
-                  <span>{item.name}</span>
-                </Link>
-              </li>
-            );
-          })}
-          <li className="group mt-auto pb-8">
+      <nav className="flex flex-1 flex-col gap-1 px-3">
+        {navItems.map((item) => {
+          const isActive =
+            "exact" in item && item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(item.href);
+          const Icon = item.icon;
+
+          return (
             <Link
-              href="/admin/settings"
-              className="flex items-center gap-4 px-6 py-3 font-['Inter'] font-light tracking-[0.1em] text-[0.6875rem] uppercase text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors duration-75"
+              key={item.name}
+              href={item.href}
+              className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                isActive
+                  ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+              }`}
             >
-              <span className="material-symbols-outlined" data-icon="settings">
-                settings
-              </span>
-              <span>SETTINGS</span>
+              <Icon className="h-4 w-4" />
+              <span>{item.name}</span>
             </Link>
-          </li>
-        </ul>
+          );
+        })}
+        <Link
+          href="/admin/settings"
+          className={`group mt-auto flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+            pathname.startsWith("/admin/settings")
+              ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+              : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+          }`}
+        >
+          <Settings className="h-4 w-4" />
+          <span>Settings</span>
+        </Link>
       </nav>
     </aside>
   );

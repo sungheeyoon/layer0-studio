@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import type { Provider } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
+import { Button } from '@/components/ui/button';
+import { useDictionary } from '@/lib/i18n/provider';
 
 function GoogleLogo() {
   return (
@@ -36,15 +39,16 @@ function GitHubLogo() {
   );
 }
 
-const PROVIDERS: { id: Provider; label: string; logo: React.ReactNode }[] = [
-  { id: 'google', label: 'CONTINUE_WITH_GOOGLE', logo: <GoogleLogo /> },
-  { id: 'github', label: 'CONTINUE_WITH_GITHUB', logo: <GitHubLogo /> },
-];
-
 export function OAuthButtons() {
   const [loading, setLoading] = useState<Provider | null>(null);
   const searchParams = useSearchParams();
   const next = searchParams.get('next');
+  const t = useDictionary().auth.oauth;
+
+  const providers: { id: Provider; label: string; logo: React.ReactNode }[] = [
+    { id: 'google', label: t.continueWithGoogle, logo: <GoogleLogo /> },
+    { id: 'github', label: t.continueWithGithub, logo: <GitHubLogo /> },
+  ];
 
   async function signIn(provider: Provider) {
     setLoading(provider);
@@ -67,29 +71,26 @@ export function OAuthButtons() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-outline-variant" />
-        <span className="font-label text-[9px] font-medium tracking-[0.2em] uppercase text-zinc-400">
-          OR
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-caption uppercase tracking-wide text-muted-foreground">
+          {t.divider}
         </span>
-        <div className="flex-1 h-px bg-outline-variant" />
+        <div className="h-px flex-1 bg-border" />
       </div>
 
       <div className="flex flex-col gap-3">
-        {PROVIDERS.map(({ id, label, logo }) => (
-          <button
+        {providers.map(({ id, label, logo }) => (
+          <Button
             key={id}
             type="button"
+            variant="outline"
             onClick={() => signIn(id)}
             disabled={loading !== null}
-            className="w-full h-12 border border-outline-variant hover:border-primary font-label text-[11px] font-medium tracking-[0.15em] uppercase text-zinc-700 flex items-center justify-center gap-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full"
           >
-            {loading === id ? (
-              <span className="w-[10px] h-[10px] border border-zinc-400 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              logo
-            )}
+            {loading === id ? <Loader2 className="h-4 w-4 animate-spin" /> : logo}
             <span>{label}</span>
-          </button>
+          </Button>
         ))}
       </div>
     </div>

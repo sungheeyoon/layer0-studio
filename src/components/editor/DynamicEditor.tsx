@@ -28,6 +28,43 @@ import { createClient } from '@/utils/supabase/client';
 import { getSiteError, isStaleConflict } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
 import { useLocale, useDictionary } from '@/lib/i18n/provider';
+import {
+  ChevronUp,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Globe,
+  GlobeLock,
+  ToggleLeft,
+  ToggleRight,
+  Pin,
+  PlusCircle,
+  Trash2,
+  ExternalLink,
+  CircleAlert,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface DynamicEditorProps {
   site: UserSite;
@@ -385,61 +422,42 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   return (
     <>
       {/* Conflict Modal */}
-      {conflictDetected && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant p-8 max-w-sm w-full mx-4 shadow-2xl">
-            <span className="material-symbols-outlined text-amber-500 text-3xl mb-4 block">sync_problem</span>
-            <h2 className="font-['Inter'] font-medium text-sm tracking-widest uppercase text-on-surface mb-3">
-              {t.conflict.title}
-            </h2>
-            <p className="font-['Inter'] font-light text-xs text-outline leading-relaxed mb-6">
-              {t.conflict.body}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => window.location.reload()}
-                className="flex-1 bg-primary text-on-primary h-10 font-['Inter'] font-medium text-[0.6875rem] tracking-[0.2em] uppercase hover:brightness-110 transition-all"
-              >
-                {t.conflict.reload}
-              </button>
-              <button
-                onClick={() => setConflictDetected(false)}
-                className="flex-1 border border-outline h-10 font-['Inter'] font-light text-[0.6875rem] tracking-[0.1em] uppercase hover:bg-surface-container transition-colors"
-              >
-                {t.conflict.keepEditing}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AlertDialog open={conflictDetected} onOpenChange={setConflictDetected}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.conflict.title}</AlertDialogTitle>
+            <AlertDialogDescription>{t.conflict.body}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.conflict.keepEditing}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => window.location.reload()}>
+              {t.conflict.reload}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Left Panel */}
-      <section className="w-[280px] min-w-[280px] shrink-0 flex flex-col border border-outline-variant bg-surface overflow-hidden">
+      <section className="flex w-[280px] min-w-[280px] shrink-0 flex-col overflow-hidden border border-border bg-card">
         {/* Tab Switcher */}
-        <div className="flex border-b border-outline-variant">
-          <button
-            onClick={() => setActiveTab('content')}
-            className={`flex-1 py-4 text-[0.6875rem] tracking-[0.2em] uppercase font-medium transition-colors ${activeTab === 'content' ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-primary'
-              }`}
-          >
-            {t.tabs.content}
-          </button>
-          <button
-            onClick={() => setActiveTab('design')}
-            className={`flex-1 py-4 text-[0.6875rem] tracking-[0.2em] uppercase font-medium transition-colors ${activeTab === 'design' ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-primary'
-              }`}
-          >
-            {t.tabs.design}
-          </button>
-        </div>
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as 'content' | 'design')}
+          className="gap-0 border-b border-border p-2"
+        >
+          <TabsList variant="line" className="w-full">
+            <TabsTrigger value="content">{t.tabs.content}</TabsTrigger>
+            <TabsTrigger value="design">{t.tabs.design}</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-        <div className="flex-grow overflow-y-auto p-6 custom-scrollbar">
+        <div className="flex-grow overflow-y-auto p-6">
           {activeTab === 'content' ? (
-            <div className="space-y-12">
+            <div className="space-y-8">
               {/* Pages (Multi only) — page management: reorder + 2-axis + label */}
               {isMulti && (
                 <div>
-                  <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
+                  <h3 className="mb-4 text-sm font-semibold text-foreground">
                     {t.pages.heading}
                   </h3>
                   <ul className="space-y-3">
@@ -448,36 +466,36 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                       return (
                         <li
                           key={page.id}
-                          className={`border p-3 transition-colors ${isActive ? 'border-primary bg-primary/5' : 'border-outline-variant'
+                          className={`rounded-md border p-3 transition-colors ${isActive ? 'border-primary bg-primary/5' : 'border-border'
                             }`}
                         >
                           {/* Row 1: reorder · page name (switch context) · routable */}
                           <div className="flex items-center gap-2">
-                            <span className="flex flex-col shrink-0 -my-1">
+                            <span className="-my-1 flex shrink-0 flex-col">
                               <button
                                 type="button"
                                 aria-label={t.pages.moveUp}
                                 disabled={index === 0}
                                 onClick={() => handleMoveNavItem(page.id, 'up')}
-                                className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
+                                className="leading-none text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-20"
                               >
-                                <span className="material-symbols-outlined text-sm">arrow_upward</span>
+                                <ChevronUp className="size-4" />
                               </button>
                               <button
                                 type="button"
                                 aria-label={t.pages.moveDown}
                                 disabled={index === pages.length - 1}
                                 onClick={() => handleMoveNavItem(page.id, 'down')}
-                                className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
+                                className="leading-none text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-20"
                               >
-                                <span className="material-symbols-outlined text-sm">arrow_downward</span>
+                                <ChevronDown className="size-4" />
                               </button>
                             </span>
 
                             <button
                               type="button"
                               onClick={() => handleSelectPage(page.id)}
-                              className={`flex-grow text-left font-['Inter'] font-light text-xs tracking-wider transition-colors ${isActive ? 'text-primary font-medium' : page.visible ? 'text-on-surface' : 'text-outline'
+                              className={`flex-grow text-left text-sm transition-colors ${isActive ? 'font-medium text-primary' : page.visible ? 'text-foreground' : 'text-muted-foreground'
                                 }`}
                             >
                               {page.nav.label || '(untitled page)'}
@@ -488,12 +506,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                               aria-label={page.visible ? t.pages.makeUnroutable : t.pages.makeRoutable}
                               title={page.visible ? t.pages.routableTitle : t.pages.unroutableTitle}
                               onClick={() => handleToggleNavItemVisible(page.id)}
-                              className={`shrink-0 transition-colors ${page.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
+                              className={`shrink-0 transition-colors ${page.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
                                 }`}
                             >
-                              <span className="material-symbols-outlined text-lg">
-                                {page.visible ? 'public' : 'public_off'}
-                              </span>
+                              {page.visible ? <Globe className="size-4" /> : <GlobeLock className="size-4" />}
                             </button>
                           </div>
 
@@ -504,22 +520,19 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                               aria-label={page.nav.visible ? t.pages.removeFromMenu : t.pages.addToMenu}
                               title={page.nav.visible ? t.pages.inTopNavTitle : t.pages.notInTopNavTitle}
                               onClick={() => handleToggleNavItemNavVisible(page.id)}
-                              className={`shrink-0 transition-colors ${page.nav.visible ? 'text-primary' : 'text-outline hover:text-primary'
+                              className={`shrink-0 transition-colors ${page.nav.visible ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                                 }`}
                             >
-                              <span className="material-symbols-outlined text-base">
-                                {page.nav.visible ? 'toggle_on' : 'toggle_off'}
-                              </span>
+                              {page.nav.visible ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
                             </button>
-                            <span className="font-['Inter'] text-[0.5625rem] tracking-[0.15em] uppercase text-outline shrink-0">
-                              Menu
+                            <span className="shrink-0 text-xs text-muted-foreground">
+                              {t.sections.menu}
                             </span>
-                            <input
-                              type="text"
+                            <Input
                               value={page.nav.label}
                               onChange={(e) => handleRelabelNavItem(page.id, e.target.value)}
                               placeholder={t.pages.namePlaceholder}
-                              className="flex-grow min-w-0 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-0.5 font-['Inter'] font-light text-[0.6875rem] transition-colors"
+                              className="h-8 flex-grow"
                             />
                           </div>
                         </li>
@@ -531,8 +544,15 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
               {/* Hierarchy */}
               <div>
-                <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                  {isMulti ? `${t.sections.sectionsLabel} // ${activePage?.nav.label ?? ''}` : t.sections.hierarchy}
+                <h3 className="mb-4 text-sm font-semibold text-foreground">
+                  {isMulti ? (
+                    <>
+                      {t.sections.sectionsLabel}{' '}
+                      <span className="font-normal text-muted-foreground">· {activePage?.nav.label ?? ''}</span>
+                    </>
+                  ) : (
+                    t.sections.hierarchy
+                  )}
                 </h3>
                 {isMulti ? (
                   <ul className="space-y-2">
@@ -546,7 +566,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                           <button
                             type="button"
                             onClick={() => setSelectedSectionId(section.id)}
-                            className={`flex-grow text-left font-['Inter'] font-light text-xs tracking-wider transition-colors ${isSelected ? 'text-primary font-medium' : section.visible ? 'text-on-surface' : 'text-outline'
+                            className={`flex-grow text-left text-sm transition-colors ${isSelected ? 'font-medium text-primary' : section.visible ? 'text-foreground' : 'text-muted-foreground'
                               }`}
                           >
                             {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
@@ -556,12 +576,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             aria-label={section.visible ? t.sections.hide : t.sections.show}
                             title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
                             onClick={() => handleToggleSectionVisible(section.id)}
-                            className={`shrink-0 transition-colors ${section.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
+                            className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
                               }`}
                           >
-                            <span className="material-symbols-outlined text-lg">
-                              {section.visible ? 'visibility' : 'visibility_off'}
-                            </span>
+                            {section.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
                           </button>
                         </li>
                       );
@@ -575,37 +593,37 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                     return (
                       <li
                         key={section.id}
-                        className={`border p-3 transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-outline-variant'
+                        className={`rounded-md border p-3 transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border'
                           }`}
                       >
                         {/* Row 1: reorder · name · page visibility */}
                         <div className="flex items-center gap-2">
                           {pinned ? (
                             <span
-                              className="material-symbols-outlined text-outline text-sm shrink-0"
+                              className="shrink-0 text-muted-foreground"
                               title={section.type === 'nav' ? t.sections.pinnedTop : t.sections.pinnedBottom}
                             >
-                              push_pin
+                              <Pin className="size-3.5" />
                             </span>
                           ) : (
-                            <span className="flex flex-col shrink-0 -my-1">
+                            <span className="-my-1 flex shrink-0 flex-col">
                               <button
                                 type="button"
                                 aria-label={t.sections.moveUp}
                                 disabled={index <= firstReorderable}
                                 onClick={() => handleMoveNavItem(section.id, 'up')}
-                                className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
+                                className="leading-none text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-20"
                               >
-                                <span className="material-symbols-outlined text-sm">arrow_upward</span>
+                                <ChevronUp className="size-4" />
                               </button>
                               <button
                                 type="button"
                                 aria-label={t.sections.moveDown}
                                 disabled={index >= lastReorderable}
                                 onClick={() => handleMoveNavItem(section.id, 'down')}
-                                className="text-outline hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed leading-none"
+                                className="leading-none text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-20"
                               >
-                                <span className="material-symbols-outlined text-sm">arrow_downward</span>
+                                <ChevronDown className="size-4" />
                               </button>
                             </span>
                           )}
@@ -613,7 +631,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                           <button
                             type="button"
                             onClick={() => setSelectedSectionId(section.id)}
-                            className={`flex-grow text-left font-['Inter'] font-light text-xs tracking-wider transition-colors ${isSelected ? 'text-primary font-medium' : section.visible ? 'text-on-surface' : 'text-outline'
+                            className={`flex-grow text-left text-sm transition-colors ${isSelected ? 'font-medium text-primary' : section.visible ? 'text-foreground' : 'text-muted-foreground'
                               }`}
                           >
                             {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
@@ -624,12 +642,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             aria-label={section.visible ? t.sections.hide : t.sections.show}
                             title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
                             onClick={() => handleToggleNavItemVisible(section.id)}
-                            className={`shrink-0 transition-colors ${section.visible ? 'text-on-surface hover:text-primary' : 'text-outline hover:text-primary'
+                            className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
                               }`}
                           >
-                            <span className="material-symbols-outlined text-lg">
-                              {section.visible ? 'visibility' : 'visibility_off'}
-                            </span>
+                            {section.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
                           </button>
                         </div>
 
@@ -640,23 +656,20 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             aria-label={section.nav.visible ? t.sections.removeFromMenu : t.sections.addToMenu}
                             title={section.nav.visible ? t.sections.inNavMenuTitle : t.sections.notInNavMenuTitle}
                             onClick={() => handleToggleNavItemNavVisible(section.id)}
-                            className={`shrink-0 transition-colors ${section.nav.visible ? 'text-primary' : 'text-outline hover:text-primary'
+                            className={`shrink-0 transition-colors ${section.nav.visible ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                               }`}
                           >
-                            <span className="material-symbols-outlined text-base">
-                              {section.nav.visible ? 'toggle_on' : 'toggle_off'}
-                            </span>
+                            {section.nav.visible ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
                           </button>
-                          <span className="font-['Inter'] text-[0.5625rem] tracking-[0.15em] uppercase text-outline shrink-0">
+                          <span className="shrink-0 text-xs text-muted-foreground">
                             {t.sections.menu}
                           </span>
-                          <input
-                            type="text"
+                          <Input
                             value={section.nav.label}
                             onChange={(e) => handleRelabelNavItem(section.id, e.target.value)}
                             disabled={!section.nav.visible}
                             placeholder={t.sections.menuLabelPlaceholder}
-                            className="flex-grow min-w-0 bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-0.5 font-['Inter'] font-light text-[0.6875rem] disabled:opacity-40 transition-colors"
+                            className="h-8 flex-grow"
                           />
                         </div>
                       </li>
@@ -669,10 +682,11 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               {/* Parameters */}
               {selectedSection && (
                 <div>
-                  <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
-                    {`${t.parameters} // ${selectedSection.type}`}
+                  <h3 className="mb-4 text-sm font-semibold text-foreground">
+                    {t.parameters}{' '}
+                    <span className="font-normal text-muted-foreground">· {selectedSection.type}</span>
                   </h3>
-                  <div className="space-y-8">
+                  <div className="space-y-6">
                     {Object.entries(selectedSection.data)
                       .filter(([, field]) => field.editable !== false)
                       .map(([fieldKey, field]) => {
@@ -694,8 +708,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               )}
             </div>
           ) : (
-            <div className="space-y-12">
-              <h3 className="font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary mb-6">
+            <div className="space-y-6">
+              <h3 className="text-sm font-semibold text-foreground">
                 {t.design.globalHeading}
               </h3>
               <GlobalStylesEditor
@@ -707,80 +721,80 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="p-6 border-t border-outline-variant bg-surface-container-low">
-          <div className="mb-3 h-4 flex items-center">
+        <div className="shrink-0 border-t border-border bg-muted/40 p-6">
+          <div className="mb-3 flex h-4 items-center text-xs">
             {autoSaveStatus === 'saving' && (
-              <span className="text-[10px] tracking-widest uppercase text-outline animate-pulse">{t.autosave.saving}</span>
+              <span className="text-muted-foreground">{t.autosave.saving}</span>
             )}
             {autoSaveStatus === 'saved' && (
-              <span className="text-[10px] tracking-widest uppercase text-green-600">{t.autosave.saved}</span>
+              <span className="text-green-600 dark:text-green-500">{t.autosave.saved}</span>
             )}
             {autoSaveStatus === 'error' && (
-              <span className="text-[10px] tracking-widest uppercase text-amber-600">{t.autosave.failed}</span>
+              <span className="text-amber-600 dark:text-amber-500">{t.autosave.failed}</span>
             )}
             {isDirty && autoSaveStatus === 'idle' && (
-              <span className="text-[10px] tracking-widest uppercase text-outline">{t.autosave.unsaved}</span>
+              <span className="text-muted-foreground">{t.autosave.unsaved}</span>
             )}
           </div>
           {actionError && (
-            <div className="mb-4 px-3 py-2 text-[10px] uppercase tracking-widest text-error border border-error/30 bg-error/5 leading-relaxed">
+            <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs leading-relaxed text-destructive">
               {actionError}
             </div>
           )}
-          <button
+          <Button
             onClick={handlePublish}
             disabled={publishing || saving}
-            className="w-full bg-primary text-on-primary h-12 font-['Inter'] font-medium text-[0.6875rem] tracking-[0.2em] uppercase flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:brightness-110"
+            size="lg"
+            className="w-full"
           >
             {publishing ? t.actions.publishing : saving ? t.actions.saving : t.actions.publish}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSave}
             disabled={saving}
-            className="w-full border border-outline mt-2 h-10 font-['Inter'] font-light text-[0.6875rem] tracking-[0.1em] uppercase hover:bg-surface-container transition-colors disabled:opacity-50"
+            variant="outline"
+            className="mt-2 w-full"
           >
             {saving ? t.actions.saving : t.actions.saveDraft}
-          </button>
+          </Button>
 
           {publishedUrl === 'NO_DOMAIN' && (
-            <div className="mt-4 p-4 text-[10px] uppercase tracking-widest text-amber-600 border border-amber-300 bg-amber-50 leading-relaxed text-center">
+            <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-4 text-center text-xs leading-relaxed text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-500">
               {t.published.line1}
-              <a href="/dashboard/domains" className="underline mx-1 font-bold hover:text-amber-800 transition-colors">
+              <a href="/dashboard/domains" className="mx-1 font-medium underline hover:text-amber-900 dark:hover:text-amber-400">
                 {t.published.setDomainLink}
               </a>
               {t.published.line2}
             </div>
           )}
           {publishedUrl && publishedUrl !== 'NO_DOMAIN' && (
-            <a
-              href={publishedUrl}
-              target="_blank"
-              className="mt-4 flex items-center justify-center gap-2 p-4 text-[10px] uppercase tracking-widest text-green-700 border border-green-300 bg-green-50 hover:bg-green-100 transition-colors"
-            >
-              <span className="material-symbols-outlined text-sm">open_in_new</span>
-              {t.published.viewSite}
-            </a>
+            <Button asChild variant="outline" className="mt-4 w-full">
+              <a href={publishedUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="size-4" />
+                {t.published.viewSite}
+              </a>
+            </Button>
           )}
         </div>
       </section>
 
       {/* Right Panel: Live Preview */}
-      <section className="flex-grow bg-surface-container-lowest relative blueprint-grid border border-outline-variant overflow-hidden flex flex-col p-6">
-        <div className="absolute top-0 left-0 bg-primary text-on-primary px-3 py-1.5 text-[10px] font-medium tracking-[0.15em] z-50">
+      <section className="relative flex flex-grow flex-col overflow-hidden border border-border bg-muted/30 p-6">
+        <div className="absolute left-3 top-3 z-10 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground">
           {t.preview.label}
         </div>
 
-        <div className="flex-grow overflow-y-auto custom-scrollbar transform-gpu">
+        <div className="flex-grow transform-gpu overflow-y-auto">
           <div
             style={themeVariables}
             className="min-h-full bg-white shadow-2xl"
             onClickCapture={handlePreviewLinkGuard}
           >
             {loadingError ? (
-              <div className="flex flex-col items-center justify-center h-[50vh] p-8 text-center">
-                <span className="material-symbols-outlined text-error text-4xl mb-4">error</span>
-                <p className="text-error font-medium mb-2">{t.loadError.heading}</p>
-                <p className="text-outline text-sm max-w-xs">{loadingError}</p>
+              <div className="flex h-[50vh] flex-col items-center justify-center p-8 text-center">
+                <CircleAlert className="mb-4 size-10 text-destructive" />
+                <p className="mb-2 font-medium text-destructive">{t.loadError.heading}</p>
+                <p className="max-w-xs text-sm text-muted-foreground">{loadingError}</p>
               </div>
             ) : TemplateRenderer ? (
               <TemplateRenderer
@@ -790,7 +804,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 activePageId={activePageId}
               />
             ) : (
-              <div className="flex items-center justify-center h-[50vh] text-outline font-light text-sm tracking-widest uppercase animate-pulse">
+              <div className="flex h-[50vh] animate-pulse items-center justify-center text-sm text-muted-foreground">
                 {t.preview.loadingRenderer}
               </div>
             )}
@@ -815,8 +829,6 @@ interface DynamicFieldProps {
 function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError }: DynamicFieldProps) {
   const t = useDictionary().editor;
   const [isUploading, setIsUploading] = useState(false);
-  const baseInputClass =
-    "w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 pb-1 font-['Inter'] font-light text-xs transition-colors";
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -862,83 +874,70 @@ function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError
   const value = field.value || '';
 
   return (
-    <div className="relative group">
-      <label className="block font-['Inter'] font-light text-[0.625rem] tracking-[0.1em] uppercase text-outline mb-2 group-focus-within:text-primary transition-colors">
-        {field.label}
-      </label>
+    <div className="space-y-2">
+      <Label>{field.label}</Label>
 
       {field.type === 'textarea' ? (
-        <textarea
-          className={`${baseInputClass} resize-none`}
+        <Textarea
           rows={3}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
       ) : field.type === 'color' ? (
         <div className="flex items-center gap-2">
-          <div
-            className="w-6 h-6 border border-outline-variant overflow-hidden"
-            style={{ backgroundColor: value }}
-          >
-            <input
-              type="color"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              className="w-12 h-12 -ml-3 -mt-3 cursor-pointer opacity-0"
-            />
-          </div>
           <input
-            type="text"
-            className={baseInputClass}
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="size-9 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
+          />
+          <Input
+            className="font-mono"
             value={value}
             onChange={(e) => onChange(e.target.value)}
           />
         </div>
       ) : field.type === 'select' ? (
-        <select
-          className={baseInputClass}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        >
-          {field.options.map((opt: string) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
+        <Select value={value} onValueChange={(v) => onChange(v)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {field.options.map((opt: string) => (
+              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       ) : field.type === 'image' ? (
-        <div>
-          <input
-            type="text"
-            className={baseInputClass}
+        <div className="space-y-2">
+          <Input
             value={value}
             onChange={(e) => onChange(e.target.value, undefined)}
             placeholder="https://images.unsplash.com/..."
             disabled={isUploading}
           />
-          <div className="mt-2">
-            <input
-              type="file"
-              accept="image/jpeg, image/png, image/webp, image/gif"
-              className="text-xs max-w-full"
-              onChange={handleUpload}
-              disabled={isUploading}
-            />
-          </div>
+          <Input
+            type="file"
+            accept="image/jpeg, image/png, image/webp, image/gif"
+            className="cursor-pointer text-xs file:mr-2 file:cursor-pointer"
+            onChange={handleUpload}
+            disabled={isUploading}
+          />
           {isUploading && (
-            <div className="text-xs text-primary animate-pulse mt-1">{t.field.uploading}</div>
+            <p className="animate-pulse text-xs text-primary">{t.field.uploading}</p>
           )}
           {value && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={value}
               alt={field.label}
-              className="mt-3 w-full h-24 object-cover grayscale opacity-60 border border-outline-variant hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+              className="mt-1 h-24 w-full rounded-md border border-border object-cover"
             />
           )}
         </div>
       ) : (
-        <input
+        <Input
           type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'}
-          className={baseInputClass}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -1029,47 +1028,53 @@ function ArrayField({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="block font-['Inter'] font-medium text-[0.6875rem] tracking-[0.1em] uppercase text-primary">
+        <Label className="text-primary">
           {field.label} ({items.length}{maxItems !== undefined ? ` / ${maxItems}` : ''})
-        </label>
-        <button
+        </Label>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
           onClick={handleAddItem}
           disabled={maxItems !== undefined && items.length >= maxItems}
-          className="text-primary hover:text-primary/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="text-primary hover:text-primary"
           title={maxItems !== undefined && items.length >= maxItems ? `${t.field.maxReachedPrefix}${maxItems}${t.field.maxReachedSuffix}` : t.field.addItem}
         >
-          <span className="material-symbols-outlined text-lg">add_circle</span>
-        </button>
+          <PlusCircle className="size-5" />
+        </Button>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {items.map((item, index) => (
           <div
             key={item._key.type !== 'array' ? item._key.value : index}
-            className="p-4 bg-surface-container-low border border-outline-variant relative group/item"
+            className="group/item relative rounded-md border border-border bg-muted/40 p-4"
           >
-            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+            <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover/item:opacity-100">
               <button
+                type="button"
                 disabled={index === 0}
                 onClick={() => handleMoveItem(index, 'up')}
-                className="text-outline hover:text-primary disabled:opacity-30"
+                className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
               >
-                <span className="material-symbols-outlined text-sm">arrow_upward</span>
+                <ChevronUp className="size-4" />
               </button>
               <button
+                type="button"
                 disabled={index === items.length - 1}
                 onClick={() => handleMoveItem(index, 'down')}
-                className="text-outline hover:text-primary disabled:opacity-30"
+                className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
               >
-                <span className="material-symbols-outlined text-sm">arrow_downward</span>
+                <ChevronDown className="size-4" />
               </button>
               <button
+                type="button"
                 onClick={() => handleRemoveItem(index)}
                 disabled={minItems !== undefined && items.length <= minItems}
-                className="text-outline hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="text-muted-foreground transition-colors hover:text-destructive disabled:cursor-not-allowed disabled:opacity-30"
                 title={minItems !== undefined && items.length <= minItems ? `${t.field.minRequiredPrefix}${minItems}${t.field.minRequiredSuffix}` : t.field.delete}
               >
-                <span className="material-symbols-outlined text-sm">delete</span>
+                <Trash2 className="size-4" />
               </button>
             </div>
 
@@ -1092,14 +1097,17 @@ function ArrayField({
         ))}
 
         {items.length === 0 && (
-          <div className="py-8 border border-dashed border-outline-variant text-center">
-            <p className="text-[10px] uppercase tracking-widest text-outline">{t.field.noItems}</p>
-            <button
+          <div className="rounded-md border border-dashed border-border py-8 text-center">
+            <p className="text-sm text-muted-foreground">{t.field.noItems}</p>
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
               onClick={handleAddItem}
-              className="mt-2 text-primary text-[10px] uppercase tracking-widest font-medium hover:underline"
+              className="mt-1 h-auto text-primary"
             >
               {t.field.addFirstItem}
-            </button>
+            </Button>
           </div>
         )}
       </div>
