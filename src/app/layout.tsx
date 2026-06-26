@@ -4,6 +4,9 @@ import Navbar from "@/components/Navbar";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import ConditionalLayoutWrapper from "@/components/ConditionalLayoutWrapper";
 import { SITE_URL } from "@/lib/seo/base-url";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionary";
+import { I18nProvider } from "@/lib/i18n/provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -43,9 +46,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCurrentUser();
+  const [user, locale] = await Promise.all([getCurrentUser(), getLocale()]);
+  const dictionary = getDictionary(locale);
   return (
-    <html lang="en" className="light">
+    <html lang={locale} className="light">
       <head>
         <link
           rel="stylesheet"
@@ -53,10 +57,12 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${inter.variable} bg-surface font-body text-on-surface antialiased`}>
-        <ConditionalLayoutWrapper>
-          <Navbar user={user} />
-        </ConditionalLayoutWrapper>
-        {children}
+        <I18nProvider locale={locale} dictionary={dictionary}>
+          <ConditionalLayoutWrapper>
+            <Navbar user={user} />
+          </ConditionalLayoutWrapper>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

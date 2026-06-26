@@ -6,17 +6,19 @@ import { useRouter } from "next/navigation";
 import { signupAction } from "./actions";
 import { getAuthError } from "@/lib/errors/messages";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
+import { useLocale } from "@/lib/i18n/provider";
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [signupEmail, setSignupEmail] = useState<string | null>(null);
   const router = useRouter();
+  const locale = useLocale();
 
   async function handleSubmit(formData: FormData) {
     const result = await signupAction(formData);
 
     if ('error' in result) {
-      setError(getAuthError(result.error));
+      setError(getAuthError(result.error, locale));
     } else {
       setError(null);
       const email = formData.get('email') as string;
