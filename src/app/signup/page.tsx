@@ -6,13 +6,14 @@ import { useRouter } from "next/navigation";
 import { signupAction } from "./actions";
 import { getAuthError } from "@/lib/errors/messages";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
-import { useLocale } from "@/lib/i18n/provider";
+import { useDictionary, useLocale } from "@/lib/i18n/provider";
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [signupEmail, setSignupEmail] = useState<string | null>(null);
   const router = useRouter();
   const locale = useLocale();
+  const t = useDictionary().auth.signup;
 
   async function handleSubmit(formData: FormData) {
     const result = await signupAction(formData);
@@ -35,17 +36,16 @@ export default function SignupPage() {
             ACCOUNT_CREATED
           </h2>
           <p className="font-body text-sm font-light text-outline leading-relaxed mb-2">
-            가입이 완료되었습니다.
+            {t.successLine1}
           </p>
           <p className="font-body text-sm font-light text-outline leading-relaxed mb-8">
-            <span className="text-primary font-medium">{signupEmail}</span>으로 확인 메일이 발송되었습니다.
-            메일함에서 링크를 클릭한 후 로그인해주세요.
+            {t.successConfirmPrefix}<span className="text-primary font-medium">{signupEmail}</span>{t.successConfirmSuffix}
           </p>
           <button
             onClick={() => router.push('/login')}
             className="bg-primary text-on-primary font-label text-[0.6875rem] font-medium tracking-[0.2em] px-12 h-12 uppercase hover:bg-primary-fixed transition-colors duration-200"
           >
-            LOGIN_PAGE
+            {t.successButton}
           </button>
         </div>
       </main>
@@ -89,7 +89,7 @@ export default function SignupPage() {
             <form className="space-y-10" action={handleSubmit}>
               {/* Field: Full Name */}
               <div className="relative group">
-                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="full_name">FULL NAME</label>
+                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="full_name">{t.fullNameLabel}</label>
                 <input
                   className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 px-2 transition-all duration-300 placeholder:text-outline/30"
                   id="full_name"
@@ -103,7 +103,7 @@ export default function SignupPage() {
 
               {/* Field: Email Address */}
               <div className="relative group">
-                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="email">EMAIL ADDRESS</label>
+                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="email">{t.emailLabel}</label>
                 <input
                   className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 px-2 transition-all duration-300 placeholder:text-outline/30"
                   id="email"
@@ -117,7 +117,7 @@ export default function SignupPage() {
 
               {/* Field: Secure Password */}
               <div className="relative group">
-                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="password">SECURE PASSWORD</label>
+                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="password">{t.passwordLabel}</label>
                 <input
                   className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 px-2 transition-all duration-300 placeholder:text-outline/30"
                   id="password"
@@ -131,7 +131,7 @@ export default function SignupPage() {
 
               {/* Field: Workspace ID */}
               <div className="relative group">
-                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="workspace_id">WORKSPACE ID</label>
+                <label className="block font-label text-[0.6rem] font-medium tracking-[0.15em] text-outline uppercase mb-2 group-focus-within:text-primary transition-colors pl-2" htmlFor="workspace_id">{t.workspaceLabel}</label>
                 <div className="relative flex items-center">
                   <input
                     className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary focus:ring-0 font-body text-sm font-light py-2 px-2 transition-all duration-300 placeholder:text-outline/30"
@@ -159,14 +159,14 @@ export default function SignupPage() {
                     className="bg-primary text-on-primary font-label text-[0.6875rem] font-medium tracking-[0.2em] px-12 h-12 uppercase hover:bg-primary-fixed transition-colors duration-200 active:scale-[0.98]" 
                     type="submit"
                   >
-                    CREATE_ACCOUNT
+                    {t.submit}
                   </button>
                 </div>
-                <Link 
-                  className="font-label text-[0.6rem] font-light tracking-[0.1em] text-outline hover:text-primary border-b border-transparent hover:border-primary pb-0.5 transition-colors duration-200 uppercase" 
+                <Link
+                  className="font-label text-[0.6rem] font-light tracking-[0.1em] text-outline hover:text-primary border-b border-transparent hover:border-primary pb-0.5 transition-colors duration-200 uppercase"
                   href="/login"
                 >
-                  ALREADY_HAVE_AN_ACCOUNT? LOGIN
+                  {t.loginLink}
                 </Link>
               </div>
             </form>
