@@ -7,13 +7,17 @@ import { loginAction } from "./actions";
 import { getAuthError } from "@/lib/errors/messages";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
+import { useDictionary, useLocale } from "@/lib/i18n/provider";
+import { LocaleToggle } from "@/components/LocaleToggle";
 
 function LoginForm() {
   const searchParams = useSearchParams();
+  const locale = useLocale();
+  const t = useDictionary().auth.login;
   const urlError = searchParams.get('error');
   const next = searchParams.get('next');
   const [error, setError] = useState<string | null>(
-    urlError ? getAuthError(urlError.toUpperCase()) : null
+    urlError ? getAuthError(urlError.toUpperCase(), locale) : null
   );
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -23,7 +27,7 @@ function LoginForm() {
       const result = await loginAction(formData);
 
       if ('error' in result) {
-        setError(getAuthError(result.error));
+        setError(getAuthError(result.error, locale));
       } else {
         setError(null);
         router.push(safeNextPath(next));
@@ -42,6 +46,10 @@ function LoginForm() {
 
         {/* Login Container */}
         <div className="w-full max-w-[420px] px-8 py-12 bg-surface z-10">
+          {/* Language switch */}
+          <div className="flex justify-end mb-6">
+            <LocaleToggle className="flex gap-3" />
+          </div>
           {/* Branding/Identity */}
           <div className="mb-20">
             <div className="flex items-center gap-2 mb-2">
@@ -60,7 +68,7 @@ function LoginForm() {
                 className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
                 htmlFor="email"
               >
-                USER_EMAIL
+                {t.emailLabel}
               </label>
               <div className="relative flex items-center">
                 <input
@@ -82,7 +90,7 @@ function LoginForm() {
                 className="font-label text-[10px] font-medium tracking-[0.15em] uppercase text-zinc-400 group-focus-within:text-zinc-900 transition-colors pl-2"
                 htmlFor="password"
               >
-                SECURE_KEY
+                {t.passwordLabel}
               </label>
               <div className="relative flex items-center">
                 <input
@@ -101,7 +109,7 @@ function LoginForm() {
             <div className="pt-8 flex flex-col gap-6">
               {error && (
                 <div className="text-red-500 font-label text-[10px] tracking-widest uppercase">
-                  ERROR: {error}
+                  {t.errorPrefix}: {error}
                 </div>
               )}
               <button
@@ -112,11 +120,11 @@ function LoginForm() {
                 {isPending ? (
                   <>
                     <span className="w-[10px] h-[10px] border border-on-primary border-t-transparent rounded-full animate-spin"></span>
-                    <span>AUTHENTICATING...</span>
+                    <span>{t.submitting}</span>
                   </>
                 ) : (
                   <>
-                    <span>INITIATE_SESSION</span>
+                    <span>{t.submit}</span>
                     <span className="w-[4px] h-[4px] bg-tertiary-fixed"></span>
                   </>
                 )}
@@ -127,13 +135,13 @@ function LoginForm() {
                   className="font-label text-[9px] font-light tracking-[0.1em] uppercase text-zinc-400 hover:text-zinc-900 transition-colors border-b border-transparent hover:border-zinc-900 pb-0.5"
                   href="/forgot-password"
                 >
-                  FORGOT_KEY?
+                  {t.forgotLink}
                 </Link>
                 <Link 
                   className="font-label text-[9px] font-light tracking-[0.1em] uppercase text-zinc-400 hover:text-zinc-900 transition-colors border-b border-transparent hover:border-zinc-900 pb-0.5" 
                   href="/signup"
                 >
-                  REQUEST_ACCESS
+                  {t.signupLink}
                 </Link>
               </div>
             </div>

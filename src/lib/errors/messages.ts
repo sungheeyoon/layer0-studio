@@ -1,11 +1,40 @@
-export const AUTH_ERRORS: Record<string, string> = {
-  INVALID_EMAIL: '올바른 이메일 형식이 아닙니다.',
-  WEAK_PASSWORD: '비밀번호는 6자 이상이어야 합니다.',
-  USER_ALREADY_EXISTS: '이미 사용 중인 이메일입니다.',
-  WRONG_CREDENTIALS: '이메일 또는 비밀번호가 올바르지 않습니다.',
-  EMAIL_NOT_CONFIRMED: '이메일 확인이 필요합니다. 받은 메일함을 확인해주세요.',
-  OAUTH_FAILED: 'SNS 로그인에 실패했습니다. 다시 시도해주세요.',
-  UNKNOWN: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+import type { Locale } from '@/lib/i18n/locale';
+
+/**
+ * Auth error display strings keyed by stable domain `code`, now locale-aware
+ * ({ ko, en }) for the Studio bilingual UI. This registry stays a separate
+ * module from the UI copy dictionary on purpose — it decouples domain error
+ * codes from display strings (a different axis than chrome copy).
+ */
+export const AUTH_ERRORS: Record<string, Record<Locale, string>> = {
+  INVALID_EMAIL: {
+    ko: '올바른 이메일 형식이 아닙니다.',
+    en: 'Invalid email format.',
+  },
+  WEAK_PASSWORD: {
+    ko: '비밀번호는 6자 이상이어야 합니다.',
+    en: 'Password must be at least 6 characters.',
+  },
+  USER_ALREADY_EXISTS: {
+    ko: '이미 사용 중인 이메일입니다.',
+    en: 'This email is already in use.',
+  },
+  WRONG_CREDENTIALS: {
+    ko: '이메일 또는 비밀번호가 올바르지 않습니다.',
+    en: 'Incorrect email or password.',
+  },
+  EMAIL_NOT_CONFIRMED: {
+    ko: '이메일 확인이 필요합니다. 받은 메일함을 확인해주세요.',
+    en: 'Email confirmation required. Please check your inbox.',
+  },
+  OAUTH_FAILED: {
+    ko: 'SNS 로그인에 실패했습니다. 다시 시도해주세요.',
+    en: 'Social login failed. Please try again.',
+  },
+  UNKNOWN: {
+    ko: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+    en: 'An error occurred. Please try again later.',
+  },
 };
 
 export const DOMAIN_ERRORS: Record<string, string> = {
@@ -49,8 +78,8 @@ export function isStaleConflict(result: unknown): boolean {
   );
 }
 
-export function getAuthError(code: string | undefined): string {
-  return AUTH_ERRORS[code ?? 'UNKNOWN'] ?? AUTH_ERRORS.UNKNOWN;
+export function getAuthError(code: string | undefined, locale: Locale): string {
+  return (AUTH_ERRORS[code ?? 'UNKNOWN'] ?? AUTH_ERRORS.UNKNOWN)[locale];
 }
 
 export function getDomainError(code: string | undefined): string {
