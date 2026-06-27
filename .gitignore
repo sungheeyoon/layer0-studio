@@ -45,7 +45,9 @@ next-env.d.ts
 .gemini/
 
 # local scripts (migration helpers, one-off tooling — add to personal .git/info/exclude)
-.claude/
+.claude/*
+# …but project skills are version-controlled (shared dev-time tooling)
+!.claude/skills/
 
 # internal portfolio prep notes (interview cheatsheet — not for public)
 docs/PORTFOLIO_ENTRY.md
