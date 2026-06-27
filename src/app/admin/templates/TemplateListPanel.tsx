@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Filter, ImageIcon, Loader2 } from 'lucide-react';
+import { Filter, ImageIcon, Loader2, Rocket } from 'lucide-react';
 import { Template } from '@/domain/entities/template.entity';
-import { deleteTemplateAction, archiveTemplateAction, revertToDraftAction, syncTemplatesAction } from './actions';
+import { deleteTemplateAction, archiveTemplateAction, revertToDraftAction, activateTemplateAction, syncTemplatesAction } from './actions';
 import { isPresetSlug } from '@/templates/_generated';
 import { SyncSummary } from '@/lib/template/sync';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +51,8 @@ export default function TemplateListPanel({
   const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
   const [revertingId, setRevertingId] = useState<string | null>(null);
+  const [confirmActivateId, setConfirmActivateId] = useState<string | null>(null);
+  const [activatingId, setActivatingId] = useState<string | null>(null);
 
   // Sync state
   const [isSyncing, setIsSyncing] = useState(false);
@@ -104,8 +106,19 @@ export default function TemplateListPanel({
     setRevertingId(null);
   };
 
+  const handleActivate = async (id: string) => {
+    setActivatingId(id);
+    const result = await activateTemplateAction(id);
+    if (result && !('error' in result)) {
+      setConfirmActivateId(null);
+      onArchive?.(id); // reuse callback to trigger list refresh
+    }
+    setActivatingId(null);
+  };
+
   const deleteTarget = templates.find((t) => t.id === confirmDeleteId) ?? null;
   const archiveTarget = templates.find((t) => t.id === confirmArchiveId) ?? null;
+  const activateTarget = templates.find((t) => t.id === confirmActivateId) ?? null;
 
   return (
     <section className="col-span-4 overflow-y-auto border-r border-border bg-muted/30">
@@ -191,9 +204,23 @@ export default function TemplateListPanel({
 
                   {/* Actions */}
                   <div
-                    className="mt-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+                    className="mt-3 flex items-center gap-1"
                     onClick={(e) => e.stopPropagation()}
                   >
+                    {/* Activate (publish) — always visible on draft rows so the
+                        publish step isn't buried in the editor's "Deploy" button. */}
+                    {template.status === 'draft' && (
+                      <Button
+                        size="xs"
+                        disabled={activatingId === template.id}
+                        onClick={() => setConfirmActivateId(template.id)}
+                      >
+                        <Rocket className="h-3 w-3" />
+                        {activatingId === template.id ? 'Activating...' : 'Activate'}
+                      </Button>
+                    )}
+                    {/* Secondary actions — revealed on hover to keep the list calm. */}
+                    <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <Button size="xs" variant="ghost" onClick={() => onEdit(template)}>
                       Edit
                     </Button>
@@ -225,6 +252,7 @@ export default function TemplateListPanel({
                     >
                       Delete
                     </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -284,6 +312,32 @@ export default function TemplateListPanel({
               onClick={() => confirmArchiveId && handleArchive(confirmArchiveId)}
             >
               {archivingId === confirmArchiveId ? 'Archiving...' : 'Archive'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Activate confirmation */}
+      <AlertDialog
+        open={!!confirmActivateId}
+        onOpenChange={(open) => { if (!open) setConfirmActivateId(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Activate template?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {activateTarget?.name}
+              <br />
+              상태를 <strong>Active</strong>로 바꿔 공개 카탈로그에 노출합니다. 사용자가 이 템플릿으로 사이트를 만들 수 있게 됩니다. 언제든 &quot;Archive&quot;로 다시 숨길 수 있습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={activatingId === confirmActivateId}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={activatingId === confirmActivateId}
+              onClick={(e) => { e.preventDefault(); if (confirmActivateId) handleActivate(confirmActivateId); }}
+            >
+              {activatingId === confirmActivateId ? 'Activating...' : 'Activate'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
