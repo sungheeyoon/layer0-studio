@@ -29,8 +29,8 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
    `pnpm generate:templates`         `pnpm template:capture`         `pnpm template:sync [--apply]`
    (predev/prebuild 자동)             (썸네일)                          (코드 → DB 반영)
 
-   `pnpm template:generate "<brief>"`  ← LLM 4-stage pipeline (Tracer)
-   (6 개 파일 자동 생성 후 generate:templates 호출)
+   새 Template 저작 = `new-template` Claude Code 스킬 (dev-time)
+   (브리프 자연어 → 6 개 파일 작성 → 검증 루프 → sync)
 ```
 
 - **코드가 진실 — Template** ([ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)): `template_json` / 썸네일 / `version` 은 항상 코드값으로 덮어씀.
@@ -45,7 +45,7 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 | 용어 | 무엇 | 어디 산다 | 누가 만든다 |
 |---|---|---|---|
 | **Category** | Template 카탈로그 분류 버킷 (cafe / corporate / fitness / interior / legal / medical / wedding) | `src/templates/<category>/` 디렉터리 이름 | 개발자 (디렉터리 추가) |
-| **Template** | 한 Category 안의 한 디자인. **모든 시각/구성 자산을 자기 디렉터리 안에 자급자족** (ADR-0001) | `src/templates/<category>/<leaf>/` | 개발자 (코드 PR) 또는 LLM (`pnpm template:generate`) |
+| **Template** | 한 Category 안의 한 디자인. **모든 시각/구성 자산을 자기 디렉터리 안에 자급자족** (ADR-0001) | `src/templates/<category>/<leaf>/` | 개발자 (코드 PR) 또는 Claude Code (`new-template` 스킬) |
 | **Section component** | 자기 메타 (`componentKey` / `category` / `label` / `dataSchema`) 를 동봉하는 self-describing React 컴포넌트 | `<templateDir>/library/<Name>.tsx` | 개발자 |
 | **Template Library** | `componentKey → Section component` 매핑. 한 Template 의 조립 키트. **다른 Template 와 공유 안 됨** | `<templateDir>/library/index.ts` | 개발자 |
 | **Preset** | 코드가 진실인 시드. composition + 데이터 + 토큰 오버라이드 | `<templateDir>/template.ts` | 개발자 / LLM |
@@ -69,9 +69,11 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 ### 1.2 Sync vs Generate (ADR-0002 의 두 진입점)
 
 - **Sync** (운영) — *기존 코드* → DB. `pnpm template:sync`. 매 배포마다.
-- **Generate** (창작) — *자연어 brief* → 새 코드 파일들 (그 다음 Sync 가 필요). `pnpm template:generate`. LLM 호출 (Anthropic API).
+- **Generate** (창작) — *자연어 brief* → 새 코드 파일들 (그 다음 Sync 가 필요). **`new-template` Claude Code 스킬**(`.claude/skills/new-template/`)이 dev-time 에 수행. 사람/Claude Code 가 6 개 파일을 작성하고 검증 게이트를 돌린다 — 사용자(최종 고객)는 Template 을 만들지 않는다.
 
-둘 다 *코드가 진실* 약속을 지킨다 — Generate 도 DB 에 직접 쓰지 않음.
+둘 다 *코드가 진실* 약속을 지킨다 — Generate 도 DB 에 직접 쓰지 않음 (sync 경유).
+
+> **이력**: 구버전엔 `pnpm template:generate` 라는 LLM API 4-stage CLI 파이프라인(`scripts/generate-template.ts`, Tracer #11–#17)이 있었으나, **Claude Code 스킬로 대체하며 제거됨** (눈먼 한 방 생성 + 사람 인계 대신, Claude Code 가 검증 루프를 자기가 닫고 추가 API 비용 0). 검증/이미지/카테고리 가드 로직(`validate-and-capture.ts`/`image-fetch.ts`/`category-gate.ts`)은 스킬의 도구로 살아남았다.
 
 ---
 
@@ -241,7 +243,7 @@ export const designTokens: DesignTokens = { ... };                 // 풍부한 
 
 **컴포넌트 사용**: 인라인 hex 금지 (§6.3 ESLint 룰). `var(--color-primary)`, `var(--font-base)` 등 참조만 허용.
 
-**현재 적용 상태** (ADR-0005): **cafe-default** 만 풍부 토큰 패턴 적용 완료 (#9 demo). 나머지 8 개 Template 는 각자 `.module.css` 에 기존 `--{prefix}-{name}` 패턴 유지 — **의도적인 점진 전환**. 각 Template 가 다른 이유로 손볼 때 자연스럽게 새 패턴으로 옮긴다. 신규 **Generate** 출력은 무조건 rich 패턴 (마이그 부담 줄이기 위해).
+**현재 적용 상태** (ADR-0005): **cafe-default** 만 풍부 토큰 패턴 적용 완료 (#9 demo). 나머지 8 개 Template 는 각자 `.module.css` 에 기존 `--{prefix}-{name}` 패턴 유지 — **의도적인 점진 전환**. 각 Template 가 다른 이유로 손볼 때 자연스럽게 새 패턴으로 옮긴다. 신규 Template (스킬 저작) 은 무조건 rich 패턴 (마이그 부담 줄이기 위해).
 
 ---
 
@@ -424,7 +426,7 @@ Section component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변�
 
 **두 레이어로 강제**:
 
-1. **Validate** — `validateTemplateFiles(templateDir)` (`src/lib/template/inline-tokens.ts`): Generate 파이프라인이 `library/*.tsx` 파일 텍스트를 스캔. 위반 시 `ValidationIssue[]` 반환.
+1. **Validate** — `validateTemplateFiles(templateDir)` (`src/lib/template/inline-tokens.ts`): `pnpm template:verify` 게이트(`validate-and-capture.ts`)가 `library/*.tsx` 파일 텍스트를 스캔. 위반 시 `ValidationIssue[]` 반환.
 2. **ESLint** — `local/no-inline-design-tokens` (`eslint-rules/no-inline-design-tokens.mjs`): `src/templates/**/*.{ts,tsx}` 대상으로 `pnpm lint` 에서 동작. AST 기반 (string Literal / TemplateElement / `fontFamily` JSX prop).
 
 | Code | 조건 |
@@ -448,10 +450,10 @@ Section component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변�
 # 코드 생성
 pnpm generate:templates           # _generated.ts 재생성 (predev/prebuild 에 자동 연결)
 
-# AI Template Generate (Tracer #1–#8)
-pnpm template:generate "<brief>"                  # 인터랙티브 4-stage 승인
-pnpm template:generate "<brief>" --auto-approve   # 무인 (CI/smoke)
-pnpm template:generate --help
+# Template 저작 (new-template 스킬이 검증 루프에서 사용)
+pnpm template:verify <templateKey>                # 통합 게이트(tsc/eslint/validate/schema↔jsx/capture)
+pnpm template:verify <templateKey> --skip-capture # 느린 썸네일 단계만 생략
+pnpm template:image <templateKey> "<query>" [wide|square|portrait]  # 스톡 이미지 fetch+호스팅 → URL 출력
 
 # 썸네일 캡처 (Playwright + sharp + pixelmatch)
 pnpm template:capture             # 모든 Template 일괄
@@ -472,36 +474,29 @@ pnpm test                         # vitest — validate 규칙 + sync 단위 테
 pnpm tsc --noEmit                 # 타입 체크 (CI 에서 클린 유지)
 ```
 
-### 7.1 `template:generate` 흐름 (Generate, Tracer #1–#8)
+### 7.1 Template 저작 흐름 (`new-template` 스킬)
+
+새 Template 은 **`new-template` Claude Code 스킬**(`.claude/skills/new-template/`)로 만든다. 명령어를 외우지 않고 자연어로 의뢰하면("아웃도어 브랜드 멀티페이지로 만들어줘") 스킬이 발동해 아래를 수행:
 
 ```
-brief ──▶ propose_composition   ──▶ [y / r / pick leaf 1-3]      ← LLM (#11)
-       ──▶ new-category gate    ──▶ [y/N] (only if category 신규)  ← #17
-       ──▶ propose_design_tokens ──▶ [y / r / n]                  ← LLM (#12)
-       ──▶ generate_section(×N)  ──▶ [approve y/n] (per section) ← stub (#13)
-       ──▶ writeFiles + generate:templates
-       ──▶ validate_and_capture  ──▶ tsc/eslint/validate/capture  ← real (#16)
+brief(자연어) ──▶ Site Type 결정 (Single=composition / Multi=templateJson 유니온 직접)
+             ──▶ 디렉터리: 가까운 Template 복제 또는 template:scaffold
+             ──▶ 6 개 파일 작성 (rich 토큰; gotchas-checklist 준수)
+             ──▶ 이미지: pnpm template:image <key> "<query>"
+             ──▶ 검증 루프(아래) — 깨지면 self-fix 후 재실행
+             ──▶ /preview/preset/<key> 육안 → pnpm template:sync (dry-run) → PR
 ```
 
-생성 결과: `src/templates/<category>/<leaf>/` 안에 6 개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). 자동으로 `pnpm generate:templates` 실행 → `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 에서 즉시 미리보기 가능.
+생성 결과: `src/templates/<category>/<leaf>/` 안에 6 개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). `pnpm generate:templates` 로 `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 미리보기.
 
-각 단계 상세:
+**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateTemplateJson` — preset → templateJson 유도 후 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **dataSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared 됨 cross-check (브레이스 밸런스 파서); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
+> `template:verify` 는 템플릿 모듈을 동적 import 하므로 첫 줄에서 `./lib/register-css-stub` 를 로드해 `.module.css` import 가 tsx 에서 깨지지 않게 한다 (sync 와 동일).
 
-**LLM #11 — `propose_composition`**: brief → category, leaf slug 후보 2-3 개, section role 시퀀스. 시스템 프롬프트는 category 정규화 룰 (소문자 + hyphen), leaf slug 컨벤션, 카테고리별 섹션 역할 가이드를 명시. UX: 사람이 leaf 후보 중 선택 또는 커스텀 입력, regenerate 가능.
-
-**LLM #12 — `propose_design_tokens`**: brief + composition → `defaultGlobalStyles` (얇은 5 필드) + `designTokens` (rich: colors / fonts / spacing? / radius? / shadows?). ADR-0005 의 2-layer 모델 그대로. Zod 스키마가 `colors.primary/secondary`, `fonts.base`, hex 색 형식, CSS length 단위 등을 runtime 검증. 카테고리별 mood 가이드 (cafe=warm earth, medical=muted + 1 accent 등) 시스템 프롬프트에 포함. UX: [y/r/n] regenerate 가능, 최대 4 회 시도.
-
-공통 인프라 (#11 에서 도입) — `scripts/lib/llm.ts` 의 `claudeJSON({systemPrompt, userMessage, schema, …})` 헬퍼: `claude-opus-4-7` + adaptive thinking + `output_config.format` (json_schema), Zod 검증, 사람-가독적 에러 (키 누락 / 401 / 429 / network / parse / schema fail). 환경 변수 `ANTHROPIC_API_KEY` 필요 — `pnpm tsx --env-file=.env.local scripts/generate-template.ts "<brief>"` 권장.
-
-**남은 stub — #13 `generate_section`**: 여전히 하드코딩. 별도 PR 에서 LLM 호출로 교체 예정.
-
-**New-category gate (#17)**: propose_composition 이 추출한 category 가 `src/templates/<category>/` 에 없으면 명시적 [y/N] 승인. 거부 시 generation 중단. 정확 일치 매칭만 (fuzzy X — `cafe-studio` 는 `cafe` 와 별개). 슬러그 가드 `^[a-z][a-z0-9-]{0,39}$` 위반 시 즉시 abort (LLM 재시도 X, brief 를 다시). `--auto-approve` 에서는 자동 통과 + warning 표시.
-
-**최종 단계 #16 — `validate_and_capture`**: 6 단계 통합 게이트. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateTemplateJson` — preset → templateJson 유도 후 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **dataSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared 됨 cross-check (브래스 밸런스 파서 — single/multi-line 둘 다 지원); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp 생성. (1)–(5) 중 하나라도 실패하면 즉시 halt + 부분 진행물 워킹 트리에 남김 (retry 안 함 — 사람 인계가 맞음). 캡처는 soft-fail (썸네일은 사후 재생성 가능).
+**New-category 가드**: 새 category slug 은 `^[a-z][a-z0-9-]{0,39}$` 를 만족해야 하고, 기존 디렉터리에 없는 새 top-level category 는 구조 변경이므로 사람의 명시적 승인 후 만든다 (`scripts/lib/category-gate.ts`, 정확 일치만 — `cafe-studio` 는 `cafe` 와 별개).
 
 ### 7.2 이미지 호스팅 헬퍼 (Issue #15)
 
-`scripts/lib/image-fetch.ts` 의 `fetchAndHostImage({ query, templateKey, aspectRatio?, role? })` — generate_section (#13) 이 `dataSchema` 에 `type: 'image'` 필드를 만들 때 호출. AI 는 query 문자열만 결정하고 헬퍼가 fetch + host 를 처리.
+`scripts/lib/image-fetch.ts` 의 `fetchAndHostImage({ query, templateKey, aspectRatio?, role? })` — `dataSchema` 의 `type: 'image'` 필드를 채울 때 사용. **`pnpm template:image <templateKey> "<query>" [aspect]`** CLI 래퍼(`scripts/host-image.ts`)로 호출하면 query 만 정하고 fetch + host + URL 출력을 헬퍼가 처리한다.
 
 **동작 순서**:
 1. Unsplash + Pexels 둘 다 query (인증된 env 키 있는 만큼). 결과를 alternate-interleave 로 합쳐 pool 구성.
@@ -519,7 +514,7 @@ brief ──▶ propose_composition   ──▶ [y / r / pick leaf 1-3]      ←
 
 **테스트 가능 형태로 설계** — `fetchImpl`, `random`, `supabase` 를 inject 가능.
 
-**현재 연결되지 않음** — generate_section(#13) 은 아직 stub 이라 헬퍼가 자동 호출되지 않음. #13 머지 후 wiring 완료 예정.
+**호출 경로** — `pnpm template:image` (`scripts/host-image.ts`) 래퍼로 노출. `new-template` 스킬이 `type: 'image'` 필드를 채울 때 이 명령으로 호출한다.
 
 ---
 
@@ -563,15 +558,18 @@ brief ──▶ propose_composition   ──▶ [y / r / pick leaf 1-3]      ←
 8. **`pnpm test` + `pnpm tsc --noEmit` + `pnpm lint`** — validate / ESLint 토큰 룰 통과 확인.
 9. **`pnpm template:sync`** dry-run → PR 머지 → 어드민 Apply.
 
-### B. AI 로 Template 통째로 생성 (Generate, ADR-0002 의 짝)
+### B. Claude Code 로 Template 통째로 생성 (`new-template` 스킬, ADR-0002 의 짝)
 
-```bash
-pnpm tsx --env-file=.env.local scripts/generate-template.ts "동네 빵집 — 따뜻한 톤, 갓 구운 빵 강조"
+Claude Code 에 자연어로 의뢰하면 `new-template` 스킬이 발동한다 (dev-time; 사용자 기능 아님):
+
+```
+"동네 빵집 — 따뜻한 톤, 갓 구운 빵 강조 한 페이지 사이트 만들어줘"
+"아웃도어 브랜드, 홈/스토리/제품/매장 페이지 멀티페이지로 만들어줘"
 ```
 
-→ Tracer 4-stage 거쳐 `src/templates/<category>/<leaf>/` 에 6 개 파일 자동 생성. 이후 시나리오 A 의 8~9 번부터.
+→ Site Type 결정 → `src/templates/<category>/<leaf>/` 에 6 개 파일 작성 → §7.1 검증 게이트(`pnpm template:verify`)를 green 까지 self-fix → 이후 시나리오 A 의 8~9 번부터.
 
-신규 Category 가 추출되면 (#17 gate) 사람이 명시적 [y/N] 승인. 거부하면 generation 중단.
+신규 Category 는 §7.1 의 슬러그 가드 + 사람 승인을 거친다.
 
 ### C. 기존 Template 에 새 Section component 추가
 
@@ -621,7 +619,7 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 3. **`pnpm dev` 또는 `pnpm build`** — `predev` / `prebuild` 가 `pnpm generate:templates` 자동 실행 → `_generated.ts` 에 등록.
 4. 이후 시나리오 A 의 7~9 번부터.
 
-대안: `pnpm template:generate "<brief>"` 로 brief 만 던지면 LLM 이 Category 제안 → #17 gate 승인 → 자동 생성. 더 빠름.
+대안: `new-template` 스킬에 brief 만 던지면 Category 제안 + 슬러그 가드 + 6 파일 작성까지 한 번에. 더 빠름 (시나리오 B).
 
 ### E. `dataSchema` 에 `required` 추가/변경
 
@@ -726,12 +724,13 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 | Sync 코어 로직 | `src/lib/template/sync.ts` (+ `__tests__/sync.test.ts`) |
 | Template assets 업로드 헬퍼 | `src/lib/template/template-assets.ts` |
 | Codegen 스크립트 | `scripts/generate-templates.mjs` |
-| Generate CLI (LLM) | `scripts/generate-template.ts` |
+| Template 저작 스킬 | `.claude/skills/new-template/` (`SKILL.md` + `gotchas-checklist.md`) |
 | Sync CLI | `scripts/sync-templates.ts` |
+| Verify CLI (통합 게이트) | `scripts/verify-template.ts` (`pnpm template:verify`) |
 | Capture CLI (Playwright) | `scripts/capture-templates.ts` |
 | Scaffold (빈 골격) | `scripts/scaffold-template.ts` |
-| LLM 공통 인프라 | `scripts/lib/llm.ts` (`claudeJSON`) |
-| 이미지 호스팅 헬퍼 | `scripts/lib/image-fetch.ts` (`fetchAndHostImage`) |
+| 이미지 호스팅 CLI/헬퍼 | `scripts/host-image.ts` (`pnpm template:image`) → `scripts/lib/image-fetch.ts` (`fetchAndHostImage`) |
+| CSS import 스텁 (tsx 모듈 로딩) | `scripts/lib/register-css-stub.ts` (sync/verify 의 첫 import) |
 | 새 카테고리 gate | `scripts/lib/category-gate.ts` |
 | Validate + capture 통합 게이트 | `scripts/lib/validate-and-capture.ts` |
 | ESLint inline-tokens 룰 | `eslint-rules/no-inline-design-tokens.mjs` |
@@ -750,7 +749,7 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 - **사용자별 커스텀 Template 업로드** — 보안·격리 비용 큼.
 - **크로스-Template Section 공유** (`src/sections/` 공용 풀) — ADR-0001 위배. 별도 RFC 없이는 X.
 - **사용자 에디터에서 섹션 추가 / 삭제·순서 변경** — 데이터 모델은 가능하지만 UX·검증 추가 비용. 현재 1 차는 preset 구조 고정.
-- **다중 페이지 공개 사이트 네비게이션** — composition 모델이 1 페이지 전제 (§9-H). ADR-0001 footnote 의 `pages/<page>/sections/` 디렉터리 방향성과 함께 미래 작업.
+- **다중 페이지 *composition* 저작** — Multi 사이트 자체는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). 다만 `composition` 모델은 여전히 1 페이지 전제라, Multi 는 `templateJson` 유니온을 직접 작성한다 (§7.1, §9-H). `composition` 을 다중 페이지로 확장 + ADR-0001 footnote 의 `pages/<page>/sections/` 디렉터리 재편은 미래 작업.
 
 ---
 
@@ -774,4 +773,4 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 
 ## 14. 한 줄 요약
 
-> **Template = 자급자족 디렉터리** (tokens + library + preset + renderer, 다른 Template 와 공유 안 됨 — ADR-0001). **코드가 진실**, Sync 로 DB 반영 (ADR-0002). **Generate** 는 brief 1 개로 새 Template 코드 자동 생성. 새 variant = 디렉터리 복제 1 번. 새 Section = `library/` 에 `.meta` 동봉한 `.tsx` 1 개. 새 Category = 디렉터리 통째로 만들면 codegen 이 알아서 등록.
+> **Template = 자급자족 디렉터리** (tokens + library + preset + renderer, 다른 Template 와 공유 안 됨 — ADR-0001). **코드가 진실**, Sync 로 DB 반영 (ADR-0002). **새 Template 저작 = `new-template` Claude Code 스킬** (dev-time; brief → 6 파일 → `template:verify` 게이트 → sync). 새 variant = 디렉터리 복제 1 번. 새 Section = `library/` 에 `.meta` 동봉한 `.tsx` 1 개. 새 Category = 디렉터리 통째로 만들면 codegen 이 알아서 등록.

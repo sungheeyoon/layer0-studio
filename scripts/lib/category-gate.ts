@@ -1,8 +1,8 @@
 /**
- * New-category approval gate for `pnpm template:generate` (Issue #17, Tracer #8).
+ * New-category slug guard + approval gate for template authoring.
  *
- * Most generations slot into an existing category dir (cafe, corporate, …).
- * When the LLM proposes a category that doesn't exist on disk, we don't
+ * Most new templates slot into an existing category dir (cafe, corporate, …).
+ * When a new template proposes a category that doesn't exist on disk, we don't
  * silently bootstrap a new top-level dir — that's a structural change worth
  * a human "yes". This module is the gate.
  *

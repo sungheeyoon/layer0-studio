@@ -1,9 +1,10 @@
 /**
- * Final integration gate for `pnpm template:generate` (Issue #16, Tracer #7).
+ * Final integration gate for template authoring — run via `pnpm template:verify`
+ * (and used by the `new-template` skill's verify loop).
  *
- * Runs after all sections are generated + image-hosted. Halts on the first
+ * Runs after a template's files are written + image-hosted. Halts on the first
  * failure — there's no auto-retry because integration-level fixes need a
- * human to look at the diff.
+ * human (or Claude Code) to look at the diff.
  *
  * Steps:
  *   1. `tsc --noEmit`              global type check (errors filtered to template dir)
