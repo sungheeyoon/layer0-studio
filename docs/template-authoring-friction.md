@@ -9,7 +9,10 @@ _목적: `new-template` 스킬 / 검증·동기화 도구 체인을 개선하기
 
 _2026-06-27, 어드민에서 `outdoor-default`를 Apply Sync 한 직후 발견. 위쪽 1~6은 "저작" 마찰, 아래 둘은 "퍼블리싱/런타임" 버그._
 
-### TODO-1. Draft → Active 전환 경로를 못 찾음 (발견 불가능성 버그)
+### TODO-1. Draft → Active 전환 경로를 못 찾음 ✅ 해결 (2026-06-27)
+> **해결 요약(2026-06-27, PR #94)**: 리스트 **draft 행에 항상 보이는 primary "Activate" 버튼** 추가(`TemplateListPanel.tsx`, Edit/Archive/Delete는 기존대로 hover 노출). `activateTemplateAction`은 기존 `updateTemplateAction(status:'active')` 경로 재사용(어드민 권한만 요구 — 에디터 Deploy와 동일 게이트, 새 권한 미도입). 공개 전 확인 다이얼로그 1단계. 능선(outdoor-default)도 active 전환해 prod 카탈로그 노출 확인. 근본(공개를 코드 status로)은 `docs/proposals/ideal-template-publishing.md` A안으로 잔존.
+
+
 - **증상**: Apply Sync로 `draft` 등록까지는 됐는데, 어드민에서 **active로 바꾸는 방법이 보이지 않음**.
 - **원인(코드 확인 완료)**: active 전환 경로는 **존재함** — `리스트에서 Edit → 에디터 하단 "Deploy template" 버튼 → 확인`이 status를 active로 만든다(`TemplateEditorPanel.tsx:428` `handleSubmit(fd,'active')`). 그런데:
   - 리스트 행(`TemplateListPanel.tsx:192~228`)의 액션은 **Edit / Archive / Delete 뿐 — "Activate" 버튼이 없음.**
