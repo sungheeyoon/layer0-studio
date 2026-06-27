@@ -135,6 +135,22 @@ export async function syncTemplates(
       }
     }
 
+    // Guard (friction doc TODO-2): if the local thumbnail file was missing, the
+    // upload never ran and `thumbnailUrl` is still the raw `public/thumbnails/…`
+    // path — a non-URL. Writing that to the DB clobbers a previously-good stored
+    // URL with a broken relative path (every catalog/admin thumbnail 404s). So
+    // when unresolved, keep the existing row's URL (or null on a brand-new row),
+    // never persist the local path.
+    const thumbnailResolved = !thumbnailUrl.startsWith('public/thumbnails/');
+    if (!thumbnailResolved) {
+      console.warn(
+        `[sync] thumbnail source missing for "${preset.slug}" (${preset.thumbnailPath}) — keeping existing thumbnail, not overwriting.`,
+      );
+    }
+    const effectiveThumbnailUrl = thumbnailResolved
+      ? thumbnailUrl
+      : (existing?.thumbnail_url ?? null);
+
     if (!existing) {
       // NEW
       summary.creates++;
@@ -149,7 +165,7 @@ export async function syncTemplates(
           category,
           template_json: effectiveTemplateJson,
           version: preset.version,
-          thumbnail_url: thumbnailUrl,
+          thumbnail_url: effectiveThumbnailUrl,
           status: 'draft'
         });
       }
@@ -166,8 +182,8 @@ export async function syncTemplates(
         changes.push(`version: ${existing.version} -> ${preset.version}`);
       }
 
-      if (existing.thumbnail_url !== thumbnailUrl) {
-        changes.push(`thumbnail: ${existing.thumbnail_url} -> ${thumbnailUrl}`);
+      if (existing.thumbnail_url !== effectiveThumbnailUrl) {
+        changes.push(`thumbnail: ${existing.thumbnail_url} -> ${effectiveThumbnailUrl}`);
       }
 
       if (changes.length > 0) {
@@ -181,7 +197,7 @@ export async function syncTemplates(
             .update({
               template_json: effectiveTemplateJson,
               version: preset.version,
-              thumbnail_url: thumbnailUrl,
+              thumbnail_url: effectiveThumbnailUrl,
               updated_at: new Date().toISOString()
             })
             .eq('slug', preset.slug);
