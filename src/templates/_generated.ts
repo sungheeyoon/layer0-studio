@@ -12,6 +12,7 @@ export const templateMap: Record<string, () => Promise<TemplateModule>> = {
   'interior-default': () => import('./interior/default'),
   'legal-default': () => import('./legal/default'),
   'medical-default': () => import('./medical/default'),
+  'outdoor-default': () => import('./outdoor/default'),
   'wedding-default': () => import('./wedding/default'),
 } as const;
 
@@ -25,6 +26,7 @@ export const presetMap: Record<string, () => Promise<{ default: TemplatePreset }
   'interior-default': () => import('./interior/default/template'),
   'legal-default': () => import('./legal/default/template'),
   'medical-default': () => import('./medical/default/template'),
+  'outdoor-default': () => import('./outdoor/default/template'),
   'wedding-default': () => import('./wedding/default/template'),
 } as const;
 
@@ -38,6 +40,7 @@ export const presetSlugs = [
   'interior-default',
   'legal-default',
   'medical-default',
+  'outdoor-default',
   'wedding-default',
 ] as const;
 
@@ -52,6 +55,7 @@ export const templateCategories: Record<string, string> = {
   'interior-default': 'interior',
   'legal-default': 'legal',
   'medical-default': 'medical',
+  'outdoor-default': 'outdoor',
   'wedding-default': 'wedding',
 } as const;
 

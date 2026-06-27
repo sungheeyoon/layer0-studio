@@ -1,0 +1,60 @@
+import React from 'react';
+import { TemplateSectionProps, SectionComponent } from '../../../types';
+import {
+  getFieldValue,
+  ArrayTemplateField,
+} from '@/domain/entities/template.entity';
+
+/**
+ * Dark stats band — a heading plus a row of value/label pairs. Sits on the
+ * deep-forest surface to break up the warm paper sections.
+ */
+const Stats: SectionComponent = function Stats(props: TemplateSectionProps) {
+  const { section } = props;
+  const heading = getFieldValue(section.data, 'heading');
+  const items = (section.data.items as ArrayTemplateField | undefined)?.items ?? [];
+
+  return (
+    <section className="bg-[var(--color-surface-dark)]">
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        {heading && (
+          <h2 className="mb-12 max-w-2xl text-2xl font-semibold tracking-tight text-[var(--color-on-dark)] sm:text-3xl">
+            {heading}
+          </h2>
+        )}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
+          {items.map((item, idx) => (
+            <div key={getFieldValue(item.label) || idx}>
+              <p className="text-4xl font-semibold tracking-tight text-[var(--color-secondary)] sm:text-5xl">
+                {getFieldValue(item.value)}
+              </p>
+              <p className="mt-2 text-sm text-[var(--color-on-dark)]/75">
+                {getFieldValue(item.label)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+Stats.meta = {
+  componentKey: 'stats',
+  category: 'feature',
+  label: '지표 (다크 밴드)',
+  dataSchema: {
+    heading: { type: 'text', label: '제목' },
+    items: {
+      type: 'array',
+      label: '지표 항목',
+      minItems: 1,
+      itemSchema: {
+        value: { type: 'text', label: '수치', required: true },
+        label: { type: 'text', label: '라벨', required: true },
+      },
+    },
+  },
+};
+
+export default Stats;
