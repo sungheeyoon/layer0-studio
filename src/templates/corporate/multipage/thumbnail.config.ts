@@ -3,7 +3,7 @@ const config = {
   // thumbnail reflects the actual renderer + tokens + imagery.
   source: 'preview://corporate-multipage',
   viewport: { width: 1600, height: 1000 },
-  capture: 'fullpage',
+  capture: 'hero',
   output: 'public/thumbnails/template-corporate-multipage.webp',
   resize: { width: 800, height: 500 },
   waitFor: { fonts: true, networkIdle: true, minDelay: 500 },

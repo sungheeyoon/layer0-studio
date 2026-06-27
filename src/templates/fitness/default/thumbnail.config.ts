@@ -1,7 +1,7 @@
 const config = {
   source: 'preview://fitness-default',
   viewport: { width: 1600, height: 1000 },
-  capture: 'fullpage',
+  capture: 'hero',
   output: 'public/thumbnails/template-fitness-default.webp',
   resize: { width: 800, height: 500 },
   waitFor: { fonts: true, networkIdle: true, minDelay: 500 },
