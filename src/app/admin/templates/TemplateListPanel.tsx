@@ -175,7 +175,7 @@ export default function TemplateListPanel({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       alt={template.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover object-top"
                       src={template.thumbnailUrl}
                     />
                   ) : (

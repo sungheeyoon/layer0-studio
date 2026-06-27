@@ -98,7 +98,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
                 <img
                   src={template.thumbnailUrl}
                   alt={template.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-top"
                 />
               ) : (
                 <span className="text-caption text-muted-foreground">{t.noPreview}</span>
