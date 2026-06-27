@@ -141,6 +141,16 @@ export async function archiveTemplateAction(id: string) {
   });
 }
 
+export async function activateTemplateAction(id: string) {
+  return withAdmin(async ({ adminSupabase }) => {
+    const useCase = createUpdateTemplateUseCase(adminSupabase);
+    await useCase.execute(id, { status: 'active' });
+
+    revalidatePath('/admin/templates');
+    return { success: true as const };
+  });
+}
+
 export async function revertToDraftAction(id: string) {
   return withAdmin(async ({ adminSupabase }) => {
     const useCase = createUpdateTemplateUseCase(adminSupabase);
