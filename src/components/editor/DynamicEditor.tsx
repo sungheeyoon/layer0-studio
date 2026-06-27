@@ -13,13 +13,28 @@ import {
   allSections,
 } from '@/domain/entities/template.entity';
 import {
-  MoveDirection,
   isSinglePinned,
-  moveNavItem,
+  reorderNavItem,
   toggleNavItemVisible,
   toggleNavItemNavVisible,
   relabelNavItem,
 } from '@/domain/entities/ordered-nav-list';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import { loadTemplate } from '@/templates/registry';
@@ -31,6 +46,7 @@ import { useLocale, useDictionary } from '@/lib/i18n/provider';
 import {
   ChevronUp,
   ChevronDown,
+  GripVertical,
   Eye,
   EyeOff,
   Globe,
@@ -215,8 +231,6 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   const TemplateRenderer = templateModule?.default;
 
-  const selectedSection = sections.find((s) => s.id === selectedSectionId) ?? null;
-
   const updateSiteJson = useCallback((updater: (json: TemplateJson) => void) => {
     setSiteJson((prev) => {
       const updated = structuredClone(prev);
@@ -261,21 +275,21 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // operates on `sections` with the nav/footer pin rule, Multi on `pages`).
   // See ADR-0007 §D4 + PLAN §5.
 
-  // Reorderable band = the contiguous middle (Single pins live at the extremes).
-  const [firstReorderable, lastReorderable] = useMemo(() => {
-    let first = -1;
-    let last = -1;
-    singleSections.forEach((s, i) => {
-      if (isSinglePinned(s)) return;
-      if (first === -1) first = i;
-      last = i;
-    });
-    return [first, last] as const;
-  }, [singleSections]);
+  // Drag-and-drop reorder (replaces the old up/down buttons). One handler for
+  // both Site Types — `reorderNavItem` dispatches to sections (Single, with the
+  // nav/footer pin rule) or pages (Multi). Pins are excluded from the sortable
+  // list, so they never move.
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
-  const handleMoveNavItem = useCallback(
-    (id: string, direction: MoveDirection) => {
-      updateSiteJson((json) => moveNavItem(json, id, direction));
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (over && active.id !== over.id) {
+        updateSiteJson((json) => reorderNavItem(json, String(active.id), String(over.id)));
+      }
     },
     [updateSiteJson],
   );
@@ -438,7 +452,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       </AlertDialog>
 
       {/* Left Panel */}
-      <section className="flex w-[280px] min-w-[280px] shrink-0 flex-col overflow-hidden border border-border bg-card">
+      <section className="flex w-[320px] min-w-[320px] shrink-0 flex-col overflow-hidden border border-border bg-card">
         {/* Tab Switcher */}
         <Tabs
           value={activeTab}
@@ -460,85 +474,84 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                   <h3 className="mb-4 text-sm font-semibold text-foreground">
                     {t.pages.heading}
                   </h3>
-                  <ul className="space-y-3">
-                    {pages.map((page, index) => {
-                      const isActive = page.id === activePageId;
-                      return (
-                        <li
-                          key={page.id}
-                          className={`rounded-md border p-3 transition-colors ${isActive ? 'border-primary bg-primary/5' : 'border-border'
-                            }`}
-                        >
-                          {/* Row 1: reorder · page name (switch context) · routable */}
-                          <div className="flex items-center gap-2">
-                            <span className="-my-1 flex shrink-0 flex-col">
-                              <button
-                                type="button"
-                                aria-label={t.pages.moveUp}
-                                disabled={index === 0}
-                                onClick={() => handleMoveNavItem(page.id, 'up')}
-                                className="leading-none text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-20"
-                              >
-                                <ChevronUp className="size-4" />
-                              </button>
-                              <button
-                                type="button"
-                                aria-label={t.pages.moveDown}
-                                disabled={index === pages.length - 1}
-                                onClick={() => handleMoveNavItem(page.id, 'down')}
-                                className="leading-none text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-20"
-                              >
-                                <ChevronDown className="size-4" />
-                              </button>
-                            </span>
-
-                            <button
-                              type="button"
-                              onClick={() => handleSelectPage(page.id)}
-                              className={`flex-grow text-left text-sm transition-colors ${isActive ? 'font-medium text-primary' : page.visible ? 'text-foreground' : 'text-muted-foreground'
-                                }`}
+                  <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={pages.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                      <ul className="space-y-3">
+                        {pages.map((page) => {
+                          const isActive = page.id === activePageId;
+                          return (
+                            <SortableRow
+                              key={page.id}
+                              id={page.id}
+                              className={(isDragging) =>
+                                `rounded-md border p-3 transition-colors ${isActive ? 'border-primary bg-primary/5' : 'border-border'} ${isDragging ? 'shadow-lg' : ''}`
+                              }
                             >
-                              {page.nav.label || '(untitled page)'}
-                            </button>
+                              {({ attributes, listeners }) => (
+                                <>
+                                  {/* Row 1: drag · page name (switch context) · routable */}
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      aria-label={t.sections.reorder}
+                                      className="-ml-1 shrink-0 cursor-grab touch-none text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
+                                      {...attributes}
+                                      {...listeners}
+                                    >
+                                      <GripVertical className="size-4" />
+                                    </button>
 
-                            <button
-                              type="button"
-                              aria-label={page.visible ? t.pages.makeUnroutable : t.pages.makeRoutable}
-                              title={page.visible ? t.pages.routableTitle : t.pages.unroutableTitle}
-                              onClick={() => handleToggleNavItemVisible(page.id)}
-                              className={`shrink-0 transition-colors ${page.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
-                                }`}
-                            >
-                              {page.visible ? <Globe className="size-4" /> : <GlobeLock className="size-4" />}
-                            </button>
-                          </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSelectPage(page.id)}
+                                      className={`flex-grow text-left text-sm transition-colors ${isActive ? 'font-medium text-primary' : page.visible ? 'text-foreground' : 'text-muted-foreground'
+                                        }`}
+                                    >
+                                      {page.nav.label || '(untitled page)'}
+                                    </button>
 
-                          {/* Row 2: nav projection (2nd axis) — in-menu toggle + page name */}
-                          <div className="mt-2 flex items-center gap-2 pl-1">
-                            <button
-                              type="button"
-                              aria-label={page.nav.visible ? t.pages.removeFromMenu : t.pages.addToMenu}
-                              title={page.nav.visible ? t.pages.inTopNavTitle : t.pages.notInTopNavTitle}
-                              onClick={() => handleToggleNavItemNavVisible(page.id)}
-                              className={`shrink-0 transition-colors ${page.nav.visible ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                                }`}
-                            >
-                              {page.nav.visible ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
-                            </button>
-                            <span className="shrink-0 text-xs text-muted-foreground">
-                              {t.sections.menu}
-                            </span>
-                            <Input
-                              value={page.nav.label}
-                              onChange={(e) => handleRelabelNavItem(page.id, e.target.value)}
-                              placeholder={t.pages.namePlaceholder}
-                              className="h-8 flex-grow"
-                            />
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                                    <button
+                                      type="button"
+                                      aria-label={page.visible ? t.pages.makeUnroutable : t.pages.makeRoutable}
+                                      title={page.visible ? t.pages.routableTitle : t.pages.unroutableTitle}
+                                      onClick={() => handleToggleNavItemVisible(page.id)}
+                                      className={`shrink-0 transition-colors ${page.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                    >
+                                      {page.visible ? <Globe className="size-4" /> : <GlobeLock className="size-4" />}
+                                    </button>
+                                  </div>
+
+                                  {/* Row 2: nav projection (2nd axis) — in-menu toggle + page name */}
+                                  <div className="mt-2 flex items-center gap-2 pl-1">
+                                    <button
+                                      type="button"
+                                      aria-label={page.nav.visible ? t.pages.removeFromMenu : t.pages.addToMenu}
+                                      title={page.nav.visible ? t.pages.inTopNavTitle : t.pages.notInTopNavTitle}
+                                      onClick={() => handleToggleNavItemNavVisible(page.id)}
+                                      className={`shrink-0 transition-colors ${page.nav.visible ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                    >
+                                      {page.nav.visible ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
+                                    </button>
+                                    <span className="shrink-0 text-xs text-muted-foreground">
+                                      {t.sections.menu}
+                                    </span>
+                                    <Input
+                                      value={page.nav.label}
+                                      onChange={(e) => handleRelabelNavItem(page.id, e.target.value)}
+                                      placeholder={t.pages.namePlaceholder}
+                                      className="h-8 flex-grow"
+                                    />
+                                  </div>
+                                </>
+                              )}
+                            </SortableRow>
+                          );
+                        })}
+                      </ul>
+                    </SortableContext>
+                  </DndContext>
                 </div>
               )}
 
@@ -555,157 +568,155 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                   )}
                 </h3>
                 {isMulti ? (
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {sections.map((section) => {
                       const isSelected = selectedSectionId === section.id;
                       return (
                         <li
                           key={section.id}
-                          className="flex items-center gap-2"
+                          className={`rounded-md border transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border'
+                            }`}
                         >
-                          <button
-                            type="button"
-                            onClick={() => setSelectedSectionId(section.id)}
-                            className={`flex-grow text-left text-sm transition-colors ${isSelected ? 'font-medium text-primary' : section.visible ? 'text-foreground' : 'text-muted-foreground'
-                              }`}
-                          >
-                            {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={section.visible ? t.sections.hide : t.sections.show}
-                            title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
-                            onClick={() => handleToggleSectionVisible(section.id)}
-                            className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
-                              }`}
-                          >
-                            {section.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                          </button>
+                          <div className="flex items-center gap-2 p-3">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedSectionId(isSelected ? null : section.id)}
+                              className={`flex-grow text-left text-sm transition-colors ${isSelected ? 'font-medium text-primary' : section.visible ? 'text-foreground' : 'text-muted-foreground'
+                                }`}
+                            >
+                              {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={section.visible ? t.sections.hide : t.sections.show}
+                              title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
+                              onClick={() => handleToggleSectionVisible(section.id)}
+                              className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
+                                }`}
+                            >
+                              {section.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                            </button>
+                          </div>
+                          {isSelected && (
+                            <div className="border-t border-border p-3">
+                              <SectionFields
+                                section={section}
+                                schema={templateModule?.library[section.type]?.meta.dataSchema}
+                                onFieldChange={handleFieldChange}
+                                onError={setActionError}
+                              />
+                            </div>
+                          )}
                         </li>
                       );
                     })}
                   </ul>
                 ) : (
-                <ul className="space-y-3">
-                  {singleSections.map((section, index) => {
-                    const pinned = isSinglePinned(section);
-                    const isSelected = selectedSectionId === section.id;
-                    return (
-                      <li
-                        key={section.id}
-                        className={`rounded-md border p-3 transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border'
-                          }`}
-                      >
-                        {/* Row 1: reorder · name · page visibility */}
-                        <div className="flex items-center gap-2">
-                          {pinned ? (
-                            <span
-                              className="shrink-0 text-muted-foreground"
-                              title={section.type === 'nav' ? t.sections.pinnedTop : t.sections.pinnedBottom}
-                            >
-                              <Pin className="size-3.5" />
-                            </span>
-                          ) : (
-                            <span className="-my-1 flex shrink-0 flex-col">
-                              <button
-                                type="button"
-                                aria-label={t.sections.moveUp}
-                                disabled={index <= firstReorderable}
-                                onClick={() => handleMoveNavItem(section.id, 'up')}
-                                className="leading-none text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-20"
-                              >
-                                <ChevronUp className="size-4" />
-                              </button>
-                              <button
-                                type="button"
-                                aria-label={t.sections.moveDown}
-                                disabled={index >= lastReorderable}
-                                onClick={() => handleMoveNavItem(section.id, 'down')}
-                                className="leading-none text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-20"
-                              >
-                                <ChevronDown className="size-4" />
-                              </button>
-                            </span>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => setSelectedSectionId(section.id)}
-                            className={`flex-grow text-left text-sm transition-colors ${isSelected ? 'font-medium text-primary' : section.visible ? 'text-foreground' : 'text-muted-foreground'
-                              }`}
+                <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={singleSections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                    <ul className="space-y-3">
+                      {singleSections.map((section) => {
+                        const pinned = isSinglePinned(section);
+                        const isSelected = selectedSectionId === section.id;
+                        return (
+                          <SortableRow
+                            key={section.id}
+                            id={section.id}
+                            disabled={pinned}
+                            className={(isDragging) =>
+                              `rounded-md border p-3 transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border'} ${isDragging ? 'shadow-lg' : ''}`
+                            }
                           >
-                            {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
-                          </button>
+                            {({ attributes, listeners }) => (
+                              <>
+                                {/* Row 1: drag/pin · name · page visibility */}
+                                <div className="flex items-center gap-2">
+                                  {pinned ? (
+                                    <span
+                                      className="shrink-0 text-muted-foreground"
+                                      title={section.type === 'nav' ? t.sections.pinnedTop : t.sections.pinnedBottom}
+                                    >
+                                      <Pin className="size-3.5" />
+                                    </span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      aria-label={t.sections.reorder}
+                                      className="-ml-1 shrink-0 cursor-grab touch-none text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
+                                      {...attributes}
+                                      {...listeners}
+                                    >
+                                      <GripVertical className="size-4" />
+                                    </button>
+                                  )}
 
-                          <button
-                            type="button"
-                            aria-label={section.visible ? t.sections.hide : t.sections.show}
-                            title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
-                            onClick={() => handleToggleNavItemVisible(section.id)}
-                            className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
-                              }`}
-                          >
-                            {section.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                          </button>
-                        </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedSectionId(isSelected ? null : section.id)}
+                                    className={`flex-grow text-left text-sm transition-colors ${isSelected ? 'font-medium text-primary' : section.visible ? 'text-foreground' : 'text-muted-foreground'
+                                      }`}
+                                  >
+                                    {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
+                                  </button>
 
-                        {/* Row 2: nav projection (2nd axis) — in-menu toggle + label */}
-                        <div className="mt-2 flex items-center gap-2 pl-1">
-                          <button
-                            type="button"
-                            aria-label={section.nav.visible ? t.sections.removeFromMenu : t.sections.addToMenu}
-                            title={section.nav.visible ? t.sections.inNavMenuTitle : t.sections.notInNavMenuTitle}
-                            onClick={() => handleToggleNavItemNavVisible(section.id)}
-                            className={`shrink-0 transition-colors ${section.nav.visible ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                              }`}
-                          >
-                            {section.nav.visible ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
-                          </button>
-                          <span className="shrink-0 text-xs text-muted-foreground">
-                            {t.sections.menu}
-                          </span>
-                          <Input
-                            value={section.nav.label}
-                            onChange={(e) => handleRelabelNavItem(section.id, e.target.value)}
-                            disabled={!section.nav.visible}
-                            placeholder={t.sections.menuLabelPlaceholder}
-                            className="h-8 flex-grow"
-                          />
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
+                                  <button
+                                    type="button"
+                                    aria-label={section.visible ? t.sections.hide : t.sections.show}
+                                    title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
+                                    onClick={() => handleToggleNavItemVisible(section.id)}
+                                    className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
+                                      }`}
+                                  >
+                                    {section.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                                  </button>
+                                </div>
+
+                                {/* Row 2: nav projection (2nd axis) — in-menu toggle + label */}
+                                <div className="mt-2 flex items-center gap-2 pl-1">
+                                  <button
+                                    type="button"
+                                    aria-label={section.nav.visible ? t.sections.removeFromMenu : t.sections.addToMenu}
+                                    title={section.nav.visible ? t.sections.inNavMenuTitle : t.sections.notInNavMenuTitle}
+                                    onClick={() => handleToggleNavItemNavVisible(section.id)}
+                                    className={`shrink-0 transition-colors ${section.nav.visible ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                                      }`}
+                                  >
+                                    {section.nav.visible ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
+                                  </button>
+                                  <span className="shrink-0 text-xs text-muted-foreground">
+                                    {t.sections.menu}
+                                  </span>
+                                  <Input
+                                    value={section.nav.label}
+                                    onChange={(e) => handleRelabelNavItem(section.id, e.target.value)}
+                                    disabled={!section.nav.visible}
+                                    placeholder={t.sections.menuLabelPlaceholder}
+                                    className="h-8 flex-grow"
+                                  />
+                                </div>
+
+                                {/* Accordion: editable fields, inline under the selected section */}
+                                {isSelected && (
+                                  <div className="mt-3 border-t border-border pt-3">
+                                    <SectionFields
+                                      section={section}
+                                      schema={templateModule?.library[section.type]?.meta.dataSchema}
+                                      onFieldChange={handleFieldChange}
+                                      onError={setActionError}
+                                    />
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </SortableRow>
+                        );
+                      })}
+                    </ul>
+                  </SortableContext>
+                </DndContext>
                 )}
               </div>
 
-              {/* Parameters */}
-              {selectedSection && (
-                <div>
-                  <h3 className="mb-4 text-sm font-semibold text-foreground">
-                    {t.parameters}{' '}
-                    <span className="font-normal text-muted-foreground">· {selectedSection.type}</span>
-                  </h3>
-                  <div className="space-y-6">
-                    {Object.entries(selectedSection.data)
-                      .filter(([, field]) => field.editable !== false)
-                      .map(([fieldKey, field]) => {
-                        const schema = templateModule?.library[selectedSection.type]?.meta.dataSchema[fieldKey];
-                        return (
-                          <DynamicField
-                            key={`${selectedSection.id}-${fieldKey}`}
-                            field={field}
-                            itemSchema={schema?.itemSchema}
-                            minItems={schema?.minItems}
-                            maxItems={schema?.maxItems}
-                            onChange={(val, aid) => handleFieldChange(selectedSection.id, fieldKey, val, aid)}
-                            onError={setActionError}
-                          />
-                        );
-                      })}
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <div className="space-y-6">
@@ -816,6 +827,112 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 }
 
 // ─── Dynamic Field Input ──────────────────────────────────────────────────
+
+/**
+ * Render fields in their authored `dataSchema` order (= visual / reading order),
+ * not the data object's key order — the seed/DB key order can differ from how the
+ * renderer lays them out. Keys present in data but absent from the schema are
+ * appended so nothing silently disappears.
+ */
+function orderedBySchema<T>(
+  data: Record<string, T>,
+  schema?: SectionDataSchema,
+): [string, T][] {
+  if (!schema) return Object.entries(data);
+  const ordered: [string, T][] = [];
+  const seen = new Set<string>();
+  for (const key of Object.keys(schema)) {
+    if (key in data) {
+      ordered.push([key, data[key]]);
+      seen.add(key);
+    }
+  }
+  for (const [key, value] of Object.entries(data)) {
+    if (!seen.has(key)) ordered.push([key, value]);
+  }
+  return ordered;
+}
+
+/**
+ * A sortable `<li>` for the hierarchy / pages lists. Owns the @dnd-kit wiring
+ * (transform/transition + drag state) and exposes the drag-handle props via a
+ * render prop, so the rich item content stays inline in the editor (closing over
+ * its handlers). `disabled` keeps Single's pinned nav/footer out of the drag.
+ */
+function SortableRow({
+  id,
+  disabled,
+  className,
+  children,
+}: {
+  id: string;
+  disabled?: boolean;
+  className?: string | ((isDragging: boolean) => string);
+  children: (handle: {
+    attributes: React.HTMLAttributes<HTMLElement>;
+    listeners: Record<string, (event: unknown) => void> | undefined;
+    isDragging: boolean;
+  }) => React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id, disabled });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : undefined,
+    zIndex: isDragging ? 20 : undefined,
+    position: isDragging ? 'relative' : undefined,
+  };
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={typeof className === 'function' ? className(isDragging) : className}
+    >
+      {children({ attributes: attributes as React.HTMLAttributes<HTMLElement>, listeners: listeners as Record<string, (event: unknown) => void> | undefined, isDragging })}
+    </li>
+  );
+}
+
+/**
+ * The editable fields of one section, rendered in schema order. Used inline
+ * inside each hierarchy item (accordion) so the edit controls appear right where
+ * the user clicked — no scrolling down to a separate Parameters panel.
+ */
+function SectionFields({
+  section,
+  schema,
+  onFieldChange,
+  onError,
+}: {
+  section: TemplateSection;
+  schema?: SectionDataSchema;
+  onFieldChange: (
+    sectionId: string,
+    fieldKey: string,
+    value: string | ArrayTemplateField['items'],
+    assetId?: string,
+  ) => void;
+  onError: (msg: string) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      {orderedBySchema(section.data, schema)
+        .filter(([, field]) => field.editable !== false)
+        .map(([fieldKey, field]) => (
+          <DynamicField
+            key={`${section.id}-${fieldKey}`}
+            field={field}
+            itemSchema={schema?.[fieldKey]?.itemSchema}
+            minItems={schema?.[fieldKey]?.minItems}
+            maxItems={schema?.[fieldKey]?.maxItems}
+            onChange={(val, aid) => onFieldChange(section.id, fieldKey, val, aid)}
+            onError={onError}
+          />
+        ))}
+    </div>
+  );
+}
 
 interface DynamicFieldProps {
   field: TemplateField;
@@ -1079,7 +1196,7 @@ function ArrayField({
             </div>
 
             <div className="space-y-6 pt-2">
-              {Object.entries(item)
+              {orderedBySchema(item, itemSchema)
                 .filter(([key, f]) => key !== '_key' && f.editable !== false)
                 .map(([fKey, f]) => (
                   <DynamicField

@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import {
   moveItem,
+  reorderItem,
   toggleVisible,
   toggleNavVisible,
   relabelNav,
   isSinglePinned,
   moveNavItem,
+  reorderNavItem,
   toggleNavItemVisible,
   toggleNavItemNavVisible,
   relabelNavItem,
@@ -93,6 +95,48 @@ describe('moveItem — reorder with pin enforcement', () => {
   });
 });
 
+describe('reorderItem — drag-and-drop reorder with pin enforcement', () => {
+  it('moves an item to another slot (arrayMove semantics)', () => {
+    const arr = singleSections();
+    expect(ids(reorderItem(arr, 'a', 'c', isSinglePinned))).toEqual([
+      'nav', 'b', 'c', 'a', 'footer',
+    ]);
+    expect(ids(reorderItem(arr, 'c', 'a', isSinglePinned))).toEqual([
+      'nav', 'c', 'a', 'b', 'footer',
+    ]);
+  });
+
+  it('will not move a pinned item itself', () => {
+    const arr = singleSections();
+    expect(reorderItem(arr, 'nav', 'b', isSinglePinned)).toBe(arr);
+    expect(reorderItem(arr, 'footer', 'b', isSinglePinned)).toBe(arr);
+  });
+
+  it('will not displace a pin (cannot drop onto nav/footer slot)', () => {
+    const arr = singleSections();
+    expect(reorderItem(arr, 'a', 'footer', isSinglePinned)).toBe(arr);
+    expect(reorderItem(arr, 'c', 'nav', isSinglePinned)).toBe(arr);
+  });
+
+  it('no-ops when active === over or on an unknown id', () => {
+    const arr = singleSections();
+    expect(reorderItem(arr, 'b', 'b', isSinglePinned)).toBe(arr);
+    expect(reorderItem(arr, 'nope', 'b', isSinglePinned)).toBe(arr);
+  });
+
+  it('reorders freely with no pin predicate (Multi pages)', () => {
+    const arr = [page('p1'), page('p2'), page('p3')];
+    expect(ids(reorderItem(arr, 'p1', 'p3'))).toEqual(['p2', 'p3', 'p1']);
+  });
+
+  it('does not mutate the input array', () => {
+    const arr = singleSections();
+    const before = ids(arr);
+    reorderItem(arr, 'a', 'c', isSinglePinned);
+    expect(ids(arr)).toEqual(before);
+  });
+});
+
 describe('toggleVisible / toggleNavVisible — the two independent axes', () => {
   it('toggleVisible flips only the target item', () => {
     const arr = [page('p1', true), page('p2', true)];
@@ -176,6 +220,20 @@ describe('dispatchers — pick sections vs pages by mode', () => {
     const json = multiJson();
     moveNavItem(json, 'home', 'down');
     expect(ids(json.pages)).toEqual(['about', 'home', 'contact']);
+  });
+
+  it('reorderNavItem respects Single pins', () => {
+    const json = singleJson();
+    reorderNavItem(json, 'a', 'footer'); // cannot displace the pinned footer
+    expect(ids(json.sections)).toEqual(['nav', 'a', 'b', 'c', 'footer']);
+    reorderNavItem(json, 'b', 'c');
+    expect(ids(json.sections)).toEqual(['nav', 'a', 'c', 'b', 'footer']);
+  });
+
+  it('reorderNavItem reorders Multi pages with no pins', () => {
+    const json = multiJson();
+    reorderNavItem(json, 'home', 'contact');
+    expect(ids(json.pages)).toEqual(['about', 'contact', 'home']);
   });
 
   it('toggle + relabel hit json.sections for Single', () => {

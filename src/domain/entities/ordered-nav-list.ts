@@ -54,6 +54,30 @@ export function moveItem<T extends IdItem>(
   return next;
 }
 
+/**
+ * Move `activeId` to the slot currently held by `overId` (drag-and-drop
+ * reorder). Uses `arrayMove` semantics: indices are read from the original
+ * array, so it pairs directly with a sortable list's active/over ids. Never
+ * moves a pinned item and never displaces one (keeps Single's nav top / footer
+ * bottom). Pure: returns a new array, or the same reference on a no-op.
+ */
+export function reorderItem<T extends IdItem>(
+  items: T[],
+  activeId: string,
+  overId: string,
+  isPinned: (item: T) => boolean = () => false,
+): T[] {
+  if (activeId === overId) return items;
+  const from = items.findIndex((x) => x.id === activeId);
+  const to = items.findIndex((x) => x.id === overId);
+  if (from < 0 || to < 0) return items;
+  if (isPinned(items[from]) || isPinned(items[to])) return items;
+  const next = items.slice();
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved);
+  return next;
+}
+
 /** Flip an item's `visible` (routable / on-page). Pure; no-op on unknown id. */
 export function toggleVisible<T extends VisibleItem>(items: T[], id: string): T[] {
   return items.map((x) => (x.id === id ? { ...x, visible: !x.visible } : x));
@@ -93,6 +117,15 @@ export function moveNavItem(json: TemplateJson, id: string, direction: MoveDirec
     json.sections = moveItem(json.sections, id, direction, isSinglePinned);
   } else {
     json.pages = moveItem(json.pages, id, direction);
+  }
+}
+
+/** Drag-and-drop reorder: move `activeId` to `overId`'s slot. See `reorderItem`. */
+export function reorderNavItem(json: TemplateJson, activeId: string, overId: string): void {
+  if (isSingleTemplate(json)) {
+    json.sections = reorderItem(json.sections, activeId, overId, isSinglePinned);
+  } else {
+    json.pages = reorderItem(json.pages, activeId, overId);
   }
 }
 

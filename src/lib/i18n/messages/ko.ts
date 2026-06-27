@@ -344,6 +344,7 @@ export const ko = {
     sections: {
       hierarchy: '구조',
       sectionsLabel: '섹션',
+      reorder: '드래그하여 순서 변경',
       moveUp: '섹션 위로 이동',
       moveDown: '섹션 아래로 이동',
       hide: '섹션 숨기기',

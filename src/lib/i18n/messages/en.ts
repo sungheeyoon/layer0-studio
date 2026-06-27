@@ -341,6 +341,7 @@ export const en: Messages = {
     sections: {
       hierarchy: 'Hierarchy',
       sectionsLabel: 'Sections',
+      reorder: 'Drag to reorder',
       moveUp: 'Move section up',
       moveDown: 'Move section down',
       hide: 'Hide section',
