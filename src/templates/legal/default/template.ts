@@ -706,7 +706,7 @@ const preset: TemplatePreset = {
       }
     ]
   },
-  "thumbnailPath": "public/thumbnails/template-legal.webp",
+  "thumbnailPath": "public/thumbnails/template-legal-default.webp",
   "version": "1.1.0",
   "defaults": {
     "name": "Legal",

@@ -18,7 +18,10 @@ _2026-06-27, 어드민에서 `outdoor-default`를 Apply Sync 한 직후 발견. 
 - **영향**: 등록은 했는데 공개를 못 함 → 사용자 카탈로그에 영영 안 뜸.
 - **제안(다음 세션)**: (1) 리스트 draft 행에 **"Activate(공개)" 버튼 직접 추가** — Edit 안 들어가도 한 번에. (2) 또는 "Deploy template" 라벨을 "Activate / 공개"로 변경하고 preset도 잘 되는지 확인. (3) 근본적으로는 `docs/proposals/ideal-template-publishing.md` A안(공개를 코드 `status`로) 방향.
 
-### TODO-2. Apply Sync가 기존 템플릿 썸네일을 전부 깨뜨림 ⭐ 원인 확정 (회귀)
+### TODO-2. Apply Sync가 기존 템플릿 썸네일을 전부 깨뜨림 ✅ 해결 (2026-06-27)
+> **해결 요약(2026-06-27)**: ① 근본 가드는 PR #92(`sync.ts` 138~152, c52bfec)로 머지·**프로덕션 배포 확인 완료**. ② 썸네일 실복구: 전 템플릿(11개) `thumbnail.config.ts` source를 `preview://<key>`로 통일(정적 `templates-ui/*.html`은 `file://`로 CSS/레이아웃이 안 실려 빈/깨진 캡처가 났음) → 전 템플릿 재-capture → preset `thumbnailPath`를 β슬러그(`template-<cat>-<leaf>.webp`)로 정정, config `output`과 1:1 일치. `corporate-multipage`엔 없던 `thumbnail.config.ts` 신규 추가. 미참조 레거시 `template-cafe.webp`/`template-corporate.webp` 삭제. ③ 재발 방지: `validate-and-capture.ts`에 **`thumbnail-path` 차단 스텝** 추가 — `preset.thumbnailPath === config.output` + 파일 실존을 검증(capture 직후 실행). dry-run = 11 updates / 0 errors, templateJson 차이는 전부 key-order뿐(semantic 동일). **남은 것: 어드민/CLI로 prod에 Apply.**
+
+
 - **증상**: 어드민 리스트 + 공개 카탈로그(템플릿 카드)에서 **능선(outdoor-default)만 제외하고 나머지 템플릿 썸네일이 전부 깨짐**. 실제 사이트 렌더는 정상(라이브 렌더라 썸네일과 무관). 사용자가 어드민에서 **Apply Sync(=전체 프리셋 sync)를 누른 직후** 발생.
 - **확정 원인**:
   1. **β 템플릿들의 썸네일 소스 webp가 repo에 없음.** `public/thumbnails/`에 실제 존재하는 파일은 `template-cafe.webp`, `template-corporate.webp`, `template-outdoor-default.webp` **셋뿐**. 그런데 preset들은 `template-fitness.webp` / `template-interior.webp` / `template-legal.webp` / `template-medical.webp` / `template-wedding.webp` / `template-corporate-multipage.webp` 등 **존재하지 않는 파일**을 `thumbnailPath`로 가리킴. (게다가 cafe/corporate는 β 슬러그(`template-cafe-default.webp`)가 아니라 레거시 이름을 가리킴.)

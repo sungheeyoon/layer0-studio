@@ -1,5 +1,5 @@
 const config = {
-  source: 'templates-ui/cafe.html',
+  source: 'preview://cafe-cozy',
   viewport: { width: 1600, height: 1000 },
   capture: 'fullpage',
   output: 'public/thumbnails/template-cafe-cozy.webp',

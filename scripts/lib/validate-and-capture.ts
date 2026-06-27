@@ -23,6 +23,7 @@
 import { spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { pathToFileURL } from 'url';
 
 import { validateTemplateJson } from '../../src/lib/template/validate';
 import { validateTemplateFiles } from '../../src/lib/template/inline-tokens';
@@ -42,6 +43,7 @@ export interface StepResult {
     | 'validate-json'
     | 'validate-files'
     | 'schema-jsx-consistency'
+    | 'thumbnail-path'
     | 'capture';
   ok: boolean;
   /** Human-readable lines (errors when !ok, summary when ok). */
@@ -287,6 +289,63 @@ export function checkDataSchemaJsxConsistency(templateRoot: string): StepResult 
   return { name: 'schema-jsx-consistency', ok: true, messages: [`schema-JSX consistent across ${tsxFiles.length} files`] };
 }
 
+// ─── Step 5.5: thumbnailPath ↔ config output ↔ file on disk ──────────────────
+
+/**
+ * Guard against the regression that broke every catalog thumbnail (see
+ * docs/template-authoring-friction.md TODO-2): a preset's `thumbnailPath`
+ * silently drifting from the `thumbnail.config.ts` `output` (or pointing at a
+ * file that doesn't exist). When that happens `template:sync` would try to
+ * upload a missing file and, pre-#92, overwrote the live storage URL with a
+ * broken local path string.
+ *
+ * Two assertions, both blocking:
+ *   1. `preset.thumbnailPath` === `thumbnail.config.ts` `output` (they describe
+ *      the same file — capture writes `output`, sync reads `thumbnailPath`).
+ *   2. that file actually exists on disk.
+ */
+export async function runThumbnailPath(templateKey: string, templateRoot: string): Promise<StepResult> {
+  const presetLoader = (presetMap as Record<string, () => Promise<{ default: import('../../src/templates/types').TemplatePreset }>>)[templateKey];
+  if (!presetLoader) {
+    return { name: 'thumbnail-path', ok: false, messages: [`presetMap has no entry for "${templateKey}".`] };
+  }
+  const preset = (await presetLoader()).default;
+  const presetPath = preset.thumbnailPath;
+
+  const configPath = path.join(templateRoot, 'thumbnail.config.ts');
+  if (!fs.existsSync(configPath)) {
+    return {
+      name: 'thumbnail-path',
+      ok: false,
+      messages: [`no thumbnail.config.ts at ${path.relative(process.cwd(), configPath)} — capture cannot produce a thumbnail.`],
+    };
+  }
+  const config = (await import(pathToFileURL(configPath).href)).default as { output?: string };
+  const configOutput = config.output;
+
+  const messages: string[] = [];
+  let ok = true;
+
+  if (presetPath !== configOutput) {
+    ok = false;
+    messages.push(
+      `preset.thumbnailPath ("${presetPath}") ≠ thumbnail.config.ts output ("${configOutput}"). ` +
+      `They must name the same file — capture writes output, sync reads thumbnailPath.`,
+    );
+  }
+
+  const fileAbs = path.join(process.cwd(), presetPath);
+  if (!fs.existsSync(fileAbs)) {
+    ok = false;
+    messages.push(
+      `thumbnail file does not exist: ${presetPath}. Run \`pnpm template:capture ${templateKey}\` and commit the webp.`,
+    );
+  }
+
+  if (ok) messages.push(`thumbnailPath OK: ${presetPath}`);
+  return { name: 'thumbnail-path', ok, messages };
+}
+
 // ─── Step 6: capture thumbnail ───────────────────────────────────────────────
 
 function runCapture(templateKey: string): StepResult {
@@ -349,20 +408,24 @@ export async function validateAndCapture(
   steps.push(schemaJsx);
   if (!schemaJsx.ok) return halt(schemaJsx);
 
-  // 6: optional, slow (Chromium).
+  // 6: optional, slow (Chromium). Skipped in CI/dry-run; thumbnails can also be
+  // re-generated independently after the fact via `pnpm template:capture`.
+  let thumbnailPath: string | null = null;
   if (opts.skipCapture) {
     steps.push({ name: 'capture', ok: true, messages: ['skipped (skipCapture: true)'] });
-    return { ok: true, steps, thumbnailPath: null };
+  } else {
+    const capture = runCapture(opts.templateKey);
+    steps.push(capture);
+    // Capture failure is reported but does NOT halt the gate on its own.
+    thumbnailPath = capture.ok ? capture.artifact ?? null : null;
   }
-  const capture = runCapture(opts.templateKey);
-  steps.push(capture);
-  // Capture failure is reported but does NOT halt the gate — thumbnails can
-  // be re-generated independently after the fact via `pnpm template:capture`.
-  // The overall .ok stays true so the CLI proceeds to the next-steps message.
 
-  return {
-    ok: true,
-    steps,
-    thumbnailPath: capture.ok ? capture.artifact ?? null : null,
-  };
+  // 7: thumbnailPath guard — runs AFTER capture so a freshly-authored template's
+  //    webp already exists on disk. Blocking: a drifted/missing thumbnailPath is
+  //    exactly the regression that broke the whole catalog (friction-doc TODO-2).
+  const thumb = await runThumbnailPath(opts.templateKey, opts.templateRoot);
+  steps.push(thumb);
+  if (!thumb.ok) return { ok: false, steps, thumbnailPath };
+
+  return { ok: true, steps, thumbnailPath };
 }

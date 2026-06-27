@@ -695,7 +695,7 @@ const preset: TemplatePreset = {
       }
     ]
   },
-  "thumbnailPath": "public/thumbnails/template-interior.webp",
+  "thumbnailPath": "public/thumbnails/template-interior-default.webp",
   "version": "1.1.0",
   "defaults": {
     "name": "Interior",

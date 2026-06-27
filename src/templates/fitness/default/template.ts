@@ -828,7 +828,7 @@ const preset: TemplatePreset = {
       }
     ]
   },
-  "thumbnailPath": "public/thumbnails/template-fitness.webp",
+  "thumbnailPath": "public/thumbnails/template-fitness-default.webp",
   "version": "1.1.0",
   "defaults": {
     "name": "Fitness",

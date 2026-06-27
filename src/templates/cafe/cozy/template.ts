@@ -135,7 +135,7 @@ const preset: TemplatePreset = {
       }
     ]
   },
-  "thumbnailPath": "public/thumbnails/template-cafe.webp",
+  "thumbnailPath": "public/thumbnails/template-cafe-cozy.webp",
   "version": "1.0.0",
   "defaults": {
     "name": "Cafe Cozy",
