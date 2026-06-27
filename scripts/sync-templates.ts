@@ -1,3 +1,4 @@
+import './lib/register-css-stub'; // MUST be first — stubs .css so template modules load under tsx
 import { createClient } from '@supabase/supabase-js';
 import { syncTemplates } from '../src/lib/template/sync';
 

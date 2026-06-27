@@ -13,7 +13,8 @@
     "template:sync": "tsx scripts/sync-templates.ts",
     "template:capture": "tsx scripts/capture-templates.ts",
     "template:scaffold": "tsx scripts/scaffold-template.ts",
-    "template:generate": "tsx scripts/generate-template.ts",
+    "template:verify": "tsx scripts/verify-template.ts",
+    "template:image": "tsx --env-file=.env.local scripts/host-image.ts",
     "predev": "node scripts/generate-templates.mjs",
     "prebuild": "node scripts/generate-templates.mjs"
   },
