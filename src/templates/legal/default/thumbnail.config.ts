@@ -1,5 +1,5 @@
 const config = {
-  source: 'templates-ui/legal.html',
+  source: 'preview://legal-default',
   viewport: { width: 1600, height: 1000 },
   capture: 'fullpage',
   output: 'public/thumbnails/template-legal-default.webp',

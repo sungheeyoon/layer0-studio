@@ -1,5 +1,5 @@
 const config = {
-  source: 'templates-ui/fitness.html',
+  source: 'preview://fitness-default',
   viewport: { width: 1600, height: 1000 },
   capture: 'fullpage',
   output: 'public/thumbnails/template-fitness-default.webp',

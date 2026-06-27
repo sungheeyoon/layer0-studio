@@ -1,5 +1,5 @@
 const config = {
-  source: 'templates-ui/interior.html',
+  source: 'preview://interior-default',
   viewport: { width: 1600, height: 1000 },
   capture: 'fullpage',
   output: 'public/thumbnails/template-interior-default.webp',

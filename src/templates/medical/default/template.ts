@@ -797,7 +797,7 @@ const preset: TemplatePreset = {
       }
     ]
   },
-  "thumbnailPath": "public/thumbnails/template-medical.webp",
+  "thumbnailPath": "public/thumbnails/template-medical-default.webp",
   "version": "1.1.0",
   "defaults": {
     "name": "Medical",

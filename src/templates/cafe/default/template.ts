@@ -844,7 +844,7 @@ const preset: TemplatePreset = {
       }
     ]
   },
-  "thumbnailPath": "public/thumbnails/template-cafe.webp",
+  "thumbnailPath": "public/thumbnails/template-cafe-default.webp",
   "version": "1.2.0",
   "defaults": {
     "name": "Cafe",

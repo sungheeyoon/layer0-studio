@@ -1,5 +1,5 @@
 const config = {
-  source: 'templates-ui/hospital.html',
+  source: 'preview://medical-default',
   viewport: { width: 1600, height: 1000 },
   capture: 'fullpage',
   output: 'public/thumbnails/template-medical-default.webp',

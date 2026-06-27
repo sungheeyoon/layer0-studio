@@ -958,7 +958,7 @@ const preset: TemplatePreset = {
       }
     ]
   },
-  "thumbnailPath": "public/thumbnails/template-wedding.webp",
+  "thumbnailPath": "public/thumbnails/template-wedding-default.webp",
   "version": "1.1.0",
   "defaults": {
     "name": "Wedding",

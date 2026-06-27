@@ -196,7 +196,7 @@ const preset: TemplatePreset = {
       }
     ]
   },
-  "thumbnailPath": "public/thumbnails/template-corporate.webp",
+  "thumbnailPath": "public/thumbnails/template-corporate-default.webp",
   "version": "1.1.0",
   "defaults": {
     "name": "Corporate",
