@@ -2,9 +2,8 @@
 
 import { UserSite } from "@/domain/entities/user-site.entity";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Settings as SettingsIcon, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import {
   updateSiteDomainAction,
   publishSiteAction,
@@ -15,7 +14,7 @@ import {
 import { getDomainError, getSiteError, isStaleConflict } from "@/lib/errors/messages";
 import { useDashboardData } from "../DashboardDataProvider";
 import { useDictionary, useLocale } from "@/lib/i18n/provider";
-import { Badge } from "@/components/ui/badge";
+import SiteListTable from "@/components/dashboard/SiteListTable";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -216,82 +215,18 @@ export default function ProjectsClient() {
       </div>
 
       {/* Project table */}
-      <div className="overflow-hidden rounded-lg border border-border">
-        <div className="grid grid-cols-12 border-b border-border bg-muted/50 px-4 py-3">
-          <div className="text-caption col-span-5 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colProject}</div>
-          <div className="text-caption col-span-2 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colStatus}</div>
-          <div className="text-caption col-span-2 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colLastMod}</div>
-          <div className="text-caption col-span-3 text-right font-medium uppercase tracking-wider text-muted-foreground">{t.common.colExecution}</div>
-        </div>
-
-        {sites.length === 0 && (
+      <SiteListTable
+        sites={filteredSites}
+        onHoverSite={setSelectedSite}
+        onConfigure={setSettingsSite}
+        empty={
           <div className="text-body py-12 text-center text-muted-foreground">
-            {t.projects.noProjects}
+            {sites.length === 0
+              ? t.projects.noProjects
+              : <>{t.projects.noMatchPrefix}&ldquo;{searchQuery}&rdquo;</>}
           </div>
-        )}
-
-        {sites.length > 0 && filteredSites.length === 0 && (
-          <div className="text-body py-12 text-center text-muted-foreground">
-            {t.projects.noMatchPrefix}&ldquo;{searchQuery}&rdquo;
-          </div>
-        )}
-
-        {filteredSites.map((site) => {
-          const isPublished = site.status === 'active';
-
-          return (
-            <div
-              key={site.id}
-              className="group grid grid-cols-12 items-center border-b border-border px-4 py-4 transition-colors last:border-b-0 hover:bg-muted/50"
-              onMouseEnter={() => setSelectedSite(site)}
-            >
-              <div className="col-span-5 flex flex-col">
-                <span className="text-body truncate font-medium">{site.siteName}</span>
-                <span className="text-caption truncate text-muted-foreground">
-                  {site.domain || `internal.id/${site.id.substring(0, 8)}`}
-                </span>
-              </div>
-              <div className="col-span-2">
-                <Badge variant={isPublished ? "default" : "secondary"}>
-                  {isPublished ? t.common.published : t.common.draft}
-                </Badge>
-              </div>
-              <div className="col-span-2">
-                <span className="text-caption text-muted-foreground">{formatDate(site.updatedAt)}</span>
-              </div>
-              <div className="col-span-3 flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  aria-label={t.projects.configuration}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSettingsSite(site);
-                  }}
-                >
-                  <SettingsIcon className="h-4 w-4" />
-                </Button>
-                {isPublished && site.domain ? (
-                  <Button asChild variant="outline" size="sm">
-                    <a href={`/site/${site.domain}`} target="_blank" rel="noopener noreferrer">
-                      {t.common.view}
-                    </a>
-                  </Button>
-                ) : (
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/preview/${site.id}`} target="_blank">
-                      {t.common.preview}
-                    </Link>
-                  </Button>
-                )}
-                <Button asChild size="sm">
-                  <Link href={`/dashboard/editor?siteId=${site.id}`}>{t.common.edit}</Link>
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        }
+      />
 
       {/* Detail metadata */}
       {selectedSite && (
