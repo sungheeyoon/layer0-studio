@@ -25,19 +25,22 @@ jobs:
         env:
           # GitHub Actions secret — must equal the Vercel env `TEMPLATE_SYNC_SECRET`.
           TEMPLATE_SYNC_SECRET: ${{ secrets.TEMPLATE_SYNC_SECRET }}
-          # The just-deployed production origin (Vercel sets this on the
-          # Production deployment). Thumbnails + endpoint live here.
-          DEPLOY_URL: ${{ github.event.deployment_status.environment_url }}
+          # Stable PUBLIC production origin (repo variable), e.g.
+          # https://layer0-studio.vercel.app. NOT the deployment's
+          # `environment_url` — that is a deployment-specific host behind Vercel
+          # Deployment Protection (returns 405/401 to a POST). The public alias
+          # serves the same just-deployed code and reaches the route.
+          PROD_URL: ${{ vars.PRODUCTION_URL }}
         run: |
-          if [ -z "$DEPLOY_URL" ]; then
-            echo "::error::environment_url is empty — cannot locate the production endpoint"
+          if [ -z "$PROD_URL" ]; then
+            echo "::error::repo variable PRODUCTION_URL is unset — set it to the public production origin"
             exit 1
           fi
-          echo "Registering templates via ${DEPLOY_URL}/api/admin/sync-templates"
+          echo "Registering templates via ${PROD_URL%/}/api/admin/sync-templates"
           # --fail → non-2xx (incl. 422 from the CREATE thumbnail guard) turns the
           # job red so registration problems are visible, without touching the
           # already-live deployment.
-          curl --fail --silent --show-error --location \
+          curl --fail --silent --show-error \
             -X POST \
             -H "Authorization: Bearer ${TEMPLATE_SYNC_SECRET}" \
-            "${DEPLOY_URL%/}/api/admin/sync-templates"
+            "${PROD_URL%/}/api/admin/sync-templates"
