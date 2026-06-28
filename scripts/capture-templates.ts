@@ -66,7 +66,9 @@ async function ensureDevServer() {
   }
 
   console.log('🚀 Starting dev server...');
-  const devServer = spawn('pnpm.cmd', ['dev'], {
+  // `pnpm.cmd` only exists on Windows; macOS/Linux need bare `pnpm` (friction §3).
+  const pnpmBin = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+  const devServer = spawn(pnpmBin, ['dev'], {
     cwd: ROOT,
     stdio: 'ignore',
     detached: true,
