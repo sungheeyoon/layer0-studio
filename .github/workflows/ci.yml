@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Version comes from the package.json `packageManager` field (pnpm@11.1.2)
+      # Version comes from the package.json `packageManager` field (pnpm@11.9.0)
       # so CI matches local exactly — newer pnpm 11.x stopped reading the
       # `pnpm.onlyBuiltDependencies` field and broke the install.
       - uses: pnpm/action-setup@v4
