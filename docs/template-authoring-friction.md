@@ -5,40 +5,7 @@ _목적: `new-template` 스킬 / 검증·동기화 도구 체인을 개선하기
 
 ---
 
-## 🔴 미해결 — 다음 세션 TODO (퍼블리싱 단계에서 실제로 막힌 버그)
-
-_2026-06-27, 어드민에서 `outdoor-default`를 Apply Sync 한 직후 발견. 위쪽 1~6은 "저작" 마찰, 아래 둘은 "퍼블리싱/런타임" 버그._
-
-### TODO-1. Draft → Active 전환 경로를 못 찾음 ✅ 해결 (2026-06-27)
-> **해결 요약(2026-06-27, PR #94)**: 리스트 **draft 행에 항상 보이는 primary "Activate" 버튼** 추가(`TemplateListPanel.tsx`, Edit/Archive/Delete는 기존대로 hover 노출). `activateTemplateAction`은 기존 `updateTemplateAction(status:'active')` 경로 재사용(어드민 권한만 요구 — 에디터 Deploy와 동일 게이트, 새 권한 미도입). 공개 전 확인 다이얼로그 1단계. 능선(outdoor-default)도 active 전환해 prod 카탈로그 노출 확인. 근본(공개를 코드 status로)은 `docs/proposals/ideal-template-publishing.md` A안으로 잔존.
-
-
-- **증상**: Apply Sync로 `draft` 등록까지는 됐는데, 어드민에서 **active로 바꾸는 방법이 보이지 않음**.
-- **원인(코드 확인 완료)**: active 전환 경로는 **존재함** — `리스트에서 Edit → 에디터 하단 "Deploy template" 버튼 → 확인`이 status를 active로 만든다(`TemplateEditorPanel.tsx:428` `handleSubmit(fd,'active')`). 그런데:
-  - 리스트 행(`TemplateListPanel.tsx:192~228`)의 액션은 **Edit / Archive / Delete 뿐 — "Activate" 버튼이 없음.**
-  - Code(preset) 행은 에디터가 **read-only**(`isCodePreset` → 이름/JSON 입력 비활성, `TemplateEditorPanel.tsx:50,212,358`)라 사용자가 "여긴 손댈 게 없네" 하고 닫게 됨. 하지만 하단 "Deploy template" 버튼은 preset에도 **활성**이라 사실은 누를 수 있음.
-  - 버튼 이름이 "Deploy template"이라 "공개(activate)"와 연결이 안 됨.
-- **영향**: 등록은 했는데 공개를 못 함 → 사용자 카탈로그에 영영 안 뜸.
-- **제안(다음 세션)**: (1) 리스트 draft 행에 **"Activate(공개)" 버튼 직접 추가** — Edit 안 들어가도 한 번에. (2) 또는 "Deploy template" 라벨을 "Activate / 공개"로 변경하고 preset도 잘 되는지 확인. (3) 근본적으로는 `docs/proposals/ideal-template-publishing.md` A안(공개를 코드 `status`로) 방향.
-
-### TODO-2. Apply Sync가 기존 템플릿 썸네일을 전부 깨뜨림 ✅ 해결 (2026-06-27)
-> **해결 요약(2026-06-27)**: ① 근본 가드는 PR #92(`sync.ts` 138~152, c52bfec)로 머지·**프로덕션 배포 확인 완료**. ② 썸네일 실복구: 전 템플릿(11개) `thumbnail.config.ts` source를 `preview://<key>`로 통일(정적 `templates-ui/*.html`은 `file://`로 CSS/레이아웃이 안 실려 빈/깨진 캡처가 났음) → 전 템플릿 재-capture → preset `thumbnailPath`를 β슬러그(`template-<cat>-<leaf>.webp`)로 정정, config `output`과 1:1 일치. `corporate-multipage`엔 없던 `thumbnail.config.ts` 신규 추가. 미참조 레거시 `template-cafe.webp`/`template-corporate.webp` 삭제. ③ 재발 방지: `validate-and-capture.ts`에 **`thumbnail-path` 차단 스텝** 추가 — `preset.thumbnailPath === config.output` + 파일 실존을 검증(capture 직후 실행). dry-run = 11 updates / 0 errors, templateJson 차이는 전부 key-order뿐(semantic 동일). **남은 것: 어드민/CLI로 prod에 Apply.**
-
-
-- **증상**: 어드민 리스트 + 공개 카탈로그(템플릿 카드)에서 **능선(outdoor-default)만 제외하고 나머지 템플릿 썸네일이 전부 깨짐**. 실제 사이트 렌더는 정상(라이브 렌더라 썸네일과 무관). 사용자가 어드민에서 **Apply Sync(=전체 프리셋 sync)를 누른 직후** 발생.
-- **확정 원인**:
-  1. **β 템플릿들의 썸네일 소스 webp가 repo에 없음.** `public/thumbnails/`에 실제 존재하는 파일은 `template-cafe.webp`, `template-corporate.webp`, `template-outdoor-default.webp` **셋뿐**. 그런데 preset들은 `template-fitness.webp` / `template-interior.webp` / `template-legal.webp` / `template-medical.webp` / `template-wedding.webp` / `template-corporate-multipage.webp` 등 **존재하지 않는 파일**을 `thumbnailPath`로 가리킴. (게다가 cafe/corporate는 β 슬러그(`template-cafe-default.webp`)가 아니라 레거시 이름을 가리킴.)
-  2. **`sync.ts`에 가드가 없음** (`src/lib/template/sync.ts:127~135` + UPDATE 분기 ~161,170): 로컬 파일이 **없으면** `thumbnailUrl`이 업로드된 storage URL이 아니라 `"public/thumbnails/template-fitness.webp"` **문자열 그대로** 남는다. 그리고 `existing.thumbnail_url !== thumbnailUrl`이면 UPDATE → **기존의 정상 storage URL을 그 깨진 로컬 경로 문자열로 덮어씀.** `<img src="public/thumbnails/...">`는 현재 페이지 기준 상대경로라 404 → 깨짐.
-  3. 능선만 멀쩡한 이유: 능선 webp는 실제로 존재(방금 capture+commit) → 정상 업로드 → 유효 URL.
-- **영향**: **프로덕션 카탈로그/어드민의 기존 템플릿 썸네일이 죄다 깨진 상태**(라이브 회귀). 사용자가 누른 Apply Sync가 기존 정상 URL들을 클로버함.
-- **수정 계획(다음 세션)**:
-  1. **`sync.ts` 하드닝 (근본 + 우선)**: 업로드가 안 일어났을 때(= `thumbnailUrl`이 여전히 `public/`로 시작) **기존 `existing.thumbnail_url`을 유지**하고 절대 깨진 로컬 경로로 덮어쓰지 말 것. 신규 행이면 빈 값/플레이스홀더로.
-  2. **썸네일 복구**: 모든 템플릿을 `pnpm template:capture <key>`로 재생성(파일 생성 → 커밋) 후 재-sync로 storage 재업로드. preset의 `thumbnailPath`도 β 슬러그(`template-<cat>-<leaf>.webp`)로 정정.
-  3. **재발 방지 가드**: verify/CI에서 "preset.thumbnailPath 파일이 실제 존재하는지"를 체크(없으면 경고/실패).
-- **주의**: 2번 재-sync는 **프로덕션 DB에 쓰는 작업**이라, 1번 가드를 먼저 머지/배포한 뒤 진행해야 또 클로버하지 않는다.
-
-
-> 결과적으로 템플릿은 정상 완성됐다(차단 게이트 전부 통과 + 썸네일 렌더 + sync dry-run 깨끗). 아래는 그 과정에서 **불필요하게 시간을 쓴 지점**들이다.
+> 퍼블리싱 단계 버그 2건(draft→active 발견성 / Apply Sync 썸네일 회귀)은 2026-06-27 해결됨(PR #92~#95). 아래는 `outdoor-default` 저작 과정에서 **불필요하게 시간을 쓴 지점**들이다. 등록·공개 파이프라인 개편은 `docs/proposals/ideal-template-publishing.md` 참고.
 
 ---
 
