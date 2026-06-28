@@ -1,8 +1,7 @@
-allowBuilds:
-  esbuild: set this to true or false
-  sharp: set this to true or false
-  unrs-resolver: set this to true or false
-ignoredBuiltDependencies:
+# Native deps whose install build scripts we DO allow (pnpm blocks build
+# scripts by default). Listing them here builds them — avoiding the
+# ERR_PNPM_IGNORED_BUILDS failure that fresh installs (CI / Vercel) hit.
+onlyBuiltDependencies:
   - esbuild
   - sharp
   - unrs-resolver

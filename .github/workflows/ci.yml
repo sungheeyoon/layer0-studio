@@ -21,9 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Version comes from the package.json `packageManager` field (pnpm@11.1.2)
+      # so CI matches local exactly — newer pnpm 11.x stopped reading the
+      # `pnpm.onlyBuiltDependencies` field and broke the install.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 11
 
       - uses: actions/setup-node@v4
         with:
@@ -31,7 +32,10 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        # pnpm 11.1.2 doesn't honor `onlyBuiltDependencies` from pnpm-workspace.yaml,
+        # so esbuild/sharp/unrs-resolver builds get blocked → ERR_PNPM_IGNORED_BUILDS.
+        # Allow the (first-party) build scripts to run so the install succeeds.
+        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
 
       - name: Generate template registry
         run: pnpm generate:templates

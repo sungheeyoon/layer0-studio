@@ -2,6 +2,7 @@
   "name": "layer0-studio",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@11.1.2",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -56,12 +57,5 @@
     "tsx": "^4.21.0",
     "typescript": "^5",
     "vitest": "^2.1.9"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "unrs-resolver"
-    ]
   }
 }
