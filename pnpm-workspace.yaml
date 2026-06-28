@@ -1,8 +1,9 @@
-# Native deps whose install build scripts we DO allow (pnpm blocks build
-# scripts by default). Listing them here builds them — avoiding the
-# ERR_PNPM_IGNORED_BUILDS failure that fresh installs (CI / Vercel) hit.
-onlyBuiltDependencies:
-  - esbuild
-  - sharp
-  - unrs-resolver
+# pnpm blocks dependency build (install) scripts by default. This is the
+# allow-list pnpm itself writes via `pnpm approve-builds` — booleans, NOT a
+# string list. These first-party native deps must build (sharp = image native
+# binary, esbuild = bundler binary, unrs-resolver = eslint resolver).
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
 verifyDepsBeforeRun: false

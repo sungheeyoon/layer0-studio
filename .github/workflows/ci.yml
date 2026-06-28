@@ -32,10 +32,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        # pnpm 11.1.2 doesn't honor `onlyBuiltDependencies` from pnpm-workspace.yaml,
-        # so esbuild/sharp/unrs-resolver builds get blocked → ERR_PNPM_IGNORED_BUILDS.
-        # Allow the (first-party) build scripts to run so the install succeeds.
-        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
+        run: pnpm install --frozen-lockfile
 
       - name: Generate template registry
         run: pnpm generate:templates
