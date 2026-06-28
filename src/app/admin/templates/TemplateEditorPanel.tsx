@@ -39,11 +39,14 @@ import {
 interface TemplateEditorPanelProps {
   /** Template to edit. If undefined, it is in create mode. */
   template?: Template;
+  /** Whether the user holds `canPublishTemplates` — gates the Deploy (→active) action (ADR-0012 §5). */
+  canPublish?: boolean;
   onDone?: () => void;
 }
 
 export default function TemplateEditorPanel({
   template,
+  canPublish = false,
   onDone,
 }: TemplateEditorPanelProps) {
   const isEditing = !!template;
@@ -424,14 +427,16 @@ export default function TemplateEditorPanel({
                 {isSubmitting ? 'Saving...' : 'Save draft'}
               </Button>
 
-              {/* Deploy Template */}
-              <Button
-                type="button"
-                disabled={!!jsonError || isSubmitting || isUploading}
-                onClick={() => setShowDeployConfirm(true)}
-              >
-                {isSubmitting ? 'Deploying...' : 'Deploy template'}
-              </Button>
+              {/* Deploy Template (→active) — publish, gated by canPublishTemplates (ADR-0012 §5). */}
+              {canPublish && (
+                <Button
+                  type="button"
+                  disabled={!!jsonError || isSubmitting || isUploading}
+                  onClick={() => setShowDeployConfirm(true)}
+                >
+                  {isSubmitting ? 'Deploying...' : 'Deploy template'}
+                </Button>
+              )}
             </div>
           </div>
         </form>

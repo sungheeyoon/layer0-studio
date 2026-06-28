@@ -14,6 +14,7 @@
     "template:capture": "tsx scripts/capture-templates.ts",
     "template:scaffold": "tsx scripts/scaffold-template.ts",
     "template:verify": "tsx scripts/verify-template.ts",
+    "template:verify:ci": "tsx scripts/verify-templates-ci.ts",
     "template:image": "tsx --env-file=.env.local scripts/host-image.ts",
     "predev": "node scripts/generate-templates.mjs",
     "prebuild": "node scripts/generate-templates.mjs"

@@ -50,7 +50,7 @@ async function run() {
         console.error(`❌ Validation failed:`);
         detail.errors?.forEach(e => console.error(`  - ${e}`));
       } else if (detail.action === 'CREATE') {
-        console.log(`[NEW] Will create with status=draft`);
+        console.log(`[NEW] Will create with status=active`);
       } else if (detail.action === 'UPDATE') {
         console.log(`[UPDATE]`);
         detail.changes?.forEach(c => console.log(`  ${c}`));

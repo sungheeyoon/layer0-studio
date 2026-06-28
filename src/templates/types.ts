@@ -87,7 +87,14 @@ export interface TemplatePreset {
 
   /** Relative path from project root, e.g. 'public/thumbnails/template-cafe.jpg' */
   thumbnailPath: string;
-  /** Semver — sync only overwrites templateJson when this exceeds the DB version. */
+  /**
+   * Semver, displayed + audited. NOT a monotonic gate: sync applies whenever
+   * `templateJson` / `version` / `thumbnail` differs from the DB — in EITHER
+   * direction. This is deliberate (ADR-0012 §6): it's what makes `git revert`
+   * of a bad template work as a rollback (the reverted, lower version re-applies
+   * the previous JSON). Do NOT "fix" sync into a forward-only `>` comparison —
+   * that would silently break revert-as-rollback.
+   */
   version: string;
 
   /** Initial values only. Ignored by sync when the DB row already has a value. */

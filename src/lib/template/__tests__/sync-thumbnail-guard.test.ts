@@ -8,8 +8,11 @@ import { syncTemplates } from '../sync';
  * the upload never runs and the computed URL is still the raw
  * `public/thumbnails/…` path — a non-URL. Persisting that would overwrite a
  * previously-good stored URL with a broken relative path (every catalog/admin
- * thumbnail 404s). The guard must instead keep the existing row's URL, and use
- * `null` on a brand-new row.
+ * thumbnail 404s). On an UPDATE the guard keeps the existing row's URL.
+ *
+ * On a CREATE the behaviour is stronger (ADR-0012 §6): a new row registers as
+ * `active` (user-visible immediately), so a missing thumbnail must abort the
+ * registration rather than publish a thumbnail-less card.
  */
 vi.mock('@/templates/_generated', () => ({
   templateMap: {},
@@ -83,13 +86,42 @@ describe('syncTemplates — thumbnail guard', () => {
     expect(updateArg.thumbnail_url).not.toContain('public/thumbnails/');
   });
 
-  it('inserts null thumbnail_url on a new row when the source file is missing', async () => {
+  it('REFUSES to register (CREATE) when the thumbnail source is missing', async () => {
     mockSupabase.in.mockResolvedValueOnce({ data: [], error: null });
 
     const summary = await syncTemplates(mockSupabase, { dryRun: false });
 
-    expect(summary.creates).toBe(1);
-    const insertArg = mockSupabase.insert.mock.calls[0][0];
-    expect(insertArg.thumbnail_url).toBeNull();
+    // ADR-0012 §6: a new row goes live as `active`, so a thumbnail-less card
+    // must never be published — registration errors out instead of inserting.
+    expect(summary.creates).toBe(0);
+    expect(summary.errors).toBe(1);
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
+    expect(summary.details[0].action).toBe('ERROR');
+  });
+
+  it('registers a NEW template as active, fetching the thumbnail from thumbnailBaseUrl', async () => {
+    mockSupabase.in.mockResolvedValueOnce({ data: [], error: null });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const summary = await syncTemplates(mockSupabase, {
+        dryRun: false,
+        thumbnailBaseUrl: 'https://deploy.example',
+      });
+
+      expect(summary.creates).toBe(1);
+      // Bytes fetched from the just-deployed public CDN, not local disk.
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://deploy.example/thumbnails/template-missing-thumb-DOES-NOT-EXIST.webp',
+      );
+      const insertArg = mockSupabase.insert.mock.calls[0][0];
+      expect(insertArg.status).toBe('active');
+      expect(insertArg.thumbnail_url).toBe('http://example.com/t.jpg');
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

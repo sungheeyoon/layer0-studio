@@ -111,7 +111,7 @@ function runEslint(templateRoot: string): StepResult {
 
 // ─── Step 3: validateTemplateJson ────────────────────────────────────────────
 
-async function runValidateJson(templateKey: string): Promise<StepResult> {
+export async function runValidateJson(templateKey: string): Promise<StepResult> {
   const presetLoader = (presetMap as Record<string, () => Promise<{ default: import('../../src/templates/types').TemplatePreset }>>)[templateKey];
   const templateLoader = (templateMap as Record<string, () => Promise<import('../../src/templates/types').TemplateModule>>)[templateKey];
   if (!presetLoader) {
@@ -154,7 +154,7 @@ async function runValidateJson(templateKey: string): Promise<StepResult> {
 
 // ─── Step 4: validateTemplateFiles (#8 file-level rules) ─────────────────────
 
-function runValidateFiles(templateRoot: string): StepResult {
+export function runValidateFiles(templateRoot: string): StepResult {
   const issues = validateTemplateFiles(templateRoot);
   if (issues.length === 0) {
     return { name: 'validate-files', ok: true, messages: ['validateTemplateFiles clean'] };
@@ -173,8 +173,12 @@ function runValidateFiles(templateRoot: string): StepResult {
  * and multi-line literals both work, and nested object values don't
  * truncate the capture.
  */
-function extractDataSchemaBlock(source: string): string | null {
-  const headerRe = /dataSchema\s*:\s*\{/g;
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractObjectBlock(source: string, key: string): string | null {
+  const headerRe = new RegExp(`${key}\\s*:\\s*\\{`, 'g');
   const header = headerRe.exec(source);
   if (!header) return null;
   let depth = 1;
@@ -188,6 +192,10 @@ function extractDataSchemaBlock(source: string): string | null {
   }
   if (depth !== 0) return null;
   return source.slice(headerRe.lastIndex, i);
+}
+
+function extractDataSchemaBlock(source: string): string | null {
+  return extractObjectBlock(source, 'dataSchema');
 }
 
 /**
@@ -214,6 +222,71 @@ function extractTopLevelKeys(block: string): Set<string> {
     i++;
   }
   return out;
+}
+
+/**
+ * Classify the top-level fields of a `dataSchema` block into:
+ *   - `scalarKeys` — ordinary fields (read via `getFieldValue(data, 'key')`)
+ *   - `arrayKeys`  — `type: 'array'` fields (iterated via `data['key'].items`,
+ *                    NOT read as a scalar)
+ *   - `itemKeys`   — the union of every array field's `itemSchema` keys (each
+ *                    read via `getFieldValue(item.subkey)` inside a `.map`)
+ *
+ * Brace-tracks at depth 0 so nested `type`/`label`/`itemSchema` entries are not
+ * mistaken for top-level fields. See `checkDataSchemaJsxConsistency`.
+ */
+function parseSchemaFields(block: string): {
+  scalarKeys: Set<string>;
+  arrayKeys: Set<string>;
+  itemKeys: Set<string>;
+} {
+  const scalarKeys = new Set<string>();
+  const arrayKeys = new Set<string>();
+  const itemKeys = new Set<string>();
+
+  let i = 0;
+  let depth = 0;
+  while (i < block.length) {
+    const ch = block[i];
+    if (ch === '{' || ch === '[' || ch === '(') { depth++; i++; continue; }
+    if (ch === '}' || ch === ']' || ch === ')') { depth--; i++; continue; }
+    if (depth === 0 && /[a-zA-Z_$]/.test(ch)) {
+      const objMatch = /^([a-zA-Z_$][\w$]*)\s*:\s*\{/.exec(block.slice(i));
+      if (objMatch) {
+        const key = objMatch[1];
+        // Capture the field's value object (brace-balanced).
+        const braceStart = i + objMatch[0].length - 1;
+        let d = 1;
+        let j = braceStart + 1;
+        while (j < block.length && d > 0) {
+          if (block[j] === '{') d++;
+          else if (block[j] === '}') d--;
+          j++;
+        }
+        const valueBlock = block.slice(braceStart + 1, j - 1);
+        if (/type\s*:\s*['"]array['"]/.test(valueBlock)) {
+          arrayKeys.add(key);
+          const itemSchemaBlock = extractObjectBlock(valueBlock, 'itemSchema');
+          if (itemSchemaBlock) {
+            for (const k of extractTopLevelKeys(itemSchemaBlock)) itemKeys.add(k);
+          }
+        } else {
+          scalarKeys.add(key);
+        }
+        i = j;
+        continue;
+      }
+      // Identifier not followed by `: {` (shorthand) — treat as a scalar key.
+      const idOnly = /^([a-zA-Z_$][\w$]*)\s*:/.exec(block.slice(i));
+      if (idOnly) {
+        scalarKeys.add(idOnly[1]);
+        i += idOnly[0].length;
+        continue;
+      }
+    }
+    i++;
+  }
+  return { scalarKeys, arrayKeys, itemKeys };
 }
 
 // ─── Step 5: dataSchema ↔ JSX consistency ────────────────────────────────────
@@ -260,26 +333,92 @@ export function checkDataSchemaJsxConsistency(templateRoot: string): StepResult 
       continue;
     }
 
-    // Property keys at depth 1 only (skip nested type/label/itemSchema entries).
-    const declaredKeys = extractTopLevelKeys(schemaBlock);
+    // Classify declared fields: scalars, `type:'array'` fields, and the item
+    // sub-keys nested in each array's `itemSchema`. Arrays and their items are
+    // accessed differently than scalars, so they need separate checks (a single
+    // flat key-set produced false positives on every array field — #array-gate).
+    const { scalarKeys, arrayKeys, itemKeys } = parseSchemaFields(schemaBlock);
+    const topLevelDeclared = new Set([...scalarKeys, ...arrayKeys]);
 
-    // Find all `getFieldValue(<accessor>, 'key')` calls in the TSX itself.
-    // Permit any accessor expression for the first arg — both `data` (destructured)
-    // and `section.data`, `item` (array-field item callbacks), etc. are common.
-    const referencedKeys = new Set<string>();
+    // Scalars: `getFieldValue(<accessor>, 'key')` (two-arg). Any accessor — both
+    // `data` (destructured) and `section.data` are common.
+    const refScalar = new Set<string>();
     for (const m of src.matchAll(/getFieldValue\s*\(\s*[\w$.[\]]+\s*,\s*['"]([\w$]+)['"]\s*\)/g)) {
-      referencedKeys.add(m[1]);
+      refScalar.add(m[1]);
     }
 
-    const declaredButUnused = [...declaredKeys].filter(k => !referencedKeys.has(k));
-    const referencedButUndeclared = [...referencedKeys].filter(k => !declaredKeys.has(k));
+    // Computed-key reads — `getFieldValue(data, `stat${n}Value`)` inside a
+    // `[1,2,3].map(...)`. The numbered fields (`stat1Value`, `stat2Value`, …)
+    // are referenced dynamically, so a literal-key match never sees them. Turn
+    // each template literal into a pattern (`${…}` → `[\w$]+`) and treat any
+    // declared key it matches as referenced. Permissive on purpose — we can't
+    // statically enumerate which indices exist.
+    const refScalarPatterns: RegExp[] = [];
+    for (const m of src.matchAll(/getFieldValue\s*\(\s*[\w$.[\]]+\s*,\s*`([^`]*)`\s*\)/g)) {
+      const literalParts = m[1].split(/\$\{[^}]*\}/).map(escapeRegExp);
+      refScalarPatterns.push(new RegExp(`^${literalParts.join('[\\w$]+')}$`));
+    }
+    const isReferencedScalar = (k: string) =>
+      refScalar.has(k) || refScalarPatterns.some(re => re.test(k));
+
+    // Dynamic-key components read fields by enumeration — `Object.entries(data)`
+    // or `getFieldValue(data, key)` with a bare variable. We can't statically
+    // know which declared keys are read, so for these files we back off the
+    // "declared but unused" direction rather than false-flag every field. The
+    // "referenced but undeclared" direction stays valid.
+    const hasDynamicScalarKeys =
+      /getFieldValue\s*\(\s*[\w$.[\]]+\s*,\s*[\w$]+\s*\)/.test(src) ||
+      /Object\.(?:entries|keys|values)\s*\(\s*(?:section\s*\.\s*)?data\b/.test(src);
+
+    // Array fields: member/bracket access on the data object — `data.items`,
+    // `data['items']`, `section.data.items`, `section.data['items']`. (`\bdata`
+    // also matches the `data` inside `section.data`.)
+    const refArray = new Set<string>();
+    for (const m of src.matchAll(/\bdata\s*(?:\.\s*([\w$]+)|\[\s*['"]([\w$]+)['"]\s*\])/g)) {
+      const k = m[1] ?? m[2];
+      if (k) refArray.add(k);
+    }
+
+    // Array item sub-fields: `getFieldValue(item.subkey)` (one-arg member form).
+    const refItem = new Set<string>();
+    for (const m of src.matchAll(/getFieldValue\s*\(\s*[\w$]+\s*\.\s*([\w$]+)\s*\)/g)) {
+      refItem.add(m[1]);
+    }
 
     const rel = path.relative(templateRoot, file);
-    for (const k of declaredButUnused) {
-      violations.push(`${rel}: field "${k}" declared in dataSchema but never read via getFieldValue`);
+
+    // Scalar fields ↔ two-arg getFieldValue (both directions).
+    if (!hasDynamicScalarKeys) {
+      for (const k of scalarKeys) {
+        if (!isReferencedScalar(k)) {
+          violations.push(`${rel}: field "${k}" declared in dataSchema but never read via getFieldValue`);
+        }
+      }
     }
-    for (const k of referencedButUndeclared) {
-      violations.push(`${rel}: field "${k}" read via getFieldValue but not declared in dataSchema`);
+    for (const k of refScalar) {
+      // An array read via `getFieldValue(data,'items')` is also legitimate.
+      if (!topLevelDeclared.has(k)) {
+        violations.push(`${rel}: field "${k}" read via getFieldValue but not declared in dataSchema`);
+      }
+    }
+
+    // Array fields: must be iterated somewhere (member access) or read scalar.
+    for (const k of arrayKeys) {
+      if (!refArray.has(k) && !refScalar.has(k)) {
+        violations.push(`${rel}: array field "${k}" declared in dataSchema but never read (no data.${k} / data['${k}'] access)`);
+      }
+    }
+
+    // Array item sub-fields ↔ getFieldValue(item.subkey) (both directions).
+    for (const k of itemKeys) {
+      if (!refItem.has(k)) {
+        violations.push(`${rel}: item field "${k}" declared in itemSchema but never read via getFieldValue(item.${k})`);
+      }
+    }
+    for (const k of refItem) {
+      if (!itemKeys.has(k)) {
+        violations.push(`${rel}: item field "${k}" read via getFieldValue(item.${k}) but not declared in any itemSchema`);
+      }
     }
   }
 

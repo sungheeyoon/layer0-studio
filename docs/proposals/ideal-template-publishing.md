@@ -1,7 +1,12 @@
 # 제안: 이상적인 템플릿 퍼블리싱 프로세스
 
 _작성: 2026-06-27 — `outdoor-default`(능선) 제작 경험을 바탕으로._
-_상태: **제안(Proposal)** — 토론용. 확정 시 ADR로 승격._
+_상태: **확정(Accepted)** — 2026-06-28 그릴링으로 6개 가지 확정, [ADR-0012](../adr/0012-template-publishing-pipeline.md)로 승격. 이 문서는 배경/논거이고, **확정안의 정본은 ADR-0012**다._
+
+> **확정 요약(ADR-0012):** A안 채택 + 6개 결정 —
+> ① 카탈로그 source = DB 행 유지(B안 기각). ② `status` 는 순수 DB 소유, **CREATE 기본값 `active`**(프리셋에 status 필드 안 둠), UPDATE 는 status 불변. ③ 등록은 **프로덕션 배포 성공 직후** Vercel 웹훅 → 보호된 엔드포인트가 `template:sync --apply`(머지 직후 아님 — 렌더러 미배포 크래시 방지). ④ CI = `tsc+eslint+verify --skip-capture` 차단 게이트, **schema-jsx array 거짓 양성 수정 선행**, 썸네일은 저작 시 커밋·CI 는 파일만 확인. ⑤ `canPublishTemplates` 를 등록 게이트 → **운영 공개/내림 토글** 게이트로 재배치(첫 공개는 머지가 게이트), 어드민 수동 sync 는 비상용으로 축소. ⑥ 가드: CREATE 썸네일 필수(못 구하면 등록 실패) + 롤백 2레인(archived 토글 / git revert+재배포) + version "diff 면 적용" 주석 정정 + takedown 내구성 회귀 테스트.
+>
+> 아래 §3 후보안·§4 이행경로는 **논의 당시의 초안**이며, 일부(예: "코드에 status 필드")는 그릴링에서 기각·수정됐다. 차이는 ADR-0012 §결정을 따른다.
 
 > 출발 질문(사용자): "스킬로 좋은 사이트를 만들고 프리뷰로 확인까지 했는데, 굳이 어드민에서 `Apply Sync`를 눌러야 DB에 올라가는 게 맞을까?"
 

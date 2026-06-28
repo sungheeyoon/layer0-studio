@@ -33,6 +33,7 @@ export default function TemplatesClientWrapper({
       <TemplateEditorPanel
         key={editingTemplate?.id ?? 'new'}
         template={editingTemplate}
+        canPublish={canPublish}
         onDone={() => setEditingTemplate(undefined)}
       />
     </>

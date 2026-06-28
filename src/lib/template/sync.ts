@@ -22,11 +22,14 @@ export interface SyncSummary {
   details: SyncResult[];
 }
 
-async function uploadThumbnail(supabase: SupabaseClient, localPath: string): Promise<string> {
-  const fileBuffer = fs.readFileSync(localPath);
+async function uploadThumbnail(
+  supabase: SupabaseClient,
+  fileBuffer: Buffer,
+  sourceName: string,
+): Promise<string> {
   const hash = crypto.createHash('md5').update(fileBuffer).digest('hex');
-  const ext = path.extname(localPath);
-  const fileName = `${path.basename(localPath, ext)}-${hash}${ext}`;
+  const ext = path.extname(sourceName);
+  const fileName = `${path.basename(sourceName, ext)}-${hash}${ext}`;
   const storagePath = `thumbnails/${fileName}`;
 
   // Check if file already exists in storage
@@ -54,11 +57,57 @@ async function uploadThumbnail(supabase: SupabaseClient, localPath: string): Pro
   return data.publicUrl;
 }
 
+/**
+ * Resolve a preset's thumbnail into a stored bucket URL.
+ *
+ * The thumbnail bytes come from one of two sources (ADR-0012 §썸네일 흐름):
+ *   - `thumbnailBaseUrl` set (post-deploy registrar, serverless runtime) → fetch
+ *     the committed webp from the just-deployed site's public CDN
+ *     (`<baseUrl>/thumbnails/<file>`), because `public/` files are not reliably
+ *     on the function filesystem.
+ *   - otherwise (local CLI) → read `public/thumbnails/<file>` from disk.
+ *
+ * Returns `{ resolved:false }` when the source can't be found — the caller then
+ * keeps the existing row's URL (UPDATE) or refuses the registration (CREATE).
+ */
+async function resolveThumbnail(
+  supabase: SupabaseClient,
+  preset: TemplatePreset,
+  opts: { dryRun: boolean; thumbnailBaseUrl?: string },
+): Promise<{ resolved: boolean; url: string | null }> {
+  // Preset already carries an absolute URL — use verbatim.
+  if (!preset.thumbnailPath.startsWith('public/thumbnails/')) {
+    return { resolved: true, url: preset.thumbnailPath };
+  }
+
+  const basename = path.basename(preset.thumbnailPath);
+
+  let buffer: Buffer | null = null;
+  if (opts.thumbnailBaseUrl) {
+    const url = `${opts.thumbnailBaseUrl.replace(/\/$/, '')}/thumbnails/${basename}`;
+    try {
+      const res = await fetch(url);
+      if (res.ok) buffer = Buffer.from(await res.arrayBuffer());
+    } catch {
+      // network error / unreachable → treated as unresolved below
+    }
+  } else {
+    const localPath = path.join(process.cwd(), preset.thumbnailPath);
+    if (fs.existsSync(localPath)) buffer = fs.readFileSync(localPath);
+  }
+
+  if (!buffer) return { resolved: false, url: null };
+  if (opts.dryRun) return { resolved: true, url: `[will-be-uploaded]/${basename}` };
+
+  const uploadedUrl = await uploadThumbnail(supabase, buffer, basename);
+  return { resolved: true, url: uploadedUrl };
+}
+
 export async function syncTemplates(
   supabase: SupabaseClient,
-  options: { dryRun: boolean; targetSlug?: string; performedBy?: string }
+  options: { dryRun: boolean; targetSlug?: string; performedBy?: string; thumbnailBaseUrl?: string }
 ): Promise<SyncSummary> {
-  const { dryRun, targetSlug, performedBy } = options;
+  const { dryRun, targetSlug, performedBy, thumbnailBaseUrl } = options;
   const summary: SyncSummary = {
     creates: 0,
     updates: 0,
@@ -122,37 +171,36 @@ export async function syncTemplates(
 
     const existing = existingMap.get(preset.slug);
 
-    // Determine thumbnail URL (local path -> storage URL)
-    let thumbnailUrl = preset.thumbnailPath;
-    if (preset.thumbnailPath.startsWith('public/thumbnails/')) {
-      const localPath = path.join(process.cwd(), preset.thumbnailPath);
-      if (fs.existsSync(localPath)) {
-        if (!dryRun) {
-          thumbnailUrl = await uploadThumbnail(supabase, localPath);
-        } else {
-          thumbnailUrl = `[will-be-uploaded]/${path.basename(localPath)}`;
-        }
-      }
-    }
-
-    // Guard (friction doc TODO-2): if the local thumbnail file was missing, the
-    // upload never ran and `thumbnailUrl` is still the raw `public/thumbnails/…`
-    // path — a non-URL. Writing that to the DB clobbers a previously-good stored
-    // URL with a broken relative path (every catalog/admin thumbnail 404s). So
-    // when unresolved, keep the existing row's URL (or null on a brand-new row),
-    // never persist the local path.
-    const thumbnailResolved = !thumbnailUrl.startsWith('public/thumbnails/');
-    if (!thumbnailResolved) {
+    // Resolve thumbnail bytes → bucket URL (ADR-0012). Guard (friction doc
+    // TODO-2): on an UPDATE miss, keep the existing row's URL rather than
+    // clobbering it with a non-URL / null.
+    const thumb = await resolveThumbnail(supabase, preset, { dryRun, thumbnailBaseUrl });
+    if (!thumb.resolved) {
       console.warn(
         `[sync] thumbnail source missing for "${preset.slug}" (${preset.thumbnailPath}) — keeping existing thumbnail, not overwriting.`,
       );
     }
-    const effectiveThumbnailUrl = thumbnailResolved
-      ? thumbnailUrl
+    const effectiveThumbnailUrl = thumb.resolved
+      ? thumb.url
       : (existing?.thumbnail_url ?? null);
 
     if (!existing) {
       // NEW
+      // CREATE thumbnail-required guard (ADR-0012 §6): a new row registers as
+      // `active` and is therefore user-visible immediately, so we refuse to
+      // publish a thumbnail-less catalog card. (UPDATE keeps the existing one.)
+      if (!thumb.resolved) {
+        summary.errors++;
+        summary.details.push({
+          slug: preset.slug,
+          action: 'ERROR',
+          errors: [
+            `thumbnail source missing for new template "${preset.slug}" (${preset.thumbnailPath}) — refusing to register a thumbnail-less template`,
+          ],
+        });
+        continue;
+      }
+
       summary.creates++;
       summary.affectedSlugs.push(preset.slug);
       summary.details.push({ slug: preset.slug, action: 'CREATE' });
@@ -166,7 +214,7 @@ export async function syncTemplates(
           template_json: effectiveTemplateJson,
           version: preset.version,
           thumbnail_url: effectiveThumbnailUrl,
-          status: 'draft'
+          status: 'active'
         });
       }
     } else {

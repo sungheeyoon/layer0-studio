@@ -79,6 +79,7 @@ src/types/database.ts ← Generated Supabase DB types
 | `/site/[domain]` | Public published site renderer |
 | `/preview/[id]` | Preview before publishing |
 | `/api/cron/cleanup-assets` | Cron job: orphan asset cleanup via Supabase RPCs (Bearer `CRON_SECRET`). Schedule: `0 3 * * *` (daily 03:00 UTC) — free Vercel plan limit (1 cron/day) |
+| `/api/admin/sync-templates` | **POST** — template registration ([ADR-0012](./docs/adr/0012-template-publishing-pipeline.md)). Runs `syncTemplates --apply` (creates new rows as `active`, fetches thumbnails from `<SITE_URL>/thumbnails/`). Bearer `TEMPLATE_SYNC_SECRET`. Invoked after a successful **production** deploy — never before (renderer code must be live first) |
 
 ### Studio UI / design system
 
@@ -138,6 +139,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_SITE_URL=       # e.g. https://layer0.studio — used by sitemap, robots, metadataBase, OG canonical
 CRON_SECRET=                # Bearer token validated by /api/cron/cleanup-assets
+TEMPLATE_SYNC_SECRET=       # Bearer token validated by POST /api/admin/sync-templates (template registration, ADR-0012). Mirror the SAME value as a GitHub Actions secret — .github/workflows/register-templates.yml uses it to call the endpoint after a production deploy.
 ```
 
 Production builds **hard-fail** if `NEXT_PUBLIC_SITE_URL` is missing (`next.config.ts:3-8`). In dev, `src/lib/seo/base-url.ts` falls back to `http://localhost:3000`.
