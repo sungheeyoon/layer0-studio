@@ -133,13 +133,14 @@ export default function TemplateListPanel({
         {/* Sync Controls */}
         <div className="mb-6 rounded-lg border border-border bg-card p-4">
           <span className="text-xs font-medium text-muted-foreground">
-            Code synchronization
+            Code sync (emergency)
           </span>
           <p className="mt-1 mb-4 text-xs text-muted-foreground">
-            Sync preset templates from the codebase to the database.
+            Registration runs automatically after a production deploy. Use this
+            only as a fallback (e.g. the deploy webhook failed).
           </p>
-          <Button size="sm" className="w-full" onClick={() => setShowSyncModal(true)}>
-            Sync from code
+          <Button size="sm" variant="outline" className="w-full" onClick={() => setShowSyncModal(true)}>
+            Force re-sync
           </Button>
         </div>
 
@@ -207,9 +208,9 @@ export default function TemplateListPanel({
                     className="mt-3 flex items-center gap-1"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Activate (publish) — always visible on draft rows so the
-                        publish step isn't buried in the editor's "Deploy" button. */}
-                    {template.status === 'draft' && (
+                    {/* Activate (publish) — the live publish decision, gated by
+                        canPublishTemplates (ADR-0012 §5). Shown on draft rows. */}
+                    {canPublish && template.status === 'draft' && (
                       <Button
                         size="xs"
                         disabled={activatingId === template.id}
@@ -224,7 +225,9 @@ export default function TemplateListPanel({
                     <Button size="xs" variant="ghost" onClick={() => onEdit(template)}>
                       Edit
                     </Button>
-                    {template.status !== 'archived' && (
+                    {/* Archive / Revert — takedown & re-publish, gated by
+                        canPublishTemplates (ADR-0012 §5). */}
+                    {canPublish && template.status !== 'archived' && (
                       <Button
                         size="xs"
                         variant="ghost"
@@ -234,7 +237,7 @@ export default function TemplateListPanel({
                         Archive
                       </Button>
                     )}
-                    {template.status === 'archived' && (
+                    {canPublish && template.status === 'archived' && (
                       <Button
                         size="xs"
                         variant="ghost"
@@ -353,9 +356,10 @@ export default function TemplateListPanel({
       >
         <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Sync presets from source</DialogTitle>
+            <DialogTitle>Force re-sync (emergency)</DialogTitle>
             <DialogDescription>
-              Reflect template presets defined in the codebase to the database.
+              Manually re-register code presets to the database. Normally this is
+              automatic after a production deploy — use only as a fallback.
             </DialogDescription>
           </DialogHeader>
 

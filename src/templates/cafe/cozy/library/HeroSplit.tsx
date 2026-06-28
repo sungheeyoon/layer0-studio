@@ -117,6 +117,7 @@ HeroSplit.meta = {
     stat2Label: { type: 'text', label: '통계 2 라벨' },
     stat3Value: { type: 'text', label: '통계 3 수치' },
     stat3Label: { type: 'text', label: '통계 3 라벨' },
+    seasonTag: { type: 'text', label: '시즌 태그' },
   },
   previewImage: '/component-previews/cafe/hero-split.webp',
 };

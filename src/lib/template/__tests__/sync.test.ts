@@ -105,4 +105,30 @@ describe('syncTemplates', () => {
       category: 'test'
     }));
   });
+
+  it('does NOT re-activate a taken-down template on UPDATE (takedown durability, ADR-0012 §6)', async () => {
+    // An operator manually took this template down to `archived`. A later code
+    // change triggers a sync UPDATE — the takedown must survive it.
+    mockSupabase.in.mockResolvedValueOnce({
+      data: [{
+        slug: 'test-default',
+        name: 'Existing Name',
+        description: 'Existing Description',
+        category: 'test',
+        template_json: { old: 'data' }, // differs → forces an UPDATE
+        version: '1.0.0',
+        thumbnail_url: 'old.jpg',
+        status: 'archived',
+      }],
+      error: null,
+    });
+
+    const summary = await syncTemplates(mockSupabase, { dryRun: false });
+
+    expect(summary.updates).toBe(1);
+    // The UPDATE payload must never carry `status` — so `archived` (or `draft`)
+    // is never silently reverted to `active` by a future sync.
+    const updateCall = mockSupabase.update.mock.calls[0][0];
+    expect(updateCall).not.toHaveProperty('status');
+  });
 });

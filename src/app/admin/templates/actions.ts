@@ -11,6 +11,17 @@ import { TemplateJson } from '@/domain/entities/template.entity';
 import { revalidatePath } from 'next/cache';
 import { syncTemplates } from '@/lib/template/sync';
 import { withAdmin } from '@/lib/actions/server-action';
+import type { User } from '@supabase/supabase-js';
+
+// ADR-0012 §5: changing a template's live `status` (publish / takedown /
+// archive) is the genuine human decision and is gated by `canPublishTemplates`
+// — separate from the admin role (ADR-0006). Registration is automated now, so
+// this capability no longer guards "Apply Sync"; it guards the live toggles.
+const PUBLISH_GUARD_ERROR = 'UNAUTHORIZED_TO_PUBLISH';
+
+function lacksPublishRight(user: User): boolean {
+  return user.app_metadata?.canPublishTemplates !== true;
+}
 
 // --- Thumbnail Upload --------------------------------------------------------
 
@@ -68,6 +79,12 @@ export async function createTemplateAction(formData: FormData) {
       return { error: 'INVALID_TEMPLATE_JSON' };
     }
 
+    // Creating a directly-public template is a publish decision (ADR-0012 §5);
+    // a `draft` create stays open to any admin.
+    if (status === 'active' && lacksPublishRight(user)) {
+      return { error: PUBLISH_GUARD_ERROR };
+    }
+
     const useCase = createCreateTemplateUseCase(adminSupabase);
     const template = await useCase.execute({
       name,
@@ -87,7 +104,7 @@ export async function createTemplateAction(formData: FormData) {
 }
 
 export async function updateTemplateAction(formData: FormData) {
-  return withAdmin(async ({ adminSupabase }) => {
+  return withAdmin(async ({ user, adminSupabase }) => {
     const id = formData.get('id') as string;
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
@@ -104,6 +121,13 @@ export async function updateTemplateAction(formData: FormData) {
     if (category) updateData.category = category;
     if (status) updateData.status = status;
     if (thumbnailUrl !== null) updateData.thumbnailUrl = thumbnailUrl;
+
+    // Publishing (→active) and explicit takedown (→archived) are the gated
+    // decisions (ADR-0012 §5). Saving as `draft` (content edit / hide) stays
+    // open to any admin — it can never expose unfinished work to users.
+    if ((status === 'active' || status === 'archived') && lacksPublishRight(user)) {
+      return { error: PUBLISH_GUARD_ERROR };
+    }
 
     if (templateJsonStr) {
       try {
@@ -132,7 +156,8 @@ export async function deleteTemplateAction(id: string) {
 }
 
 export async function archiveTemplateAction(id: string) {
-  return withAdmin(async ({ adminSupabase }) => {
+  return withAdmin(async ({ user, adminSupabase }) => {
+    if (lacksPublishRight(user)) return { error: PUBLISH_GUARD_ERROR };
     const useCase = createUpdateTemplateUseCase(adminSupabase);
     await useCase.execute(id, { status: 'archived' });
 
@@ -142,7 +167,8 @@ export async function archiveTemplateAction(id: string) {
 }
 
 export async function activateTemplateAction(id: string) {
-  return withAdmin(async ({ adminSupabase }) => {
+  return withAdmin(async ({ user, adminSupabase }) => {
+    if (lacksPublishRight(user)) return { error: PUBLISH_GUARD_ERROR };
     const useCase = createUpdateTemplateUseCase(adminSupabase);
     await useCase.execute(id, { status: 'active' });
 
@@ -152,7 +178,8 @@ export async function activateTemplateAction(id: string) {
 }
 
 export async function revertToDraftAction(id: string) {
-  return withAdmin(async ({ adminSupabase }) => {
+  return withAdmin(async ({ user, adminSupabase }) => {
+    if (lacksPublishRight(user)) return { error: PUBLISH_GUARD_ERROR };
     const useCase = createUpdateTemplateUseCase(adminSupabase);
     await useCase.execute(id, { status: 'draft' });
 
@@ -163,9 +190,11 @@ export async function revertToDraftAction(id: string) {
 
 export async function syncTemplatesAction(dryRun: boolean) {
   return withAdmin(async ({ user, adminSupabase }) => {
-    // For real apply, check canPublishTemplates (separate from the admin role).
-    if (!dryRun && user.app_metadata?.canPublishTemplates !== true) {
-      return { error: 'UNAUTHORIZED_TO_APPLY_SYNC' };
+    // Registration is automated post-deploy now (ADR-0012); this manual sync is
+    // the emergency "force re-register" escape hatch (e.g. the webhook failed).
+    // Still gated by canPublishTemplates for any real apply.
+    if (!dryRun && lacksPublishRight(user)) {
+      return { error: PUBLISH_GUARD_ERROR };
     }
 
     // syncTemplates surfaces its own failure messages verbatim to the admin UI,

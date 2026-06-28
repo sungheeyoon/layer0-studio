@@ -1,0 +1,43 @@
+name: Register templates
+
+# Wiring for ADR-0012: when a PRODUCTION deploy succeeds, register code presets
+# into the catalog by calling the protected endpoint. Runs AFTER the deploy is
+# live, so the renderer code is already serving (no "row exists but renderer not
+# deployed" window). Vercel's Git integration posts a GitHub Deployment status
+# of `success` for the Production environment — that is our trigger.
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  register:
+    name: Register
+    # Only a SUCCESSFUL PRODUCTION deployment. `contains` matches both
+    # `Production` and `production` environment labels.
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      contains(github.event.deployment_status.environment, 'roduction')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger template registration
+        env:
+          # GitHub Actions secret — must equal the Vercel env `TEMPLATE_SYNC_SECRET`.
+          TEMPLATE_SYNC_SECRET: ${{ secrets.TEMPLATE_SYNC_SECRET }}
+          # The just-deployed production origin (Vercel sets this on the
+          # Production deployment). Thumbnails + endpoint live here.
+          DEPLOY_URL: ${{ github.event.deployment_status.environment_url }}
+        run: |
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "::error::environment_url is empty — cannot locate the production endpoint"
+            exit 1
+          fi
+          echo "Registering templates via ${DEPLOY_URL}/api/admin/sync-templates"
+          # --fail → non-2xx (incl. 422 from the CREATE thumbnail guard) turns the
+          # job red so registration problems are visible, without touching the
+          # already-live deployment.
+          curl --fail --silent --show-error --location \
+            -X POST \
+            -H "Authorization: Bearer ${TEMPLATE_SYNC_SECRET}" \
+            "${DEPLOY_URL%/}/api/admin/sync-templates"
