@@ -5,7 +5,7 @@ _목적: `new-template` 스킬 / 검증·동기화 도구 체인을 개선하기
 
 ---
 
-> 퍼블리싱 단계 버그 2건(draft→active 발견성 / Apply Sync 썸네일 회귀)은 2026-06-27 해결됨(PR #92~#95). 아래는 `outdoor-default` 저작 과정에서 **불필요하게 시간을 쓴 지점**들이다. 등록·공개 파이프라인 개편은 **[ADR-0012](./adr/0012-template-publishing-pipeline.md)로 구현 완료**(PR #97) — item 1 도 그 과정에서 해결됐다. item 2~6 은 아직 열린 도구 마찰.
+> 퍼블리싱 단계 버그 2건(draft→active 발견성 / Apply Sync 썸네일 회귀)은 2026-06-27 해결됨(PR #92~#95). 아래는 `outdoor-default` 저작 과정에서 **불필요하게 시간을 쓴 지점**들이다. 등록·공개 파이프라인 개편은 **[ADR-0012](./adr/0012-template-publishing-pipeline.md)로 구현 완료**(PR #97). **도구 마찰 item 1·2·3 은 2026-06-28 해결됨.** 남은 item 4~6 은 코드 버그가 아니라 환경 제약(4)·설계상 동작 노트(5)·스킬 레벨 미정(6).
 
 ---
 
@@ -21,14 +21,18 @@ _목적: `new-template` 스킬 / 검증·동기화 도구 체인을 개선하기
   - (근본) 검사기가 `type:'array'` + `itemSchema`를 인지하도록 개선. 또는 단일 인자 `getFieldValue(item.field)` 호출도 referenced로 집계.
   - 회피법(현재 채택): 항목 필드는 `getFieldValue(item, 'x')`(2-인자) 대신 **`getFieldValue(item.x)`(1-인자)** 로 읽으면 절반(undeclared)이 사라짐. 나머지 `items` 거짓 양성은 참조 템플릿과 동일하게 잔존.
 
-## 2. `pnpm template:sync`가 `.env.local`을 로드하지 않음
+## 2. `pnpm template:sync`가 `.env.local`을 로드하지 않음 — ✅ 해결됨 (2026-06-28)
+
+> `package.json`의 `template:sync`에 `--env-file=.env.local` 추가(`template:image`와 통일). 이제 `pnpm template:sync <key>`가 바로 동작. (CI는 이 스크립트를 안 돌리므로 `.env.local` 부재 영향 없음.) 아래는 당시 기록(보존).
 
 - **증상**: `pnpm template:sync outdoor-default` → `NEXT_PUBLIC_SUPABASE_URL ... are required` 에러로 즉시 실패.
 - **원인**: package.json의 `template:sync` 스크립트는 `tsx scripts/sync-templates.ts`로 호출 — **`--env-file=.env.local`이 빠져 있음**. 반면 `template:image`는 `--env-file=.env.local`이 붙어 있어 잘 됨(일관성 없음).
 - **영향**: dry-run 한 번 돌리는데 막힘. 회피: `pnpm exec tsx --env-file=.env.local scripts/sync-templates.ts <key>`.
 - **제안**: package.json `template:sync`(및 `template:verify` 등 DB/모듈 로딩 스크립트)에 `--env-file=.env.local` 추가해 다른 명령과 통일.
 
-## 3. `template:capture`가 macOS에서 dev 서버를 못 띄움
+## 3. `template:capture`가 macOS에서 dev 서버를 못 띄움 — ✅ 해결됨 (2026-06-28)
+
+> `ensureDevServer`의 spawn 대상을 `process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'`로 분기(`scripts/capture-templates.ts`). macOS/Linux에서도 capture가 dev 서버를 자체 기동. 아래는 당시 기록(보존).
 
 - **증상**: 서버가 없을 때 capture 실행 → `🚀 Starting dev server...` 후 `Error: Timeout waiting for dev server`.
 - **원인**: `ensureDevServer`가 **`pnpm.cmd`(Windows 전용 실행 파일)** 를 spawn함. macOS/Linux엔 `pnpm.cmd`가 없어 서버가 영영 안 뜨고 30초 후 타임아웃.
@@ -58,4 +62,4 @@ _목적: `new-template` 스킬 / 검증·동기화 도구 체인을 개선하기
 ---
 
 ## 한 줄 요약
-실제 코드/데이터 작업보다 **도구 체인의 환경 차이(Windows 가정·env-file 누락)와 거짓 양성 검증**에서 시간이 더 들었다. 차단 게이트와 정보성 게이트를 구분 표기하고, 스크립트 환경 로딩을 통일하고, capture의 OS 분기를 고치면 다음 템플릿 저작이 훨씬 매끄러워진다.
+실제 코드/데이터 작업보다 **도구 체인의 환경 차이(Windows 가정·env-file 누락)와 거짓 양성 검증**에서 시간이 더 들었다. → 그 3건(거짓 양성 검증 #1·env-file #2·capture OS 분기 #3)은 모두 고쳐졌다(2026-06-28). 남은 #4~6 은 코드 외 항목.
