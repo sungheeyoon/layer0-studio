@@ -62,7 +62,7 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 | `thumbnailUrl` | ✅ (해시 기반) | — | 해시 다르면 재업로드 |
 | `version` | ✅ (semver) | — | 코드값으로 덮어씀 |
 | `name` / `description` / `category` | 신규 row 시드값 only | ✅ | DB 값 있으면 보존 |
-| `status` | — | ✅ | 절대 안 건드림 (신규 row 만 `'draft'`) |
+| `status` | — | ✅ | 절대 안 건드림 — 신규 row 는 `'active'` ([ADR-0012](./adr/0012-template-publishing-pipeline.md): 머지=공개 승인) |
 
 > **핵심 약속**: 운영자가 어드민에서 description 을 바꿔도 다음 sync 가 코드값으로 되돌리지 않는다. `templateJson` / 썸네일 / 버전은 **항상 코드 진실** — 어드민에서 코드 preset row 의 JSON 직접 편집은 차단되어 있음 (manual row 만 편집 허용).
 
@@ -347,7 +347,7 @@ RenderSingleSite / RenderMultiSite    ← src/templates/renderSingleSite.tsx · 
    │     md5 해시 기반 파일명 (template-<slug>-<hash>.webp)
    │     이미 storage 에 있으면 재사용, 아니면 업로드
    ├─ existing slug 비교:
-   │     없음 → INSERT (status='draft')
+   │     없음 → INSERT (status='active' — ADR-0012)
    │     있음 → JSON.stringify 비교, 변경 있으면 UPDATE
    │           (template_json / version / thumbnail_url / updated_at)
 3. 변경 있고 dryRun=false 면 template_sync_audit 로그
@@ -362,7 +362,9 @@ pnpm template:sync --apply --yes    # 카운트다운 우회 (CI)
 pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 ```
 
-`--apply` 시 validate 에러가 있으면 전체 중단. 권한은 `canPublishTemplates === true` 만 어드민 UI 에서 apply 가능 — **admin role 과 분리** ([ADR-0006](./adr/0006-canpublishtemplates-separate-from-admin.md)). CLI 는 service role key 로 무조건 가능 → 운영 서버에서 실수 방지를 위해 필수로 dry-run 먼저 보고 적용.
+`--apply` 시 validate 에러가 있으면 전체 중단. CLI 는 service role key 로 무조건 가능 → 운영 서버에서 실수 방지를 위해 필수로 dry-run 먼저 보고 적용.
+
+> **등록은 이제 자동이다** ([ADR-0012](./adr/0012-template-publishing-pipeline.md)). 프로덕션 배포가 성공하면 `deployment_status` 워크플로(`.github/workflows/register-templates.yml`)가 보호된 엔드포인트 `POST /api/admin/sync-templates`(Bearer `TEMPLATE_SYNC_SECRET`)를 호출해 `syncTemplates --apply` 를 돌린다 — 신규 row 는 `active`, 썸네일은 배포된 public URL 에서 fetch. 어드민 UI 의 수동 sync 는 **비상용(Force re-sync)** 으로 축소됐고, `canPublishTemplates` 는 이제 **라이브 status 토글**(공개/내림)을 게이트한다(ADR-0012 §5, ADR-0006 스코프 재정의).
 
 ### 5.3 감사 로그
 
@@ -520,18 +522,17 @@ brief(자연어) ──▶ Site Type 결정 (Single=composition / Multi=template
 
 ## 8. Admin UI
 
-`/admin/templates` — `app_metadata.role === 'admin'` 필요. Sync 적용은 별도 `canPublishTemplates === true` 필요 (ADR-0006).
+`/admin/templates` — `app_metadata.role === 'admin'` 필요. 라이브 status 토글(공개/내림)은 별도 `canPublishTemplates === true` 필요 (ADR-0006/[ADR-0012](./adr/0012-template-publishing-pipeline.md) §5).
 
 | 영역 | 동작 |
 |---|---|
 | 카탈로그 그리드 | preset row 는 `code` 배지·read-only, manual row 는 `manual` 배지·편집 가능 |
-| `Sync from Code` 버튼 | 1 단계: Preview Sync (dry-run, 모두 가능) |
-| `Apply Sync` 버튼 | 2 단계: 실제 적용 (`canPublishTemplates === true` 필요) |
+| `Force re-sync` 버튼 | **비상용** (등록은 배포 후 자동, ADR-0012). dry-run Preview 는 모두 가능, 실제 apply 는 `canPublishTemplates` 필요 |
 | Composition 다이어그램 | `CompositionPreview.tsx` — preset row 클릭 시 componentKey/category 시각화 |
 | `+ New Template` | manual one-off 시드 (시즌 프로모션 등) — JSON textarea 직접 편집 가능 |
-| Status 토글 | `draft` ↔ `active` ↔ `archived` (sync 는 안 건드림) |
+| Status 토글 (Activate/Archive/Revert) | `draft` ↔ `active` ↔ `archived` — `canPublishTemplates` 필요(공개=active·보관=archived; draft 저장은 누구나). sync 는 안 건드림 |
 
-`syncTemplatesAction(dryRun)` — `src/app/admin/templates/actions.ts`. apply 분기에서 `canPublishTemplates` 체크. service role client 로 storage 업로드 + DB upsert.
+`syncTemplatesAction(dryRun)` — `src/app/admin/templates/actions.ts`. apply 및 status 토글 액션은 `canPublishTemplates` 체크. service role client 로 storage 업로드 + DB upsert.
 
 ---
 

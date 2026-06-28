@@ -5,11 +5,13 @@ _목적: `new-template` 스킬 / 검증·동기화 도구 체인을 개선하기
 
 ---
 
-> 퍼블리싱 단계 버그 2건(draft→active 발견성 / Apply Sync 썸네일 회귀)은 2026-06-27 해결됨(PR #92~#95). 아래는 `outdoor-default` 저작 과정에서 **불필요하게 시간을 쓴 지점**들이다. 등록·공개 파이프라인 개편은 `docs/proposals/ideal-template-publishing.md` 참고.
+> 퍼블리싱 단계 버그 2건(draft→active 발견성 / Apply Sync 썸네일 회귀)은 2026-06-27 해결됨(PR #92~#95). 아래는 `outdoor-default` 저작 과정에서 **불필요하게 시간을 쓴 지점**들이다. 등록·공개 파이프라인 개편은 **[ADR-0012](./adr/0012-template-publishing-pipeline.md)로 구현 완료**(PR #97) — item 1 도 그 과정에서 해결됐다. item 2~6 은 아직 열린 도구 마찰.
 
 ---
 
-## 1. `template:verify`의 schema-jsx-consistency가 array 필드에서 거짓 실패 ⚠️ (가장 큰 마찰)
+## 1. `template:verify`의 schema-jsx-consistency가 array 필드에서 거짓 실패 — ✅ 해결됨 (2026-06-28, ADR-0012)
+
+> 검사기가 `parseSchemaFields`로 array/computed/dynamic 키를 인지하도록 수정됨(`scripts/lib/validate-and-capture.ts`). array 필드는 멤버 접근으로, `itemSchema` 하위키는 `getFieldValue(item.x)`로 양방향 검증. 11개 템플릿 전수 CLEAN, 회귀 테스트 추가. 이 수정 과정에서 실제 드리프트 버그(cafe-cozy `seasonTag` 선언 누락)도 발견·수정. 아래는 당시 증상 기록(보존).
 
 - **증상**: 검증 게이트가 `❌ Gate failed`로 중단. `items` 같은 `array` 필드마다 `"items declared in dataSchema but never read"`, 항목 내부 필드(`name`/`price`...)마다 `"read but not declared"` 위반을 쏟아냄.
 - **원인**: 일관성 검사기가 **정규식 기반**이라 (1) `array` 필드를 `data['items']`로 직접 읽는 패턴을 인식 못 하고, (2) `itemSchema` 안의 중첩 키를 "선언된 것"으로 못 봄. 즉 array를 쓰는 모든 컴포넌트가 구조적으로 실패한다. **참조 템플릿 cafe-default(MenuBento)조차 동일하게 실패**한다 — 실제로는 차단이 아니라 정보성 단계인데, 게이트는 exit 1로 중단시킨다.

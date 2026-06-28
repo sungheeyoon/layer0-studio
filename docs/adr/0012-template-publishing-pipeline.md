@@ -6,7 +6,7 @@
 
 `outdoor-default`(능선) 저작 경험에서 드러난 마찰: 스킬로 사이트를 만들고 프리뷰로 검증까지 끝냈는데도, 카탈로그에 올리려면 **어드민에 로그인해 `Sync from Code` → `Apply Sync` 를 손으로 눌러야** 했다.
 
-진단은 `docs/proposals/ideal-template-publishing.md` 에 정리돼 있고, 핵심은 **하나의 `Apply Sync` 버튼이 성격이 다른 두 행위를 섞고 있다**는 것이다:
+핵심 진단은 **하나의 `Apply Sync` 버튼이 성격이 다른 두 행위를 섞고 있다**는 것이다:
 
 | 행위 | 성격 | 사람이 필요한가 |
 |---|---|---|
@@ -72,10 +72,9 @@
 - 자동 등록의 안전은 **CI 검증이 진짜 차단 게이트**라는 전제에 달려 있다 → schema-jsx array 거짓 양성 수정이 **선행 필수**.
 - default 가 `active` 라 위험 방향이 "실수로 미공개" → "실수로 조기 공개"로 뒤집힌다. 방어: 준비될 때까지 머지하지 않음(사람 통제) + CREATE 썸네일 필수 가드(기계 통제) + 머지 후 어드민 draft 토글(사후 통제).
 - ADR-0002("코드가 진실")와 충돌하지 않는다 — 사람이 DB JSON 을 손으로 만드는 경로를 늘리지 않고 오히려 줄인다.
-- 미구현 선행조건: `.github/workflows/` 부재(CI 워크플로 신설 필요), Vercel 배포 성공 웹훅 + 등록 엔드포인트 신설, `template_sync_audit` 감사 로그 유지.
+- **구현 완료(2026-06-28, PR #97 머지·프로덕션 배포됨):** schema-jsx 게이트 수정, sync 변경, 등록 엔드포인트(`/api/admin/sync-templates`), CI 워크플로(`ci.yml` + `register-templates.yml`), 권한 재배치, 롤백 가드. 운영 설정만 별도: `TEMPLATE_SYNC_SECRET` 을 GitHub Actions secret + Vercel env 에 **동일값**으로 설정(완료). `template_sync_audit` 감사 로그 유지.
 
 ## 관련
 
 - 잇는 결정: [ADR-0002](./0002-templates-source-of-truth-is-code.md)(코드 = source of truth), [ADR-0006](./0006-canpublishtemplates-separate-from-admin.md)(canPublishTemplates 분리 — 스코프 재정의), [ADR-0007](./0007-single-multi-site-type-structural-union.md)(siteJson 깊은 복사 = 피해 반경 한정).
-- 배경 제안서: [docs/proposals/ideal-template-publishing.md](../proposals/ideal-template-publishing.md).
 - 저작 단계: `new-template` 스킬, `docs/TEMPLATE_SYSTEM.md`.
