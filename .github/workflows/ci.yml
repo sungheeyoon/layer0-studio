@@ -32,7 +32,11 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        # NOT --frozen-lockfile: that mode skips re-applying settings (incl.
+        # pnpm-workspace.yaml `onlyBuiltDependencies`), so esbuild/sharp builds
+        # get ignored → ERR_PNPM_IGNORED_BUILDS. Plain install matches Vercel
+        # (which passes). Lockfile is committed + current, so deps stay pinned.
+        run: pnpm install --frozen-lockfile=false
 
       - name: Generate template registry
         run: pnpm generate:templates
