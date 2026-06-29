@@ -44,7 +44,7 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 
 | 용어 | 무엇 | 어디 산다 | 누가 만든다 |
 |---|---|---|---|
-| **Category** | Template 카탈로그 분류 버킷 (cafe / corporate / fitness / interior / legal / medical / wedding) | `src/templates/<category>/` 디렉터리 이름 | 개발자 (디렉터리 추가) |
+| **Category** | Template 카탈로그 분류 버킷 (cafe / corporate / fitness / interior / legal / medical / outdoor / wedding). **두 가지 표기**: 파일시스템은 **소문자** 디렉터리명(`src/templates/cafe/`), 카탈로그·DB(`templates.category`)·`templateCategories` 값은 **첫 글자 대문자**(`Cafe`) — codegen 이 디렉터리명을 Capitalize 해 만든다. 자세히는 §2.6 | `src/templates/<category>/` 디렉터리 이름 | 개발자 (디렉터리 추가) |
 | **Template** | 한 Category 안의 한 디자인. **모든 시각/구성 자산을 자기 디렉터리 안에 자급자족** (ADR-0001) | `src/templates/<category>/<leaf>/` | 개발자 (코드 PR) 또는 Claude Code (`new-template` 스킬) |
 | **Section component** | 자기 메타 (`componentKey` / `category` / `label` / `dataSchema`) 를 동봉하는 self-describing React 컴포넌트 | `<templateDir>/library/<Name>.tsx` | 개발자 |
 | **Template Library** | `componentKey → Section component` 매핑. 한 Template 의 조립 키트. **다른 Template 와 공유 안 됨** | `<templateDir>/library/index.ts` | 개발자 |
@@ -245,11 +245,26 @@ export const designTokens: DesignTokens = { ... };                 // 풍부한 
 
 **현재 적용 상태** (ADR-0005): **cafe-default** 만 풍부 토큰 패턴 적용 완료 (#9 demo). 나머지 8 개 Template 는 각자 `.module.css` 에 기존 `--{prefix}-{name}` 패턴 유지 — **의도적인 점진 전환**. 각 Template 가 다른 이유로 손볼 때 자연스럽게 새 패턴으로 옮긴다. 신규 Template (스킬 저작) 은 무조건 rich 패턴 (마이그 부담 줄이기 위해).
 
+### 2.6 Category 표기 규칙 — 소문자 디렉터리 / 대문자 카탈로그
+
+Category 는 **한 단어**이고 두 가지 표기로 산다:
+
+| 쓰임 | 표기 | 예 | 어디 |
+|---|---|---|---|
+| 파일시스템 디렉터리 | **소문자** | `src/templates/cafe/` | 디스크 |
+| `templateKey` 접두 | **소문자** | `cafe-default` | `_generated.ts`, DB slug |
+| 카탈로그·DB `category` 값 | **첫 글자 대문자** | `Cafe` | `templateCategories`, `templates.category` |
+
+- **단일 규칙**: `templateCategories` (codegen 산출) 가 디렉터리명을 Capitalize 해 담는다 (`generate-templates.mjs` 의 `toCategory()`). 이게 카탈로그/DB 의 정본 형태다.
+- `categoryLabel()` (`src/lib/i18n/category-label.ts`) 는 i18n 조회 전에 `toLowerCase()` 하므로 대문자여도 라벨이 해석된다. **i18n `categoryLabels` 맵 키는 소문자** (`cafe`,`outdoor`,…) — 새 category 디렉터리를 추가하면 ko + en 양쪽에 소문자 키를 추가해야 카탈로그에 raw slug 가 안 뜬다.
+- `syncTemplates` 는 UPDATE 시 DB `category` 를 이 대문자 값으로 reconcile 한다 (코드가 진실, ADR-0002). 과거엔 INSERT 때만 넣어서 `food`/`Business`/`Event` 같은 stale slug 가 남았고, **migration 020** 이 일회성 정규화(`initcap(split_part(slug,'-','1'))`)를 했다.
+- **⚠️ 케이스 민감 함정**: `templateCategories` 값(`Cafe`)을 **파일시스템 경로**에 그대로 쓰면 안 된다 — 디렉터리는 소문자다. macOS(APFS, 케이스 무시)에선 통과하지만 **Linux/CI(케이스 민감)에서 깨진다**. FS 경로를 만들 땐 `category.toLowerCase()` 할 것 (`scripts/verify-template*.ts` 가 이 패턴). §10 함정 참고.
+
 ---
 
 ## 3. Template 디렉터리 구조 (β 모델, ADR-0001)
 
-9 개 Template (cafe-{cozy,default,modern}, corporate-default, fitness-default, interior-default, legal-default, medical-default, wedding-default) 모두 같은 골격:
+10 개 Template (cafe-{cozy,default,modern}, corporate-default, fitness-default, interior-default, legal-default, medical-default, outdoor-default, wedding-default) 모두 같은 골격:
 
 ```
 src/templates/cafe/default/
@@ -705,6 +720,9 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 
 15. **Optimistic concurrency RPC 우회 금지** ([ADR-0004](./adr/0004-optimistic-concurrency-via-rpc.md))
     UserSite 저장은 `save_site_template_with_lock` RPC 만 사용. 새 저장 경로 (자동 정리, 마이그 스크립트 등) 추가 시 `expectedUpdatedAt` 을 받아서 RPC 로 흘려야 함. 단순 `update` 로 바이패스하면 다른 탭의 변경분이 silent 하게 사라진다.
+
+16. **`templateCategories` 값(대문자)을 FS 경로에 그대로 쓰면 CI 에서 깨진다** ⚠️
+    `templateCategories['cafe-cozy'] === 'Cafe'` (대문자, §2.6). 이걸 `join(TEMPLATES_DIR, category, leaf)` 처럼 **파일시스템 경로**에 그대로 넣으면 디렉터리는 소문자(`cafe`)라 불일치 → **macOS(케이스 무시)에선 통과, Linux/CI 에선 `no thumbnail.config.ts` 류로 전수 실패**. FS 경로엔 항상 `category.toLowerCase()`. (`scripts/verify-template.ts` / `verify-templates-ci.ts` 가 이 패턴.) 반대로 DB `category` 값·카탈로그 표시는 대문자 그대로 둔다.
 
 ---
 

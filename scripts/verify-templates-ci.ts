@@ -30,7 +30,10 @@ async function main() {
   for (const templateKey of keys) {
     const category = templateCategories[templateKey];
     const leaf = templateKey.slice(category.length + 1);
-    const templateRoot = join(TEMPLATES_DIR, category, leaf);
+    // templateCategories holds the Capitalized catalog form (e.g. `Cafe`), but
+    // the directory on disk is lowercase (`src/templates/cafe/...`). Lowercase
+    // for the filesystem path or this fails on case-sensitive FS (Linux/CI).
+    const templateRoot = join(TEMPLATES_DIR, category.toLowerCase(), leaf);
 
     const steps: StepResult[] = [
       await runValidateJson(templateKey),
