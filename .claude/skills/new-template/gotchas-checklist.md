@@ -20,6 +20,12 @@ The §10 traps from `docs/TEMPLATE_SYSTEM.md`, condensed for authoring. Re-read 
 - [ ] **No inline color/font literals** — only `var(--color-primary)`, `var(--font-base)`, etc. Inline `#hex` / `rgb()` / `hsl()` / `font-family: '...'` are an ESLint **error** (build fails). Whitelist: `transparent`, `inherit`, `currentColor`, `none`. Source-of-truth files `tokens.ts` / `template.ts` are exempt. (§6.3)
 - [ ] **New Templates use the rich token pattern** — `tokens.ts` exports `defaultGlobalStyles` (thin, 5 user-editable fields) + `designTokens` (rich: colors/fonts/spacing/radius/shadows/typography). Pass `designTokens` to the site renderer in `index.tsx`. Do **not** add a `.module.css` with `@import url(...)` — legacy Templates do this and it's a migration burden + breaks tsx module loading (already worked around in scripts via register-css-stub, but new Templates should just not need it). (§2.5, ADR-0005)
 
+## Canvas size (viewport / hero / thumbnail)
+
+- [ ] **Design for the canonical desktop viewport `1600 × 900`** — that's the `viewport` every `thumbnail.config.ts` captures at, so it's literally the screen the design is validated against. (§2.7)
+- [ ] **Only the first section (hero) fills the screen** — use `min-h-[100dvh]` (or `min-h-[calc(100vh-4rem)]` if a 4rem nav sits above it), matching the shipped templates. At 900px tall that frames the hero at ~836px. **Subsequent sections are free-form height** (content-sized) — the full-screen rule is the first-impression only. (§2.7)
+- [ ] **Leave `thumbnail.config.ts` at the standard `viewport 1600×900 → resize 800×450`** unless there's a reason. The editor live preview renders at 1440 desktop width (fill-to-panel, adaptive height); 1440 vs 1600 render the same layout (no `2xl:` breakpoints), so a full-viewport hero shows full-screen in the editor too. (§2.7)
+
 ## Files & sync
 
 - [ ] **`thumbnailPath` ↔ `thumbnail.config.ts` `output` extension must match** (`.webp`/`.jpg`), or sync uploads the wrong/old file. (§10.1)
