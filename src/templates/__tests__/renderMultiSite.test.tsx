@@ -1,20 +1,128 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
-import CorporateMultipageTemplate from '../corporate/multipage';
-import preset from '../corporate/multipage/template';
-import { isMultiTemplate } from '@/domain/entities/template.entity';
+import { RenderMultiSite } from '../renderMultiSite';
+import { TemplateLibrary, NavSectionProps, SectionComponent } from '../types';
+import {
+  TemplateJson,
+  getFieldValue,
+  isMultiTemplate,
+} from '@/domain/entities/template.entity';
 
-const siteJson = preset.templateJson;
+// ---------------------------------------------------------------------------
+// Self-contained Multi fixture. RenderMultiSite is generic Multi infra used by a
+// shipping Multi template (outdoor-default) and the routes/sitemap/editor. We
+// exercise it here with a minimal in-test library + siteJson rather than coupling
+// the test to any shipping template's content. (corporate-multipage, a former
+// minimal Multi example, was removed — see migration 020.)
+// ---------------------------------------------------------------------------
+
+const meta = (componentKey: string) => ({
+  componentKey,
+  category: componentKey,
+  label: componentKey,
+  dataSchema: {},
+});
+
+// nav/footer take injected page links; the renderer passes them via createElement
+// (see renderMultiSite), so — like the real templates — read them through a cast.
+const Nav: SectionComponent = (props) => {
+  const { navItems } = props as NavSectionProps;
+  return (
+    <header>
+      <span>Acme</span>
+      <nav>
+        {navItems.map((i) => (
+          <a key={i.href} href={i.href}>
+            {i.label}
+          </a>
+        ))}
+      </nav>
+    </header>
+  );
+};
+
+const Body: SectionComponent = ({ section }) => (
+  <main>{getFieldValue(section.data, 'text')}</main>
+);
+
+const Footer: SectionComponent = (props) => {
+  const { navItems } = props as NavSectionProps;
+  return (
+    <footer>
+      {navItems.map((i) => (
+        <a key={i.href} href={i.href}>
+          {i.label}
+        </a>
+      ))}
+      <small>All rights reserved.</small>
+    </footer>
+  );
+};
+
+const library: TemplateLibrary = {
+  nav: { Component: Nav, meta: meta('nav') },
+  body: { Component: Body, meta: meta('body') },
+  footer: { Component: Footer, meta: meta('footer') },
+};
+
+const text = (value: string) => ({ text: { type: 'text' as const, label: 'Text', value } });
+
+const siteJson: TemplateJson = {
+  mode: 'multi',
+  templateKey: 'fixture-multi',
+  globalStyles: {
+    primaryColor: 'var(--color-primary)',
+    secondaryColor: 'var(--color-secondary)',
+    fontFamily: 'var(--font-base)',
+    fontSize: '16px',
+    layout: 'default',
+  },
+  shared: {
+    header: [{ id: 'nav', type: 'nav', visible: true, data: {} }],
+    footer: [{ id: 'footer', type: 'footer', visible: true, data: {} }],
+  },
+  pages: [
+    {
+      id: 'page-home',
+      slug: '',
+      visible: true,
+      nav: { visible: true, label: 'Home' },
+      sections: [
+        { id: 's-home', type: 'body', visible: true, data: text('We build dependable software.') },
+      ],
+    },
+    {
+      id: 'page-about',
+      slug: 'about',
+      visible: true,
+      nav: { visible: true, label: 'About' },
+      sections: [
+        { id: 's-about', type: 'body', visible: true, data: text('A team that sweats the details.') },
+      ],
+    },
+    {
+      id: 'page-privacy',
+      slug: 'privacy',
+      visible: true,
+      nav: { visible: false, label: 'Privacy' },
+      sections: [
+        { id: 's-privacy', type: 'body', visible: true, data: text('Privacy policy.') },
+      ],
+    },
+  ],
+};
+
 const BASE = '/site/acme';
 
 function render(activePageId: string): string {
   return renderToStaticMarkup(
-    <CorporateMultipageTemplate
+    <RenderMultiSite
       siteJson={siteJson}
       selectedSectionId={null}
       activePageId={activePageId}
       basePath={BASE}
+      library={library}
     />,
   );
 }

@@ -13,7 +13,7 @@ Whether a Site is one continuous scroll (**Single**) or a set of routable **Page
 _Avoid_: mode (the literal `TemplateJson` field — fine in code, not in conversation).
 
 **Template**:
-A designer-built (or **Generate**d) blueprint that Users instantiate into Sites. Each Template is self-contained in code (its own design tokens, section components, renderer) and lives as a row in the `templates` table; has a status of `draft | active | archived`. Produced by **Sync**'ing its **Preset**. Currently 10 Templates across 7 **Categories** (9 Single + the `corporate-multipage` Multi example).
+A designer-built (or **Generate**d) blueprint that Users instantiate into Sites. Each Template is self-contained in code (its own design tokens, section components, renderer) and lives as a row in the `templates` table; has a status of `draft | active | archived`. Produced by **Sync**'ing its **Preset**. Currently 10 Templates across 8 **Categories**; `outdoor-default` (능선) is Multi Site Type, the other 9 Single (the earlier `corporate-multipage` minimal Multi example was removed — `outdoor-default` is the shipping Multi template).
 _Avoid_: Theme (deprecated — see Flagged ambiguities). Preset (the source, not the row).
 
 **Category**:

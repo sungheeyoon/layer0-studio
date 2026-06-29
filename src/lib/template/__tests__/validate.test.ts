@@ -13,7 +13,6 @@ import medicalPreset from '@/templates/medical/default/template';
 import weddingPreset from '@/templates/wedding/default/template';
 import cafeModernPreset from '@/templates/cafe/modern/template';
 import cafeCozyPreset from '@/templates/cafe/cozy/template';
-import corporateMultipagePreset from '@/templates/corporate/multipage/template';
 
 import { templateMap, getAvailableTemplateKeys } from '@/templates/_generated';
 
@@ -344,7 +343,6 @@ describe('all presets — errors must be zero', () => {
     { name: 'wedding-default',   preset: weddingPreset,    templateKey: 'wedding-default' },
     { name: 'cafe-modern',       preset: cafeModernPreset, templateKey: 'cafe-modern' },
     { name: 'cafe-cozy',         preset: cafeCozyPreset,   templateKey: 'cafe-cozy' },
-    { name: 'corporate-multipage', preset: corporateMultipagePreset, templateKey: 'corporate-multipage' },
   ];
 
   for (const { name, preset, templateKey } of cases) {

@@ -234,6 +234,13 @@ export async function syncTemplates(
         changes.push(`thumbnail: ${existing.thumbnail_url} -> ${effectiveThumbnailUrl}`);
       }
 
+      // Category is derived from the directory layout (code = source of truth).
+      // It used to be set only on INSERT, so a slug renamed in code never
+      // reached existing rows — reconcile it on UPDATE too.
+      if (existing.category !== category) {
+        changes.push(`category: ${existing.category} -> ${category}`);
+      }
+
       if (changes.length > 0) {
         summary.updates++;
         summary.affectedSlugs.push(preset.slug);
@@ -243,6 +250,7 @@ export async function syncTemplates(
           await supabase
             .from('templates')
             .update({
+              category,
               template_json: effectiveTemplateJson,
               version: preset.version,
               thumbnail_url: effectiveThumbnailUrl,

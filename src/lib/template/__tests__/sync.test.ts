@@ -80,11 +80,13 @@ describe('syncTemplates', () => {
       thumbnail_url: 'test.jpg'
     }));
 
-    // Check that name/description/category are NOT in the update call
+    // name/description are user-editable in the DB and must NOT be clobbered.
     const updateCall = mockSupabase.update.mock.calls[0][0];
     expect(updateCall.name).toBeUndefined();
     expect(updateCall.description).toBeUndefined();
-    expect(updateCall.category).toBeUndefined();
+    // category, by contrast, is code-derived (source of truth) and is now
+    // reconciled on UPDATE — the dir-derived 'test' replaces the stale slug.
+    expect(updateCall.category).toBe('test');
   });
 
   it('should use default meta-data on create', async () => {

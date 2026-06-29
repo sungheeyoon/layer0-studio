@@ -179,6 +179,7 @@ export const en: Messages = {
       fitness: 'Fitness',
       business: 'Business',
       wedding: 'Wedding',
+      outdoor: 'Outdoor',
     },
   },
   dashboard: {

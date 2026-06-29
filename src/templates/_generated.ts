@@ -7,7 +7,6 @@ export const templateMap: Record<string, () => Promise<TemplateModule>> = {
   'cafe-default': () => import('./cafe/default'),
   'cafe-modern': () => import('./cafe/modern'),
   'corporate-default': () => import('./corporate/default'),
-  'corporate-multipage': () => import('./corporate/multipage'),
   'fitness-default': () => import('./fitness/default'),
   'interior-default': () => import('./interior/default'),
   'legal-default': () => import('./legal/default'),
@@ -21,7 +20,6 @@ export const presetMap: Record<string, () => Promise<{ default: TemplatePreset }
   'cafe-default': () => import('./cafe/default/template'),
   'cafe-modern': () => import('./cafe/modern/template'),
   'corporate-default': () => import('./corporate/default/template'),
-  'corporate-multipage': () => import('./corporate/multipage/template'),
   'fitness-default': () => import('./fitness/default/template'),
   'interior-default': () => import('./interior/default/template'),
   'legal-default': () => import('./legal/default/template'),
@@ -35,7 +33,6 @@ export const presetSlugs = [
   'cafe-default',
   'cafe-modern',
   'corporate-default',
-  'corporate-multipage',
   'fitness-default',
   'interior-default',
   'legal-default',
@@ -44,19 +41,18 @@ export const presetSlugs = [
   'wedding-default',
 ] as const;
 
-/** Maps templateKey → category (derived from directory layout) */
+/** Maps templateKey → category (Capitalized parent dir name, source of truth) */
 export const templateCategories: Record<string, string> = {
-  'cafe-cozy': 'cafe',
-  'cafe-default': 'cafe',
-  'cafe-modern': 'cafe',
-  'corporate-default': 'corporate',
-  'corporate-multipage': 'corporate',
-  'fitness-default': 'fitness',
-  'interior-default': 'interior',
-  'legal-default': 'legal',
-  'medical-default': 'medical',
-  'outdoor-default': 'outdoor',
-  'wedding-default': 'wedding',
+  'cafe-cozy': 'Cafe',
+  'cafe-default': 'Cafe',
+  'cafe-modern': 'Cafe',
+  'corporate-default': 'Corporate',
+  'fitness-default': 'Fitness',
+  'interior-default': 'Interior',
+  'legal-default': 'Legal',
+  'medical-default': 'Medical',
+  'outdoor-default': 'Outdoor',
+  'wedding-default': 'Wedding',
 } as const;
 
 export function getAvailableTemplateKeys(): string[] {

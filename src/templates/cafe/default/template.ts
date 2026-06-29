@@ -849,7 +849,7 @@ const preset: TemplatePreset = {
   "defaults": {
     "name": "Cafe",
     "description": "감각적인 카페·커피숍 웹사이트 템플릿. 메뉴, 공간 소개, 위치 안내 섹션 포함.",
-    "category": "food"
+    "category": "cafe"
   }
 };
 

@@ -4,8 +4,14 @@
 //
 // β model (Issue #6):
 // - Each template is a self-contained directory at src/templates/<category>/<leaf>/.
-// - templateKey = `<category>-<leaf>` (concat per Q6-3-c).
-// - defaults.category derived from parent dir name; preset file no longer declares it.
+// - templateKey = `<category>-<leaf>` (concat per Q6-3-c) — always lowercase.
+// - category is the parent dir name, Capitalized (e.g. `corporate` → `Corporate`).
+//   Capitalized is the canonical catalog form; `categoryLabel()` lowercases before
+//   i18n lookup, so labels still resolve. This is the single rule that keeps the
+//   DB category slug consistent (sync reconciles existing rows to this value).
+
+/** Canonical category form: Capitalize the directory name. */
+const toCategory = (dir) => dir.charAt(0).toUpperCase() + dir.slice(1);
 
 import { readdirSync, statSync, existsSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
@@ -64,9 +70,9 @@ const lines = [
   ...templates.map((t) => `  '${t.templateKey}',`),
   `] as const;`,
   ``,
-  `/** Maps templateKey → category (derived from directory layout) */`,
+  `/** Maps templateKey → category (Capitalized parent dir name, source of truth) */`,
   `export const templateCategories: Record<string, string> = {`,
-  ...templates.map((t) => `  '${t.templateKey}': '${t.category}',`),
+  ...templates.map((t) => `  '${t.templateKey}': '${toCategory(t.category)}',`),
   `} as const;`,
   ``,
   `export function getAvailableTemplateKeys(): string[] {`,

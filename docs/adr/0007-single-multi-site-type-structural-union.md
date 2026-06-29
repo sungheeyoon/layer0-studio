@@ -42,7 +42,7 @@ nav 객체 모양·필터 규칙(`visible && nav.visible`)·라벨 출처(`nav.l
 
 - **기존 Single `user_sites` 마이그레이션 완료** — **migration 018** (`docs/migrations/018_single_site_type.md`, 프로덕션 적용됨; PLAN 초안의 "015" 번호가 아니라 실제로는 018 로 실행, `templates` 테이블 정렬은 **019**): `{ pages:[home] }` → `{ mode:'single', sections }` 평탄화, `data.label` 키 → `eyebrow`, nav 섹션 `menu1~N` 제거, 각 섹션 `nav:{visible,label}` 주입, `editable` 제거, slot_key `${page.id}.${section.id}.${key}` → `${section.id}.${key}` (다음 저장 시 RPC self-heal). 위험은 낮음(평탄화+리네임, nav/footer 들어올리기 아님).
 - **`mode` 분기는 사이트 수준 엔트리포인트에 모으되**, 실제로는 렌더·에디터·검증·영속화(asset slot_key)·키주입 ~5개 축에서 mode-aware fork 가 발생한다 — "의도된 분기"로 수용.
-- **Multi 는 기존 Single 템플릿을 개조하지 않고 새 템플릿으로 출시** — 첫 Multi 템플릿은 `corporate-multipage` (최소 예시: 공유 header/footer + Home·About·Privacy 페이지). Single 9 개는 새 구조로 마이그레이션되었으나 디자인은 유지.
+- **Multi 는 기존 Single 템플릿을 개조하지 않고 새 템플릿으로 출시** — 최초 예시였던 `corporate-multipage` 는 이후 제거됨(migration 020). **현재 출시되는 Multi 템플릿은 `outdoor-default`(능선)** 이며 나머지 9 개는 Single. Multi 렌더링 인프라(`renderMultiSite`, `[[...slug]]` 라우팅)는 `outdoor-default` 가 실사용 중이고, `renderMultiSite.test` 는 출시 템플릿 콘텐츠에 결합하지 않도록 자체 인라인 픽스처로 렌더러를 검증한다.
 - nav 컴포넌트는 `type === 'nav'` 로 식별해 `navItems` 를 직접 주입(메타 카테고리 탐색 같은 추가 추상화 없음).
 
 ## 관련

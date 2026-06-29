@@ -140,7 +140,7 @@ const preset: TemplatePreset = {
   "defaults": {
     "name": "Cafe Cozy",
     "description": "편안하고 따뜻한 분위기의 카페 템플릿. 스토리와 방문 안내 중심.",
-    "category": "food"
+    "category": "cafe"
   }
 };
 

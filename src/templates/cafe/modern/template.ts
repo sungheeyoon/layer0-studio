@@ -195,7 +195,7 @@ const preset: TemplatePreset = {
   "defaults": {
     "name": "Cafe Modern",
     "description": "도시적인 분위기의 현대적인 카페 템플릿. 비디오 히어로와 깔끔한 레이아웃.",
-    "category": "food"
+    "category": "cafe"
   }
 };
 
