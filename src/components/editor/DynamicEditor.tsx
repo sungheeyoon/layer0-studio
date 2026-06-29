@@ -37,6 +37,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
+import EditorPreviewFrame from './EditorPreviewFrame';
 import { loadTemplate } from '@/templates/registry';
 import { SectionDataSchema, TemplateModule } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
@@ -411,12 +412,6 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // links (and Single anchors) shouldn't navigate the editor away. Neutralise
   // their default in the capture phase (next/link honours e.defaultPrevented);
   // the click still bubbles to section selection. Page switching uses the tabs.
-  const handlePreviewLinkGuard = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('a')) {
-      e.preventDefault();
-    }
-  }, []);
-
   const themeVariables = useMemo(() => ({
     '--theme-primary': siteJson.globalStyles.primaryColor,
     '--theme-secondary': siteJson.globalStyles.secondaryColor,
@@ -790,36 +785,32 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       </section>
 
       {/* Right Panel: Live Preview */}
-      <section className="relative flex flex-grow flex-col overflow-hidden border border-border bg-muted/30 p-6">
+      <section className="relative flex flex-grow flex-col overflow-hidden border border-border bg-muted/30 p-3">
         <div className="absolute left-3 top-3 z-10 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground">
           {t.preview.label}
         </div>
 
-        <div className="flex-grow transform-gpu overflow-y-auto">
-          <div
-            style={themeVariables}
-            className="min-h-full bg-white shadow-2xl"
-            onClickCapture={handlePreviewLinkGuard}
-          >
-            {loadingError ? (
-              <div className="flex h-[50vh] flex-col items-center justify-center p-8 text-center">
-                <CircleAlert className="mb-4 size-10 text-destructive" />
-                <p className="mb-2 font-medium text-destructive">{t.loadError.heading}</p>
-                <p className="max-w-xs text-sm text-muted-foreground">{loadingError}</p>
-              </div>
-            ) : TemplateRenderer ? (
-              <TemplateRenderer
-                siteJson={siteJson}
-                selectedSectionId={selectedSectionId}
-                onSectionClick={handleSectionClick}
-                activePageId={activePageId}
-              />
-            ) : (
-              <div className="flex h-[50vh] animate-pulse items-center justify-center text-sm text-muted-foreground">
-                {t.preview.loadingRenderer}
-              </div>
-            )}
-          </div>
+        <div className="flex-grow overflow-hidden">
+          {loadingError ? (
+            <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+              <CircleAlert className="mb-4 size-10 text-destructive" />
+              <p className="mb-2 font-medium text-destructive">{t.loadError.heading}</p>
+              <p className="max-w-xs text-sm text-muted-foreground">{loadingError}</p>
+            </div>
+          ) : TemplateRenderer ? (
+            <EditorPreviewFrame
+              TemplateRenderer={TemplateRenderer}
+              siteJson={siteJson}
+              selectedSectionId={selectedSectionId}
+              activePageId={activePageId}
+              onSectionClick={handleSectionClick}
+              themeVariables={themeVariables}
+            />
+          ) : (
+            <div className="flex h-full animate-pulse items-center justify-center text-sm text-muted-foreground">
+              {t.preview.loadingRenderer}
+            </div>
+          )}
         </div>
       </section>
     </>
