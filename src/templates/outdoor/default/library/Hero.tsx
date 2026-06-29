@@ -28,7 +28,7 @@ const Hero: SectionComponent = function Hero(props: TemplateSectionProps) {
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface-dark)] via-[var(--color-surface-dark)]/50 to-transparent" />
 
-      <div className="relative mx-auto flex min-h-[78vh] max-w-7xl flex-col justify-end px-6 pb-20 pt-32">
+      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col justify-end px-6 pb-20 pt-32">
         {eyebrow && (
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-on-dark)]/80">
             {eyebrow}

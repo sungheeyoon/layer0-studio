@@ -11,7 +11,7 @@ export default function Hero({
   ctaLabel: string;
 }) {
   return (
-    <section className="relative flex min-h-[80vh] items-center overflow-hidden border-b border-border px-6 md:px-10">
+    <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden border-b border-border px-6 md:px-10">
       {/* Soft brand wash, no blueprint grid */}
       <div
         aria-hidden
