@@ -9,12 +9,12 @@ import { getFieldValue } from '@/domain/entities/template.entity';
  */
 const Hero: SectionComponent = function Hero(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.data, 'eyebrow');
-  const title = getFieldValue(section.data, 'title') || '능선을 잇다';
-  const subtitle = getFieldValue(section.data, 'subtitle');
-  const primaryCta = getFieldValue(section.data, 'primaryCtaLabel');
-  const secondaryCta = getFieldValue(section.data, 'secondaryCtaLabel');
-  const image = getFieldValue(section.data, 'image');
+  const eyebrow = getFieldValue(section.fields, 'eyebrow');
+  const title = getFieldValue(section.fields, 'title') || '능선을 잇다';
+  const subtitle = getFieldValue(section.fields, 'subtitle');
+  const primaryCta = getFieldValue(section.fields, 'primaryCtaLabel');
+  const secondaryCta = getFieldValue(section.fields, 'secondaryCtaLabel');
+  const image = getFieldValue(section.fields, 'image');
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-surface-dark)]">
@@ -65,7 +65,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: '히어로 (홈)',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'text', label: '대제목', required: true },
     subtitle: { type: 'textarea', label: '설명' },

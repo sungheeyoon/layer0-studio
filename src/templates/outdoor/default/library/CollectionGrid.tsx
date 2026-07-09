@@ -11,9 +11,9 @@ import {
  */
 const CollectionGrid: SectionComponent = function CollectionGrid(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.data, 'eyebrow');
-  const heading = getFieldValue(section.data, 'heading');
-  const items = (section.data.items as ArrayField | undefined)?.items ?? [];
+  const eyebrow = getFieldValue(section.fields, 'eyebrow');
+  const heading = getFieldValue(section.fields, 'heading');
+  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-soft)]">
@@ -79,7 +79,7 @@ CollectionGrid.meta = {
   componentKey: 'collectionGrid',
   category: 'gallery',
   label: '컬렉션 카드',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     heading: { type: 'text', label: '제목' },
     items: {

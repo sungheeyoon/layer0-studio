@@ -8,12 +8,12 @@ import { getFieldValue } from '@/domain/entities/template.entity';
  */
 const FeatureSplit: SectionComponent = function FeatureSplit(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.data, 'eyebrow');
-  const heading = getFieldValue(section.data, 'heading') || '제목';
-  const body = getFieldValue(section.data, 'body');
-  const note = getFieldValue(section.data, 'note');
-  const image = getFieldValue(section.data, 'image');
-  const imageSide = getFieldValue(section.data, 'imageSide') || 'right';
+  const eyebrow = getFieldValue(section.fields, 'eyebrow');
+  const heading = getFieldValue(section.fields, 'heading') || '제목';
+  const body = getFieldValue(section.fields, 'body');
+  const note = getFieldValue(section.fields, 'note');
+  const image = getFieldValue(section.fields, 'image');
+  const imageSide = getFieldValue(section.fields, 'imageSide') || 'right';
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -58,7 +58,7 @@ FeatureSplit.meta = {
   componentKey: 'featureSplit',
   category: 'content',
   label: '이미지 + 텍스트 분할',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     heading: { type: 'text', label: '제목', required: true },
     body: { type: 'textarea', label: '본문' },

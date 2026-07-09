@@ -24,7 +24,7 @@ export function makeTemplateJson(overrides: Partial<SingleContent> = {}): Conten
         type: 'hero',
         visible: true,
         nav: { visible: false, label: 'Hero' },
-        data: {
+        fields: {
           title: { type: 'text', label: 'Title', value: 'Hello', editable: true },
         },
       },
@@ -94,9 +94,9 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return this.sites.find(s => s.userId === userId && s.siteName === name) ?? null;
   }
 
-  async create(data: CreateUserSiteDto): Promise<UserSite> {
+  async create(dto: CreateUserSiteDto): Promise<UserSite> {
     const site: UserSite = {
-      ...data,
+      ...dto,
       id: `new-${Date.now()}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -105,9 +105,9 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return site;
   }
 
-  async update(id: string, data: UpdateUserSiteDto, expectedUpdatedAt: string | null): Promise<UserSite> {
+  async update(id: string, dto: UpdateUserSiteDto, expectedUpdatedAt: string | null): Promise<UserSite> {
     const idx = this.guardVersion(id, expectedUpdatedAt);
-    this.sites[idx] = { ...this.sites[idx], ...data, updatedAt: this.nextUpdatedAt() };
+    this.sites[idx] = { ...this.sites[idx], ...dto, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
 

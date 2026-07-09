@@ -9,9 +9,9 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || 'APEX';
-  const ctaText = getFieldValue(data, 'ctaText') || '무료 체험';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || 'APEX';
+  const ctaText = getFieldValue(fields, 'ctaText') || '무료 체험';
 
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen] = useState(false);

@@ -7,14 +7,14 @@ import { PlusIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Faq: SectionComponent = function Faq({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
 
   const items = [1, 2, 3, 4, 5, 6]
     .map((n) => ({
-      q: getFieldValue(data, `q${n}`) || '',
-      a: getFieldValue(data, `a${n}`) || '',
+      q: getFieldValue(fields, `q${n}`) || '',
+      a: getFieldValue(fields, `a${n}`) || '',
     }))
     .filter((it) => it.q);
 

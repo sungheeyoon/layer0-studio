@@ -4,15 +4,15 @@ import { StarIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || '';
 
   const reviews = [1, 2, 3].map(n => ({
-    body: getFieldValue(data, `review${n}Body`) || '',
-    author: getFieldValue(data, `review${n}Author`) || '',
-    meta: getFieldValue(data, `review${n}Meta`) || '',
+    body: getFieldValue(fields, `review${n}Body`) || '',
+    author: getFieldValue(fields, `review${n}Author`) || '',
+    meta: getFieldValue(fields, `review${n}Meta`) || '',
     featured: n === 2,
-    avatar: getFieldValue(data, `review${n}Avatar`) || `https://i.pravatar.cc/150?u=legal_review_${n}`,
+    avatar: getFieldValue(fields, `review${n}Avatar`) || `https://i.pravatar.cc/150?u=legal_review_${n}`,
   }));
 
   return (
@@ -58,7 +58,7 @@ Testimonials.meta = {
   componentKey: 'testimonials',
   category: 'content',
   label: 'Legal Testimonials',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'text', label: '섹션 타이틀', required: true },
     review1Body: { type: 'textarea', label: '후기 1 본문' },
     review1Author: { type: 'text', label: '후기 1 작성자' },

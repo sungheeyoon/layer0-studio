@@ -4,21 +4,21 @@ import { HomeIcon, BuildingsIcon, MonitorIcon, PaletteIcon, ShieldCheckIcon, Arr
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || 'Our Services';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || 'Our Services';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
 
-  const s1Title = getFieldValue(data, 's1Title');
-  const s1Desc = getFieldValue(data, 's1Desc');
-  const s1Badge = getFieldValue(data, 's1Badge');
-  const s1Price = getFieldValue(data, 's1Price');
+  const s1Title = getFieldValue(fields, 's1Title');
+  const s1Desc = getFieldValue(fields, 's1Desc');
+  const s1Badge = getFieldValue(fields, 's1Badge');
+  const s1Price = getFieldValue(fields, 's1Price');
 
   const services = [
-    { title: getFieldValue(data, 's2Title'), desc: getFieldValue(data, 's2Desc'), icon: <BuildingsIcon size={22} className="text-[var(--i-gold)]" /> },
-    { title: getFieldValue(data, 's3Title'), desc: getFieldValue(data, 's3Desc'), icon: <MonitorIcon size={22} className="text-[var(--i-gold)]" /> },
-    { title: getFieldValue(data, 's4Title'), desc: getFieldValue(data, 's4Desc'), icon: <PaletteIcon size={22} className="text-[var(--i-gold)]" />, isConsulting: true },
-    { title: getFieldValue(data, 's5Title'), desc: getFieldValue(data, 's5Desc'), icon: <ShieldCheckIcon size={22} className="text-[var(--i-gold)]" />, isAS: true },
+    { title: getFieldValue(fields, 's2Title'), desc: getFieldValue(fields, 's2Desc'), icon: <BuildingsIcon size={22} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(fields, 's3Title'), desc: getFieldValue(fields, 's3Desc'), icon: <MonitorIcon size={22} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(fields, 's4Title'), desc: getFieldValue(fields, 's4Desc'), icon: <PaletteIcon size={22} className="text-[var(--i-gold)]" />, isConsulting: true },
+    { title: getFieldValue(fields, 's5Title'), desc: getFieldValue(fields, 's5Desc'), icon: <ShieldCheckIcon size={22} className="text-[var(--i-gold)]" />, isAS: true },
   ].filter(s => s.title);
 
   return (
@@ -116,7 +116,7 @@ Services.meta = {
   componentKey: 'services',
   category: 'features',
   label: 'Interior Services',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },

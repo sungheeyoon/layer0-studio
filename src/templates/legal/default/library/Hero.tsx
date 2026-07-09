@@ -4,21 +4,21 @@ import { VerifiedCheckIcon, ChatIcon, ArrowDownIcon, DiplomaIcon } from '../sect
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const subtitle = getFieldValue(data, 'subtitle') || '';
-  const ctaPrimaryText = getFieldValue(data, 'ctaPrimaryText') || '';
-  const ctaSecondaryText = getFieldValue(data, 'ctaSecondaryText') || '';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const subtitle = getFieldValue(fields, 'subtitle') || '';
+  const ctaPrimaryText = getFieldValue(fields, 'ctaPrimaryText') || '';
+  const ctaSecondaryText = getFieldValue(fields, 'ctaSecondaryText') || '';
 
-  const stat1Value = getFieldValue(data, 'stat1Value') || '';
-  const stat1Label = getFieldValue(data, 'stat1Label') || '';
-  const stat2Value = getFieldValue(data, 'stat2Value') || '';
-  const stat2Label = getFieldValue(data, 'stat2Label') || '';
-  const stat3Value = getFieldValue(data, 'stat3Value') || '';
-  const stat3Label = getFieldValue(data, 'stat3Label') || '';
-  const stat4Value = getFieldValue(data, 'stat4Value') || '';
-  const stat4Label = getFieldValue(data, 'stat4Label') || '';
+  const stat1Value = getFieldValue(fields, 'stat1Value') || '';
+  const stat1Label = getFieldValue(fields, 'stat1Label') || '';
+  const stat2Value = getFieldValue(fields, 'stat2Value') || '';
+  const stat2Label = getFieldValue(fields, 'stat2Label') || '';
+  const stat3Value = getFieldValue(fields, 'stat3Value') || '';
+  const stat3Label = getFieldValue(fields, 'stat3Label') || '';
+  const stat4Value = getFieldValue(fields, 'stat4Value') || '';
+  const stat4Label = getFieldValue(fields, 'stat4Label') || '';
 
   return (
     <section className="bg-gradient-to-br from-[var(--l-surface)] via-[var(--l-surface-warm)] to-[var(--l-surface-warmer)] min-h-[100dvh] flex flex-col justify-center pt-28 pb-20 px-4 relative overflow-hidden">
@@ -107,7 +107,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Legal Hero',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 배지' },
     title: { type: 'textarea', label: '메인 타이틀', required: true },
     subtitle: { type: 'textarea', label: '서브 타이틀' },

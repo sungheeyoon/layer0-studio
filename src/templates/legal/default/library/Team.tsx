@@ -3,14 +3,14 @@ import styles from '../legal.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Team: SectionComponent = function Team({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || '';
 
   const members = [1, 2, 3].map(n => ({
-    name: getFieldValue(data, `member${n}Name`) || '',
-    role: getFieldValue(data, `member${n}Role`) || '',
-    body: getFieldValue(data, `member${n}Body`) || '',
-    image: getFieldValue(data, `member${n}Image`) || `https://picsum.photos/seed/legal_team_${n}/600/450`,
+    name: getFieldValue(fields, `member${n}Name`) || '',
+    role: getFieldValue(fields, `member${n}Role`) || '',
+    body: getFieldValue(fields, `member${n}Body`) || '',
+    image: getFieldValue(fields, `member${n}Image`) || `https://picsum.photos/seed/legal_team_${n}/600/450`,
     badge: n === 1 ? '대표 변호사' : n === 2 ? '수석 세무사' : '파트너 변호사',
     badgeBg: n === 1 ? 'bg-amber-500' : 'bg-[var(--l-navy-light)]',
   }));
@@ -56,7 +56,7 @@ Team.meta = {
   componentKey: 'team',
   category: 'content',
   label: 'Legal Team',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'text', label: '섹션 타이틀', required: true },
     member1Name: { type: 'text', label: '멤버 1 이름' },
     member1Role: { type: 'text', label: '멤버 1 직함' },

@@ -11,10 +11,10 @@ import {
  */
 const Contact: SectionComponent = function Contact(props: TemplateSectionProps) {
   const { section } = props;
-  const heading = getFieldValue(section.data, 'heading') || '문의하기';
-  const intro = getFieldValue(section.data, 'intro');
-  const hours = getFieldValue(section.data, 'hours');
-  const items = (section.data.items as ArrayField | undefined)?.items ?? [];
+  const heading = getFieldValue(section.fields, 'heading') || '문의하기';
+  const intro = getFieldValue(section.fields, 'intro');
+  const hours = getFieldValue(section.fields, 'hours');
+  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -64,7 +64,7 @@ Contact.meta = {
   componentKey: 'contact',
   category: 'contact',
   label: '문의 정보',
-  dataSchema: {
+  fieldsSchema: {
     heading: { type: 'text', label: '제목', required: true },
     intro: { type: 'textarea', label: '안내 문구' },
     hours: { type: 'textarea', label: '운영 시간' },

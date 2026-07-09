@@ -4,51 +4,51 @@ import { ArrowUpRightIcon, BoxingIcon, YogaIcon, ChefHatIcon } from '../sections
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Programs: SectionComponent = function Programs({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '프로그램';
-  const title = getFieldValue(data, 'title') || '당신의 목표에 맞는 프로그램';
-  const description = getFieldValue(data, 'description') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '프로그램';
+  const title = getFieldValue(fields, 'title') || '당신의 목표에 맞는 프로그램';
+  const description = getFieldValue(fields, 'description') || '';
 
   const programs = [
     {
       id: 'p1',
-      title: getFieldValue(data, 'p1Title'),
-      desc: getFieldValue(data, 'p1Desc'),
-      image: getFieldValue(data, 'p1Image'),
+      title: getFieldValue(fields, 'p1Title'),
+      desc: getFieldValue(fields, 'p1Desc'),
+      image: getFieldValue(fields, 'p1Image'),
       badge: 'Most Popular',
       colSpan: 'md:col-span-2',
       showArrow: true,
     },
     {
       id: 'p2',
-      title: getFieldValue(data, 'p2Title'),
-      desc: getFieldValue(data, 'p2Desc'),
-      image: getFieldValue(data, 'p2Image'),
+      title: getFieldValue(fields, 'p2Title'),
+      desc: getFieldValue(fields, 'p2Desc'),
+      image: getFieldValue(fields, 'p2Image'),
     },
     {
       id: 'p3',
-      title: getFieldValue(data, 'p3Title'),
-      desc: getFieldValue(data, 'p3Desc'),
+      title: getFieldValue(fields, 'p3Title'),
+      desc: getFieldValue(fields, 'p3Desc'),
       icon: <BoxingIcon size={22} className="text-[var(--f-lime)]" />,
       bg: styles.bgSurface,
     },
     {
       id: 'p4',
-      title: getFieldValue(data, 'p4Title'),
-      desc: getFieldValue(data, 'p4Desc'),
+      title: getFieldValue(fields, 'p4Title'),
+      desc: getFieldValue(fields, 'p4Desc'),
       icon: <YogaIcon size={22} className="text-[var(--f-lime)]" />,
       bg: styles.bgSurface,
     },
     {
       id: 'p5',
-      title: getFieldValue(data, 'p5Title'),
-      desc: getFieldValue(data, 'p5Desc'),
-      image: getFieldValue(data, 'p5Image'),
+      title: getFieldValue(fields, 'p5Title'),
+      desc: getFieldValue(fields, 'p5Desc'),
+      image: getFieldValue(fields, 'p5Image'),
     },
     {
       id: 'p6',
-      title: getFieldValue(data, 'p6Title'),
-      desc: getFieldValue(data, 'p6Desc'),
+      title: getFieldValue(fields, 'p6Title'),
+      desc: getFieldValue(fields, 'p6Desc'),
       icon: <ChefHatIcon size={22} className="text-[var(--f-lime)]" />,
       bg: 'color-mix(in srgb, var(--f-lime) 7%, transparent)',
       borderColor: 'color-mix(in srgb, var(--f-lime) 15%, transparent)',
@@ -133,7 +133,7 @@ Programs.meta = {
   componentKey: 'programs',
   category: 'features',
   label: 'Fitness Programs',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },

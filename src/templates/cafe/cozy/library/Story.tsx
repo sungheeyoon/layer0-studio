@@ -4,19 +4,19 @@ import { LeafIcon, FireIcon, HandHeartIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Story: SectionComponent = function Story({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '카페 소개';
-  const title1 = getFieldValue(data, 'title1') || '커피 한 잔에는';
-  const titleAccent = getFieldValue(data, 'titleAccent') || '이야기가';
-  const title2 = getFieldValue(data, 'title2') || '담겨 있습니다';
-  const quote = getFieldValue(data, 'quote') || '';
-  const description = getFieldValue(data, 'description') || '';
-  const image = getFieldValue(data, 'image') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '카페 소개';
+  const title1 = getFieldValue(fields, 'title1') || '커피 한 잔에는';
+  const titleAccent = getFieldValue(fields, 'titleAccent') || '이야기가';
+  const title2 = getFieldValue(fields, 'title2') || '담겨 있습니다';
+  const quote = getFieldValue(fields, 'quote') || '';
+  const description = getFieldValue(fields, 'description') || '';
+  const image = getFieldValue(fields, 'image') || '';
 
   const pillars = [
-    { title: getFieldValue(data, 'f1Title'), desc: getFieldValue(data, 'f1Desc'), icon: <LeafIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
-    { title: getFieldValue(data, 'f2Title'), desc: getFieldValue(data, 'f2Desc'), icon: <FireIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
-    { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), icon: <HandHeartIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(fields, 'f1Title'), desc: getFieldValue(fields, 'f1Desc'), icon: <LeafIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(fields, 'f2Title'), desc: getFieldValue(fields, 'f2Desc'), icon: <FireIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
+    { title: getFieldValue(fields, 'f3Title'), desc: getFieldValue(fields, 'f3Desc'), icon: <HandHeartIcon size={22} className="text-[var(--c-terra)] fill-current" /> },
   ].filter(p => p.title);
 
   return (
@@ -83,7 +83,7 @@ Story.meta = {
   componentKey: 'story',
   category: 'about',
   label: 'Our Story',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title1: { type: 'text', label: '타이틀 1행' },
     titleAccent: { type: 'text', label: '강조 타이틀' },

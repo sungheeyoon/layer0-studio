@@ -5,12 +5,12 @@ import { renderAccentTitle } from '../sections/title-parts';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Philosophy: SectionComponent = function Philosophy({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const body = getFieldValue(data, 'body') || '';
-  const ctaText = getFieldValue(data, 'ctaText') || '';
-  const ctaUrl = getFieldValue(data, 'ctaUrl') || '#';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const body = getFieldValue(fields, 'body') || '';
+  const ctaText = getFieldValue(fields, 'ctaText') || '';
+  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#';
 
   return (
     <section className={`${styles.section} ${styles.bgDark800}`}>
@@ -48,7 +48,7 @@ Philosophy.meta = {
   componentKey: 'philosophy',
   category: 'content',
   label: 'Wedding Philosophy',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'textarea', label: '타이틀', required: true },
     body: { type: 'textarea', label: '본문' },

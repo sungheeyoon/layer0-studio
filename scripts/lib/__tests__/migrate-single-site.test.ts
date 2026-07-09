@@ -63,8 +63,8 @@ describe('migrateSingleSiteJson', () => {
     const { json } = migrateSingleSiteJson(legacy(), seedNav);
     if (!isSingleContent(json)) throw new Error('unreachable');
     const hero = json.sections.find((s) => s.id === 'hero-001')!;
-    expect('label' in hero.data).toBe(false);
-    expect(getFieldValue(hero.data, 'eyebrow')).toBe('Hero kicker');
+    expect('label' in hero.fields).toBe(false);
+    expect(getFieldValue(hero.fields, 'eyebrow')).toBe('Hero kicker');
     expect('editable' in hero).toBe(false);
   });
 
@@ -72,7 +72,7 @@ describe('migrateSingleSiteJson', () => {
     const { json } = migrateSingleSiteJson(legacy(), seedNav);
     if (!isSingleContent(json)) throw new Error('unreachable');
     const nav = json.sections.find((s) => s.id === 'nav-001')!;
-    expect(Object.keys(nav.data)).toEqual(['brandName', 'ctaText']);
+    expect(Object.keys(nav.fields)).toEqual(['brandName', 'ctaText']);
   });
 
   it('injects per-section nav from the seed by id, preserving section.visible independently', () => {

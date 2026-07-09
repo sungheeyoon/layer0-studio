@@ -4,20 +4,20 @@ import { ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || 'Seoul Gangnam — Since 2010';
-  const titleLine1 = getFieldValue(data, 'title1') || '한계를';
-  const titleLine2 = getFieldValue(data, 'title2') || '다시';
-  const titleLine3 = getFieldValue(data, 'title3') || '정의합니다';
-  const description = getFieldValue(data, 'description') || '';
-  const bgImage = getFieldValue(data, 'backgroundImage') || '';
-  const ctaPrimary = getFieldValue(data, 'ctaPrimary') || '무료 체험 신청';
-  const ctaSecondary = getFieldValue(data, 'ctaSecondary') || '프로그램 보기';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || 'Seoul Gangnam — Since 2010';
+  const titleLine1 = getFieldValue(fields, 'title1') || '한계를';
+  const titleLine2 = getFieldValue(fields, 'title2') || '다시';
+  const titleLine3 = getFieldValue(fields, 'title3') || '정의합니다';
+  const description = getFieldValue(fields, 'description') || '';
+  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
+  const ctaPrimary = getFieldValue(fields, 'ctaPrimary') || '무료 체험 신청';
+  const ctaSecondary = getFieldValue(fields, 'ctaSecondary') || '프로그램 보기';
 
   const stats = [1, 2, 3, 4].map(n => ({
-    value: getFieldValue(data, `stat${n}Value`),
-    label: getFieldValue(data, `stat${n}Label`),
-    suffix: getFieldValue(data, `stat${n}Suffix`),
+    value: getFieldValue(fields, `stat${n}Value`),
+    label: getFieldValue(fields, `stat${n}Label`),
+    suffix: getFieldValue(fields, `stat${n}Suffix`),
   })).filter(s => s.value);
 
   return (
@@ -100,7 +100,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Fitness Hero',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title1: { type: 'text', label: '타이틀 1행', required: true },
     title2: { type: 'text', label: '타이틀 2행 (강조)', required: true },

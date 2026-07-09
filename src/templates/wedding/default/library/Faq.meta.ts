@@ -4,7 +4,7 @@ export const faqMeta: SectionComponentMeta = {
   componentKey: 'faq',
   category: 'content',
   label: 'Wedding FAQ',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'text', label: '타이틀', required: true },
     q1: { type: 'text', label: '질문 1' },

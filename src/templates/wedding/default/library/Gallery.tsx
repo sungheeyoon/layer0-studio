@@ -3,12 +3,12 @@ import styles from '../wedding.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Gallery: SectionComponent = function Gallery({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
 
   const images = [1, 2, 3, 4, 5, 6]
-    .map((n) => getFieldValue(data, `image${n}`) || '')
+    .map((n) => getFieldValue(fields, `image${n}`) || '')
     .filter((src) => src);
 
   // Spans for masonry effect: 1st & 4th are tall (row-span-2)
@@ -62,7 +62,7 @@ Gallery.meta = {
   componentKey: 'gallery',
   category: 'content',
   label: 'Wedding Gallery',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'text', label: '타이틀', required: true },
     image1: { type: 'image', label: '갤러리 이미지 1' },

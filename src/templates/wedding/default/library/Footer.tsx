@@ -4,12 +4,12 @@ import { BookmarkIcon, ChatSquareIcon, InstagramIcon, PlayIcon } from '../sectio
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const brand = getFieldValue(data, 'brand') || 'HAUTRE';
-  const tagline = getFieldValue(data, 'tagline') || '';
-  const description = getFieldValue(data, 'description') || '';
-  const address = getFieldValue(data, 'address') || '';
-  const copyright = getFieldValue(data, 'copyright') || '';
+  const { fields } = section;
+  const brand = getFieldValue(fields, 'brand') || 'HAUTRE';
+  const tagline = getFieldValue(fields, 'tagline') || '';
+  const description = getFieldValue(fields, 'description') || '';
+  const address = getFieldValue(fields, 'address') || '';
+  const copyright = getFieldValue(fields, 'copyright') || '';
 
   return (
     <footer style={{
@@ -180,7 +180,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Wedding Footer',
-  dataSchema: {
+  fieldsSchema: {
     brand: { type: 'text', label: '브랜드 로고' },
     tagline: { type: 'text', label: '태그라인' },
     description: { type: 'textarea', label: '브랜드 설명' },

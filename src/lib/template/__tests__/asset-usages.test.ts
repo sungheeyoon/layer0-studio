@@ -22,7 +22,7 @@ function imageSection(id: string, key: string, assetId: string): SingleSection {
     type: 'hero',
     visible: true,
     nav: { visible: false, label: '' },
-    data: {
+    fields: {
       [key]: { type: 'image', label: 'Image', value: 'https://cdn/x.jpg', assetId },
     },
   };
@@ -82,7 +82,7 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
           type: 'hero',
           visible: true,
           nav: { visible: false, label: '' },
-          data: {
+          fields: {
             title: { type: 'text', label: 'Title', value: 'hi' },
             pic: { type: 'image', label: 'Pic', value: 'https://cdn/y.jpg' }, // no assetId
           },

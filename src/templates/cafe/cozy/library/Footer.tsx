@@ -4,16 +4,16 @@ import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIco
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || 'MONO';
-  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Specialty Coffee & Bakery';
-  const description = getFieldValue(data, 'description') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const address = getFieldValue(data, 'address') || '';
-  const weekdayHours = getFieldValue(data, 'weekdayHours') || '';
-  const weekendHours = getFieldValue(data, 'weekendHours') || '';
-  const copyright = getFieldValue(data, 'copyright') || '';
-  const businessInfo = getFieldValue(data, 'businessInfo') || '';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || 'MONO';
+  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Specialty Coffee & Bakery';
+  const description = getFieldValue(fields, 'description') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const address = getFieldValue(fields, 'address') || '';
+  const weekdayHours = getFieldValue(fields, 'weekdayHours') || '';
+  const weekendHours = getFieldValue(fields, 'weekendHours') || '';
+  const copyright = getFieldValue(fields, 'copyright') || '';
+  const businessInfo = getFieldValue(fields, 'businessInfo') || '';
 
   return (
     <footer className="bg-[var(--c-espresso)] border-t border-[var(--c-linen)] border-opacity-5 pt-16 pb-10 px-6 lg:px-10">
@@ -112,7 +112,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Footer',
-  dataSchema: {
+  fieldsSchema: {
     brandName: { type: 'text', label: '브랜드 이름', required: true },
     brandSubtext: { type: 'text', label: '브랜드 보조텍스트' },
     description: { type: 'textarea', label: '브랜드 설명' },

@@ -12,9 +12,9 @@ import {
  */
 const Pillars: SectionComponent = function Pillars(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.data, 'eyebrow');
-  const heading = getFieldValue(section.data, 'heading');
-  const items = (section.data.items as ArrayField | undefined)?.items ?? [];
+  const eyebrow = getFieldValue(section.fields, 'eyebrow');
+  const heading = getFieldValue(section.fields, 'heading');
+  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -61,7 +61,7 @@ Pillars.meta = {
   componentKey: 'pillars',
   category: 'feature',
   label: '브랜드 가치 (3열)',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     heading: { type: 'text', label: '제목' },
     items: {

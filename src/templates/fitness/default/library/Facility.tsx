@@ -4,22 +4,22 @@ import { RulerIcon, DumbbellIcon, ShowerIcon, ClockIcon, ParkingIcon } from '../
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Facility: SectionComponent = function Facility({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '시설 안내';
-  const title = getFieldValue(data, 'title') || '장비가\n결과를\n만듭니다';
-  const description = getFieldValue(data, 'description') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '시설 안내';
+  const title = getFieldValue(fields, 'title') || '장비가\n결과를\n만듭니다';
+  const description = getFieldValue(fields, 'description') || '';
 
   const features = [
-    { title: getFieldValue(data, 'f1Title'), label: getFieldValue(data, 'f1Label'), icon: <RulerIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: getFieldValue(data, 'f2Title'), label: getFieldValue(data, 'f2Label'), icon: <DumbbellIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: getFieldValue(data, 'f3Title'), label: getFieldValue(data, 'f3Label'), icon: <ShowerIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: getFieldValue(data, 'f4Title'), label: getFieldValue(data, 'f4Label'), icon: <ClockIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: getFieldValue(data, 'f5Title'), label: getFieldValue(data, 'f5Label'), icon: <ParkingIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(fields, 'f1Title'), label: getFieldValue(fields, 'f1Label'), icon: <RulerIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(fields, 'f2Title'), label: getFieldValue(fields, 'f2Label'), icon: <DumbbellIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(fields, 'f3Title'), label: getFieldValue(fields, 'f3Label'), icon: <ShowerIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(fields, 'f4Title'), label: getFieldValue(fields, 'f4Label'), icon: <ClockIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: getFieldValue(fields, 'f5Title'), label: getFieldValue(fields, 'f5Label'), icon: <ParkingIcon size={18} className="text-[var(--f-lime)]" /> },
   ].filter(f => f.title);
 
-  const images = [1, 2, 3].map(n => getFieldValue(data, `image${n}`)).filter(Boolean);
-  const trustValue = getFieldValue(data, 'trustValue') || '14';
-  const trustLabel = getFieldValue(data, 'trustLabel') || 'Years\nof Trust';
+  const images = [1, 2, 3].map(n => getFieldValue(fields, `image${n}`)).filter(Boolean);
+  const trustValue = getFieldValue(fields, 'trustValue') || '14';
+  const trustLabel = getFieldValue(fields, 'trustLabel') || 'Years\nof Trust';
 
   return (
     <section className="bg-[var(--f-surface)] border-y border-[var(--f-border)] overflow-hidden" id="facility">
@@ -98,7 +98,7 @@ Facility.meta = {
   componentKey: 'facility',
   category: 'content',
   label: 'Fitness Facility',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },

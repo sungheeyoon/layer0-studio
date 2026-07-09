@@ -5,7 +5,7 @@ import { join } from 'path';
 import {
   runValidateJson,
   runValidateFiles,
-  checkDataSchemaJsxConsistency,
+  checkFieldsSchemaJsxConsistency,
   runThumbnailPath,
   type StepResult,
 } from './lib/validate-and-capture';
@@ -38,7 +38,7 @@ async function main() {
     const steps: StepResult[] = [
       await runValidateJson(templateKey),
       runValidateFiles(templateRoot),
-      checkDataSchemaJsxConsistency(templateRoot),
+      checkFieldsSchemaJsxConsistency(templateRoot),
       await runThumbnailPath(templateKey, templateRoot),
     ];
 

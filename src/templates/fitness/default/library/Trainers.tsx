@@ -4,19 +4,19 @@ import { CupIcon, DiplomaIcon, ClockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Trainers: SectionComponent = function Trainers({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '트레이너';
-  const title = getFieldValue(data, 'title') || '당신 옆에서\n함께 싸웁니다';
-  const description = getFieldValue(data, 'description') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '트레이너';
+  const title = getFieldValue(fields, 'title') || '당신 옆에서\n함께 싸웁니다';
+  const description = getFieldValue(fields, 'description') || '';
 
   const trainers = [1, 2, 3].map(n => ({
-    name: getFieldValue(data, `m${n}Name`),
-    role: getFieldValue(data, `m${n}Role`),
-    badge: getFieldValue(data, `m${n}Badge`),
-    image: getFieldValue(data, `m${n}Image`),
-    info1: getFieldValue(data, `m${n}Info1`),
-    info2: getFieldValue(data, `m${n}Info2`),
-    info3: getFieldValue(data, `m${n}Info3`),
+    name: getFieldValue(fields, `m${n}Name`),
+    role: getFieldValue(fields, `m${n}Role`),
+    badge: getFieldValue(fields, `m${n}Badge`),
+    image: getFieldValue(fields, `m${n}Image`),
+    info1: getFieldValue(fields, `m${n}Info1`),
+    info2: getFieldValue(fields, `m${n}Info2`),
+    info3: getFieldValue(fields, `m${n}Info3`),
     mt: n === 2 ? 'lg:mt-10' : '',
   })).filter(m => m.name);
 
@@ -98,7 +98,7 @@ Trainers.meta = {
   componentKey: 'trainers',
   category: 'content',
   label: 'Fitness Trainers',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },

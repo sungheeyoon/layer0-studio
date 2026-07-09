@@ -3,12 +3,12 @@ import styles from '../corporate.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Features: SectionComponent = function Features({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || 'Core Features';
-  const subtitle = getFieldValue(data, 'subtitle') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || 'Core Features';
+  const subtitle = getFieldValue(fields, 'subtitle') || '';
 
   // Filter out non-feature items
-  const features = Object.entries(data).filter(([key]) => !['title', 'subtitle', 'heading'].includes(key));
+  const features = Object.entries(fields).filter(([key]) => !['title', 'subtitle', 'heading'].includes(key));
 
   return (
     <div className={styles.section}>
@@ -29,7 +29,7 @@ const Features: SectionComponent = function Features({ section }: TemplateSectio
                 {field.label}
               </h3>
               <p className="text-xs font-light leading-relaxed opacity-60 group-hover:text-on-primary group-hover:opacity-80 transition-all">
-                {getFieldValue(data, key)}
+                {getFieldValue(fields, key)}
               </p>
             </div>
           ))}
@@ -43,7 +43,7 @@ Features.meta = {
   componentKey: 'features',
   category: 'features',
   label: 'Corporate Features',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'text', label: 'Section Title', required: true },
     subtitle: { type: 'text', label: 'Subtitle' },
     strategy: { type: 'text', label: 'Strategy' },

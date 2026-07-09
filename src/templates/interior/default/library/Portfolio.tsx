@@ -4,16 +4,16 @@ import { ArrowRightIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || 'Portfolio';
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || 'Portfolio';
+  const title = getFieldValue(fields, 'title') || '';
 
   const projects = [
     {
       id: 'p1',
-      meta: getFieldValue(data, 'p1Meta'),
-      title: getFieldValue(data, 'p1Title'),
-      desc: getFieldValue(data, 'p1Desc'),
+      meta: getFieldValue(fields, 'p1Meta'),
+      title: getFieldValue(fields, 'p1Title'),
+      desc: getFieldValue(fields, 'p1Desc'),
       height: '520px',
       rowSpan: 'md:row-span-2',
       bg: 'var(--i-grad-portfolio-1)',
@@ -35,8 +35,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
     },
     {
       id: 'p2',
-      meta: getFieldValue(data, 'p2Meta'),
-      title: getFieldValue(data, 'p2Title'),
+      meta: getFieldValue(fields, 'p2Meta'),
+      title: getFieldValue(fields, 'p2Title'),
       height: '250px',
       colSpan: 'md:col-span-2',
       bg: 'var(--i-grad-portfolio-2)',
@@ -56,8 +56,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
     },
     {
       id: 'p3',
-      meta: getFieldValue(data, 'p3Meta'),
-      title: getFieldValue(data, 'p3Title'),
+      meta: getFieldValue(fields, 'p3Meta'),
+      title: getFieldValue(fields, 'p3Title'),
       height: '255px',
       bg: 'var(--i-grad-portfolio-3)',
       svg: (
@@ -76,8 +76,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
     },
     {
       id: 'p4',
-      meta: getFieldValue(data, 'p4Meta'),
-      title: getFieldValue(data, 'p4Title'),
+      meta: getFieldValue(fields, 'p4Meta'),
+      title: getFieldValue(fields, 'p4Title'),
       height: '255px',
       bg: 'var(--i-grad-portfolio-4)',
       svg: (
@@ -146,7 +146,7 @@ Portfolio.meta = {
   componentKey: 'portfolio',
   category: 'content',
   label: 'Interior Portfolio',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     p1Meta: { type: 'text', label: 'P1 메타' },

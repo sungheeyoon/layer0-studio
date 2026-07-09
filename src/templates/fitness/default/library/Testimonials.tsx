@@ -4,16 +4,16 @@ import { StarIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '멤버 후기';
-  const title = getFieldValue(data, 'title') || '결과가\n모든 걸\n말합니다';
-  const ratingValue = getFieldValue(data, 'ratingValue') || '4.9';
-  const ratingLabel = getFieldValue(data, 'ratingLabel') || 'Google 리뷰 기준 • 894개 후기';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '멤버 후기';
+  const title = getFieldValue(fields, 'title') || '결과가\n모든 걸\n말합니다';
+  const ratingValue = getFieldValue(fields, 'ratingValue') || '4.9';
+  const ratingLabel = getFieldValue(fields, 'ratingLabel') || 'Google 리뷰 기준 • 894개 후기';
 
   const reviews = [1, 2, 3, 4, 5, 6].map(n => ({
-    body: getFieldValue(data, `r${n}Body`),
-    author: getFieldValue(data, `r${n}Author`),
-    meta: getFieldValue(data, `r${n}Meta`),
+    body: getFieldValue(fields, `r${n}Body`),
+    author: getFieldValue(fields, `r${n}Author`),
+    meta: getFieldValue(fields, `r${n}Meta`),
     mt: n % 2 === 0 ? 'md:mt-8' : '',
   })).filter(r => r.body);
 
@@ -77,7 +77,7 @@ Testimonials.meta = {
   componentKey: 'testimonials',
   category: 'content',
   label: 'Fitness Testimonials',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     ratingValue: { type: 'text', label: '별점 수치' },

@@ -9,7 +9,7 @@
  * indices 1-9.
  *
  * Wiring: `generate_section` (Issue #13) is intended to call this whenever
- * its dataSchema declares an `image` field; the LLM only picks the query
+ * its fieldsSchema declares an `image` field; the LLM only picks the query
  * text, this helper handles fetch + host. This file stands alone — no
  * integration touchpoint exists yet (deferred to #13).
  */
@@ -276,7 +276,7 @@ function picsumFallback(opts: { aspectRatio?: AspectRatio; seed: string }): stri
  * Top-level entry point. See module header for behavior.
  *
  * The integration point (`generate_section` auto-calling this when its
- * `dataSchema` declares an `image` field) lands in Issue #13.
+ * `fieldsSchema` declares an `image` field) lands in Issue #13.
  */
 export async function fetchAndHostImage(
   opts: FetchAndHostImageOptions,

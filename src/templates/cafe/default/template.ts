@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "네비게이션"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "MONO",
             "type": "text",
@@ -50,7 +50,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Seoul Seongsu — Specialty Coffee"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Seoul Seongsu — Specialty Coffee",
             "type": "text",
@@ -163,7 +163,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "마퀴"
         },
-        "data": {
+        "fields": {
           "item1": {
             "value": "Single Origin",
             "type": "text",
@@ -216,7 +216,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "메뉴"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "메뉴",
             "type": "text",
@@ -351,7 +351,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "카페 소개"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "카페 소개",
             "type": "text",
@@ -440,7 +440,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "공간"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "공간",
             "type": "text",
@@ -541,7 +541,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "손님 후기"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "손님 후기",
             "type": "text",
@@ -678,7 +678,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "방문 안내"
         },
-        "data": {
+        "fields": {
           "backgroundImage": {
             "value": "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1600&q=70",
             "type": "image",
@@ -785,7 +785,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "MONO",
             "type": "text",

@@ -4,18 +4,18 @@ import { StarIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const ratingScore = getFieldValue(data, 'ratingScore') || '';
-  const ratingNote = getFieldValue(data, 'ratingNote') || '';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const ratingScore = getFieldValue(fields, 'ratingScore') || '';
+  const ratingNote = getFieldValue(fields, 'ratingNote') || '';
 
   const reviews = [1, 2, 3]
     .map((n) => ({
-      body: getFieldValue(data, `review${n}Body`) || '',
-      author: getFieldValue(data, `review${n}Author`) || '',
-      meta: getFieldValue(data, `review${n}Meta`) || '',
-      avatar: getFieldValue(data, `review${n}Avatar`) || '',
+      body: getFieldValue(fields, `review${n}Body`) || '',
+      author: getFieldValue(fields, `review${n}Author`) || '',
+      meta: getFieldValue(fields, `review${n}Meta`) || '',
+      avatar: getFieldValue(fields, `review${n}Avatar`) || '',
       featured: n === 2,
     }))
     .filter((r) => r.body);
@@ -121,7 +121,7 @@ Testimonials.meta = {
   componentKey: 'testimonials',
   category: 'content',
   label: 'Wedding Testimonials',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'text', label: '타이틀', required: true },
     review1Body: { type: 'textarea', label: '후기 1 본문' },

@@ -74,7 +74,7 @@ const preset: TemplatePreset = {
           id: 'nav-001',
           type: 'nav',
           visible: true,
-          data: {
+          fields: {
             brandName: { type: 'text', label: '브랜드명', value: '능선' },
           },
         },
@@ -84,7 +84,7 @@ const preset: TemplatePreset = {
           id: 'footer-001',
           type: 'footer',
           visible: true,
-          data: {
+          fields: {
             brandName: { type: 'text', label: '브랜드명', value: '능선' },
             tagline: {
               type: 'textarea',
@@ -118,7 +118,7 @@ const preset: TemplatePreset = {
             id: 'home-hero',
             type: 'hero',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: 'SINCE 2016 · SEOUL' },
               title: { type: 'text', label: '대제목', value: '능선을 잇다' },
               subtitle: {
@@ -136,7 +136,7 @@ const preset: TemplatePreset = {
             id: 'home-pillars',
             type: 'pillars',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '능선이 일하는 방식' },
               heading: { type: 'text', label: '제목', value: '오래 쓰는 것을, 가볍게' },
               items: {
@@ -178,7 +178,7 @@ const preset: TemplatePreset = {
             id: 'home-story',
             type: 'featureSplit',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '브랜드' },
               heading: { type: 'text', label: '제목', value: '능선은 길에서 시작됐습니다' },
               body: {
@@ -196,7 +196,7 @@ const preset: TemplatePreset = {
             id: 'home-collections',
             type: 'collectionGrid',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '대표 컬렉션' },
               heading: { type: 'text', label: '제목', value: '계절을 입다' },
               items: {
@@ -231,7 +231,7 @@ const preset: TemplatePreset = {
             id: 'home-stats',
             type: 'stats',
             visible: true,
-            data: {
+            fields: {
               heading: { type: 'text', label: '제목', value: '숫자로 보는 능선' },
               items: {
                 type: 'array',
@@ -249,7 +249,7 @@ const preset: TemplatePreset = {
             id: 'home-cta',
             type: 'ctaBanner',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '함께 걷기' },
               heading: { type: 'text', label: '제목', value: '다음 능선에서 만나요' },
               body: {
@@ -279,7 +279,7 @@ const preset: TemplatePreset = {
             id: 'shop-header',
             type: 'pageHeader',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: 'STORE' },
               title: { type: 'text', label: '제목', value: '스토어' },
               description: {
@@ -294,7 +294,7 @@ const preset: TemplatePreset = {
             id: 'shop-products',
             type: 'productGrid',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '신상품' },
               heading: { type: 'text', label: '제목', value: '이번 시즌의 장비' },
               items: {
@@ -345,7 +345,7 @@ const preset: TemplatePreset = {
             id: 'shop-cta',
             type: 'ctaBanner',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '리페어 서비스' },
               heading: { type: 'text', label: '제목', value: '고쳐 쓰면 더 오래갑니다' },
               body: {
@@ -375,7 +375,7 @@ const preset: TemplatePreset = {
             id: 'col-header',
             type: 'pageHeader',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: 'COLLECTIONS' },
               title: { type: 'text', label: '제목', value: '컬렉션' },
               description: {
@@ -390,7 +390,7 @@ const preset: TemplatePreset = {
             id: 'col-grid',
             type: 'collectionGrid',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '2026 라인업' },
               heading: { type: 'text', label: '제목', value: '네 개의 능선' },
               items: {
@@ -429,7 +429,7 @@ const preset: TemplatePreset = {
             id: 'col-split',
             type: 'featureSplit',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '소재 이야기' },
               heading: { type: 'text', label: '제목', value: '산에서 와서 산으로 돌아가도록' },
               body: {
@@ -461,7 +461,7 @@ const preset: TemplatePreset = {
             id: 'act-header',
             type: 'pageHeader',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: 'ACTIVITIES' },
               title: { type: 'text', label: '제목', value: '액티비티' },
               description: {
@@ -476,7 +476,7 @@ const preset: TemplatePreset = {
             id: 'act-grid',
             type: 'activityGrid',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '2026 일정' },
               heading: { type: 'text', label: '제목', value: '함께 걷는 프로그램' },
               items: {
@@ -519,7 +519,7 @@ const preset: TemplatePreset = {
             id: 'act-cta',
             type: 'ctaBanner',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '신청 안내' },
               heading: { type: 'text', label: '제목', value: '자리가 빠르게 마감됩니다' },
               body: { type: 'textarea', label: '설명', value: '각 회차 정원은 12명입니다. 멤버십 회원은 우선 신청과 장비 대여 혜택을 받습니다.' },
@@ -545,7 +545,7 @@ const preset: TemplatePreset = {
             id: 'jrn-header',
             type: 'pageHeader',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: 'JOURNAL' },
               title: { type: 'text', label: '제목', value: '저널' },
               description: {
@@ -560,7 +560,7 @@ const preset: TemplatePreset = {
             id: 'jrn-grid',
             type: 'journalGrid',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '최근 글' },
               heading: { type: 'text', label: '제목', value: '산에서 온 이야기' },
               items: {
@@ -631,7 +631,7 @@ const preset: TemplatePreset = {
             id: 'about-header',
             type: 'pageHeader',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: 'ABOUT' },
               title: { type: 'text', label: '제목', value: '산을 걷는 사람들이 만듭니다' },
               description: {
@@ -646,7 +646,7 @@ const preset: TemplatePreset = {
             id: 'about-split',
             type: 'featureSplit',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '시작' },
               heading: { type: 'text', label: '제목', value: '마땅한 장비가 없어서, 직접 만들었습니다' },
               body: {
@@ -664,7 +664,7 @@ const preset: TemplatePreset = {
             id: 'about-pillars',
             type: 'pillars',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: '약속' },
               heading: { type: 'text', label: '제목', value: '능선이 지키는 세 가지' },
               items: {
@@ -682,7 +682,7 @@ const preset: TemplatePreset = {
             id: 'about-stats',
             type: 'stats',
             visible: true,
-            data: {
+            fields: {
               heading: { type: 'text', label: '제목', value: '걸어온 길' },
               items: {
                 type: 'array',
@@ -714,7 +714,7 @@ const preset: TemplatePreset = {
             id: 'contact-header',
             type: 'pageHeader',
             visible: true,
-            data: {
+            fields: {
               eyebrow: { type: 'text', label: '상단 라벨', value: 'CONTACT' },
               title: { type: 'text', label: '제목', value: '문의하기' },
               description: {
@@ -729,7 +729,7 @@ const preset: TemplatePreset = {
             id: 'contact-info',
             type: 'contact',
             visible: true,
-            data: {
+            fields: {
               heading: { type: 'text', label: '제목', value: '성수 플래그십 & 작업실' },
               intro: {
                 type: 'textarea',

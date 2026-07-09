@@ -4,7 +4,7 @@ export const contactMeta: SectionComponentMeta = {
   componentKey: 'contact',
   category: 'contact',
   label: 'Corporate Contact',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'text', label: 'Section Title', required: true },
     email: { type: 'text', label: 'Email' },
     phone: { type: 'text', label: 'Phone' },

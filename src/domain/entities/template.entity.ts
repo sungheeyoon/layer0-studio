@@ -85,7 +85,7 @@ export interface Section {
   id: string;
   type: string;
   visible: boolean;
-  data: Record<string, Field>;
+  fields: Record<string, Field>;
 }
 
 /**

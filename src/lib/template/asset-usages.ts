@@ -22,11 +22,11 @@ export function collectAssetUsages(siteJson: ContentModel): AssetUsage[] {
   const usages: AssetUsage[] = [];
 
   const collectFromSection = (
-    section: { id: string; data?: Record<string, unknown> },
+    section: { id: string; fields?: Record<string, unknown> },
     prefix: string,
   ) => {
-    if (!section.data) return;
-    for (const [key, field] of Object.entries(section.data)) {
+    if (!section.fields) return;
+    for (const [key, field] of Object.entries(section.fields)) {
       const f = field as { type?: string; assetId?: string };
       if (f.type === 'image' && f.assetId) {
         usages.push({ asset_id: f.assetId, slot_key: `${prefix}${section.id}.${key}` });

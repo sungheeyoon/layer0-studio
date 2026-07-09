@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "네비게이션"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "에스파시오",
             "type": "text",
@@ -44,7 +44,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Seoul Premium Interior Studio"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Seoul Premium Interior Studio",
             "type": "text",
@@ -127,7 +127,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "통계"
         },
-        "data": {
+        "fields": {
           "s1Value": {
             "value": "280",
             "type": "text",
@@ -186,7 +186,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "스튜디오 소개"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "About Espacio",
             "type": "text",
@@ -257,7 +257,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "서비스"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Our Services",
             "type": "text",
@@ -358,7 +358,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "포트폴리오"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Portfolio",
             "type": "text",
@@ -435,7 +435,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "진행 과정"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "How We Work",
             "type": "text",
@@ -530,7 +530,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Client Reviews"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Client Reviews",
             "type": "text",
@@ -607,7 +607,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "문의"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Get Started",
             "type": "text",
@@ -654,7 +654,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "description": {
             "value": "공간이 삶을 바꾸는 순간을 설계하는 프리미엄 인테리어 스튜디오. 2015년 설립.",
             "type": "textarea",

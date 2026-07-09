@@ -4,16 +4,16 @@ import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIco
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || 'ARRC';
-  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Clinic';
-  const description = getFieldValue(data, 'description') || '';
-  const address = getFieldValue(data, 'address') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const hours = getFieldValue(data, 'hours') || '';
-  const copyright = getFieldValue(data, 'copyright') || '';
-  const businessNum = getFieldValue(data, 'businessNum') || '';
-  const representative = getFieldValue(data, 'representative') || '';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || 'ARRC';
+  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Clinic';
+  const description = getFieldValue(fields, 'description') || '';
+  const address = getFieldValue(fields, 'address') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const hours = getFieldValue(fields, 'hours') || '';
+  const copyright = getFieldValue(fields, 'copyright') || '';
+  const businessNum = getFieldValue(fields, 'businessNum') || '';
+  const representative = getFieldValue(fields, 'representative') || '';
 
   return (
     <footer className="bg-[var(--m-charcoal)] border-t border-[var(--m-cream)]/[0.06] pt-16 pb-10 px-6 lg:px-10">
@@ -103,7 +103,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Medical Footer',
-  dataSchema: {
+  fieldsSchema: {
     brandName: { type: 'text', label: '브랜드 이름' },
     brandSubtext: { type: 'text', label: '보조 텍스트' },
     description: { type: 'text', label: '설명' },

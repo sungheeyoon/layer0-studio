@@ -4,19 +4,19 @@ import { ArrowRightIcon, PhoneIcon, MedalIcon, ShieldCheckIcon, StarIcon } from 
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || 'Seoul Premium Interior Studio';
-  const estLabel = getFieldValue(data, 'estLabel') || 'Est. 2015';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
-  const ctaPrimary = getFieldValue(data, 'ctaPrimary') || '포트폴리오 보기';
-  const ctaSecondary = getFieldValue(data, 'ctaSecondary') || '무료 상담 예약';
-  const trust1 = getFieldValue(data, 'trust1') || '한국 인테리어 대상 2023';
-  const trust2 = getFieldValue(data, 'trust2') || '건설업 면허 보유';
-  const trust3 = getFieldValue(data, 'trust3') || '고객 만족도 4.9/5.0';
-  const statValue = getFieldValue(data, 'statValue') || '280';
-  const statLabel = getFieldValue(data, 'statLabel') || '완성된 프로젝트';
-  const projectTitle = getFieldValue(data, 'projectTitle') || '성북동 단독주택 — 거실 리모델링';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || 'Seoul Premium Interior Studio';
+  const estLabel = getFieldValue(fields, 'estLabel') || 'Est. 2015';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
+  const ctaPrimary = getFieldValue(fields, 'ctaPrimary') || '포트폴리오 보기';
+  const ctaSecondary = getFieldValue(fields, 'ctaSecondary') || '무료 상담 예약';
+  const trust1 = getFieldValue(fields, 'trust1') || '한국 인테리어 대상 2023';
+  const trust2 = getFieldValue(fields, 'trust2') || '건설업 면허 보유';
+  const trust3 = getFieldValue(fields, 'trust3') || '고객 만족도 4.9/5.0';
+  const statValue = getFieldValue(fields, 'statValue') || '280';
+  const statLabel = getFieldValue(fields, 'statLabel') || '완성된 프로젝트';
+  const projectTitle = getFieldValue(fields, 'projectTitle') || '성북동 단독주택 — 거실 리모델링';
 
   return (
     <section className={`${styles.heroArt} relative min-h-screen flex items-center pt-16 overflow-hidden`}>
@@ -133,7 +133,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Interior Hero',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     estLabel: { type: 'text', label: '설립 연도 라벨' },
     title: { type: 'textarea', label: '메인 타이틀', required: true },

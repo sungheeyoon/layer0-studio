@@ -7,7 +7,7 @@ import { ContentModel, allSections } from '@/domain/entities/template.entity';
 export function injectKeys(json: ContentModel): ContentModel {
   const updated = structuredClone(json);
   allSections(updated).forEach((section) => {
-    Object.values(section.data).forEach((field) => {
+    Object.values(section.fields).forEach((field) => {
       if (field.type === 'array' && field.items) {
         field.items.forEach((item) => {
           if (!item._key) {
@@ -31,7 +31,7 @@ export function injectKeys(json: ContentModel): ContentModel {
 export function stripKeys(json: ContentModel): ContentModel {
   const updated = structuredClone(json);
   allSections(updated).forEach((section) => {
-    Object.values(section.data).forEach((field) => {
+    Object.values(section.fields).forEach((field) => {
       if (field.type === 'array' && field.items) {
         field.items.forEach((item) => {
           delete item._key;

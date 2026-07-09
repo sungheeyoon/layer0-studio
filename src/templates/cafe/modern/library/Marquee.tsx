@@ -4,8 +4,8 @@ import { CoffeeIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const items = [1, 2, 3, 4, 5, 6, 7, 8].map(n => getFieldValue(data, `item${n}`)).filter(Boolean);
+  const { fields } = section;
+  const items = [1, 2, 3, 4, 5, 6, 7, 8].map(n => getFieldValue(fields, `item${n}`)).filter(Boolean);
 
   return (
     <section className="bg-[var(--c-espresso)] py-5 overflow-hidden">
@@ -43,7 +43,7 @@ Marquee.meta = {
   componentKey: 'marquee',
   category: 'feature',
   label: 'Ticker Strip',
-  dataSchema: {
+  fieldsSchema: {
     item1: { type: 'text', label: '항목 1' },
     item2: { type: 'text', label: '항목 2' },
     item3: { type: 'text', label: '항목 3' },

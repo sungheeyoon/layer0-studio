@@ -11,8 +11,8 @@ import {
  */
 const Stats: SectionComponent = function Stats(props: TemplateSectionProps) {
   const { section } = props;
-  const heading = getFieldValue(section.data, 'heading');
-  const items = (section.data.items as ArrayField | undefined)?.items ?? [];
+  const heading = getFieldValue(section.fields, 'heading');
+  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-dark)]">
@@ -43,7 +43,7 @@ Stats.meta = {
   componentKey: 'stats',
   category: 'feature',
   label: '지표 (다크 밴드)',
-  dataSchema: {
+  fieldsSchema: {
     heading: { type: 'text', label: '제목' },
     items: {
       type: 'array',

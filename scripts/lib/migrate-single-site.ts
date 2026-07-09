@@ -151,7 +151,7 @@ export function migrateSingleSiteJson(
       type: s.type,
       visible: s.visible ?? true,
       nav,
-      data,
+      fields: data,
     };
   });
 

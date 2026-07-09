@@ -4,21 +4,21 @@ import { PhoneIcon, ArrowUpRightIcon, MapPointIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Visit: SectionComponent = function Visit({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const bgImage = getFieldValue(data, 'backgroundImage') || '';
-  const label = getFieldValue(data, 'eyebrow') || '방문 안내';
-  const title = getFieldValue(data, 'title') || '언제든\n환영합니다';
-  const description = getFieldValue(data, 'description') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const instagram = getFieldValue(data, 'instagram') || '#';
+  const { fields } = section;
+  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
+  const label = getFieldValue(fields, 'eyebrow') || '방문 안내';
+  const title = getFieldValue(fields, 'title') || '언제든\n환영합니다';
+  const description = getFieldValue(fields, 'description') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const instagram = getFieldValue(fields, 'instagram') || '#';
 
   const hours = [1, 2, 3, 4].map(n => ({
-    label: getFieldValue(data, `h${n}Label`),
-    value: getFieldValue(data, `h${n}Value`),
+    label: getFieldValue(fields, `h${n}Label`),
+    value: getFieldValue(fields, `h${n}Value`),
   })).filter(h => h.label);
 
-  const address = getFieldValue(data, 'address') || '';
-  const addressDetail = getFieldValue(data, 'addressDetail') || '';
+  const address = getFieldValue(fields, 'address') || '';
+  const addressDetail = getFieldValue(fields, 'addressDetail') || '';
 
   return (
     <section className="relative overflow-hidden" id="visit">
@@ -110,7 +110,7 @@ Visit.meta = {
   componentKey: 'visit',
   category: 'about',
   label: 'Visit Info',
-  dataSchema: {
+  fieldsSchema: {
     backgroundImage: { type: 'image', label: '배경 이미지' },
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀' },

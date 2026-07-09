@@ -4,18 +4,18 @@ import { BuildingsIcon, SofaIcon, ShieldCheckIcon, MapPointIcon } from '../secti
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Space: SectionComponent = function Space({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
-  const mainImage = getFieldValue(data, 'mainImage') || '';
-  const subImage = getFieldValue(data, 'subImage') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
+  const mainImage = getFieldValue(fields, 'mainImage') || '';
+  const subImage = getFieldValue(fields, 'subImage') || '';
 
   const features = [
-    { title: getFieldValue(data, 'feature1Title'), desc: getFieldValue(data, 'feature1Desc'), icon: <BuildingsIcon size={22} className="text-[var(--m-gold)]" /> },
-    { title: getFieldValue(data, 'feature2Title'), desc: getFieldValue(data, 'feature2Desc'), icon: <SofaIcon size={22} className="text-[var(--m-gold)]" /> },
-    { title: getFieldValue(data, 'feature3Title'), desc: getFieldValue(data, 'feature3Desc'), icon: <ShieldCheckIcon size={22} className="text-[var(--m-gold)]" /> },
-    { title: getFieldValue(data, 'feature4Title'), desc: getFieldValue(data, 'feature4Desc'), icon: <MapPointIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: getFieldValue(fields, 'feature1Title'), desc: getFieldValue(fields, 'feature1Desc'), icon: <BuildingsIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: getFieldValue(fields, 'feature2Title'), desc: getFieldValue(fields, 'feature2Desc'), icon: <SofaIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: getFieldValue(fields, 'feature3Title'), desc: getFieldValue(fields, 'feature3Desc'), icon: <ShieldCheckIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: getFieldValue(fields, 'feature4Title'), desc: getFieldValue(fields, 'feature4Desc'), icon: <MapPointIcon size={22} className="text-[var(--m-gold)]" /> },
   ].filter(f => f.title);
 
   return (
@@ -75,7 +75,7 @@ Space.meta = {
   componentKey: 'space',
   category: 'content',
   label: 'Medical Space',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },

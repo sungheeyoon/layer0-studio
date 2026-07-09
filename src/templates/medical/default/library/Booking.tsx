@@ -4,13 +4,13 @@ import { PhoneIcon, ChatIcon, ClockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Booking: SectionComponent = function Booking({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const hours = getFieldValue(data, 'hours') || '';
-  const image = getFieldValue(data, 'image') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const hours = getFieldValue(fields, 'hours') || '';
+  const image = getFieldValue(fields, 'image') || '';
 
   return (
     <section className="relative overflow-hidden py-28 lg:py-44" id="booking">
@@ -71,7 +71,7 @@ Booking.meta = {
   componentKey: 'booking',
   category: 'contact',
   label: 'Medical Booking CTA',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },

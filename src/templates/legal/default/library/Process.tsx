@@ -3,12 +3,12 @@ import styles from '../legal.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || '';
 
   const steps = [1, 2, 3, 4, 5].map(n => ({
-    title: getFieldValue(data, `step${n}Title`) || '',
-    body: getFieldValue(data, `step${n}Body`) || '',
+    title: getFieldValue(fields, `step${n}Title`) || '',
+    body: getFieldValue(fields, `step${n}Body`) || '',
   }));
 
   return (
@@ -55,7 +55,7 @@ Process.meta = {
   componentKey: 'process',
   category: 'content',
   label: 'Legal Process',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'text', label: '섹션 타이틀', required: true },
     step1Title: { type: 'text', label: '단계 1 제목' },
     step1Body: { type: 'textarea', label: '단계 1 설명' },

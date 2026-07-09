@@ -9,10 +9,10 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 const Navigation: SectionComponent = function Navigation(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || 'MONO';
-  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Specialty Coffee';
-  const ctaText = getFieldValue(data, 'ctaText') || '오시는 길';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || 'MONO';
+  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Specialty Coffee';
+  const ctaText = getFieldValue(fields, 'ctaText') || '오시는 길';
 
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen] = useState(false);

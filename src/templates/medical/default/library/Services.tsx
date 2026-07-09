@@ -4,40 +4,40 @@ import { ArrowRightIcon, MagicStickIcon, SyringeIcon, LeafIcon } from '../sectio
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
 
   const services = [
     {
-      title: getFieldValue(data, 'service1Title'),
-      desc: getFieldValue(data, 'service1Desc'),
-      image: getFieldValue(data, 'service1Image'),
+      title: getFieldValue(fields, 'service1Title'),
+      desc: getFieldValue(fields, 'service1Desc'),
+      image: getFieldValue(fields, 'service1Image'),
       badge: '인기 No.1',
       colSpan: 'md:col-span-2',
     },
     {
-      title: getFieldValue(data, 'service2Title'),
-      desc: getFieldValue(data, 'service2Desc'),
-      image: getFieldValue(data, 'service2Image'),
+      title: getFieldValue(fields, 'service2Title'),
+      desc: getFieldValue(fields, 'service2Desc'),
+      image: getFieldValue(fields, 'service2Image'),
     },
     {
-      title: getFieldValue(data, 'service3Title'),
-      desc: getFieldValue(data, 'service3Desc'),
+      title: getFieldValue(fields, 'service3Title'),
+      desc: getFieldValue(fields, 'service3Desc'),
       dark: true,
       icon: <SyringeIcon size={22} className="text-[var(--m-gold)]" />,
     },
     {
-      title: getFieldValue(data, 'service4Title'),
-      desc: getFieldValue(data, 'service4Desc'),
+      title: getFieldValue(fields, 'service4Title'),
+      desc: getFieldValue(fields, 'service4Desc'),
       light: true,
       icon: <LeafIcon size={22} />,
     },
     {
-      title: getFieldValue(data, 'service5Title'),
-      desc: getFieldValue(data, 'service5Desc'),
-      image: getFieldValue(data, 'service5Image'),
+      title: getFieldValue(fields, 'service5Title'),
+      desc: getFieldValue(fields, 'service5Desc'),
+      image: getFieldValue(fields, 'service5Image'),
     },
   ].filter(s => s.title);
 
@@ -105,7 +105,7 @@ Services.meta = {
   componentKey: 'services',
   category: 'features',
   label: 'Medical Services',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '섹션 설명' },

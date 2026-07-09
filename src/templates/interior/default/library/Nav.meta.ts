@@ -4,7 +4,7 @@ export const navMeta: SectionComponentMeta = {
   componentKey: 'nav',
   category: 'navigation',
   label: 'Interior Navigation',
-  dataSchema: {
+  fieldsSchema: {
     brandName: { type: 'text', label: '브랜드 이름' },
     ctaText: { type: 'text', label: 'CTA 텍스트' },
   },
