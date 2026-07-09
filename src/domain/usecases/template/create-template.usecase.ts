@@ -10,7 +10,7 @@ interface CreateTemplateInput {
   category: string;
   status: 'draft' | 'active' | 'archived';
   thumbnailUrl: string | null;
-  templateJson: ContentModel;
+  content: ContentModel;
   version: string;
   createdBy: string;
 }
@@ -29,7 +29,7 @@ export class CreateTemplateUseCase {
     }
 
     // Validate content against the Template library (single source of truth)
-    const { errors } = await this.validator.validate(input.templateJson);
+    const { errors } = await this.validator.validate(input.content);
     if (errors.length > 0) {
       throw new TemplateError('INVALID_TEMPLATE_JSON', errors);
     }

@@ -22,8 +22,8 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       siteName: row.site_name,
       domain: row.domain,
       status: row.status,
-      siteJson: row.site_json,
-      templateSnapshot: row.template_snapshot,
+      content: row.content,
+      snapshot: row.snapshot,
       publishedAt: row.published_at,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -84,8 +84,8 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
         site_name: dto.siteName,
         domain: dto.domain,
         status: dto.status,
-        site_json: dto.siteJson,
-        template_snapshot: dto.templateSnapshot,
+        content: dto.content,
+        snapshot: dto.snapshot,
         published_at: dto.publishedAt,
       })
       .select()
@@ -105,8 +105,8 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     if (dto.siteName !== undefined) updatePayload.site_name = dto.siteName;
     if (dto.domain !== undefined) updatePayload.domain = dto.domain;
     if (dto.status !== undefined) updatePayload.status = dto.status;
-    if (dto.siteJson !== undefined) updatePayload.site_json = dto.siteJson;
-    if (dto.templateSnapshot !== undefined) updatePayload.template_snapshot = dto.templateSnapshot;
+    if (dto.content !== undefined) updatePayload.content = dto.content;
+    if (dto.snapshot !== undefined) updatePayload.snapshot = dto.snapshot;
     if (dto.publishedAt !== undefined) updatePayload.published_at = dto.publishedAt;
     updatePayload.updated_at = new Date().toISOString();
 

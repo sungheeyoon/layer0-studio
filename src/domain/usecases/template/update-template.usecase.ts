@@ -25,8 +25,8 @@ export class UpdateTemplateUseCase {
     }
 
     // Validate content against the Template library (single source of truth)
-    if (data.templateJson) {
-      const { errors } = await this.validator.validate(data.templateJson);
+    if (data.content) {
+      const { errors } = await this.validator.validate(data.content);
       if (errors.length > 0) {
         throw new TemplateError('INVALID_TEMPLATE_JSON', errors);
       }

@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const site = await useCase.execute(domain);
-    const { siteJson } = site;
+    const { content: siteJson } = site;
     const slugPath = (slug ?? []).join('/');
 
     // Resolve the active page (Multi) so SEO is read per-page.
@@ -96,7 +96,7 @@ export default async function PublicSitePage({ params }: Props) {
     notFound();
   }
 
-  const { siteJson } = site;
+  const { content: siteJson } = site;
   const slugPath = (slug ?? []).join('/');
 
   // Resolve the active page (Multi) or guard against stray slugs (Single).

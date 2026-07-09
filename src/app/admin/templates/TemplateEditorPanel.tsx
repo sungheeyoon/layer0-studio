@@ -55,7 +55,7 @@ export default function TemplateEditorPanel({
 
   // JSON state
   const [templateJsonStr, setTemplateJsonStr] = useState(
-    template ? JSON.stringify(template.templateJson, null, 2) : '',
+    template ? JSON.stringify(template.content, null, 2) : '',
   );
   const [jsonError, setJsonError] = useState<string | null>(
     template ? null : 'JSON is required'

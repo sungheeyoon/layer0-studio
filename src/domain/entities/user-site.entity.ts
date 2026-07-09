@@ -7,10 +7,10 @@ export interface UserSite {
   siteName: string;
   domain: string | null;
   status: 'draft' | 'active' | 'suspended';
-  siteJson: ContentModel;
+  content: ContentModel;
   // Immutable snapshot of the original template JSON at site creation time.
   // Intended for future "reset to template" / diff features — not yet consumed by any UI.
-  templateSnapshot: ContentModel;
+  snapshot: ContentModel;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;

@@ -28,7 +28,7 @@ export async function createCustomSiteAction(
     const site = await useCase.executeCustom({
       userId,
       siteName,
-      siteJson,
+      content: siteJson,
       domain,
     });
 

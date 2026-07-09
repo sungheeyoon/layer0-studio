@@ -8,7 +8,7 @@ export type TemplateRow = {
   category: string;
   status: 'draft' | 'active' | 'archived';
   thumbnail_url: string | null;
-  template_json: ContentModel;
+  content: ContentModel;
   version: string;
   created_by: string;
   created_at: string;
@@ -22,8 +22,8 @@ export type UserSiteRow = {
   site_name: string;
   domain: string | null;
   status: 'draft' | 'active' | 'suspended';
-  site_json: ContentModel;
-  template_snapshot: ContentModel;
+  content: ContentModel;
+  snapshot: ContentModel;
   published_at: string | null;
   created_at: string;
   updated_at: string;

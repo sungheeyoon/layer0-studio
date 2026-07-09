@@ -151,11 +151,11 @@ export async function syncTemplates(
     const templateModuleLoader = templateMap[templateKey];
     const templateModule = templateModuleLoader ? await templateModuleLoader() : null;
 
-    // 2. The Preset carries the full templateJson verbatim (code is source of truth).
-    const effectiveTemplateJson = preset.templateJson;
+    // 2. The Preset carries the full content verbatim (code is source of truth).
+    const content = preset.templateJson;
 
     // 3. Validate
-    const validation = validateTemplateJson(effectiveTemplateJson, {
+    const validation = validateTemplateJson(content, {
       availableTemplateKeys: getAvailableTemplateKeys(),
       templateLibrary: templateModule?.library
     });
@@ -211,7 +211,7 @@ export async function syncTemplates(
           name: preset.defaults.name,
           description: preset.defaults.description,
           category,
-          template_json: effectiveTemplateJson,
+          content,
           version: preset.version,
           thumbnail_url: effectiveThumbnailUrl,
           status: 'active'
@@ -221,9 +221,9 @@ export async function syncTemplates(
       // UPDATE?
       const changes: string[] = [];
 
-      // Compare templateJson
-      if (JSON.stringify(existing.template_json) !== JSON.stringify(effectiveTemplateJson)) {
-        changes.push('templateJson changed');
+      // Compare content
+      if (JSON.stringify(existing.content) !== JSON.stringify(content)) {
+        changes.push('content changed');
       }
 
       if (existing.version !== preset.version) {
@@ -251,7 +251,7 @@ export async function syncTemplates(
             .from('templates')
             .update({
               category,
-              template_json: effectiveTemplateJson,
+              content,
               version: preset.version,
               thumbnail_url: effectiveThumbnailUrl,
               updated_at: new Date().toISOString()

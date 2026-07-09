@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('user_sites')
-    .select('domain, published_at, site_json')
+    .select('domain, published_at, content')
     .eq('status', 'active')
     .not('domain', 'is', null)
     .order('published_at', { ascending: false })
@@ -31,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const row of data ?? []) {
     const base = `${SITE_URL}/site/${row.domain}`;
     const lastModified = row.published_at ?? now;
-    const siteJson = row.site_json as ContentModel | null;
+    const siteJson = row.content as ContentModel | null;
 
     if (siteJson && isMultiContent(siteJson)) {
       // Every routable (visible) Page gets a URL: the first page = home (base),
