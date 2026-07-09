@@ -1,7 +1,7 @@
-import { TemplateJson } from '../../entities/template.entity';
+import { ContentModel } from '../../entities/template.entity';
 
 /**
- * A single validation finding against a Site's content (`TemplateJson`).
+ * A single validation finding against a Site's content (`ContentModel`).
  * `code` is a stable identifier (see the catalog in docs/TEMPLATE_SYSTEM.md §6);
  * `path` points at the offending location (e.g. `sections[id=hero].data.title`).
  */
@@ -26,5 +26,5 @@ export interface SiteContentValidationResult {
  * is loaded — it only depends on this contract.
  */
 export interface SiteContentValidator {
-  validate(json: TemplateJson): Promise<SiteContentValidationResult>;
+  validate(json: ContentModel): Promise<SiteContentValidationResult>;
 }

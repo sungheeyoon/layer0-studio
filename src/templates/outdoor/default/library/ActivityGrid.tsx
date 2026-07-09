@@ -2,7 +2,7 @@ import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import {
   getFieldValue,
-  ArrayTemplateField,
+  ArrayField,
 } from '@/domain/entities/template.entity';
 
 /**
@@ -13,7 +13,7 @@ const ActivityGrid: SectionComponent = function ActivityGrid(props: TemplateSect
   const { section } = props;
   const eyebrow = getFieldValue(section.data, 'eyebrow');
   const heading = getFieldValue(section.data, 'heading');
-  const items = (section.data.items as ArrayTemplateField | undefined)?.items ?? [];
+  const items = (section.data.items as ArrayField | undefined)?.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">

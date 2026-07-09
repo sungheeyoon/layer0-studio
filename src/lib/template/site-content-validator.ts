@@ -1,4 +1,4 @@
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 import {
   SiteContentValidator,
   SiteContentValidationResult,
@@ -17,7 +17,7 @@ import { validateTemplateJson } from './validate';
  * reports `UNKNOWN_TEMPLATE_KEY` because `availableTemplateKeys` is supplied.
  */
 export class LibraryAwareSiteContentValidator implements SiteContentValidator {
-  async validate(json: TemplateJson): Promise<SiteContentValidationResult> {
+  async validate(json: ContentModel): Promise<SiteContentValidationResult> {
     const mod = await loadTemplate(json.templateKey);
     return validateTemplateJson(json, {
       availableTemplateKeys: getAvailableTemplateKeys(),

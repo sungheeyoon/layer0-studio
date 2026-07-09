@@ -1,4 +1,4 @@
-import { TemplateJson, TemplateSection, TemplateFieldType } from '@/domain/entities/template.entity';
+import { ContentModel, Section, FieldType } from '@/domain/entities/template.entity';
 import { ComponentType } from 'react';
 
 /**
@@ -14,7 +14,7 @@ export interface SectionComponentMeta {
 
 export interface SectionDataSchema {
   [fieldKey: string]: {
-    type: TemplateFieldType;
+    type: FieldType;
     label: string;
     required?: boolean;
     options?: string[]; // (select용, 이미 사실상 사용 중)
@@ -83,7 +83,7 @@ export interface TemplatePreset {
    * (Single / Multi) — the Preset is the source of truth, carried verbatim
    * (the legacy `composition` short-hand was removed, see ADR-0007).
    */
-  templateJson: TemplateJson;
+  templateJson: ContentModel;
 
   /** Relative path from project root, e.g. 'public/thumbnails/template-cafe.jpg' */
   thumbnailPath: string;
@@ -107,7 +107,7 @@ export interface TemplatePreset {
 
 /** Template overall page renderer Props */
 export interface TemplateRendererProps {
-  siteJson: TemplateJson;
+  siteJson: ContentModel;
   selectedSectionId: string | null;
   onSectionClick?: (sectionId: string) => void;
   activePageId?: string; // ID of the page to render
@@ -121,7 +121,7 @@ export interface TemplateRendererProps {
 
 /** Template individual section renderer Props (for components within slots) */
 export interface TemplateSectionProps {
-  section: TemplateSection;
+  section: Section;
   isSelected?: boolean;
   onClick?: () => void;
 }
@@ -145,13 +145,13 @@ export interface NavSectionProps extends TemplateSectionProps {
 
 export interface TemplateModule {
   default: ComponentType<TemplateRendererProps>;
-  defaultTemplateJson: TemplateJson;
+  defaultTemplateJson: ContentModel;
   library: TemplateLibrary;
 }
 
 /**
  * A template's rich design tokens — the *code-fixed* visual identity.
- * The user-editable thin layer is `TemplateGlobalStyles` (primaryColor,
+ * The user-editable thin layer is `GlobalStyles` (primaryColor,
  * secondaryColor, fontFamily, fontSize) which overlays specific keys here
  * via `tokensToCssVars()` (`src/lib/template/design-tokens.ts`).
  *

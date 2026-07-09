@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import { SITE_URL } from '@/lib/seo/base-url';
-import { TemplateJson, isMultiTemplate } from '@/domain/entities/template.entity';
+import { ContentModel, isMultiContent } from '@/domain/entities/template.entity';
 
 export const revalidate = 3600;
 
@@ -31,9 +31,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const row of data ?? []) {
     const base = `${SITE_URL}/site/${row.domain}`;
     const lastModified = row.published_at ?? now;
-    const siteJson = row.site_json as TemplateJson | null;
+    const siteJson = row.site_json as ContentModel | null;
 
-    if (siteJson && isMultiTemplate(siteJson)) {
+    if (siteJson && isMultiContent(siteJson)) {
       // Every routable (visible) Page gets a URL: the first page = home (base),
       // the rest at `${base}/${slug}`. Pages hidden from the top nav are still
       // routable, so they are included too.

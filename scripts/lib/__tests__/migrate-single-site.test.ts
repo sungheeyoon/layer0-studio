@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { migrateSingleSiteJson, type SeedNavMap } from '../migrate-single-site';
-import { isSingleTemplate, getFieldValue, type TemplateField } from '../../../src/domain/entities/template.entity';
+import { isSingleContent, getFieldValue, type Field } from '../../../src/domain/entities/template.entity';
 
-const txt = (value: string): TemplateField => ({ type: 'text', label: 'x', value, editable: true });
+const txt = (value: string): Field => ({ type: 'text', label: 'x', value, editable: true });
 
 // Authoritative seed: nav hidden, hero hidden, menu+story visible (nav targets).
 const seedNav: SeedNavMap = new Map([
@@ -52,8 +52,8 @@ describe('migrateSingleSiteJson', () => {
   it('flattens pages → mode:single and lifts sections', () => {
     const { status, json } = migrateSingleSiteJson(legacy(), seedNav);
     expect(status).toBe('migrated');
-    expect(isSingleTemplate(json)).toBe(true);
-    if (!isSingleTemplate(json)) throw new Error('unreachable');
+    expect(isSingleContent(json)).toBe(true);
+    if (!isSingleContent(json)) throw new Error('unreachable');
     expect(json.templateKey).toBe('cafe-default');
     expect(json.sections).toHaveLength(4);
     expect('pages' in json).toBe(false);
@@ -61,7 +61,7 @@ describe('migrateSingleSiteJson', () => {
 
   it('renames data.label → data.eyebrow and drops section-level editable', () => {
     const { json } = migrateSingleSiteJson(legacy(), seedNav);
-    if (!isSingleTemplate(json)) throw new Error('unreachable');
+    if (!isSingleContent(json)) throw new Error('unreachable');
     const hero = json.sections.find((s) => s.id === 'hero-001')!;
     expect('label' in hero.data).toBe(false);
     expect(getFieldValue(hero.data, 'eyebrow')).toBe('Hero kicker');
@@ -70,14 +70,14 @@ describe('migrateSingleSiteJson', () => {
 
   it('strips menuN from the nav section data', () => {
     const { json } = migrateSingleSiteJson(legacy(), seedNav);
-    if (!isSingleTemplate(json)) throw new Error('unreachable');
+    if (!isSingleContent(json)) throw new Error('unreachable');
     const nav = json.sections.find((s) => s.id === 'nav-001')!;
     expect(Object.keys(nav.data)).toEqual(['brandName', 'ctaText']);
   });
 
   it('injects per-section nav from the seed by id, preserving section.visible independently', () => {
     const { json } = migrateSingleSiteJson(legacy(), seedNav);
-    if (!isSingleTemplate(json)) throw new Error('unreachable');
+    if (!isSingleContent(json)) throw new Error('unreachable');
     const story = json.sections.find((s) => s.id === 'story-001')!;
     expect(story.visible).toBe(false); // own visibility preserved
     expect(story.nav).toEqual({ visible: true, label: '카페 소개' }); // nav.visible independent
@@ -87,7 +87,7 @@ describe('migrateSingleSiteJson', () => {
 
   it('preserves user-edited menu labels via order-zip onto nav targets', () => {
     const { json, notes } = migrateSingleSiteJson(legacy({ menu1: '음료', menu2: '우리 이야기' }), seedNav);
-    if (!isSingleTemplate(json)) throw new Error('unreachable');
+    if (!isSingleContent(json)) throw new Error('unreachable');
     expect(json.sections.find((s) => s.id === 'menu-001')!.nav.label).toBe('음료');
     expect(json.sections.find((s) => s.id === 'story-001')!.nav.label).toBe('우리 이야기');
     expect(notes.join(' ')).toContain('preserved 2');
@@ -97,7 +97,7 @@ describe('migrateSingleSiteJson', () => {
     const input = legacy();
     input.pages[0].sections.push({ id: 'extra-001', type: 'gallery', visible: true, editable: true, data: { label: txt('Gallery') } });
     const { json, notes } = migrateSingleSiteJson(input, seedNav);
-    if (!isSingleTemplate(json)) throw new Error('unreachable');
+    if (!isSingleContent(json)) throw new Error('unreachable');
     const extra = json.sections.find((s) => s.id === 'extra-001')!;
     expect(extra.nav).toEqual({ visible: false, label: 'Gallery' });
     expect(notes.length).toBe(0); // templateKey known, only the section is novel
@@ -118,7 +118,7 @@ describe('migrateSingleSiteJson', () => {
   it('derives nav for an unknown templateKey and notes it', () => {
     const input = { ...legacy(), templateKey: 'custom-xyz' };
     const { json, notes } = migrateSingleSiteJson(input, seedNav);
-    if (!isSingleTemplate(json)) throw new Error('unreachable');
+    if (!isSingleContent(json)) throw new Error('unreachable');
     expect(json.sections.every((s) => s.nav.visible === false)).toBe(true);
     expect(notes.join(' ')).toContain('not in code registry');
   });

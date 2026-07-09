@@ -1,4 +1,4 @@
-import { TemplateJson } from '../entities/template.entity';
+import { ContentModel } from '../entities/template.entity';
 import { UserSite, CreateUserSiteDto, UpdateUserSiteDto } from '../entities/user-site.entity';
 
 export interface IUserSiteRepository {
@@ -12,7 +12,7 @@ export interface IUserSiteRepository {
    * bypass the optimistic-concurrency check (admin force path).
    */
   update(id: string, data: UpdateUserSiteDto, expectedUpdatedAt: string | null): Promise<UserSite>;
-  updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt: string): Promise<UserSite>;
+  updateSiteJson(id: string, siteJson: ContentModel, expectedUpdatedAt: string): Promise<UserSite>;
   delete(id: string): Promise<void>;
   findByDomain(domain: string): Promise<UserSite | null>;
   findByUserIdAndName(userId: string, name: string): Promise<UserSite | null>;

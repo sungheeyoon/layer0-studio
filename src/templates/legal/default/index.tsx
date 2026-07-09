@@ -4,11 +4,11 @@ import styles from './legal.module.css';
 import { legalDefaultLibrary } from './library';
 import { RenderSingleSite } from '../../renderSingleSite';
 import { defaultGlobalStyles } from './tokens';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = legalDefaultLibrary;
 
-export const defaultTemplateJson: TemplateJson = {
+export const defaultTemplateJson: ContentModel = {
   mode: 'single',
   templateKey: 'legal-default',
   globalStyles: defaultGlobalStyles,

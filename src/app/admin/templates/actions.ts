@@ -7,7 +7,7 @@ import {
   createUpdateTemplateUseCase,
   createDeleteTemplateUseCase,
 } from '@/lib/di/container';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 import { revalidatePath } from 'next/cache';
 import { syncTemplates } from '@/lib/template/sync';
 import { withAdmin } from '@/lib/actions/server-action';
@@ -72,7 +72,7 @@ export async function createTemplateAction(formData: FormData) {
     const templateJsonStr = formData.get('templateJson') as string;
 
     // Parse JSON
-    let templateJson: TemplateJson;
+    let templateJson: ContentModel;
     try {
       templateJson = JSON.parse(templateJsonStr);
     } catch {

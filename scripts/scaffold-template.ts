@@ -52,9 +52,9 @@ async function run() {
   // 1. tokens.ts
   const tokensPath = join(themeDir, 'tokens.ts');
   if (!existsSync(tokensPath)) {
-    const content = `import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
+    const content = `import { GlobalStyles } from '@/domain/entities/template.entity';
 
-export const defaultGlobalStyles: TemplateGlobalStyles = {
+export const defaultGlobalStyles: GlobalStyles = {
   primaryColor: '#000000',
   secondaryColor: '#ffffff',
   fontFamily: 'sans-serif',
@@ -88,11 +88,11 @@ import styles from './${key}.module.css';
 import { ${key}Library } from './library';
 import { RenderSingleSite } from '../renderSingleSite';
 import { defaultGlobalStyles } from './tokens';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = ${key}Library;
 
-export const defaultTemplateJson: TemplateJson = {
+export const defaultTemplateJson: ContentModel = {
   mode: 'single',
   templateKey: '${key}',
   globalStyles: defaultGlobalStyles,

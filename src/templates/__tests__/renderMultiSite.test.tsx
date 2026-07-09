@@ -4,9 +4,9 @@ import { describe, it, expect } from 'vitest';
 import { RenderMultiSite } from '../renderMultiSite';
 import { TemplateLibrary, NavSectionProps, SectionComponent } from '../types';
 import {
-  TemplateJson,
+  ContentModel,
   getFieldValue,
-  isMultiTemplate,
+  isMultiContent,
 } from '@/domain/entities/template.entity';
 
 // ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ const library: TemplateLibrary = {
 
 const text = (value: string) => ({ text: { type: 'text' as const, label: 'Text', value } });
 
-const siteJson: TemplateJson = {
+const siteJson: ContentModel = {
   mode: 'multi',
   templateKey: 'fixture-multi',
   globalStyles: {
@@ -129,8 +129,8 @@ function render(activePageId: string): string {
 
 describe('RenderMultiSite — Multi tracer assembly', () => {
   it('the fixture is a Multi Site with a shared header/footer and ≥2 pages', () => {
-    expect(isMultiTemplate(siteJson)).toBe(true);
-    if (!isMultiTemplate(siteJson)) return;
+    expect(isMultiContent(siteJson)).toBe(true);
+    if (!isMultiContent(siteJson)) return;
     expect(siteJson.shared.header.length).toBeGreaterThan(0);
     expect(siteJson.shared.footer.length).toBeGreaterThan(0);
     expect(siteJson.pages.length).toBeGreaterThanOrEqual(2);

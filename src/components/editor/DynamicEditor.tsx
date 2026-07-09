@@ -3,13 +3,13 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { UserSite } from '@/domain/entities/user-site.entity';
 import {
-  TemplateJson,
-  TemplateGlobalStyles,
-  TemplateField,
-  TemplateSection,
-  ArrayTemplateField,
-  isSingleTemplate,
-  isMultiTemplate,
+  ContentModel,
+  GlobalStyles,
+  Field,
+  Section,
+  ArrayField,
+  isSingleContent,
+  isMultiContent,
   allSections,
 } from '@/domain/entities/template.entity';
 import {
@@ -90,27 +90,27 @@ interface DynamicEditorProps {
 export default function DynamicEditor({ site }: DynamicEditorProps) {
   const locale = useLocale();
   const t = useDictionary().editor;
-  const [siteJson, setSiteJson] = useState<TemplateJson>(() => injectKeys(site.siteJson));
+  const [siteJson, setSiteJson] = useState<ContentModel>(() => injectKeys(site.siteJson));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
-  const isMulti = isMultiTemplate(siteJson);
+  const isMulti = isMultiContent(siteJson);
 
   // Multi sites edit one page at a time (page tabs switch the context). The
   // active page also drives the live preview (`activePageId` → renderer).
   const [activePageId, setActivePageId] = useState<string | undefined>(() =>
-    isMultiTemplate(site.siteJson) ? site.siteJson.pages[0]?.id : undefined,
+    isMultiContent(site.siteJson) ? site.siteJson.pages[0]?.id : undefined,
   );
 
   // Single sites carry their sections directly (one continuous scroll); they
   // own the rich per-section nav controls (#41).
   const singleSections = useMemo(
-    () => (isSingleTemplate(siteJson) ? siteJson.sections : []),
+    () => (isSingleContent(siteJson) ? siteJson.sections : []),
     [siteJson],
   );
 
   // Multi page-management source: array order = nav order.
   const pages = useMemo(
-    () => (isMultiTemplate(siteJson) ? siteJson.pages : []),
+    () => (isMultiContent(siteJson) ? siteJson.pages : []),
     [siteJson],
   );
   const activePage = useMemo(
@@ -121,9 +121,9 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // The sections shown in the Hierarchy / Parameters panel: Single → its
   // sections; Multi → shared header + the active page's sections + shared footer
   // (so the brand, page body and footer of the previewed page are all editable).
-  const sections = useMemo<TemplateSection[]>(() => {
-    if (isSingleTemplate(siteJson)) return siteJson.sections;
-    if (isMultiTemplate(siteJson) && activePage) {
+  const sections = useMemo<Section[]>(() => {
+    if (isSingleContent(siteJson)) return siteJson.sections;
+    if (isMultiContent(siteJson) && activePage) {
       return [...siteJson.shared.header, ...activePage.sections, ...siteJson.shared.footer];
     }
     return [];
@@ -232,7 +232,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   const TemplateRenderer = templateModule?.default;
 
-  const updateSiteJson = useCallback((updater: (json: TemplateJson) => void) => {
+  const updateSiteJson = useCallback((updater: (json: ContentModel) => void) => {
     setSiteJson((prev) => {
       const updated = structuredClone(prev);
       updater(updated);
@@ -242,7 +242,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   }, [scheduleAutoSave]);
 
   const handleFieldChange = useCallback(
-    (sectionId: string, fieldKey: string, value: string | ArrayTemplateField['items'], assetId?: string) => {
+    (sectionId: string, fieldKey: string, value: string | ArrayField['items'], assetId?: string) => {
       updateSiteJson((json) => {
         const section = allSections(json).find(s => s.id === sectionId);
         if (section && section.data[fieldKey]) {
@@ -262,7 +262,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   );
 
   const handleGlobalStyleChange = useCallback(
-    (key: keyof TemplateGlobalStyles, value: string) => {
+    (key: keyof GlobalStyles, value: string) => {
       updateSiteJson((json) => {
         json.globalStyles[key] = value;
       });
@@ -334,7 +334,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setActiveTab('content');
     // Re-anchor the section selection to the newly active page's view.
     const json = siteJsonRef.current;
-    if (isMultiTemplate(json)) {
+    if (isMultiContent(json)) {
       const page = json.pages.find((p) => p.id === pageId);
       setSelectedSectionId(
         json.shared.header[0]?.id ?? page?.sections[0]?.id ?? json.shared.footer[0]?.id ?? null,
@@ -896,12 +896,12 @@ function SectionFields({
   onFieldChange,
   onError,
 }: {
-  section: TemplateSection;
+  section: Section;
   schema?: SectionDataSchema;
   onFieldChange: (
     sectionId: string,
     fieldKey: string,
-    value: string | ArrayTemplateField['items'],
+    value: string | ArrayField['items'],
     assetId?: string,
   ) => void;
   onError: (msg: string) => void;
@@ -926,11 +926,11 @@ function SectionFields({
 }
 
 interface DynamicFieldProps {
-  field: TemplateField;
+  field: Field;
   itemSchema?: SectionDataSchema;
   minItems?: number;
   maxItems?: number;
-  onChange: (value: string | ArrayTemplateField['items'], assetId?: string) => void;
+  onChange: (value: string | ArrayField['items'], assetId?: string) => void;
   onError: (msg: string) => void;
 }
 
@@ -968,7 +968,7 @@ function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError
 
   if (field.type === 'array') {
     return (
-      <ArrayField
+      <ArrayFieldEditor
         field={field}
         itemSchema={itemSchema}
         minItems={minItems}
@@ -1054,7 +1054,7 @@ function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError
   );
 }
 
-function ArrayField({
+function ArrayFieldEditor({
   field,
   itemSchema,
   minItems,
@@ -1062,11 +1062,11 @@ function ArrayField({
   onChange,
   onError,
 }: {
-  field: ArrayTemplateField;
+  field: ArrayField;
   itemSchema?: SectionDataSchema;
   minItems?: number;
   maxItems?: number;
-  onChange: (value: ArrayTemplateField['items']) => void;
+  onChange: (value: ArrayField['items']) => void;
   onError: (msg: string) => void;
 }) {
   const t = useDictionary().editor;
@@ -1079,7 +1079,7 @@ function ArrayField({
       return;
     }
 
-    const newItem: Record<string, TemplateField> = {
+    const newItem: Record<string, Field> = {
       _key: { type: 'text', value: Math.random().toString(36).slice(2), label: '_key', editable: false },
     };
 
@@ -1119,7 +1119,7 @@ function ArrayField({
     onChange(next);
   };
 
-  const handleItemFieldChange = (index: number, fieldKey: string, value: string | ArrayTemplateField['items'], assetId?: string) => {
+  const handleItemFieldChange = (index: number, fieldKey: string, value: string | ArrayField['items'], assetId?: string) => {
     const next = structuredClone(items);
     const field = next[index][fieldKey];
     if (field.type === 'array' && Array.isArray(value)) {

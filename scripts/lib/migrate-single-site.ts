@@ -20,11 +20,11 @@
  * via the lock RPC (asset_id unchanged, so no orphan mis-sweep). See PLAN §4.
  */
 import {
-  TemplateJson,
+  ContentModel,
   NavMeta,
   SingleSection,
-  TemplateField,
-  TemplateGlobalStyles,
+  Field,
+  GlobalStyles,
   getFieldValue,
 } from '@/domain/entities/template.entity';
 
@@ -35,7 +35,7 @@ interface LegacySection {
   visible?: boolean;
   editable?: boolean;
   title?: string;
-  data: Record<string, TemplateField>;
+  data: Record<string, Field>;
 }
 
 interface LegacyPage {
@@ -45,7 +45,7 @@ interface LegacyPage {
 
 interface LegacyTemplateJson {
   templateKey: string;
-  globalStyles: TemplateGlobalStyles;
+  globalStyles: GlobalStyles;
   pages?: LegacyPage[];
 }
 
@@ -60,7 +60,7 @@ export type MigrateStatus =
 export interface MigrateResult {
   status: MigrateStatus;
   /** The migrated JSON, or the input untouched when skipped. */
-  json: TemplateJson;
+  json: ContentModel;
   notes: string[];
 }
 
@@ -72,7 +72,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 }
 
 /** Old nav `menuN` values, ordered by N, with blanks dropped. */
-function orderedMenuValues(navData: Record<string, TemplateField>): string[] {
+function orderedMenuValues(navData: Record<string, Field>): string[] {
   return Object.keys(navData)
     .filter((k) => MENU_KEY_RE.test(k))
     .sort((a, b) => Number(a.slice(4)) - Number(b.slice(4)))
@@ -82,8 +82,8 @@ function orderedMenuValues(navData: Record<string, TemplateField>): string[] {
 
 /** Rename the `label` field key → `eyebrow`, preserving its value. */
 function renameLabelToEyebrow(
-  data: Record<string, TemplateField>,
-): Record<string, TemplateField> {
+  data: Record<string, Field>,
+): Record<string, Field> {
   if (!('label' in data) || 'eyebrow' in data) return data;
   const { label, ...rest } = data;
   return { eyebrow: label, ...rest };
@@ -92,8 +92,8 @@ function renameLabelToEyebrow(
 /** Strip section-level `editable`/`title` and (for nav) `menuN`/`menuNUrl`. */
 function cleanData(
   type: string,
-  data: Record<string, TemplateField>,
-): Record<string, TemplateField> {
+  data: Record<string, Field>,
+): Record<string, Field> {
   const renamed = renameLabelToEyebrow(data);
   if (type !== 'nav') return renamed;
   return Object.fromEntries(
@@ -112,17 +112,17 @@ export function migrateSingleSiteJson(
   const notes: string[] = [];
 
   if (isRecord(input) && 'mode' in input) {
-    return { status: 'skipped-already', json: input as unknown as TemplateJson, notes };
+    return { status: 'skipped-already', json: input as unknown as ContentModel, notes };
   }
 
   if (!isRecord(input) || !Array.isArray((input as unknown as LegacyTemplateJson).pages)) {
-    return { status: 'skipped-shape', json: input as unknown as TemplateJson, notes };
+    return { status: 'skipped-shape', json: input as unknown as ContentModel, notes };
   }
 
   const legacy = input as unknown as LegacyTemplateJson;
   const pages = legacy.pages ?? [];
   if (pages.length === 0 || !Array.isArray(pages[0].sections)) {
-    return { status: 'skipped-shape', json: input as unknown as TemplateJson, notes };
+    return { status: 'skipped-shape', json: input as unknown as ContentModel, notes };
   }
   if (pages.length > 1) {
     notes.push(
@@ -174,7 +174,7 @@ export function migrateSingleSiteJson(
     }
   }
 
-  const migrated: TemplateJson = {
+  const migrated: ContentModel = {
     mode: 'single',
     templateKey,
     globalStyles: legacy.globalStyles,

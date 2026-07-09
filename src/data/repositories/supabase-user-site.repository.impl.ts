@@ -5,7 +5,7 @@ import {
   CreateUserSiteDto,
   UpdateUserSiteDto,
 } from '@/domain/entities/user-site.entity';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { isNotFoundError } from '@/data/errors/supabase-error.adapter';
 import { collectAssetUsages } from '@/lib/template/asset-usages';
@@ -137,7 +137,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     return this.mapRow(data);
   }
 
-  async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt: string): Promise<UserSite> {
+  async updateSiteJson(id: string, siteJson: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
     // Extract new asset usages (Single / Multi page / Multi shared slot_keys).
     const newUsages = collectAssetUsages(siteJson);
 

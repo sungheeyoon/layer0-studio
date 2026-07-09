@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { SiteWriteUseCase } from '../usecases/user-site/site-write.usecase';
 import { FakeUserSiteRepo, FakeSiteContentValidator, makeSite, makeTemplateJson } from './fakes';
 import {
-  TemplateJson,
-  SinglePageTemplate,
-  ArrayTemplateField,
+  ContentModel,
+  SingleContent,
+  ArrayField,
 } from '../entities/template.entity';
 import { SiteContentValidationIssue } from '../usecases/ports/site-content-validator.port';
 import { UserSite } from '../entities/user-site.entity';
 
-const asSingle = (json: TemplateJson) => json as SinglePageTemplate;
+const asSingle = (json: ContentModel) => json as SingleContent;
 
 /** Build a use case + repo around a single owned site, returning its fresh token. */
 function setup(siteOverrides: Partial<UserSite> = {}, validatorErrors: SiteContentValidationIssue[] = []) {
@@ -133,7 +133,7 @@ describe('SiteWriteUseCase.saveJson — validation gate', () => {
     });
     const { uc, token } = setup();
     const result = await uc.saveJson('site-1', 'user-1', json, token);
-    const items = asSingle(result.siteJson).sections[0].data.items as ArrayTemplateField;
+    const items = asSingle(result.siteJson).sections[0].data.items as ArrayField;
     expect(items.type).toBe('array');
     expect(items.items).toHaveLength(1);
   });

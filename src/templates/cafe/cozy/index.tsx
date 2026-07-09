@@ -4,11 +4,11 @@ import styles from './cafe.module.css';
 import { cafeCozyLibrary } from './library';
 import { RenderSingleSite } from '../../renderSingleSite';
 import { defaultGlobalStyles } from './tokens';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = cafeCozyLibrary;
 
-export const defaultTemplateJson: TemplateJson = {
+export const defaultTemplateJson: ContentModel = {
   mode: 'single',
   templateKey: 'cafe-cozy',
   globalStyles: defaultGlobalStyles,

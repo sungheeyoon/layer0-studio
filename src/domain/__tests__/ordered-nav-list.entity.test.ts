@@ -13,10 +13,10 @@ import {
   relabelNavItem,
 } from '../entities/ordered-nav-list';
 import {
-  SinglePageTemplate,
-  MultiPageTemplate,
+  SingleContent,
+  MultiContent,
   SingleSection,
-  TemplatePage,
+  Page,
 } from '../entities/template.entity';
 
 const globalStyles = {
@@ -31,7 +31,7 @@ function section(id: string, type: string, visible = true, navVisible = true): S
   return { id, type, visible, nav: { visible: navVisible, label: id }, data: {} };
 }
 
-function page(id: string, visible = true, navVisible = true): TemplatePage {
+function page(id: string, visible = true, navVisible = true): Page {
   return { id, slug: id, visible, nav: { visible: navVisible, label: id }, sections: [] };
 }
 
@@ -192,14 +192,14 @@ describe('isSinglePinned', () => {
 
 // ── Mode-agnostic dispatchers ────────────────────────────────────────────────
 
-const singleJson = (): SinglePageTemplate => ({
+const singleJson = (): SingleContent => ({
   templateKey: 'cafe-default',
   globalStyles,
   mode: 'single',
   sections: singleSections(),
 });
 
-const multiJson = (): MultiPageTemplate => ({
+const multiJson = (): MultiContent => ({
   templateKey: 'corporate-multipage',
   globalStyles,
   mode: 'multi',

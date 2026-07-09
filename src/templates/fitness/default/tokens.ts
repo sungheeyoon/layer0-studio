@@ -1,6 +1,6 @@
-import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
+import { GlobalStyles } from '@/domain/entities/template.entity';
 
-export const defaultGlobalStyles: TemplateGlobalStyles = {
+export const defaultGlobalStyles: GlobalStyles = {
   primaryColor: '#CDFF00', // Lime
   secondaryColor: '#141414', // Surface
   fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",

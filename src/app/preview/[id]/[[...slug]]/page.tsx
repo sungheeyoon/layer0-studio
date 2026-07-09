@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetTemplateUseCase } from '@/lib/di/container';
-import { isMultiTemplate } from '@/domain/entities/template.entity';
+import { isMultiContent } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
 import TemplateClientWrapper from '@/templates/TemplateClientWrapper';
@@ -45,7 +45,7 @@ export default async function TemplatePreviewPage({ params }: Props) {
   // Mirror the public site: empty slug = home (first page); unknown / hidden
   // page → 404. Single templates have no sub-paths.
   let activePageId: string | undefined;
-  if (isMultiTemplate(templateJson)) {
+  if (isMultiContent(templateJson)) {
     const { pages } = templateJson;
     const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
     if (!activePage || !activePage.visible) notFound();

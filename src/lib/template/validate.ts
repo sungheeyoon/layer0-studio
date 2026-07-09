@@ -1,4 +1,4 @@
-import { TemplateJson, TemplateSection, TemplateField } from '@/domain/entities/template.entity';
+import { ContentModel, Section, Field } from '@/domain/entities/template.entity';
 import {
   SiteContentValidationIssue,
   SiteContentValidationResult,
@@ -30,7 +30,7 @@ const HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 const CSS_LENGTH_RE = /^[\d.]+(%|px|rem|em|vw|vh|ch)$/;
 
 export function validateTemplateJson(
-  json: TemplateJson,
+  json: ContentModel,
   options: ValidateOptions = {},
 ): ValidationResult {
   const errors: ValidationIssue[] = [];
@@ -91,7 +91,7 @@ export function validateTemplateJson(
 
   // Per-section validation, shared across modes.
   const sectionIds = new Set<string>();
-  const validateSection = (section: TemplateSection, secRef: string) => {
+  const validateSection = (section: Section, secRef: string) => {
       // Rule 4: section.id must be unique across the whole template
       if (sectionIds.has(section.id)) {
         err('DUPLICATE_SECTION_ID', `section id "${section.id}" is not unique`, secRef);
@@ -111,7 +111,7 @@ export function validateTemplateJson(
           // Rule 2-bis: data schema validation
           const validateSchemaRecursively = (
             schema: SectionDataSchema,
-            data: Record<string, TemplateField>,
+            data: Record<string, Field>,
             ref: string,
           ) => {
             for (const [fieldKey, fieldSchema] of Object.entries(schema)) {

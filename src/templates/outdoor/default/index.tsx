@@ -3,11 +3,11 @@ import { TemplateRendererProps, TemplateLibrary } from '../../types';
 import { outdoorDefaultLibrary } from './library';
 import { RenderMultiSite } from '../../renderMultiSite';
 import { defaultGlobalStyles, designTokens } from './tokens';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = outdoorDefaultLibrary;
 
-export const defaultTemplateJson: TemplateJson = {
+export const defaultTemplateJson: ContentModel = {
   mode: 'multi',
   templateKey: 'outdoor-default',
   globalStyles: defaultGlobalStyles,

@@ -1,4 +1,4 @@
-import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
+import { GlobalStyles } from '@/domain/entities/template.entity';
 import type { DesignTokens } from '@/templates/types';
 
 /**
@@ -10,7 +10,7 @@ import type { DesignTokens } from '@/templates/types';
  *   fontFamily     → --font-base
  *   fontSize       → --font-size
  */
-export const defaultGlobalStyles: TemplateGlobalStyles = {
+export const defaultGlobalStyles: GlobalStyles = {
     primaryColor: '#C96A3A',         // terra
     secondaryColor: '#231509',       // espresso
     fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",

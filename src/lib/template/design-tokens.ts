@@ -1,5 +1,5 @@
 import type { DesignTokens } from '@/templates/types';
-import type { TemplateGlobalStyles } from '@/domain/entities/template.entity';
+import type { GlobalStyles } from '@/domain/entities/template.entity';
 
 /**
  * Map each `DesignTokens` dimension to its CSS custom property prefix
@@ -15,12 +15,12 @@ const PREFIX_BY_DIMENSION: Record<keyof DesignTokens, string> = {
 };
 
 /**
- * Mapping from the *thin*, user-editable `TemplateGlobalStyles` to the
+ * Mapping from the *thin*, user-editable `GlobalStyles` to the
  * specific CSS custom properties that overlay the template's rich
  * `DesignTokens`. Templates that want a particular axis to be themable must
  * name their token accordingly (e.g. `colors.primary`, `fonts.base`).
  */
-const OVERLAY_MAP: Readonly<Partial<Record<keyof TemplateGlobalStyles, string>>> = {
+const OVERLAY_MAP: Readonly<Partial<Record<keyof GlobalStyles, string>>> = {
   primaryColor:   '--color-primary',
   secondaryColor: '--color-secondary',
   fontFamily:     '--font-base',
@@ -40,7 +40,7 @@ const OVERLAY_MAP: Readonly<Partial<Record<keyof TemplateGlobalStyles, string>>>
  */
 export function tokensToCssVars(
   designTokens: DesignTokens,
-  overrides?: Partial<TemplateGlobalStyles> | null,
+  overrides?: Partial<GlobalStyles> | null,
 ): Record<string, string> {
   const vars: Record<string, string> = {};
 
@@ -54,7 +54,7 @@ export function tokensToCssVars(
   }
 
   if (overrides) {
-    for (const [field, cssVar] of Object.entries(OVERLAY_MAP) as Array<[keyof TemplateGlobalStyles, string]>) {
+    for (const [field, cssVar] of Object.entries(OVERLAY_MAP) as Array<[keyof GlobalStyles, string]>) {
       const value = overrides[field];
       if (value !== undefined && value !== null && value !== '') {
         vars[cssVar] = String(value);
