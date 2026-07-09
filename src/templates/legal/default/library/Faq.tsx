@@ -7,12 +7,12 @@ import { PlusIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Faq: SectionComponent = function Faq({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || '';
 
   const items = [1, 2, 3, 4, 5].map(n => ({
-    q: getFieldValue(data, `q${n}`) || '',
-    a: getFieldValue(data, `a${n}`) || '',
+    q: getFieldValue(fields, `q${n}`) || '',
+    a: getFieldValue(fields, `a${n}`) || '',
   })).filter(it => it.q);
 
   const [openIdx, setOpenIdx] = useState<number | null>(null);

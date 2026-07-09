@@ -6,11 +6,11 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || '하람';
-  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Law & Tax';
-  const phone = getFieldValue(data, 'phone') || '02-3456-7890';
-  const ctaText = getFieldValue(data, 'ctaText') || '무료 상담 신청';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || '하람';
+  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Law & Tax';
+  const phone = getFieldValue(fields, 'phone') || '02-3456-7890';
+  const ctaText = getFieldValue(fields, 'ctaText') || '무료 상담 신청';
 
   return (
     <header className={styles.navWrap}>
@@ -53,7 +53,7 @@ Nav.meta = {
   componentKey: 'nav',
   category: 'navigation',
   label: 'Legal Navigation',
-  dataSchema: {
+  fieldsSchema: {
     brandName: { type: 'text', label: '사무소 이름' },
     brandSubtext: { type: 'text', label: '보조 텍스트' },
     phone: { type: 'text', label: '전화번호' },

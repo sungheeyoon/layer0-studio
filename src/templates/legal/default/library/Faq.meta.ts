@@ -4,7 +4,7 @@ export const faqMeta: SectionComponentMeta = {
   componentKey: 'faq',
   category: 'content',
   label: 'Legal FAQ',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'text', label: '섹션 타이틀', required: true },
     q1: { type: 'text', label: '질문 1' },
     a1: { type: 'textarea', label: '답변 1' },

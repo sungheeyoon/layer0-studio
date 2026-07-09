@@ -5,20 +5,20 @@ import { renderAccentTitle } from '../sections/title-parts';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
-  const image = getFieldValue(data, 'image') || '';
-  const statValue = getFieldValue(data, 'statValue') || '';
-  const statLabel = getFieldValue(data, 'statLabel') || '';
-  const sinceLabel = getFieldValue(data, 'sinceLabel') || '';
-  const ctaPrimary = getFieldValue(data, 'ctaPrimary') || '';
-  const ctaSecondary = getFieldValue(data, 'ctaSecondary') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
+  const image = getFieldValue(fields, 'image') || '';
+  const statValue = getFieldValue(fields, 'statValue') || '';
+  const statLabel = getFieldValue(fields, 'statLabel') || '';
+  const sinceLabel = getFieldValue(fields, 'sinceLabel') || '';
+  const ctaPrimary = getFieldValue(fields, 'ctaPrimary') || '';
+  const ctaSecondary = getFieldValue(fields, 'ctaSecondary') || '';
 
   const stats = [1, 2, 3].map(n => ({
-    value: getFieldValue(data, `stat${n}Value`),
-    label: getFieldValue(data, `stat${n}Label`),
+    value: getFieldValue(fields, `stat${n}Value`),
+    label: getFieldValue(fields, `stat${n}Label`),
   })).filter(s => s.value);
 
   return (
@@ -118,7 +118,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Medical Hero',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'textarea', label: '메인 타이틀', required: true },
     description: { type: 'textarea', label: '설명' },

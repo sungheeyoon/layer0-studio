@@ -4,21 +4,21 @@ import { SunIcon, BuildingsIcon, LaptopIcon, BookIcon, VinylIcon } from '../sect
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Space: SectionComponent = function Space({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '공간';
-  const title = getFieldValue(data, 'title') || '머물고 싶은\n공간을 만듭니다';
-  const description = getFieldValue(data, 'description') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '공간';
+  const title = getFieldValue(fields, 'title') || '머물고 싶은\n공간을 만듭니다';
+  const description = getFieldValue(fields, 'description') || '';
 
-  const imageLarge = getFieldValue(data, 'imageLarge') || '';
-  const imageSmall = getFieldValue(data, 'imageSmall') || '';
-  const cardTitle = getFieldValue(data, 'cardTitle') || '채광이 좋은 공간';
-  const cardDesc = getFieldValue(data, 'cardDesc') || '';
+  const imageLarge = getFieldValue(fields, 'imageLarge') || '';
+  const imageSmall = getFieldValue(fields, 'imageSmall') || '';
+  const cardTitle = getFieldValue(fields, 'cardTitle') || '채광이 좋은 공간';
+  const cardDesc = getFieldValue(fields, 'cardDesc') || '';
 
   const features = [
-    { title: getFieldValue(data, 'f1Title'), desc: getFieldValue(data, 'f1Desc'), icon: <BuildingsIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
-    { title: getFieldValue(data, 'f2Title'), desc: getFieldValue(data, 'f2Desc'), icon: <LaptopIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
-    { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), icon: <BookIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
-    { title: getFieldValue(data, 'f4Title'), desc: getFieldValue(data, 'f4Desc'), icon: <VinylIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: getFieldValue(fields, 'f1Title'), desc: getFieldValue(fields, 'f1Desc'), icon: <BuildingsIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: getFieldValue(fields, 'f2Title'), desc: getFieldValue(fields, 'f2Desc'), icon: <LaptopIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: getFieldValue(fields, 'f3Title'), desc: getFieldValue(fields, 'f3Desc'), icon: <BookIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: getFieldValue(fields, 'f4Title'), desc: getFieldValue(fields, 'f4Desc'), icon: <VinylIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
   ].filter(f => f.title);
 
   return (
@@ -97,7 +97,7 @@ Space.meta = {
   componentKey: 'space',
   category: 'about',
   label: 'Space & Features',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀' },
     description: { type: 'textarea', label: '섹션 설명' },

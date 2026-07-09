@@ -4,18 +4,18 @@ import { GraduationCapIcon, HospitalIcon, ClockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Team: SectionComponent = function Team({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
 
   const members = [1, 2, 3].map(n => ({
-    name: getFieldValue(data, `member${n}Name`),
-    role: getFieldValue(data, `member${n}Role`),
-    info1: getFieldValue(data, `member${n}Info1`),
-    info2: getFieldValue(data, `member${n}Info2`),
-    info3: getFieldValue(data, `member${n}Info3`),
-    image: getFieldValue(data, `member${n}Image`),
+    name: getFieldValue(fields, `member${n}Name`),
+    role: getFieldValue(fields, `member${n}Role`),
+    info1: getFieldValue(fields, `member${n}Info1`),
+    info2: getFieldValue(fields, `member${n}Info2`),
+    info3: getFieldValue(fields, `member${n}Info3`),
+    image: getFieldValue(fields, `member${n}Image`),
     mt: n === 2 ? 'lg:mt-10' : '',
   })).filter(m => m.name);
 
@@ -71,7 +71,7 @@ Team.meta = {
   componentKey: 'team',
   category: 'content',
   label: 'Medical Team',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'text', label: '섹션 설명' },

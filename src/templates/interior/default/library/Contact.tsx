@@ -6,13 +6,13 @@ import { ArrowRightIcon, PhoneIcon, LetterIcon, MapPinIcon } from '../sections/i
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || 'Get Started';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const email = getFieldValue(data, 'email') || '';
-  const address = getFieldValue(data, 'address') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || 'Get Started';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const email = getFieldValue(fields, 'email') || '';
+  const address = getFieldValue(fields, 'address') || '';
 
   return (
     <section id="contact" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: 'var(--i-grad-contact)' }}>

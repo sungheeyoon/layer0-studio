@@ -3,11 +3,11 @@ import styles from '../corporate.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const About: SectionComponent = function About({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || 'About Us';
-  const subtitle = getFieldValue(data, 'subtitle') || '';
-  const body = getFieldValue(data, 'body') || '';
-  const image = getFieldValue(data, 'image');
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || 'About Us';
+  const subtitle = getFieldValue(fields, 'subtitle') || '';
+  const body = getFieldValue(fields, 'body') || '';
+  const image = getFieldValue(fields, 'image');
 
   return (
     <div className={`${styles.section} ${styles.genericSection}`}>
@@ -36,7 +36,7 @@ About.meta = {
   componentKey: 'about',
   category: 'content',
   label: 'Corporate About',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'text', label: 'Section Title', required: true },
     subtitle: { type: 'text', label: 'Subtitle' },
     body: { type: 'textarea', label: 'Description' },

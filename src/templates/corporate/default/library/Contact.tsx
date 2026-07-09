@@ -5,11 +5,11 @@ import styles from '../corporate.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || 'Get in Touch';
-  const email = getFieldValue(data, 'email') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const address = getFieldValue(data, 'address') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || 'Get in Touch';
+  const email = getFieldValue(fields, 'email') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const address = getFieldValue(fields, 'address') || '';
 
   return (
     <div className={`${styles.section} ${styles.genericSection}`}>

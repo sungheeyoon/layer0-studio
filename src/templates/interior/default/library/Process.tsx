@@ -13,13 +13,13 @@ const STEP_ICONS = [
 ];
 
 const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || 'How We Work';
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || 'How We Work';
+  const title = getFieldValue(fields, 'title') || '';
 
   const steps = [1, 2, 3, 4, 5, 6].map(n => ({
-    title: getFieldValue(data, `step${n}Title`),
-    desc: getFieldValue(data, `step${n}Desc`),
+    title: getFieldValue(fields, `step${n}Title`),
+    desc: getFieldValue(fields, `step${n}Desc`),
   })).filter(s => s.title);
 
   return (
@@ -66,7 +66,7 @@ Process.meta = {
   componentKey: 'process',
   category: 'content',
   label: 'Interior Process',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     step1Title: { type: 'text', label: '1단계 제목' },

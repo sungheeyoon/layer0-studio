@@ -3,13 +3,13 @@ import { HomeIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, 
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const description = getFieldValue(data, 'description') || '';
-  const address = getFieldValue(data, 'address') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const email = getFieldValue(data, 'email') || '';
-  const hours = getFieldValue(data, 'hours') || '';
-  const copyright = getFieldValue(data, 'copyright') || '';
+  const { fields } = section;
+  const description = getFieldValue(fields, 'description') || '';
+  const address = getFieldValue(fields, 'address') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const email = getFieldValue(fields, 'email') || '';
+  const hours = getFieldValue(fields, 'hours') || '';
+  const copyright = getFieldValue(fields, 'copyright') || '';
 
   return (
     <footer style={{ background: 'var(--i-dark-deepest)', borderTop: '1px solid color-mix(in srgb, white 5%, transparent)' }}>
@@ -99,7 +99,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Interior Footer',
-  dataSchema: {
+  fieldsSchema: {
     description: { type: 'textarea', label: '브랜드 설명' },
     address: { type: 'text', label: '주소' },
     phone: { type: 'text', label: '전화번호' },

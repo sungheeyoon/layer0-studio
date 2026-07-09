@@ -12,9 +12,9 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 const Navigation: SectionComponent = function Navigation(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const brandName = getFieldValue(section.data, 'brandName') || '능선';
-  const ctaLabel = getFieldValue(section.data, 'ctaLabel');
-  const ctaHref = getFieldValue(section.data, 'ctaHref') || navItems[0]?.href || '/';
+  const brandName = getFieldValue(section.fields, 'brandName') || '능선';
+  const ctaLabel = getFieldValue(section.fields, 'ctaLabel');
+  const ctaHref = getFieldValue(section.fields, 'ctaHref') || navItems[0]?.href || '/';
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--color-line)] bg-[var(--color-surface)]/85 backdrop-blur">
@@ -55,7 +55,7 @@ Navigation.meta = {
   componentKey: 'nav',
   category: 'nav',
   label: '헤더 내비게이션',
-  dataSchema: {
+  fieldsSchema: {
     brandName: { type: 'text', label: '브랜드명', required: true },
     ctaLabel: { type: 'text', label: 'CTA 버튼 텍스트' },
     ctaHref: { type: 'text', label: 'CTA 링크' },

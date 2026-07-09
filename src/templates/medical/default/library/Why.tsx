@@ -3,14 +3,14 @@ import styles from '../medical.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Why: SectionComponent = function Why({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
 
   const features = [
-    { title: getFieldValue(data, 'f1Title'), desc: getFieldValue(data, 'f1Desc'), image: getFieldValue(data, 'f1Image'), num: '01' },
-    { title: getFieldValue(data, 'f2Title'), desc: getFieldValue(data, 'f2Desc'), image: getFieldValue(data, 'f2Image'), num: '02', reverse: true },
-    { title: getFieldValue(data, 'f3Title'), desc: getFieldValue(data, 'f3Desc'), image: getFieldValue(data, 'f3Image'), num: '03' },
+    { title: getFieldValue(fields, 'f1Title'), desc: getFieldValue(fields, 'f1Desc'), image: getFieldValue(fields, 'f1Image'), num: '01' },
+    { title: getFieldValue(fields, 'f2Title'), desc: getFieldValue(fields, 'f2Desc'), image: getFieldValue(fields, 'f2Image'), num: '02', reverse: true },
+    { title: getFieldValue(fields, 'f3Title'), desc: getFieldValue(fields, 'f3Desc'), image: getFieldValue(fields, 'f3Image'), num: '03' },
   ].filter(f => f.title);
 
   return (
@@ -68,7 +68,7 @@ Why.meta = {
   componentKey: 'why',
   category: 'content',
   label: 'Why Medical',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'text', label: '섹션 타이틀', required: true },
     f1Title: { type: 'textarea', label: '특징 1 제목' },

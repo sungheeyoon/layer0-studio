@@ -107,7 +107,7 @@ describe('SiteWriteUseCase — version guard', () => {
 // --- saveJson validation gate (#56) ------------------------------------------
 describe('SiteWriteUseCase.saveJson — validation gate', () => {
   it('rejects with INVALID_TEMPLATE_JSON and attaches the issues', async () => {
-    const issues = [{ code: 'INVALID_COLOR_FIELD', message: 'not hex', path: 'sections[0].data.accent' }];
+    const issues = [{ code: 'INVALID_COLOR_FIELD', message: 'not hex', path: 'sections[0].fields.accent' }];
     const { uc, token } = setup({}, issues as never);
     await expect(uc.saveJson('site-1', 'user-1', makeTemplateJson(), token))
       .rejects.toMatchObject({ code: 'INVALID_TEMPLATE_JSON', issues });
@@ -121,7 +121,7 @@ describe('SiteWriteUseCase.saveJson — validation gate', () => {
           type: 'menu',
           visible: true,
           nav: { visible: false, label: 'Menu' },
-          data: {
+          fields: {
             items: {
               type: 'array',
               label: 'Items',
@@ -133,7 +133,7 @@ describe('SiteWriteUseCase.saveJson — validation gate', () => {
     });
     const { uc, token } = setup();
     const result = await uc.saveJson('site-1', 'user-1', json, token);
-    const items = asSingle(result.content).sections[0].data.items as ArrayField;
+    const items = asSingle(result.content).sections[0].fields.items as ArrayField;
     expect(items.type).toBe('array');
     expect(items.items).toHaveLength(1);
   });

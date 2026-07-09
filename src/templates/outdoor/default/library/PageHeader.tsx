@@ -8,10 +8,10 @@ import { getFieldValue } from '@/domain/entities/template.entity';
  */
 const PageHeader: SectionComponent = function PageHeader(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.data, 'eyebrow');
-  const title = getFieldValue(section.data, 'title') || '페이지';
-  const description = getFieldValue(section.data, 'description');
-  const image = getFieldValue(section.data, 'image');
+  const eyebrow = getFieldValue(section.fields, 'eyebrow');
+  const title = getFieldValue(section.fields, 'title') || '페이지';
+  const description = getFieldValue(section.fields, 'description');
+  const image = getFieldValue(section.fields, 'image');
 
   return (
     <section className="relative isolate overflow-hidden border-b border-[var(--color-line)] bg-[var(--color-surface-dark)]">
@@ -48,7 +48,7 @@ PageHeader.meta = {
   componentKey: 'pageHeader',
   category: 'hero',
   label: '페이지 헤더',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'text', label: '제목', required: true },
     description: { type: 'textarea', label: '설명' },

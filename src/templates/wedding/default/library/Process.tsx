@@ -11,17 +11,17 @@ const STEP_ICONS = [
 ];
 
 const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const ctaText = getFieldValue(data, 'ctaText') || '';
-  const ctaUrl = getFieldValue(data, 'ctaUrl') || '#';
-  const ctaNote = getFieldValue(data, 'ctaNote') || '';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const ctaText = getFieldValue(fields, 'ctaText') || '';
+  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#';
+  const ctaNote = getFieldValue(fields, 'ctaNote') || '';
 
   const steps = [1, 2, 3, 4]
     .map((n) => ({
-      title: getFieldValue(data, `step${n}Title`) || '',
-      body: getFieldValue(data, `step${n}Body`) || '',
+      title: getFieldValue(fields, `step${n}Title`) || '',
+      body: getFieldValue(fields, `step${n}Body`) || '',
     }))
     .filter((s) => s.title);
 
@@ -80,7 +80,7 @@ Process.meta = {
   componentKey: 'process',
   category: 'content',
   label: 'Wedding Process',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'text', label: '타이틀', required: true },
     step1Title: { type: 'text', label: '스텝 1 제목' },

@@ -4,16 +4,16 @@ import { DumbbellIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIc
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || 'APEX';
-  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Fitness';
-  const description = getFieldValue(data, 'description') || '';
-  const copyright = getFieldValue(data, 'copyright') || `© ${new Date().getFullYear()} APEX FITNESS. All rights reserved.`;
-  const businessInfo = getFieldValue(data, 'businessInfo') || '';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || 'APEX';
+  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Fitness';
+  const description = getFieldValue(fields, 'description') || '';
+  const copyright = getFieldValue(fields, 'copyright') || `© ${new Date().getFullYear()} APEX FITNESS. All rights reserved.`;
+  const businessInfo = getFieldValue(fields, 'businessInfo') || '';
   
-  const address = getFieldValue(data, 'address') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const hours = getFieldValue(data, 'hours') || '';
+  const address = getFieldValue(fields, 'address') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const hours = getFieldValue(fields, 'hours') || '';
 
   return (
     <footer className="bg-[var(--f-void)] border-t border-[var(--f-border)] pt-16 pb-10 px-6 lg:px-10">
@@ -124,7 +124,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Fitness Footer',
-  dataSchema: {
+  fieldsSchema: {
     brandName: { type: 'text', label: '브랜드 이름' },
     brandSubtext: { type: 'text', label: '보조 텍스트' },
     description: { type: 'textarea', label: '브랜드 설명' },

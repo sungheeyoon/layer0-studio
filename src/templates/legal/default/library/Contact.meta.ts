@@ -4,7 +4,7 @@ export const contactMeta: SectionComponentMeta = {
   componentKey: 'contact',
   category: 'contact',
   label: 'Legal Contact',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'textarea', label: '타이틀', required: true },
     body: { type: 'textarea', label: '본문' },
     phone: { type: 'text', label: '전화번호' },

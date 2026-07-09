@@ -4,24 +4,24 @@ import { ArrowRightIcon, LeafIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const HeroImage: SectionComponent = function HeroImage({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || 'Seoul Seongsu — Specialty Coffee';
-  const title1 = getFieldValue(data, 'title1') || '천천히,';
-  const titleAccent = getFieldValue(data, 'titleAccent') || '제대로';
-  const subtitle = getFieldValue(data, 'subtitle') || '— 한 잔의 완성';
-  const description = getFieldValue(data, 'description') || '';
-  const image = getFieldValue(data, 'image') || '';
-  const ctaPrimary = getFieldValue(data, 'ctaPrimary') || '메뉴 보기';
-  const ctaSecondary = getFieldValue(data, 'ctaSecondary') || '카페 소개';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || 'Seoul Seongsu — Specialty Coffee';
+  const title1 = getFieldValue(fields, 'title1') || '천천히,';
+  const titleAccent = getFieldValue(fields, 'titleAccent') || '제대로';
+  const subtitle = getFieldValue(fields, 'subtitle') || '— 한 잔의 완성';
+  const description = getFieldValue(fields, 'description') || '';
+  const image = getFieldValue(fields, 'image') || '';
+  const ctaPrimary = getFieldValue(fields, 'ctaPrimary') || '메뉴 보기';
+  const ctaSecondary = getFieldValue(fields, 'ctaSecondary') || '카페 소개';
 
   const stats = [1, 2, 3].map(n => ({
-    value: getFieldValue(data, `stat${n}Value`),
-    label: getFieldValue(data, `stat${n}Label`),
+    value: getFieldValue(fields, `stat${n}Value`),
+    label: getFieldValue(fields, `stat${n}Label`),
   })).filter(s => s.value);
 
-  const badgeText = getFieldValue(data, 'badgeText') || '"Roasted in-house"';
-  const badgeSubtext = getFieldValue(data, 'badgeSubtext') || '직접 로스팅한 원두';
-  const seasonTag = getFieldValue(data, 'seasonTag') || 'Spring Menu';
+  const badgeText = getFieldValue(fields, 'badgeText') || '"Roasted in-house"';
+  const badgeSubtext = getFieldValue(fields, 'badgeSubtext') || '직접 로스팅한 원두';
+  const seasonTag = getFieldValue(fields, 'seasonTag') || 'Spring Menu';
 
   return (
     <section className="min-h-[100dvh] flex items-stretch pt-[68px]" id="hero">
@@ -112,7 +112,7 @@ HeroImage.meta = {
   componentKey: 'hero-image',
   category: 'hero',
   label: 'Hero (Image Background)',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title1: { type: 'text', label: '타이틀 1행' },
     titleAccent: { type: 'text', label: '강조 타이틀' },

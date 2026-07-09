@@ -8,11 +8,11 @@ import { getFieldValue } from '@/domain/entities/template.entity';
  */
 const CtaBanner: SectionComponent = function CtaBanner(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.data, 'eyebrow');
-  const heading = getFieldValue(section.data, 'heading') || '함께 걷는 길';
-  const body = getFieldValue(section.data, 'body');
-  const ctaLabel = getFieldValue(section.data, 'ctaLabel');
-  const image = getFieldValue(section.data, 'image');
+  const eyebrow = getFieldValue(section.fields, 'eyebrow');
+  const heading = getFieldValue(section.fields, 'heading') || '함께 걷는 길';
+  const body = getFieldValue(section.fields, 'body');
+  const ctaLabel = getFieldValue(section.fields, 'ctaLabel');
+  const image = getFieldValue(section.fields, 'image');
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-primary)]">
@@ -52,7 +52,7 @@ CtaBanner.meta = {
   componentKey: 'ctaBanner',
   category: 'cta',
   label: 'CTA 배너',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     heading: { type: 'text', label: '제목', required: true },
     body: { type: 'textarea', label: '설명' },

@@ -11,7 +11,7 @@
  *   2. `eslint src/templates/<key>/` Issue #8 token enforcement included
  *   3. `validateTemplateJson`       derived from preset
  *   4. `validateTemplateFiles`      file-level scan (#8 rules)
- *   5. dataSchema ↔ JSX consistency (declared vs referenced field keys)
+ *   5. fieldsSchema ↔ JSX consistency (declared vs referenced field keys)
  *   6. `template:capture <key>`     Playwright thumbnail capture
  *
  * Steps 1-5 are fast (in-process or small spawn). Step 6 spawns a Chromium
@@ -167,9 +167,9 @@ export function runValidateFiles(templateRoot: string): StepResult {
 }
 
 /**
- * Find the `dataSchema: { … }` literal in a TypeScript source string and
+ * Find the `fieldsSchema: { … }` literal in a TypeScript source string and
  * return the contents *between* the outermost braces (or null if no
- * `dataSchema:` is present). Uses brace-balanced scanning so single-line
+ * `fieldsSchema:` is present). Uses brace-balanced scanning so single-line
  * and multi-line literals both work, and nested object values don't
  * truncate the capture.
  */
@@ -195,11 +195,11 @@ function extractObjectBlock(source: string, key: string): string | null {
 }
 
 function extractDataSchemaBlock(source: string): string | null {
-  return extractObjectBlock(source, 'dataSchema');
+  return extractObjectBlock(source, 'fieldsSchema');
 }
 
 /**
- * Given the inside of `dataSchema: { … }`, return the top-level property
+ * Given the inside of `fieldsSchema: { … }`, return the top-level property
  * keys only. Brace-tracks so nested keys (`type`, `label`, etc.) are skipped.
  */
 function extractTopLevelKeys(block: string): Set<string> {
@@ -225,15 +225,15 @@ function extractTopLevelKeys(block: string): Set<string> {
 }
 
 /**
- * Classify the top-level fields of a `dataSchema` block into:
- *   - `scalarKeys` — ordinary fields (read via `getFieldValue(data, 'key')`)
- *   - `arrayKeys`  — `type: 'array'` fields (iterated via `data['key'].items`,
+ * Classify the top-level fields of a `fieldsSchema` block into:
+ *   - `scalarKeys` — ordinary fields (read via `getFieldValue(fields, 'key')`)
+ *   - `arrayKeys`  — `type: 'array'` fields (iterated via `fields['key'].items`,
  *                    NOT read as a scalar)
  *   - `itemKeys`   — the union of every array field's `itemSchema` keys (each
  *                    read via `getFieldValue(item.subkey)` inside a `.map`)
  *
  * Brace-tracks at depth 0 so nested `type`/`label`/`itemSchema` entries are not
- * mistaken for top-level fields. See `checkDataSchemaJsxConsistency`.
+ * mistaken for top-level fields. See `checkFieldsSchemaJsxConsistency`.
  */
 function parseSchemaFields(block: string): {
   scalarKeys: Set<string>;
@@ -289,20 +289,20 @@ function parseSchemaFields(block: string): {
   return { scalarKeys, arrayKeys, itemKeys };
 }
 
-// ─── Step 5: dataSchema ↔ JSX consistency ────────────────────────────────────
+// ─── Step 5: fieldsSchema ↔ JSX consistency ────────────────────────────────────
 
 /**
  * For each `library/<Section>.tsx`, find:
- *   - Declared field keys in the inline `<Component>.meta.dataSchema` literal
- *   - Referenced field keys in `getFieldValue(data, 'key')` calls
+ *   - Declared field keys in the inline `<Component>.meta.fieldsSchema` literal
+ *   - Referenced field keys in `getFieldValue(fields, 'key')` calls
  * Cross-check both directions. Catches typos / forgotten field migrations.
  *
- * Regex-based — not an AST walk. Good enough since dataSchema is always a
- * literal in our codegen and `getFieldValue(data, '...')` is the only
+ * Regex-based — not an AST walk. Good enough since fieldsSchema is always a
+ * literal in our codegen and `getFieldValue(fields, '...')` is the only
  * canonical accessor. Components that use `.meta.ts` siblings (client
  * components) are handled too.
  */
-export function checkDataSchemaJsxConsistency(templateRoot: string): StepResult {
+export function checkFieldsSchemaJsxConsistency(templateRoot: string): StepResult {
   const libraryDir = path.join(templateRoot, 'library');
   if (!fs.existsSync(libraryDir)) {
     return { name: 'schema-jsx-consistency', ok: true, messages: ['no library/ dir — skipped'] };
@@ -319,8 +319,8 @@ export function checkDataSchemaJsxConsistency(templateRoot: string): StepResult 
     const src = fs.readFileSync(file, 'utf-8');
     const base = path.basename(file, '.tsx');
 
-    // Find the dataSchema literal — either inline `<C>.meta = { dataSchema: { … } }`
-    // or sibling `<C>.meta.ts` exporting `dataSchema: { … }`.
+    // Find the fieldsSchema literal — either inline `<C>.meta = { fieldsSchema: { … } }`
+    // or sibling `<C>.meta.ts` exporting `fieldsSchema: { … }`.
     let schemaSource = src;
     const metaSibling = path.join(libraryDir, `${base}.meta.ts`);
     if (fs.existsSync(metaSibling)) {
@@ -341,13 +341,13 @@ export function checkDataSchemaJsxConsistency(templateRoot: string): StepResult 
     const topLevelDeclared = new Set([...scalarKeys, ...arrayKeys]);
 
     // Scalars: `getFieldValue(<accessor>, 'key')` (two-arg). Any accessor — both
-    // `data` (destructured) and `section.data` are common.
+    // `fields` (destructured) and `section.fields` are common.
     const refScalar = new Set<string>();
     for (const m of src.matchAll(/getFieldValue\s*\(\s*[\w$.[\]]+\s*,\s*['"]([\w$]+)['"]\s*\)/g)) {
       refScalar.add(m[1]);
     }
 
-    // Computed-key reads — `getFieldValue(data, `stat${n}Value`)` inside a
+    // Computed-key reads — `getFieldValue(fields, `stat${n}Value`)` inside a
     // `[1,2,3].map(...)`. The numbered fields (`stat1Value`, `stat2Value`, …)
     // are referenced dynamically, so a literal-key match never sees them. Turn
     // each template literal into a pattern (`${…}` → `[\w$]+`) and treat any
@@ -361,20 +361,20 @@ export function checkDataSchemaJsxConsistency(templateRoot: string): StepResult 
     const isReferencedScalar = (k: string) =>
       refScalar.has(k) || refScalarPatterns.some(re => re.test(k));
 
-    // Dynamic-key components read fields by enumeration — `Object.entries(data)`
-    // or `getFieldValue(data, key)` with a bare variable. We can't statically
+    // Dynamic-key components read fields by enumeration — `Object.entries(fields)`
+    // or `getFieldValue(fields, key)` with a bare variable. We can't statically
     // know which declared keys are read, so for these files we back off the
     // "declared but unused" direction rather than false-flag every field. The
     // "referenced but undeclared" direction stays valid.
     const hasDynamicScalarKeys =
       /getFieldValue\s*\(\s*[\w$.[\]]+\s*,\s*[\w$]+\s*\)/.test(src) ||
-      /Object\.(?:entries|keys|values)\s*\(\s*(?:section\s*\.\s*)?data\b/.test(src);
+      /Object\.(?:entries|keys|values)\s*\(\s*(?:section\s*\.\s*)?fields\b/.test(src);
 
-    // Array fields: member/bracket access on the data object — `data.items`,
-    // `data['items']`, `section.data.items`, `section.data['items']`. (`\bdata`
-    // also matches the `data` inside `section.data`.)
+    // Array fields: member/bracket access on the fields object — `fields.items`,
+    // `fields['items']`, `section.fields.items`, `section.fields['items']`. (`\bfields`
+    // also matches the `fields` inside `section.fields`.)
     const refArray = new Set<string>();
-    for (const m of src.matchAll(/\bdata\s*(?:\.\s*([\w$]+)|\[\s*['"]([\w$]+)['"]\s*\])/g)) {
+    for (const m of src.matchAll(/\bfields\s*(?:\.\s*([\w$]+)|\[\s*['"]([\w$]+)['"]\s*\])/g)) {
       const k = m[1] ?? m[2];
       if (k) refArray.add(k);
     }
@@ -391,21 +391,21 @@ export function checkDataSchemaJsxConsistency(templateRoot: string): StepResult 
     if (!hasDynamicScalarKeys) {
       for (const k of scalarKeys) {
         if (!isReferencedScalar(k)) {
-          violations.push(`${rel}: field "${k}" declared in dataSchema but never read via getFieldValue`);
+          violations.push(`${rel}: field "${k}" declared in fieldsSchema but never read via getFieldValue`);
         }
       }
     }
     for (const k of refScalar) {
-      // An array read via `getFieldValue(data,'items')` is also legitimate.
+      // An array read via `getFieldValue(fields,'items')` is also legitimate.
       if (!topLevelDeclared.has(k)) {
-        violations.push(`${rel}: field "${k}" read via getFieldValue but not declared in dataSchema`);
+        violations.push(`${rel}: field "${k}" read via getFieldValue but not declared in fieldsSchema`);
       }
     }
 
     // Array fields: must be iterated somewhere (member access) or read scalar.
     for (const k of arrayKeys) {
       if (!refArray.has(k) && !refScalar.has(k)) {
-        violations.push(`${rel}: array field "${k}" declared in dataSchema but never read (no data.${k} / data['${k}'] access)`);
+        violations.push(`${rel}: array field "${k}" declared in fieldsSchema but never read (no fields.${k} / fields['${k}'] access)`);
       }
     }
 
@@ -543,7 +543,7 @@ export async function validateAndCapture(
   if (!files.ok) return halt(files);
 
   // 5: in-process structural check.
-  const schemaJsx = checkDataSchemaJsxConsistency(opts.templateRoot);
+  const schemaJsx = checkFieldsSchemaJsxConsistency(opts.templateRoot);
   steps.push(schemaJsx);
   if (!schemaJsx.ok) return halt(schemaJsx);
 

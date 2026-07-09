@@ -4,8 +4,8 @@ import { VerifiedCheckIcon, StarIcon, ShieldCheckIcon, GraduationCapIcon, Hospit
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const items = [1, 2, 3, 4, 5, 6].map(n => getFieldValue(data, `item${n}`)).filter(Boolean);
+  const { fields } = section;
+  const items = [1, 2, 3, 4, 5, 6].map(n => getFieldValue(fields, `item${n}`)).filter(Boolean);
 
   const icons = [
     <VerifiedCheckIcon key="1" size={14} className="text-[var(--m-gold)]" />,
@@ -50,7 +50,7 @@ Marquee.meta = {
   componentKey: 'marquee',
   category: 'content',
   label: 'Medical Certifications',
-  dataSchema: {
+  fieldsSchema: {
     item1: { type: 'text', label: '항목 1' },
     item2: { type: 'text', label: '항목 2' },
     item3: { type: 'text', label: '항목 3' },

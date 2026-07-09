@@ -4,16 +4,16 @@ import { PenIcon, DiamondIcon, ClockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const About: SectionComponent = function About({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const label = getFieldValue(data, 'eyebrow') || 'About Espacio';
-  const title = getFieldValue(data, 'title') || '';
-  const description = getFieldValue(data, 'description') || '';
-  const projectTitle = getFieldValue(data, 'projectTitle') || '한남동 타운하우스 — 주방 리노베이션';
+  const { fields } = section;
+  const label = getFieldValue(fields, 'eyebrow') || 'About Espacio';
+  const title = getFieldValue(fields, 'title') || '';
+  const description = getFieldValue(fields, 'description') || '';
+  const projectTitle = getFieldValue(fields, 'projectTitle') || '한남동 타운하우스 — 주방 리노베이션';
 
   const values = [
-    { title: getFieldValue(data, 'v1Title'), desc: getFieldValue(data, 'v1Desc'), icon: <PenIcon size={18} className="text-[var(--i-gold)]" /> },
-    { title: getFieldValue(data, 'v2Title'), desc: getFieldValue(data, 'v2Desc'), icon: <DiamondIcon size={18} className="text-[var(--i-gold)]" /> },
-    { title: getFieldValue(data, 'v3Title'), desc: getFieldValue(data, 'v3Desc'), icon: <ClockIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(fields, 'v1Title'), desc: getFieldValue(fields, 'v1Desc'), icon: <PenIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(fields, 'v2Title'), desc: getFieldValue(fields, 'v2Desc'), icon: <DiamondIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: getFieldValue(fields, 'v3Title'), desc: getFieldValue(fields, 'v3Desc'), icon: <ClockIcon size={18} className="text-[var(--i-gold)]" /> },
   ].filter(v => v.title);
 
   return (
@@ -94,7 +94,7 @@ About.meta = {
   componentKey: 'about',
   category: 'content',
   label: 'Interior About',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '설명' },

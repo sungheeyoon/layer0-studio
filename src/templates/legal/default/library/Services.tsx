@@ -4,19 +4,19 @@ import { ArrowRightIcon, BuildingsIcon, CalculatorIcon, HomeIcon, GraphIcon, Use
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || '';
 
   const services = [
-    { title: getFieldValue(data, 'service1Title'), body: getFieldValue(data, 'service1Body'), icon: <BuildingsIcon size={40} className="text-amber-400 mb-5" />, large: true },
-    { title: getFieldValue(data, 'service2Title'), body: getFieldValue(data, 'service2Body'), icon: <CalculatorIcon size={32} className="text-amber-600 mb-4" />, bg: 'bg-amber-50 border-amber-100' },
-    { title: getFieldValue(data, 'service3Title'), body: getFieldValue(data, 'service3Body'), icon: <HomeIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
-    { title: getFieldValue(data, 'service4Title'), body: getFieldValue(data, 'service4Body'), icon: <GraphIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
-    { title: getFieldValue(data, 'service5Title'), body: getFieldValue(data, 'service5Body'), icon: <UserHandsIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(fields, 'service1Title'), body: getFieldValue(fields, 'service1Body'), icon: <BuildingsIcon size={40} className="text-amber-400 mb-5" />, large: true },
+    { title: getFieldValue(fields, 'service2Title'), body: getFieldValue(fields, 'service2Body'), icon: <CalculatorIcon size={32} className="text-amber-600 mb-4" />, bg: 'bg-amber-50 border-amber-100' },
+    { title: getFieldValue(fields, 'service3Title'), body: getFieldValue(fields, 'service3Body'), icon: <HomeIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(fields, 'service4Title'), body: getFieldValue(fields, 'service4Body'), icon: <GraphIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: getFieldValue(fields, 'service5Title'), body: getFieldValue(fields, 'service5Body'), icon: <UserHandsIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
   ];
 
-  const mainCtaTitle = getFieldValue(data, 'service6Title') || '';
-  const mainCtaBody = getFieldValue(data, 'service6Body') || '';
+  const mainCtaTitle = getFieldValue(fields, 'service6Title') || '';
+  const mainCtaBody = getFieldValue(fields, 'service6Body') || '';
 
   return (
     <section id="services" className="py-24 md:py-32 px-4 bg-white">
@@ -90,7 +90,7 @@ Services.meta = {
   componentKey: 'services',
   category: 'features',
   label: 'Legal Services',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     service1Title: { type: 'text', label: '서비스 1 제목' },
     service1Body: { type: 'textarea', label: '서비스 1 설명' },

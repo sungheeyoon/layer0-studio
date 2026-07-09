@@ -4,10 +4,10 @@ import { ShieldCheckIcon, DocumentTextIcon, ChatIcon, PlayCircleIcon } from '../
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || '하람 법률세무사무소';
-  const copyright = getFieldValue(data, 'copyright') || '© 2024 하람 법률세무사무소. All rights reserved.';
-  const address = getFieldValue(data, 'address') || '';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || '하람 법률세무사무소';
+  const copyright = getFieldValue(fields, 'copyright') || '© 2024 하람 법률세무사무소. All rights reserved.';
+  const address = getFieldValue(fields, 'address') || '';
 
   return (
     <footer className="bg-[var(--l-navy-deep)] py-16 px-4">
@@ -81,7 +81,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Legal Footer',
-  dataSchema: {
+  fieldsSchema: {
     brandName: { type: 'text', label: '사무소 이름' },
     copyright: { type: 'text', label: '저작권' },
     address: { type: 'textarea', label: '주소' },

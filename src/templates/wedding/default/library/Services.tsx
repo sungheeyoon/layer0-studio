@@ -4,33 +4,33 @@ import { ArrowRightIcon, HeartIcon, GiftIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
 
   const service1 = {
-    badge: getFieldValue(data, 'service1Badge') || '',
-    title: getFieldValue(data, 'service1Title') || '',
-    body: getFieldValue(data, 'service1Body') || '',
-    image: getFieldValue(data, 'service1Image') || '',
+    badge: getFieldValue(fields, 'service1Badge') || '',
+    title: getFieldValue(fields, 'service1Title') || '',
+    body: getFieldValue(fields, 'service1Body') || '',
+    image: getFieldValue(fields, 'service1Image') || '',
   };
   const service2 = {
-    title: getFieldValue(data, 'service2Title') || '',
-    body: getFieldValue(data, 'service2Body') || '',
-    image: getFieldValue(data, 'service2Image') || '',
+    title: getFieldValue(fields, 'service2Title') || '',
+    body: getFieldValue(fields, 'service2Body') || '',
+    image: getFieldValue(fields, 'service2Image') || '',
   };
   const service3 = {
-    title: getFieldValue(data, 'service3Title') || '',
-    body: getFieldValue(data, 'service3Body') || '',
+    title: getFieldValue(fields, 'service3Title') || '',
+    body: getFieldValue(fields, 'service3Body') || '',
   };
   const service4 = {
-    title: getFieldValue(data, 'service4Title') || '',
-    body: getFieldValue(data, 'service4Body') || '',
+    title: getFieldValue(fields, 'service4Title') || '',
+    body: getFieldValue(fields, 'service4Body') || '',
   };
-  const ctaCardTitle = getFieldValue(data, 'ctaCardTitle') || '';
-  const ctaCardBody = getFieldValue(data, 'ctaCardBody') || '';
-  const ctaCardButton = getFieldValue(data, 'ctaCardButton') || '';
-  const ctaCardUrl = getFieldValue(data, 'ctaCardUrl') || '#';
+  const ctaCardTitle = getFieldValue(fields, 'ctaCardTitle') || '';
+  const ctaCardBody = getFieldValue(fields, 'ctaCardBody') || '';
+  const ctaCardButton = getFieldValue(fields, 'ctaCardButton') || '';
+  const ctaCardUrl = getFieldValue(fields, 'ctaCardUrl') || '#';
 
   return (
     <section className={`${styles.section} ${styles.bgDark900} ${styles.dottedBg}`}>
@@ -181,7 +181,7 @@ Services.meta = {
   componentKey: 'services',
   category: 'features',
   label: 'Wedding Services',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'text', label: '타이틀', required: true },
     service1Badge: { type: 'text', label: '서비스 1 배지' },

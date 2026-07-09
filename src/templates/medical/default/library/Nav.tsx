@@ -6,10 +6,10 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || 'ARRC';
-  const brandSubtext = getFieldValue(data, 'brandSubtext') || 'Clinic';
-  const ctaText = getFieldValue(data, 'ctaText') || '예약하기';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || 'ARRC';
+  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Clinic';
+  const ctaText = getFieldValue(fields, 'ctaText') || '예약하기';
 
   return (
     <nav className={styles.navbar}>
@@ -49,7 +49,7 @@ Nav.meta = {
   componentKey: 'nav',
   category: 'navigation',
   label: 'Medical Navigation',
-  dataSchema: {
+  fieldsSchema: {
     brandName: { type: 'text', label: '브랜드 이름' },
     brandSubtext: { type: 'text', label: '보조 텍스트' },
     ctaText: { type: 'text', label: 'CTA 텍스트' },

@@ -6,12 +6,12 @@ import { PhoneIcon, ClockIcon, MapPinIcon, ChatIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || '';
-  const body = getFieldValue(data, 'body') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const hours = getFieldValue(data, 'hours') || '';
-  const location = getFieldValue(data, 'location') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || '';
+  const body = getFieldValue(fields, 'body') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const hours = getFieldValue(fields, 'hours') || '';
+  const location = getFieldValue(fields, 'location') || '';
 
   return (
     <section id="contact" className="py-24 md:py-32 px-4 bg-[var(--l-navy)] relative overflow-hidden">

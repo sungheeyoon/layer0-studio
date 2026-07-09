@@ -8,17 +8,17 @@ export interface SectionComponentMeta {
   componentKey: string;            // Unique key in the library ('hero-video', 'menu-grid', etc.)
   category: string;                 // 'hero' | 'menu' | 'story' | 'footer' | ...
   label: string;                    // Display name in admin catalog
-  dataSchema: SectionDataSchema;   // Field type/required definitions
+  fieldsSchema: SectionFieldsSchema;   // Field type/required definitions
   previewImage?: string;            // Admin catalog thumbnail (optional)
 }
 
-export interface SectionDataSchema {
+export interface SectionFieldsSchema {
   [fieldKey: string]: {
     type: FieldType;
     label: string;
     required?: boolean;
     options?: string[]; // (select용, 이미 사실상 사용 중)
-    itemSchema?: SectionDataSchema; // ★ type: 'array'일 때 필수
+    itemSchema?: SectionFieldsSchema; // ★ type: 'array'일 때 필수
     minItems?: number; // ★ optional 제약
     maxItems?: number; // ★ optional 제약
   };
@@ -160,7 +160,7 @@ export interface TemplateModule {
  * `--color-primary`. Section components reference these via `var(--color-primary)`.
  *
  * AI generation pipeline (issues #11+) emits this shape directly so visual
- * identity is captured as data, not as ad-hoc CSS strings.
+ * identity is captured as fields, not as ad-hoc CSS strings.
  */
 export interface DesignTokens {
   /** Palette. globalStyles.primaryColor overlays `primary`, secondaryColor overlays `secondary`. */

@@ -3,12 +3,12 @@ import styles from '../corporate.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || '';
-  const subtitle = getFieldValue(data, 'subtitle') || '';
-  const bgImage = getFieldValue(data, 'backgroundImage') || '';
-  const ctaText = getFieldValue(data, 'ctaText') || '';
-  const ctaUrl = getFieldValue(data, 'ctaUrl') || '#';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || '';
+  const subtitle = getFieldValue(fields, 'subtitle') || '';
+  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
+  const ctaText = getFieldValue(fields, 'ctaText') || '';
+  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#';
 
   return (
     <div
@@ -41,7 +41,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Corporate Hero',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'text', label: 'Main Title', required: true },
     subtitle: { type: 'text', label: 'Subtitle' },
     backgroundImage: { type: 'image', label: 'Background Image' },

@@ -48,8 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Explicit PageSeo wins; fall back to hero extraction when none is authored.
     const seo = resolveActivePageSeo(siteJson, activePageId);
     const heroSection = allSections(siteJson).find(s => s.type === 'hero');
-    const heroTitle = getFieldValue(heroSection?.data['title']) || getFieldValue(heroSection?.data['heading']) || '';
-    const heroSubtitle = getFieldValue(heroSection?.data['subtitle']) || '';
+    const heroTitle = getFieldValue(heroSection?.fields['title']) || getFieldValue(heroSection?.fields['heading']) || '';
+    const heroSubtitle = getFieldValue(heroSection?.fields['subtitle']) || '';
     const title = seo?.title || site.siteName;
     const description = seo?.description || buildDescription(site.siteName, undefined, heroTitle, heroSubtitle);
 

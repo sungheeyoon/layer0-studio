@@ -17,28 +17,28 @@ interface Pkg {
 }
 
 const Pricing: SectionComponent = function Pricing({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const subtitle = getFieldValue(data, 'subtitle') || '';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const subtitle = getFieldValue(fields, 'subtitle') || '';
 
   const buildPkg = (n: number, opts: { featured?: boolean; premium?: boolean } = {}): Pkg | null => {
-    const name = getFieldValue(data, `pkg${n}Name`);
+    const name = getFieldValue(fields, `pkg${n}Name`);
     if (!name) return null;
     const features: string[] = [];
     for (let i = 1; i <= 6; i++) {
-      const f = getFieldValue(data, `pkg${n}Feature${i}`);
+      const f = getFieldValue(fields, `pkg${n}Feature${i}`);
       if (f) features.push(f);
     }
     return {
-      badge: getFieldValue(data, `pkg${n}Badge`) || undefined,
-      tier: getFieldValue(data, `pkg${n}Tier`) || '',
+      badge: getFieldValue(fields, `pkg${n}Badge`) || undefined,
+      tier: getFieldValue(fields, `pkg${n}Tier`) || '',
       name,
-      price: getFieldValue(data, `pkg${n}Price`) || '',
-      priceSuffix: getFieldValue(data, `pkg${n}PriceSuffix`) || '',
-      note: getFieldValue(data, `pkg${n}Note`) || '',
+      price: getFieldValue(fields, `pkg${n}Price`) || '',
+      priceSuffix: getFieldValue(fields, `pkg${n}PriceSuffix`) || '',
+      note: getFieldValue(fields, `pkg${n}Note`) || '',
       features,
-      ctaText: getFieldValue(data, `pkg${n}CtaText`) || '상담 신청',
+      ctaText: getFieldValue(fields, `pkg${n}CtaText`) || '상담 신청',
       featured: opts.featured,
       premium: opts.premium,
     };
@@ -132,7 +132,7 @@ Pricing.meta = {
   componentKey: 'pricing',
   category: 'features',
   label: 'Wedding Pricing',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '상단 라벨' },
     title: { type: 'text', label: '타이틀', required: true },
     subtitle: { type: 'text', label: '서브 타이틀' },

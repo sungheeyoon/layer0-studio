@@ -4,7 +4,7 @@ export const contactMeta: SectionComponentMeta = {
   componentKey: 'contact',
   category: 'contact',
   label: 'Interior Contact',
-  dataSchema: {
+  fieldsSchema: {
     eyebrow: { type: 'text', label: '섹션 라벨' },
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     description: { type: 'textarea', label: '설명' },

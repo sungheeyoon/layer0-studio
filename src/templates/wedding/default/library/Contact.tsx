@@ -7,16 +7,16 @@ import { renderAccentTitle } from '../sections/title-parts';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const eyebrow = getFieldValue(data, 'eyebrow') || '';
-  const title = getFieldValue(data, 'title') || '';
-  const body = getFieldValue(data, 'body') || '';
-  const phone = getFieldValue(data, 'phone') || '';
-  const hours = getFieldValue(data, 'hours') || '';
-  const location = getFieldValue(data, 'location') || '';
-  const bgImage = getFieldValue(data, 'backgroundImage') || '';
-  const formTitle = getFieldValue(data, 'formTitle') || '무료 상담 신청';
-  const formNote = getFieldValue(data, 'formNote') || '';
+  const { fields } = section;
+  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
+  const title = getFieldValue(fields, 'title') || '';
+  const body = getFieldValue(fields, 'body') || '';
+  const phone = getFieldValue(fields, 'phone') || '';
+  const hours = getFieldValue(fields, 'hours') || '';
+  const location = getFieldValue(fields, 'location') || '';
+  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
+  const formTitle = getFieldValue(fields, 'formTitle') || '무료 상담 신청';
+  const formNote = getFieldValue(fields, 'formNote') || '';
 
   return (
     <section

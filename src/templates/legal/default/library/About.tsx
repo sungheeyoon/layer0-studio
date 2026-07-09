@@ -4,14 +4,14 @@ import { UserHandsIcon, DocumentTextIcon, LockIcon } from '../sections/icons';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const About: SectionComponent = function About({ section }: TemplateSectionProps) {
-  const { data } = section;
-  const title = getFieldValue(data, 'title') || '';
-  const body = getFieldValue(data, 'body') || '';
+  const { fields } = section;
+  const title = getFieldValue(fields, 'title') || '';
+  const body = getFieldValue(fields, 'body') || '';
 
   const reasons = [
-    { title: getFieldValue(data, 'reason1Title'), body: getFieldValue(data, 'reason1Body'), icon: <UserHandsIcon size={20} className="text-amber-400" /> },
-    { title: getFieldValue(data, 'reason2Title'), body: getFieldValue(data, 'reason2Body'), icon: <DocumentTextIcon size={20} className="text-amber-400" /> },
-    { title: getFieldValue(data, 'reason3Title'), body: getFieldValue(data, 'reason3Body'), icon: <LockIcon size={20} className="text-amber-400" /> },
+    { title: getFieldValue(fields, 'reason1Title'), body: getFieldValue(fields, 'reason1Body'), icon: <UserHandsIcon size={20} className="text-amber-400" /> },
+    { title: getFieldValue(fields, 'reason2Title'), body: getFieldValue(fields, 'reason2Body'), icon: <DocumentTextIcon size={20} className="text-amber-400" /> },
+    { title: getFieldValue(fields, 'reason3Title'), body: getFieldValue(fields, 'reason3Body'), icon: <LockIcon size={20} className="text-amber-400" /> },
   ];
 
   return (
@@ -52,7 +52,7 @@ About.meta = {
   componentKey: 'about',
   category: 'content',
   label: 'Legal About',
-  dataSchema: {
+  fieldsSchema: {
     title: { type: 'textarea', label: '섹션 타이틀', required: true },
     body: { type: 'textarea', label: '본문' },
     reason1Title: { type: 'text', label: '이유 1 제목' },

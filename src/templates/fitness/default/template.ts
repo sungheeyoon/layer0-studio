@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "네비게이션"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "APEX",
             "type": "text",
@@ -44,7 +44,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Seoul Gangnam — Since 2010"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Seoul Gangnam — Since 2010",
             "type": "text",
@@ -175,7 +175,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "마퀴"
         },
-        "data": {
+        "fields": {
           "item1": {
             "value": "퍼스널 트레이닝",
             "type": "text",
@@ -234,7 +234,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "프로그램"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "프로그램",
             "type": "text",
@@ -353,7 +353,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "시설"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "시설 안내",
             "type": "text",
@@ -472,7 +472,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "트레이너"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "트레이너",
             "type": "text",
@@ -627,7 +627,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "후기"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "멤버 후기",
             "type": "text",
@@ -716,7 +716,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "무료 체험"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "무료 체험",
             "type": "text",
@@ -775,7 +775,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "APEX",
             "type": "text",

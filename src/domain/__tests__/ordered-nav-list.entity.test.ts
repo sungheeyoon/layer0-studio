@@ -28,7 +28,7 @@ const globalStyles = {
 };
 
 function section(id: string, type: string, visible = true, navVisible = true): SingleSection {
-  return { id, type, visible, nav: { visible: navVisible, label: id }, data: {} };
+  return { id, type, visible, nav: { visible: navVisible, label: id }, fields: {} };
 }
 
 function page(id: string, visible = true, navVisible = true): Page {

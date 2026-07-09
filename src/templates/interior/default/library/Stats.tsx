@@ -3,10 +3,10 @@ import styles from '../interior.module.css';
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const Stats: SectionComponent = function Stats({ section }: TemplateSectionProps) {
-  const { data } = section;
+  const { fields } = section;
   const stats = [1, 2, 3, 4].map(n => ({
-    value: getFieldValue(data, `s${n}Value`),
-    label: getFieldValue(data, `s${n}Label`),
+    value: getFieldValue(fields, `s${n}Value`),
+    label: getFieldValue(fields, `s${n}Label`),
   })).filter(s => s.value);
 
   return (
@@ -36,7 +36,7 @@ Stats.meta = {
   componentKey: 'stats',
   category: 'content',
   label: 'Interior Stats Bar',
-  dataSchema: {
+  fieldsSchema: {
     s1Value: { type: 'text', label: '통계 1 수치' },
     s1Label: { type: 'text', label: '통계 1 라벨' },
     s2Value: { type: 'text', label: '통계 2 수치' },

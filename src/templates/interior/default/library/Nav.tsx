@@ -8,9 +8,9 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { data } = section;
-  const brandName = getFieldValue(data, 'brandName') || '에스파시오';
-  const ctaText = getFieldValue(data, 'ctaText') || '무료 상담 신청';
+  const { fields } = section;
+  const brandName = getFieldValue(fields, 'brandName') || '에스파시오';
+  const ctaText = getFieldValue(fields, 'ctaText') || '무료 상담 신청';
 
   return (
     <nav className={`${styles.glassNav} fixed top-0 left-0 right-0 z-50`}>

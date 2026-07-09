@@ -39,7 +39,7 @@ import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadA
 import GlobalStylesEditor from './GlobalStylesEditor';
 import EditorPreviewFrame from './EditorPreviewFrame';
 import { loadTemplate } from '@/templates/registry';
-import { SectionDataSchema, TemplateModule } from '@/templates/types';
+import { SectionFieldsSchema, TemplateModule } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
 import { getSiteError, isStaleConflict } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
@@ -245,8 +245,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     (sectionId: string, fieldKey: string, value: string | ArrayField['items'], assetId?: string) => {
       updateSiteJson((json) => {
         const section = allSections(json).find(s => s.id === sectionId);
-        if (section && section.data[fieldKey]) {
-          const field = section.data[fieldKey];
+        if (section && section.fields[fieldKey]) {
+          const field = section.fields[fieldKey];
           if (field.type === 'array' && Array.isArray(value)) {
             field.items = value;
           } else if (field.type !== 'array' && typeof value === 'string') {
@@ -596,7 +596,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             <div className="border-t border-border p-3">
                               <SectionFields
                                 section={section}
-                                schema={templateModule?.library[section.type]?.meta.dataSchema}
+                                schema={templateModule?.library[section.type]?.meta.fieldsSchema}
                                 onFieldChange={handleFieldChange}
                                 onError={setActionError}
                               />
@@ -695,7 +695,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                   <div className="mt-3 border-t border-border pt-3">
                                     <SectionFields
                                       section={section}
-                                      schema={templateModule?.library[section.type]?.meta.dataSchema}
+                                      schema={templateModule?.library[section.type]?.meta.fieldsSchema}
                                       onFieldChange={handleFieldChange}
                                       onError={setActionError}
                                     />
@@ -820,14 +820,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 // ─── Dynamic Field Input ──────────────────────────────────────────────────
 
 /**
- * Render fields in their authored `dataSchema` order (= visual / reading order),
+ * Render fields in their authored `fieldsSchema` order (= visual / reading order),
  * not the data object's key order — the seed/DB key order can differ from how the
  * renderer lays them out. Keys present in data but absent from the schema are
  * appended so nothing silently disappears.
  */
 function orderedBySchema<T>(
   data: Record<string, T>,
-  schema?: SectionDataSchema,
+  schema?: SectionFieldsSchema,
 ): [string, T][] {
   if (!schema) return Object.entries(data);
   const ordered: [string, T][] = [];
@@ -897,7 +897,7 @@ function SectionFields({
   onError,
 }: {
   section: Section;
-  schema?: SectionDataSchema;
+  schema?: SectionFieldsSchema;
   onFieldChange: (
     sectionId: string,
     fieldKey: string,
@@ -908,7 +908,7 @@ function SectionFields({
 }) {
   return (
     <div className="space-y-6">
-      {orderedBySchema(section.data, schema)
+      {orderedBySchema(section.fields, schema)
         .filter(([, field]) => field.editable !== false)
         .map(([fieldKey, field]) => (
           <DynamicField
@@ -927,7 +927,7 @@ function SectionFields({
 
 interface DynamicFieldProps {
   field: Field;
-  itemSchema?: SectionDataSchema;
+  itemSchema?: SectionFieldsSchema;
   minItems?: number;
   maxItems?: number;
   onChange: (value: string | ArrayField['items'], assetId?: string) => void;
@@ -1063,7 +1063,7 @@ function ArrayFieldEditor({
   onError,
 }: {
   field: ArrayField;
-  itemSchema?: SectionDataSchema;
+  itemSchema?: SectionFieldsSchema;
   minItems?: number;
   maxItems?: number;
   onChange: (value: ArrayField['items']) => void;

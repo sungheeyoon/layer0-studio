@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "네비게이션"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "하람",
             "type": "text",
@@ -56,7 +56,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "법무부 등록 · 한국세무사회 정회원"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "법무부 등록 · 한국세무사회 정회원",
             "type": "text",
@@ -145,7 +145,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "신뢰 배지"
         },
-        "data": {
+        "fields": {
           "stat1Value": {
             "value": "4,700",
             "type": "text",
@@ -204,7 +204,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "업무 분야"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "어떤 법률·세무 문제든\n하람이 함께합니다",
             "type": "textarea",
@@ -293,7 +293,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "사무소 소개"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "하람을 선택하는\n세 가지 이유",
             "type": "textarea",
@@ -352,7 +352,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "구성원"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "하람의 전문가를 소개합니다",
             "type": "text",
@@ -441,7 +441,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "진행 절차"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "투명하고 체계적인 진행 절차",
             "type": "text",
@@ -518,7 +518,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "testimonials"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "의뢰인들이 직접 말하는 하람",
             "type": "text",
@@ -589,7 +589,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "자주 묻는 질문"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "자주 묻는 질문",
             "type": "text",
@@ -642,7 +642,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "문의하기"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "지금 바로 상담하세요.\n첫 상담은 무료입니다.",
             "type": "textarea",
@@ -683,7 +683,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "하람 법률세무사무소",
             "type": "text",

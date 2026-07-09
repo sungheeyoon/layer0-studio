@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "네비게이션"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "COZY CORNER",
             "type": "text",
@@ -42,7 +42,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Homemade & Fresh"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Homemade & Fresh",
             "type": "text",
@@ -78,7 +78,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "story"
         },
-        "data": {
+        "fields": {
           "title1": {
             "value": "Our Humble",
             "type": "text",
@@ -104,7 +104,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "visit"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "Come Visit",
             "type": "textarea",
@@ -125,7 +125,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "COZY CORNER",
             "type": "text",

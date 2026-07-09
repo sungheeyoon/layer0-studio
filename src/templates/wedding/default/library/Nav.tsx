@@ -6,11 +6,11 @@ import { getFieldValue } from '@/domain/entities/template.entity';
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { data } = section;
-  const brand = getFieldValue(data, 'brand') || 'HAUTRE';
-  const tagline = getFieldValue(data, 'tagline') || '';
-  const ctaText = getFieldValue(data, 'ctaText') || '';
-  const ctaUrl = getFieldValue(data, 'ctaUrl') || '#contact';
+  const { fields } = section;
+  const brand = getFieldValue(fields, 'brand') || 'HAUTRE';
+  const tagline = getFieldValue(fields, 'tagline') || '';
+  const ctaText = getFieldValue(fields, 'ctaText') || '';
+  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#contact';
 
   return (
     <header className={styles.navWrap}>
@@ -46,7 +46,7 @@ Nav.meta = {
   componentKey: 'nav',
   category: 'navigation',
   label: 'Wedding Navigation',
-  dataSchema: {
+  fieldsSchema: {
     brand: { type: 'text', label: '브랜드 로고' },
     tagline: { type: 'text', label: '브랜드 태그라인' },
     ctaText: { type: 'text', label: 'CTA 버튼' },

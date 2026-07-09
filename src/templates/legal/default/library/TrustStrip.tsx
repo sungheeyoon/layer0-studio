@@ -4,11 +4,11 @@ import { BuildingsIcon, DocumentTextIcon, HomeIcon, UserHandsIcon } from '../sec
 import { getFieldValue } from '@/domain/entities/template.entity';
 
 const TrustStrip: SectionComponent = function TrustStrip({ section }: TemplateSectionProps) {
-  const { data } = section;
+  const { fields } = section;
   
   const stats = [1, 2, 3, 4].map(n => ({
-    value: getFieldValue(data, `stat${n}Value`) || '',
-    label: getFieldValue(data, `stat${n}Label`) || '',
+    value: getFieldValue(fields, `stat${n}Value`) || '',
+    label: getFieldValue(fields, `stat${n}Label`) || '',
   }));
 
   const icons = [
@@ -39,7 +39,7 @@ TrustStrip.meta = {
   componentKey: 'trust-strip',
   category: 'content',
   label: 'Legal Trust Strip',
-  dataSchema: {
+  fieldsSchema: {
     stat1Value: { type: 'text', label: '통계 1 값' },
     stat1Label: { type: 'text', label: '통계 1 라벨' },
     stat2Value: { type: 'text', label: '통계 2 값' },

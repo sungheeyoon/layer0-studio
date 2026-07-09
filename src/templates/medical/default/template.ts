@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "네비게이션"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "ARRC",
             "type": "text",
@@ -50,7 +50,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "ARRC Clinic — 서울 강남구 청담동"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "ARRC Clinic — 서울 강남구 청담동",
             "type": "text",
@@ -151,7 +151,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "마퀴"
         },
-        "data": {
+        "fields": {
           "item1": {
             "value": "대한피부과학회 인정의",
             "type": "text",
@@ -198,7 +198,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "진료 안내"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "진료 안내",
             "type": "text",
@@ -305,7 +305,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "클리닉 소개"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "클리닉 소개",
             "type": "text",
@@ -394,7 +394,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "아르크가 다른 이유"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "아르크가 다른 이유",
             "type": "text",
@@ -471,7 +471,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "의료진"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "의료진 소개",
             "type": "text",
@@ -608,7 +608,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "후기"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "환자 후기",
             "type": "text",
@@ -691,7 +691,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "진료 예약"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "진료 예약",
             "type": "text",
@@ -738,7 +738,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "ARRC",
             "type": "text",

@@ -21,7 +21,7 @@ const meta = (componentKey: string) => ({
   componentKey,
   category: componentKey,
   label: componentKey,
-  dataSchema: {},
+  fieldsSchema: {},
 });
 
 // nav/footer take injected page links; the renderer passes them via createElement
@@ -43,7 +43,7 @@ const Nav: SectionComponent = (props) => {
 };
 
 const Body: SectionComponent = ({ section }) => (
-  <main>{getFieldValue(section.data, 'text')}</main>
+  <main>{getFieldValue(section.fields, 'text')}</main>
 );
 
 const Footer: SectionComponent = (props) => {
@@ -79,8 +79,8 @@ const siteJson: ContentModel = {
     layout: 'default',
   },
   shared: {
-    header: [{ id: 'nav', type: 'nav', visible: true, data: {} }],
-    footer: [{ id: 'footer', type: 'footer', visible: true, data: {} }],
+    header: [{ id: 'nav', type: 'nav', visible: true, fields: {} }],
+    footer: [{ id: 'footer', type: 'footer', visible: true, fields: {} }],
   },
   pages: [
     {
@@ -89,7 +89,7 @@ const siteJson: ContentModel = {
       visible: true,
       nav: { visible: true, label: 'Home' },
       sections: [
-        { id: 's-home', type: 'body', visible: true, data: text('We build dependable software.') },
+        { id: 's-home', type: 'body', visible: true, fields: text('We build dependable software.') },
       ],
     },
     {
@@ -98,7 +98,7 @@ const siteJson: ContentModel = {
       visible: true,
       nav: { visible: true, label: 'About' },
       sections: [
-        { id: 's-about', type: 'body', visible: true, data: text('A team that sweats the details.') },
+        { id: 's-about', type: 'body', visible: true, fields: text('A team that sweats the details.') },
       ],
     },
     {
@@ -107,7 +107,7 @@ const siteJson: ContentModel = {
       visible: true,
       nav: { visible: false, label: 'Privacy' },
       sections: [
-        { id: 's-privacy', type: 'body', visible: true, data: text('Privacy policy.') },
+        { id: 's-privacy', type: 'body', visible: true, fields: text('Privacy policy.') },
       ],
     },
   ],

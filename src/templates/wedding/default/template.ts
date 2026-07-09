@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "네비게이션"
         },
-        "data": {
+        "fields": {
           "brand": {
             "value": "HAUTRE",
             "type": "text",
@@ -56,7 +56,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Wedding & Event Planner"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Wedding & Event Planner",
             "type": "text",
@@ -151,7 +151,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Our Philosophy"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Our Philosophy",
             "type": "text",
@@ -192,7 +192,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "서비스"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Services",
             "type": "text",
@@ -305,7 +305,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "갤러리"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Gallery",
             "type": "text",
@@ -364,7 +364,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "진행 방식"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "How We Work",
             "type": "text",
@@ -453,7 +453,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "패키지"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Packages",
             "type": "text",
@@ -680,7 +680,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "후기"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Reviews",
             "type": "text",
@@ -787,7 +787,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "FAQ"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "FAQ",
             "type": "text",
@@ -858,7 +858,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Start Your Story"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Start Your Story",
             "type": "text",
@@ -923,7 +923,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "brand": {
             "value": "HAUTRE",
             "type": "text",

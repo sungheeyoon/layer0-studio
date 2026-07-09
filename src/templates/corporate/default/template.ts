@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "히어로"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "We Build Digital Experiences",
             "type": "text",
@@ -62,7 +62,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "about"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "Our Philosophy",
             "type": "text",
@@ -97,7 +97,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "features"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "Core Capabilities",
             "type": "text",
@@ -144,7 +144,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "contact"
         },
-        "data": {
+        "fields": {
           "title": {
             "value": "Get in Touch",
             "type": "text",
@@ -179,7 +179,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "companyName": {
             "value": "ACME Corp",
             "type": "text",

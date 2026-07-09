@@ -3,7 +3,7 @@ import {
   SiteContentValidationIssue,
   SiteContentValidationResult,
 } from '@/domain/usecases/ports/site-content-validator.port';
-import { TemplateLibrary, SectionDataSchema } from '@/templates/types';
+import { TemplateLibrary, SectionFieldsSchema } from '@/templates/types';
 
 /**
  * The validation result vocabulary is owned by the domain port
@@ -21,7 +21,7 @@ export interface SlotDefinition {
 export interface ValidateOptions {
   /** When provided, templateKey must be in this list. */
   availableTemplateKeys?: string[];
-  /** Phase 6: Provides component library and their data schemas for deep validation. */
+  /** Phase 6: Provides component library and their fields schemas for deep validation. */
   templateLibrary?: TemplateLibrary;
 }
 
@@ -108,15 +108,15 @@ export function validateTemplateJson(
             `${secRef}.type`,
           );
         } else {
-          // Rule 2-bis: data schema validation
+          // Rule 2-bis: fields schema validation
           const validateSchemaRecursively = (
-            schema: SectionDataSchema,
-            data: Record<string, Field>,
+            schema: SectionFieldsSchema,
+            fields: Record<string, Field>,
             ref: string,
           ) => {
             for (const [fieldKey, fieldSchema] of Object.entries(schema)) {
-              const field = data[fieldKey];
-              const fieldRef = `${ref}.data.${fieldKey}`;
+              const field = fields[fieldKey];
+              const fieldRef = `${ref}.fields.${fieldKey}`;
 
               if (!field && fieldSchema.required) {
                 err(
@@ -178,30 +178,30 @@ export function validateTemplateJson(
             }
 
             // Warn on unknown fields
-            for (const fieldKey of Object.keys(data)) {
+            for (const fieldKey of Object.keys(fields)) {
               if (!schema[fieldKey]) {
                 warn(
                   'UNKNOWN_DATA_FIELD',
                   `field "${fieldKey}" is not defined in component schema`,
-                  `${ref}.data.${fieldKey}`,
+                  `${ref}.fields.${fieldKey}`,
                 );
               }
             }
           };
 
-          validateSchemaRecursively(entry.meta.dataSchema, section.data, secRef);
+          validateSchemaRecursively(entry.meta.fieldsSchema, section.fields, secRef);
         }
       }
 
-      // Rules 5 & 8: basic data integrity
-      for (const [fieldKey, field] of Object.entries(section.data)) {
-        const fieldRef = `${secRef}.data.${fieldKey}`;
+      // Rules 5 & 8: basic fields integrity
+      for (const [fieldKey, field] of Object.entries(section.fields)) {
+        const fieldRef = `${secRef}.fields.${fieldKey}`;
 
         if (!field.type) {
-          err('MISSING_FIELD_TYPE', `data field "${fieldKey}" is missing type`, fieldRef);
+          err('MISSING_FIELD_TYPE', `fields field "${fieldKey}" is missing type`, fieldRef);
         }
         if (field.label === undefined || field.label === null) {
-          err('MISSING_FIELD_LABEL', `data field "${fieldKey}" is missing label`, fieldRef);
+          err('MISSING_FIELD_LABEL', `fields field "${fieldKey}" is missing label`, fieldRef);
         }
 
         if (field.type === 'array') {
@@ -213,11 +213,11 @@ export function validateTemplateJson(
           }
         } else {
           if (field.value === undefined || field.value === null) {
-            err('MISSING_FIELD_VALUE', `data field "${fieldKey}" is missing value`, fieldRef);
+            err('MISSING_FIELD_VALUE', `fields field "${fieldKey}" is missing value`, fieldRef);
           } else if (typeof field.value !== 'string') {
             err(
               'NON_STRING_FIELD_VALUE',
-              `data field "${fieldKey}" value must be a string (got ${typeof field.value})`,
+              `fields field "${fieldKey}" value must be a string (got ${typeof field.value})`,
               fieldRef,
             );
           }
@@ -238,7 +238,7 @@ export function validateTemplateJson(
             if (field.value.startsWith('http://')) {
               warn(
                 'INSECURE_URL',
-                `data field "${fieldKey}" uses http:// — prefer https to avoid mixed-content issues`,
+                `fields field "${fieldKey}" uses http:// — prefer https to avoid mixed-content issues`,
                 fieldRef,
               );
             }

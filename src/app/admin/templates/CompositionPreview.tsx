@@ -75,9 +75,9 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
                 </div>
 
                 {/* Data Fields Summary */}
-                {meta?.dataSchema && (
+                {meta?.fieldsSchema && (
                   <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 border-t border-border pt-2">
-                    {Object.entries(meta.dataSchema).map(([key, schema]) => (
+                    {Object.entries(meta.fieldsSchema).map(([key, schema]) => (
                       <div key={key} className="flex items-center gap-1">
                         <span className="text-xs text-muted-foreground">{key}</span>
                         <span className="font-mono text-[10px] text-muted-foreground/70">[{schema.type}{schema.required ? '*' : ''}]</span>

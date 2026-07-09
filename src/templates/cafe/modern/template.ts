@@ -21,7 +21,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "네비게이션"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "MODERN CAFE",
             "type": "text",
@@ -47,7 +47,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "Urban Coffee Experience"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Urban Coffee Experience",
             "type": "text",
@@ -98,7 +98,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "마퀴"
         },
-        "data": {
+        "fields": {
           "item1": {
             "value": "Fast Brew",
             "type": "text",
@@ -129,7 +129,7 @@ const preset: TemplatePreset = {
           "visible": true,
           "label": "Menu"
         },
-        "data": {
+        "fields": {
           "eyebrow": {
             "value": "Menu",
             "type": "text",
@@ -175,7 +175,7 @@ const preset: TemplatePreset = {
           "visible": false,
           "label": "푸터"
         },
-        "data": {
+        "fields": {
           "brandName": {
             "value": "MODERN CAFE",
             "type": "text",

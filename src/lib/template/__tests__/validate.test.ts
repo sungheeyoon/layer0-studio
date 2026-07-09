@@ -35,7 +35,7 @@ function minimalJson(overrides: Partial<SingleContent> = {}): SingleContent {
         type: 'hero',
         visible: true,
         nav: { visible: false, label: 'Hero' },
-        data: {
+        fields: {
           title: { type: 'text', label: 'Title', value: 'Hello', editable: true },
         },
       },
@@ -72,18 +72,18 @@ describe('validateTemplateJson — structure', () => {
     expect(result.errors.some((e) => e.code === 'MISSING_NAV')).toBe(true);
   });
 
-  it('errors when data field is missing value', () => {
+  it('errors when fields field is missing value', () => {
     const json = minimalJson();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (json.sections[0].data.title as any).value = undefined;
+    (json.sections[0].fields.title as any).value = undefined;
     const result = validateTemplateJson(json);
     expect(result.errors.some((e) => e.code === 'MISSING_FIELD_VALUE')).toBe(true);
   });
 
-  it('errors when data field value is not a string', () => {
+  it('errors when fields field value is not a string', () => {
     const json = minimalJson();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (json.sections[0].data.title as any).value = 42;
+    (json.sections[0].fields.title as any).value = 42;
     const result = validateTemplateJson(json);
     expect(result.errors.some((e) => e.code === 'NON_STRING_FIELD_VALUE')).toBe(true);
   });
@@ -92,14 +92,14 @@ describe('validateTemplateJson — structure', () => {
 describe('validateTemplateJson — color fields (#56)', () => {
   it('errors when a color field value is not hex', () => {
     const json = minimalJson();
-    json.sections[0].data.accent = { type: 'color', label: 'Accent', value: 'red', editable: true };
+    json.sections[0].fields.accent = { type: 'color', label: 'Accent', value: 'red', editable: true };
     const result = validateTemplateJson(json);
     expect(result.errors.some((e) => e.code === 'INVALID_COLOR_FIELD')).toBe(true);
   });
 
   it('passes when a color field value is a valid hex', () => {
     const json = minimalJson();
-    json.sections[0].data.accent = { type: 'color', label: 'Accent', value: '#ff0066', editable: true };
+    json.sections[0].fields.accent = { type: 'color', label: 'Accent', value: '#ff0066', editable: true };
     const result = validateTemplateJson(json);
     expect(result.errors.filter((e) => e.code === 'INVALID_COLOR_FIELD')).toHaveLength(0);
   });
@@ -161,7 +161,7 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
         componentKey: 'hero',
         category: 'hero',
         label: 'Hero',
-        dataSchema: {
+        fieldsSchema: {
           title: { type: 'text', label: 'Title', required: true },
           image: { type: 'image', label: 'Image', required: false },
         },
@@ -178,7 +178,7 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
 
   it('errors when required field is missing', () => {
     const json = minimalJson();
-    json.sections[0].data = {}; // title is required
+    json.sections[0].fields = {}; // title is required
     const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
   });
@@ -186,14 +186,14 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
   it('errors on field type mismatch', () => {
     const json = minimalJson();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (json.sections[0].data.title as any).type = 'image'; // expected text
+    (json.sections[0].fields.title as any).type = 'image'; // expected text
     const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'FIELD_TYPE_MISMATCH')).toBe(true);
   });
 
-  it('warns on unknown data fields', () => {
+  it('warns on unknown fields fields', () => {
     const json = minimalJson();
-    json.sections[0].data.extra = { type: 'text', label: 'Extra', value: '...', editable: true };
+    json.sections[0].fields.extra = { type: 'text', label: 'Extra', value: '...', editable: true };
     const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.warnings.some((w) => w.code === 'UNKNOWN_DATA_FIELD')).toBe(true);
   });
@@ -206,7 +206,7 @@ describe('validateTemplateJson — array fields', () => {
         componentKey: 'menu-list',
         category: 'menu',
         label: 'Menu List',
-        dataSchema: {
+        fieldsSchema: {
           items: {
             type: 'array',
             label: 'Items',
@@ -225,7 +225,7 @@ describe('validateTemplateJson — array fields', () => {
   it('passes when array items are valid', () => {
     const json = minimalJson();
     json.sections[0].type = 'menu-list';
-    json.sections[0].data = {
+    json.sections[0].fields = {
       items: {
         type: 'array',
         label: 'Items',
@@ -241,7 +241,7 @@ describe('validateTemplateJson — array fields', () => {
   it('errors when items is not an array', () => {
     const json = minimalJson();
     json.sections[0].type = 'menu-list';
-    json.sections[0].data = {
+    json.sections[0].fields = {
       items: {
         type: 'array',
         label: 'Items',
@@ -256,7 +256,7 @@ describe('validateTemplateJson — array fields', () => {
   it('errors when array item fails nested validation', () => {
     const json = minimalJson();
     json.sections[0].type = 'menu-list';
-    json.sections[0].data = {
+    json.sections[0].fields = {
       items: {
         type: 'array',
         label: 'Items',
@@ -266,16 +266,16 @@ describe('validateTemplateJson — array fields', () => {
       },
     };
     // Test missing required field
-    (json.sections[0].data.items as ArrayField).items[0] = {}; // title missing
+    (json.sections[0].fields.items as ArrayField).items[0] = {}; // title missing
     const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
-    expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path).toContain('items.items[0].data.title');
+    expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path).toContain('items.items[0].fields.title');
   });
 
   it('errors on minItems / maxItems violation', () => {
     const json = minimalJson();
     json.sections[0].type = 'menu-list';
-    json.sections[0].data = {
+    json.sections[0].fields = {
       items: {
         type: 'array',
         label: 'Items',
@@ -285,7 +285,7 @@ describe('validateTemplateJson — array fields', () => {
     const resultMin = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(resultMin.errors.some((e) => e.code === 'ARRAY_ITEMS_BELOW_MIN')).toBe(true);
 
-    (json.sections[0].data.items as ArrayField).items = [
+    (json.sections[0].fields.items as ArrayField).items = [
       { title: { type: 'text', label: 'T', value: '1' } },
       { title: { type: 'text', label: 'T', value: '2' } },
       { title: { type: 'text', label: 'T', value: '3' } }, // maxItems is 2
@@ -299,7 +299,7 @@ describe('validateTemplateJson — array fields', () => {
       'broken-array': {
         meta: {
           componentKey: 'broken-array',
-          dataSchema: {
+          fieldsSchema: {
             items: { type: 'array', label: 'Items' }, // missing itemSchema
           },
         },
@@ -308,7 +308,7 @@ describe('validateTemplateJson — array fields', () => {
 
     const json = minimalJson();
     json.sections[0].type = 'broken-array';
-    json.sections[0].data = {
+    json.sections[0].fields = {
       items: { type: 'array', label: 'Items', items: [] },
     };
     const result = validateTemplateJson(json, { templateLibrary: brokenLibrary });
@@ -319,7 +319,7 @@ describe('validateTemplateJson — array fields', () => {
 describe('validateTemplateJson — warnings', () => {
   it('warns when image field uses http://', () => {
     const json = minimalJson();
-    json.sections[0].data.title = {
+    json.sections[0].fields.title = {
       type: 'image',
       label: 'Image',
       value: 'http://example.com/img.jpg',
