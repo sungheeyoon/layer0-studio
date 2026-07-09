@@ -93,7 +93,7 @@ export async function createTemplateAction(formData: FormData) {
       category: category || 'general',
       status: status as 'draft' | 'active' | 'archived',
       thumbnailUrl: thumbnailUrl || null,
-      templateJson,
+      content: templateJson,
       version: '1.0.0',
       createdBy: user.id,
     });

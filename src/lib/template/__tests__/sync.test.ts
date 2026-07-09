@@ -65,7 +65,7 @@ describe('syncTemplates', () => {
         name: 'Existing Name',
         description: 'Existing Description',
         category: 'existing',
-        template_json: { old: 'data' },
+        content: { old: 'data' },
         version: '1.0.0',
         thumbnail_url: 'old.jpg'
       }],
@@ -117,7 +117,7 @@ describe('syncTemplates', () => {
         name: 'Existing Name',
         description: 'Existing Description',
         category: 'test',
-        template_json: { old: 'data' }, // differs → forces an UPDATE
+        content: { old: 'data' }, // differs → forces an UPDATE
         version: '1.0.0',
         thumbnail_url: 'old.jpg',
         status: 'archived',

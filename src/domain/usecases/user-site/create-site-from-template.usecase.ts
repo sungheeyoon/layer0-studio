@@ -12,7 +12,7 @@ interface CreateSiteFromTemplateInput {
 interface CreateCustomSiteInput {
   userId: string;
   siteName: string;
-  siteJson: ContentModel;
+  content: ContentModel;
   domain?: string;
 }
 
@@ -39,8 +39,8 @@ export class CreateSiteFromTemplateUseCase {
       throw new TemplateError('NAME_TAKEN');
     }
 
-    // Deep copy template JSON to user's site
-    const siteJson: ContentModel = structuredClone(template.templateJson);
+    // Deep copy template content to user's site
+    const content: ContentModel = structuredClone(template.content);
 
     return this.userSiteRepository.create({
       userId: input.userId,
@@ -48,8 +48,8 @@ export class CreateSiteFromTemplateUseCase {
       siteName: input.siteName,
       domain: null,
       status: 'draft',
-      siteJson,
-      templateSnapshot: template.templateJson, // Original template snapshot
+      content,
+      snapshot: template.content, // Original template snapshot
       publishedAt: null,
     });
   }
@@ -64,8 +64,8 @@ export class CreateSiteFromTemplateUseCase {
       siteName: input.siteName,
       domain: input.domain ?? null,
       status: 'draft',
-      siteJson: input.siteJson,
-      templateSnapshot: input.siteJson, // For custom sites, use initial JSON as snapshot
+      content: input.content,
+      snapshot: input.content, // For custom sites, use initial JSON as snapshot
       publishedAt: null,
     });
   }

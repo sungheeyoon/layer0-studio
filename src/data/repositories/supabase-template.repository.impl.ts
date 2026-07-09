@@ -21,7 +21,7 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
       category: row.category ?? 'general',
       status: row.status,
       thumbnailUrl: row.thumbnail_url,
-      templateJson: row.template_json,
+      content: row.content,
       version: row.version ?? '1.0.0',
       createdBy: row.created_by,
       createdAt: row.created_at,
@@ -155,7 +155,7 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
         category: dto.category,
         status: dto.status,
         thumbnail_url: dto.thumbnailUrl,
-        template_json: dto.templateJson,
+        content: dto.content,
         version: dto.version,
         created_by: dto.createdBy,
       })
@@ -181,7 +181,7 @@ export class SupabaseTemplateRepositoryImpl implements ITemplateRepository {
     if (dto.category !== undefined) updatePayload.category = dto.category;
     if (dto.status !== undefined) updatePayload.status = dto.status;
     if (dto.thumbnailUrl !== undefined) updatePayload.thumbnail_url = dto.thumbnailUrl;
-    if (dto.templateJson !== undefined) updatePayload.template_json = dto.templateJson;
+    if (dto.content !== undefined) updatePayload.content = dto.content;
     if (dto.version !== undefined) updatePayload.version = dto.version;
     updatePayload.updated_at = new Date().toISOString();
 

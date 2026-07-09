@@ -42,8 +42,8 @@ export function makeSite(overrides: Partial<UserSite> = {}): UserSite {
     siteName: 'My Site',
     domain: null,
     status: 'draft',
-    siteJson: json,
-    templateSnapshot: json,
+    content: json,
+    snapshot: json,
     publishedAt: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -113,7 +113,7 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
 
   async updateSiteJson(id: string, siteJson: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
     const idx = this.guardVersion(id, expectedUpdatedAt);
-    this.sites[idx] = { ...this.sites[idx], siteJson, updatedAt: this.nextUpdatedAt() };
+    this.sites[idx] = { ...this.sites[idx], content: siteJson, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
 

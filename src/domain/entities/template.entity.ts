@@ -223,7 +223,7 @@ export interface Template {
   category: string;
   status: 'draft' | 'active' | 'archived';
   thumbnailUrl: string | null;
-  templateJson: ContentModel;
+  content: ContentModel;
   version: string;
   createdBy: string;
   createdAt: string;

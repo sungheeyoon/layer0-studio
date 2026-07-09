@@ -133,7 +133,7 @@ describe('SiteWriteUseCase.saveJson — validation gate', () => {
     });
     const { uc, token } = setup();
     const result = await uc.saveJson('site-1', 'user-1', json, token);
-    const items = asSingle(result.siteJson).sections[0].data.items as ArrayField;
+    const items = asSingle(result.content).sections[0].data.items as ArrayField;
     expect(items.type).toBe('array');
     expect(items.items).toHaveLength(1);
   });

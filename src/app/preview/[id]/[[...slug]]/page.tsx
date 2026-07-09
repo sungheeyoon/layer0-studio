@@ -39,7 +39,7 @@ export default async function TemplatePreviewPage({ params }: Props) {
     notFound();
   }
 
-  const { templateJson } = template;
+  const { content: templateJson } = template;
   const slugPath = (slug ?? []).join('/');
 
   // Mirror the public site: empty slug = home (first page); unknown / hidden

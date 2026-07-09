@@ -71,7 +71,7 @@ describe('syncTemplates — thumbnail guard', () => {
         name: 'Missing Thumb',
         description: 'desc',
         category: 'test',
-        template_json: { old: 'data' }, // differs → forces an UPDATE
+        content: { old: 'data' }, // differs → forces an UPDATE
         version: '1.0.0',
         thumbnail_url: 'https://cdn.example/stored-good.webp',
       }],

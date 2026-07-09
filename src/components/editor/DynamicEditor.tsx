@@ -90,7 +90,7 @@ interface DynamicEditorProps {
 export default function DynamicEditor({ site }: DynamicEditorProps) {
   const locale = useLocale();
   const t = useDictionary().editor;
-  const [siteJson, setSiteJson] = useState<ContentModel>(() => injectKeys(site.siteJson));
+  const [siteJson, setSiteJson] = useState<ContentModel>(() => injectKeys(site.content));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
   const isMulti = isMultiContent(siteJson);
@@ -98,7 +98,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // Multi sites edit one page at a time (page tabs switch the context). The
   // active page also drives the live preview (`activePageId` → renderer).
   const [activePageId, setActivePageId] = useState<string | undefined>(() =>
-    isMultiContent(site.siteJson) ? site.siteJson.pages[0]?.id : undefined,
+    isMultiContent(site.content) ? site.content.pages[0]?.id : undefined,
   );
 
   // Single sites carry their sections directly (one continuous scroll); they
