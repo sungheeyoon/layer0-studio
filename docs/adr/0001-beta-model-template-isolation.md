@@ -4,7 +4,7 @@
 
 ## Future direction
 
-multi-page 는 **데이터 모델 차원**에서 이미 출시됐다([ADR-0007](./0007-single-multi-site-type-structural-union.md) — `TemplateJson` 유니온, `renderMultiSite`). 다만 그 작업은 평탄한 `library/` 를 그대로 쓰며, 디렉터리를 `src/templates/<templateKey>/pages/<page>/sections/` 로 옮기는 **코드 구조 재편은 여전히 미결**이다. 그래서 `library/` 라는 디렉터리 이름은 *과도기 아티팩트* 로 다루며, CONTEXT.md 글로서리에 도메인 용어로 굳히지 않는다.
+multi-page 는 **데이터 모델 차원**에서 이미 출시됐다([ADR-0007](./0007-single-multi-site-type-structural-union.md) — `ContentModel`(구 `TemplateJson`) 유니온, `renderMultiSite`). 다만 그 작업은 평탄한 `library/` 를 그대로 쓰며, 디렉터리를 `src/templates/<templateKey>/pages/<page>/sections/` 로 옮기는 **코드 구조 재편은 여전히 미결**이다. 그래서 `library/` 라는 디렉터리 이름은 *과도기 아티팩트* 로 다루며, CONTEXT.md 글로서리에 도메인 용어로 굳히지 않는다.
 
 ## Consequences
 

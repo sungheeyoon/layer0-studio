@@ -53,7 +53,7 @@
 
 ### 6. 안전 가드 (자동화의 안전벨트)
 
-- **피해 반경 한정**: 사용자 사이트는 생성 시 `structuredClone` 으로 siteJson 을 깊은 복사하므로(ADR-0007 흐름), 나쁜 Template UPDATE 의 피해는 **카탈로그 카드 + 신규 인스턴스화**로 한정되고 기존 라이브 사이트엔 번지지 않는다.
+- **피해 반경 한정**: 사용자 사이트는 생성 시 `structuredClone` 으로 `content`(구 siteJson) 를 깊은 복사하므로(ADR-0007 흐름), 나쁜 Template UPDATE 의 피해는 **카탈로그 카드 + 신규 인스턴스화**로 한정되고 기존 라이브 사이트엔 번지지 않는다.
 - **CREATE 썸네일 필수 가드**: 첫 공개가 곧장 `active` 이므로, CREATE 에서 썸네일(배포된 public URL 에서 fetch → `template-thumbnails` 버킷 업로드)을 못 구하면 **등록을 실패시킨다**(썸네일 없는 카드를 라이브로 내보내지 않음). UPDATE 는 현행 가드(기존 썸네일 유지) 유지.
 - **롤백 2레인**:
   - (1) **빠른 숨김** = `status` → `archived` 토글(배포 불필요). 결정 2 에 의해 이후 sync 가 되살리지 않음.
@@ -76,5 +76,5 @@
 
 ## 관련
 
-- 잇는 결정: [ADR-0002](./0002-templates-source-of-truth-is-code.md)(코드 = source of truth), [ADR-0006](./0006-canpublishtemplates-separate-from-admin.md)(canPublishTemplates 분리 — 스코프 재정의), [ADR-0007](./0007-single-multi-site-type-structural-union.md)(siteJson 깊은 복사 = 피해 반경 한정).
+- 잇는 결정: [ADR-0002](./0002-templates-source-of-truth-is-code.md)(코드 = source of truth), [ADR-0006](./0006-canpublishtemplates-separate-from-admin.md)(canPublishTemplates 분리 — 스코프 재정의), [ADR-0007](./0007-single-multi-site-type-structural-union.md)(`content` 깊은 복사 = 피해 반경 한정).
 - 저작 단계: `new-template` 스킬, `docs/TEMPLATE_SYSTEM.md`.

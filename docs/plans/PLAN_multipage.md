@@ -23,68 +23,70 @@ _관련: [ADR-0007](../adr/0007-single-multi-site-type-structural-union.md) (이
 
 | # | 결정 | 요지 |
 |---|---|---|
-| **D1** | Single/Multi = 독립 Site Type | 생성 시점에 `mode` 결정. **상호 진화 없음.** 구조적 유니온(`Template = SinglePageTemplate \| MultiPageTemplate`). 분기는 사이트 수준 엔트리포인트에 두고 섹션 수준 렌더는 재사용. |
-| **D2** | base `TemplateSection` + `SingleSection extends`, 통일 `nav:{visible,label}` | nav 정보는 **projection 소스에만** 둔다. base = `{id,type,visible,data}` (섹션 콘텐츠 모양, 렌더 재사용). single은 섹션이 nav 구동 → `SingleSection extends { nav:{visible,label} }`. multi는 페이지가 nav 구동 → `TemplatePage.nav:{visible,label}`. **multi 내부 섹션엔 nav 없음.** `title` 제거(이름은 `nav.label`이 겸함), `editable` 제거(항상 true 죽은 필드). nav 객체 모양은 single·multi 동일. **죽은 필드 0.** |
+| **D1** | Single/Multi = 독립 Site Type | 생성 시점에 `mode` 결정. **상호 진화 없음.** 구조적 유니온(`ContentModel = SingleContent \| MultiContent`). 분기는 사이트 수준 엔트리포인트에 두고 섹션 수준 렌더는 재사용. |
+| **D2** | base `Section` + `SingleSection extends`, 통일 `nav:{visible,label}` | nav 정보는 **projection 소스에만** 둔다. base = `{id,type,visible,fields}` (섹션 콘텐츠 모양, 렌더 재사용). single은 섹션이 nav 구동 → `SingleSection extends { nav:{visible,label} }`. multi는 페이지가 nav 구동 → `Page.nav:{visible,label}`. **multi 내부 섹션엔 nav 없음.** `title` 제거(이름은 `nav.label`이 겸함), `editable` 제거(항상 true 죽은 필드). nav 객체 모양은 single·multi 동일. **죽은 필드 0.** |
 | **D3** | nav = projection (통일 `deriveNav`) | nav는 독립 데이터가 아니라 소스의 투영. single=`sections`(앵커), multi=`pages`(slug). nav 객체·필터·라벨 출처(`nav.label`)는 동일, **진짜 다른 단 하나(href: 앵커 vs slug)만 다름.** 반영: **배열 순서** + **노출 자격**(`nav.visible`). `visible`/`nav.visible`은 **독립 축** — `visible:false`면 nav에서도 제외(일방향 가드)이나, `visible:true`라고 nav 노출이 강제되지 않음(보이지만 nav엔 숨김 가능). |
 | **D4** | Single = `sections[]` 하나 | nav/footer를 별도 필드로 분리하지 않고 `sections[]` 안에 유지(= 하나의 스크롤 흐름). 제약은 에디터 **핀 고정**으로 표현(nav 최상단·footer 최하단·reorder 불가). |
-| **D5** | Multi 페이지 2축 | `TemplatePage.visible`(라우팅 가능 여부) + `TemplatePage.nav.visible`(상단 메뉴 노출 여부). 독립 축. 약관/개인정보처리방침 = `visible:true, nav.visible:false`. |
+| **D5** | Multi 페이지 2축 | `Page.visible`(라우팅 가능 여부) + `Page.nav.visible`(상단 메뉴 노출 여부). 독립 축. 약관/개인정보처리방침 = `visible:true, nav.visible:false`. |
 | **D6** | 기존 single 데이터 마이그레이션 | 초기 단계라 타협 없이 구조 확정. `{pages:[home]}` → `{mode:'single', sections}`, `label`키→`eyebrow`, nav 섹션 `menu1~N` 제거, 각 single 섹션에 `nav:{visible,label}` 주입, `title`/`editable` 제거. |
 
 ---
 
 ## 2. 데이터 모델
 
-`src/domain/entities/template.entity.ts`. `TemplateJson`이 구조적 유니온이 된다.
+`src/domain/entities/template.entity.ts`. `ContentModel`이 구조적 유니온이 된다.
+
+> 타입 이름은 **현재(post-ADR-0013) 기준**으로 표기한다. 이 RFC 설계 당시엔 `TemplateJson`/`TemplateSection`/`TemplateField`/`TemplatePage`/`TemplateGlobalStyles`/`SinglePageTemplate`/`MultiPageTemplate`/`TemplateBase` 였고, [ADR-0013](../adr/0013-content-model-rename.md)이 구조는 그대로 둔 채 각각 `ContentModel`/`Section`/`Field`/`Page`/`GlobalStyles`/`SingleContent`/`MultiContent`/`ContentModelBase`로 개명(+ section 의 `data`→`fields`, migration 022)했다.
 
 ```typescript
 // ── base: 섹션 "콘텐츠 모양" (single·multi 공통, 섹션 렌더 재사용) ──
-interface TemplateSection {
+interface Section {
   id: string;                                 // immutable (재생성 코드 0건, 검증 완료). 앵커/slot_key 기준
   type: string;                               // library componentKey 매칭
   visible: boolean;                           // 화면 노출 여부 (사용자)
-  data: Record<string, TemplateField>;        // data.eyebrow.value = 화면 상단 키커(구 data.label)
+  fields: Record<string, Field>;              // fields.eyebrow.value = 화면 상단 키커(구 data.label; 컨테이너 data→fields는 migration 022)
   // title/editable 없음 — 이름은 nav.label(SingleSection)/page.nav.label이 담당, multi 내부 섹션은 에디터에서 type 표시(현재와 동일).
   // editable: 모든 프리셋에서 항상 true였던 죽은 필드라 제거. 필드 레벨 field.editable은 유지.
 }
 
 // ── single 전용: 섹션이 nav를 구동 → 통일 nav 객체 추가 ──────
-interface SingleSection extends TemplateSection {
+interface SingleSection extends Section {
   nav: { visible: boolean; label: string };   // single nav 소스. visible=노출 자격, label=nav 텍스트.
 }
 
 // ── multi 전용: page ──────────────────────────────────────
 interface PageSeo { title: string; description: string; }   // 🔮 Phase 6 자리표시
 
-interface TemplatePage {
+interface Page {
   id: string;
   slug: string;
   visible: boolean;                           // 라우팅 가능 여부 (false → 404, 데이터는 보존)
   nav: { visible: boolean; label: string };   // multi nav 소스. label=페이지 이름 겸 nav 텍스트(에디터 탭에도 사용).
-  sections: TemplateSection[];                // base — nav 구동 안 함
+  sections: Section[];                        // base — nav 구동 안 함
   seo?: PageSeo;                              // 🔮 Phase 6
   // title 없음 — 페이지 이름은 nav.label이 겸함 (nav.visible:false여도 label은 에디터 탭에 표시)
   // order 없음 — pages[] 배열 순서 = nav/렌더 순서 (migration 012의 "배열 순서 = 렌더 순서"와 일관)
 }
 
 // ── Site Type 유니온 ─────────────────────────────────────
-interface TemplateBase {
+interface ContentModelBase {
   templateKey: string;                        // 렌더러 선택 (공유 코드)
-  globalStyles: TemplateGlobalStyles;
+  globalStyles: GlobalStyles;
 }
 
-interface SinglePageTemplate extends TemplateBase {
+interface SingleContent extends ContentModelBase {
   mode: 'single';
   sections: SingleSection[];                  // nav/footer 포함, 에디터에서 핀 고정
   seo?: PageSeo;                             // 🔮 Phase 6 (single은 페이지가 하나 → 사이트 레벨)
 }
 
-interface MultiPageTemplate extends TemplateBase {
+interface MultiContent extends ContentModelBase {
   mode: 'multi';
-  shared: { header: TemplateSection[]; footer: TemplateSection[] };
-  pages: TemplatePage[];
+  shared: { header: Section[]; footer: Section[] };
+  pages: Page[];
 }
 
-type TemplateJson = SinglePageTemplate | MultiPageTemplate;   // mode 판별자
+type ContentModel = SingleContent | MultiContent;   // mode 판별자 (SiteMode)
 ```
 
 **원칙 한 줄: _nav 정보는 통일 `nav:{visible,label}`로 projection 소스에만 붙는다._** single은 **섹션**(`SingleSection.nav`) + 앵커(`#section-${id}`), multi는 **페이지**(`page.nav`) + slug가 소스. nav 객체 모양·필터 규칙·라벨 출처(`nav.label`)는 양쪽 동일하고, **진짜 다른 단 하나(앵커 vs slug)만 다르다.** `title`은 없다(이름은 `nav.label`이 겸함). **죽은 필드 0.**
@@ -154,14 +156,14 @@ interface NavSectionProps extends TemplateSectionProps {
 
 ## 4. 마이그레이션 (기존 single 데이터)
 
-`docs/migrations/015_single_site_type.sql`. 대상: `user_sites.site_json`, `user_sites.template_snapshot`. (`templates.template_json`은 코드가 진실 → 재sync로 해결.)
+`docs/migrations/018_single_site_type.md` (설계 당시 015 로 예정). 대상: `user_sites.content`, `user_sites.snapshot` (설계 당시 컬럼명 `site_json`/`template_snapshot`, migration 021 에서 개명). (`templates.content`은 코드가 진실 → 재sync로 해결.)
 
 각 row 변환:
 1. `{ pages: [home], templateKey, globalStyles }` → `{ mode:'single', templateKey, globalStyles, sections }` (home.sections를 최상위 sections로 승격, 페이지 래퍼 제거).
 2. 각 섹션: `data.label` 키 → `data.eyebrow` 키로 리네임.
 3. nav 섹션(`type==='nav'`): `menu1~N` 필드 제거.
 4. 각 single 섹션에 `nav:{visible,label}` 주입, `title`/`editable` 제거 — 기존 nav의 `menuN` 값으로 대상 섹션 `nav.label`을 채우고 `nav.visible:true`; nav 대상이 아닌 섹션은 `nav:{visible:false, label:<섹션 이름(eyebrow/type 기반)>}`.
-5. **slot_key 네임스페이스 변경**: `${page.id}.${section.id}.${key}` → `${section.id}.${key}`. 다음 저장 시 RPC가 `site_json`에서 재계산하므로 self-heal(asset_id 동일 → orphan 오삭제 없음). 마이그레이션 노트에 명시.
+5. **slot_key 네임스페이스 변경**: `${page.id}.${section.id}.${key}` → `${section.id}.${key}`. 다음 저장 시 RPC가 `content`(구 `site_json`)에서 재계산하므로 self-heal(asset_id 동일 → orphan 오삭제 없음). 마이그레이션 노트에 명시.
 
 ⚠️ 백업 + 드라이런 필수. 단, v1과 달리 **nav/footer를 들어올리는 구조 이관이 아니라 래퍼 평탄화 + 필드 리네임**이라 위험이 현저히 낮다.
 
@@ -172,7 +174,7 @@ interface NavSectionProps extends TemplateSectionProps {
 ### Phase 0 — 기반: `composition` 제거 + 타입 유니온 도입 ✅
 - `src/templates/types.ts` — `TemplatePreset`에서 `composition`/`PresetSection` 제거, `mode` 판별 `templateJson` 필수화.
 - `src/lib/template/preset.ts` — `deriveTemplateJsonFromPreset` 삭제(preset이 곧 templateJson).
-- `template.entity.ts` — §2 유니온 도입(base `TemplateSection`(`title`/`editable` 없음) + `SingleSection extends {nav:{visible,label}}` + `TemplatePage{nav:{visible,label}}` / 유니온 `TemplateJson`).
+- `template.entity.ts` — §2 유니온 도입(base `Section`(`title`/`editable` 없음) + `SingleSection extends {nav:{visible,label}}` + `Page{nav:{visible,label}}` / 유니온 `ContentModel`).
 - `DynamicEditor.tsx:357` — 죽은 섹션 `editable` 게이트 제거.
 - 호출부 정리: `sync.ts:109`, `scripts/lib/validate-and-capture.ts:134`, `preview/preset/[...key]/page.tsx:30`.
 - 6개 single 템플릿 `template.ts` → `{ mode:'single', sections }`로 변환(eyebrow, 섹션별 `nav:{visible,label}`).

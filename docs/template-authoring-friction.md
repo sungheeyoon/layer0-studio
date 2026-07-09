@@ -13,7 +13,7 @@ _목적: `new-template` 스킬 / 검증·동기화 도구 체인을 개선하기
 
 > 검사기가 `parseSchemaFields`로 array/computed/dynamic 키를 인지하도록 수정됨(`scripts/lib/validate-and-capture.ts`). array 필드는 멤버 접근으로, `itemSchema` 하위키는 `getFieldValue(item.x)`로 양방향 검증. 11개 템플릿 전수 CLEAN, 회귀 테스트 추가. 이 수정 과정에서 실제 드리프트 버그(cafe-cozy `seasonTag` 선언 누락)도 발견·수정. 아래는 당시 증상 기록(보존).
 
-- **증상**: 검증 게이트가 `❌ Gate failed`로 중단. `items` 같은 `array` 필드마다 `"items declared in dataSchema but never read"`, 항목 내부 필드(`name`/`price`...)마다 `"read but not declared"` 위반을 쏟아냄.
+- **증상**: 검증 게이트가 `❌ Gate failed`로 중단. `items` 같은 `array` 필드마다 `"items declared in fieldsSchema but never read"`, 항목 내부 필드(`name`/`price`...)마다 `"read but not declared"` 위반을 쏟아냄.
 - **원인**: 일관성 검사기가 **정규식 기반**이라 (1) `array` 필드를 `data['items']`로 직접 읽는 패턴을 인식 못 하고, (2) `itemSchema` 안의 중첩 키를 "선언된 것"으로 못 봄. 즉 array를 쓰는 모든 컴포넌트가 구조적으로 실패한다. **참조 템플릿 cafe-default(MenuBento)조차 동일하게 실패**한다 — 실제로는 차단이 아니라 정보성 단계인데, 게이트는 exit 1로 중단시킨다.
 - **영향**: 스킬 지침("all green까지 self-fix")과 충돌. 개발자가 "내가 뭘 잘못했나" 추적하느라 시간 낭비. 진짜 차단 게이트(tsc/eslint/validate-json/validate-files)와 거짓 실패가 같은 무게로 표시됨.
 - **제안**:
