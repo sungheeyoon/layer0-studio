@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateTemplateJson } from '../validate';
+import { validateContent } from '../validate';
 import { SingleContent, ArrayField } from '@/domain/entities/template.entity';
 import type { TemplateLibrary } from '@/templates/types';
 
@@ -46,21 +46,21 @@ function minimalJson(overrides: Partial<SingleContent> = {}): SingleContent {
 
 // ─── Unit tests ────────────────────────────────────────────────────
 
-describe('validateTemplateJson — structure', () => {
+describe('validateContent — structure', () => {
   it('passes a well-formed JSON with no options', () => {
-    const result = validateTemplateJson(minimalJson());
+    const result = validateContent(minimalJson());
     expect(result.errors).toHaveLength(0);
   });
 
   it('errors when sections is empty', () => {
-    const result = validateTemplateJson(minimalJson({ sections: [] }));
+    const result = validateContent(minimalJson({ sections: [] }));
     expect(result.errors.some((e) => e.code === 'SECTIONS_EMPTY')).toBe(true);
   });
 
   it('errors on duplicate section ids', () => {
     const json = minimalJson();
     json.sections.push({ ...json.sections[0] }); // same id
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.some((e) => e.code === 'DUPLICATE_SECTION_ID')).toBe(true);
   });
 
@@ -68,7 +68,7 @@ describe('validateTemplateJson — structure', () => {
     const json = minimalJson();
     // @ts-expect-error intentional: drop the required nav projection source
     delete json.sections[0].nav;
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.some((e) => e.code === 'MISSING_NAV')).toBe(true);
   });
 
@@ -76,7 +76,7 @@ describe('validateTemplateJson — structure', () => {
     const json = minimalJson();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (json.sections[0].fields.title as any).value = undefined;
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.some((e) => e.code === 'MISSING_FIELD_VALUE')).toBe(true);
   });
 
@@ -84,57 +84,57 @@ describe('validateTemplateJson — structure', () => {
     const json = minimalJson();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (json.sections[0].fields.title as any).value = 42;
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.some((e) => e.code === 'NON_STRING_FIELD_VALUE')).toBe(true);
   });
 });
 
-describe('validateTemplateJson — color fields (#56)', () => {
+describe('validateContent — color fields (#56)', () => {
   it('errors when a color field value is not hex', () => {
     const json = minimalJson();
     json.sections[0].fields.accent = { type: 'color', label: 'Accent', value: 'red', editable: true };
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.some((e) => e.code === 'INVALID_COLOR_FIELD')).toBe(true);
   });
 
   it('passes when a color field value is a valid hex', () => {
     const json = minimalJson();
     json.sections[0].fields.accent = { type: 'color', label: 'Accent', value: '#ff0066', editable: true };
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.filter((e) => e.code === 'INVALID_COLOR_FIELD')).toHaveLength(0);
   });
 });
 
-describe('validateTemplateJson — templateKey', () => {
+describe('validateContent — templateKey', () => {
   it('errors when templateKey is not in availableTemplateKeys', () => {
-    const result = validateTemplateJson(minimalJson(), { availableTemplateKeys: ['cafe'] });
+    const result = validateContent(minimalJson(), { availableTemplateKeys: ['cafe'] });
     expect(result.errors.some((e) => e.code === 'UNKNOWN_TEMPLATE_KEY')).toBe(true);
   });
 
   it('passes when templateKey is in availableTemplateKeys', () => {
-    const result = validateTemplateJson(minimalJson(), { availableTemplateKeys: ['corporate'] });
+    const result = validateContent(minimalJson(), { availableTemplateKeys: ['corporate'] });
     expect(result.errors.filter((e) => e.code === 'UNKNOWN_TEMPLATE_KEY')).toHaveLength(0);
   });
 
   it('skips templateKey check when availableTemplateKeys is not provided', () => {
-    const result = validateTemplateJson(minimalJson({ templateKey: 'nonexistent' }));
+    const result = validateContent(minimalJson({ templateKey: 'nonexistent' }));
     expect(result.errors.filter((e) => e.code === 'UNKNOWN_TEMPLATE_KEY')).toHaveLength(0);
   });
 });
 
-describe('validateTemplateJson — globalStyles', () => {
+describe('validateContent — globalStyles', () => {
   it('errors when globalStyles is missing', () => {
     const json = minimalJson();
     // @ts-expect-error intentional
     delete json.globalStyles;
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.some((e) => e.code === 'MISSING_GLOBAL_STYLES')).toBe(true);
   });
 
   it('warns on non-hex primaryColor', () => {
     const json = minimalJson();
     json.globalStyles.primaryColor = 'red';
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.warnings.some((w) => w.code === 'NON_HEX_COLOR')).toBe(true);
     expect(result.errors.filter((e) => e.code === 'INVALID_COLOR')).toHaveLength(0);
   });
@@ -142,19 +142,19 @@ describe('validateTemplateJson — globalStyles', () => {
   it('errors on invalid fontSize', () => {
     const json = minimalJson();
     json.globalStyles.fontSize = 'big';
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.some((e) => e.code === 'INVALID_FONT_SIZE')).toBe(true);
   });
 
   it('errors on unknown layout', () => {
     const json = minimalJson();
     json.globalStyles.layout = 'superwide';
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.errors.some((e) => e.code === 'UNKNOWN_LAYOUT')).toBe(true);
   });
 });
 
-describe('validateTemplateJson — library rules (Phase 6)', () => {
+describe('validateContent — library rules (Phase 6)', () => {
   const mockLibrary = {
     hero: {
       meta: {
@@ -172,14 +172,14 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
   it('errors when componentKey is unknown', () => {
     const json = minimalJson();
     json.sections[0].type = 'unknown-comp';
-    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const result = validateContent(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'UNKNOWN_COMPONENT_KEY')).toBe(true);
   });
 
   it('errors when required field is missing', () => {
     const json = minimalJson();
     json.sections[0].fields = {}; // title is required
-    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const result = validateContent(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
   });
 
@@ -187,19 +187,19 @@ describe('validateTemplateJson — library rules (Phase 6)', () => {
     const json = minimalJson();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (json.sections[0].fields.title as any).type = 'image'; // expected text
-    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const result = validateContent(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'FIELD_TYPE_MISMATCH')).toBe(true);
   });
 
   it('warns on unknown fields fields', () => {
     const json = minimalJson();
     json.sections[0].fields.extra = { type: 'text', label: 'Extra', value: '...', editable: true };
-    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const result = validateContent(json, { templateLibrary: mockLibrary });
     expect(result.warnings.some((w) => w.code === 'UNKNOWN_DATA_FIELD')).toBe(true);
   });
 });
 
-describe('validateTemplateJson — array fields', () => {
+describe('validateContent — array fields', () => {
   const mockLibrary = {
     'menu-list': {
       meta: {
@@ -234,7 +234,7 @@ describe('validateTemplateJson — array fields', () => {
         ],
       },
     };
-    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const result = validateContent(json, { templateLibrary: mockLibrary });
     expect(result.errors).toHaveLength(0);
   });
 
@@ -249,7 +249,7 @@ describe('validateTemplateJson — array fields', () => {
         items: 'not-an-array',
       },
     };
-    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const result = validateContent(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'NON_ARRAY_FIELD_VALUE')).toBe(true);
   });
 
@@ -267,7 +267,7 @@ describe('validateTemplateJson — array fields', () => {
     };
     // Test missing required field
     (json.sections[0].fields.items as ArrayField).items[0] = {}; // title missing
-    const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const result = validateContent(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
     expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path).toContain('items.items[0].fields.title');
   });
@@ -282,7 +282,7 @@ describe('validateTemplateJson — array fields', () => {
         items: [], // minItems is 1
       },
     };
-    const resultMin = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const resultMin = validateContent(json, { templateLibrary: mockLibrary });
     expect(resultMin.errors.some((e) => e.code === 'ARRAY_ITEMS_BELOW_MIN')).toBe(true);
 
     (json.sections[0].fields.items as ArrayField).items = [
@@ -290,7 +290,7 @@ describe('validateTemplateJson — array fields', () => {
       { title: { type: 'text', label: 'T', value: '2' } },
       { title: { type: 'text', label: 'T', value: '3' } }, // maxItems is 2
     ];
-    const resultMax = validateTemplateJson(json, { templateLibrary: mockLibrary });
+    const resultMax = validateContent(json, { templateLibrary: mockLibrary });
     expect(resultMax.errors.some((e) => e.code === 'ARRAY_ITEMS_ABOVE_MAX')).toBe(true);
   });
 
@@ -311,12 +311,12 @@ describe('validateTemplateJson — array fields', () => {
     json.sections[0].fields = {
       items: { type: 'array', label: 'Items', items: [] },
     };
-    const result = validateTemplateJson(json, { templateLibrary: brokenLibrary });
+    const result = validateContent(json, { templateLibrary: brokenLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_ITEM_SCHEMA')).toBe(true);
   });
 });
 
-describe('validateTemplateJson — warnings', () => {
+describe('validateContent — warnings', () => {
   it('warns when image field uses http://', () => {
     const json = minimalJson();
     json.sections[0].fields.title = {
@@ -325,7 +325,7 @@ describe('validateTemplateJson — warnings', () => {
       value: 'http://example.com/img.jpg',
       editable: true,
     };
-    const result = validateTemplateJson(json);
+    const result = validateContent(json);
     expect(result.warnings.some((w) => w.code === 'INSECURE_URL')).toBe(true);
   });
 });
@@ -351,10 +351,10 @@ describe('all presets — errors must be zero', () => {
       const templateModule = templateLoader ? await templateLoader() : null;
       const templateLibrary = templateModule?.library;
 
-      // The Preset carries the full templateJson verbatim (code is source of truth).
-      const templateJson = preset.templateJson;
+      // The Preset carries the full content verbatim (code is source of truth).
+      const content = preset.content;
 
-      const result = validateTemplateJson(templateJson, {
+      const result = validateContent(content, {
         availableTemplateKeys: ALL_TEMPLATE_KEYS,
         templateLibrary,
       });

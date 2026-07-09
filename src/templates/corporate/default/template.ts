@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   "slug": "corporate-default",
-  "templateJson": {
+  "content": {
     "mode": "single",
     "templateKey": "corporate-default",
     "globalStyles": {

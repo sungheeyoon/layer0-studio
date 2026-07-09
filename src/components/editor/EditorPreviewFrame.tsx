@@ -28,7 +28,7 @@ const CLONE_MARKER = 'data-editor-preview-clone';
 interface EditorPreviewFrameProps {
   /** The dynamically-loaded template renderer (Single or Multi — same interface). */
   TemplateRenderer: ComponentType<TemplateRendererProps>;
-  siteJson: ContentModel;
+  content: ContentModel;
   selectedSectionId: string | null;
   activePageId?: string;
   onSectionClick: (sectionId: string) => void;
@@ -60,7 +60,7 @@ function syncHeadStyles(targetDoc: Document) {
 
 export default function EditorPreviewFrame({
   TemplateRenderer,
-  siteJson,
+  content,
   selectedSectionId,
   activePageId,
   onSectionClick,
@@ -167,7 +167,7 @@ export default function EditorPreviewFrame({
     }
     rootRef.current.render(
       <TemplateRenderer
-        siteJson={siteJson}
+        content={content}
         selectedSectionId={selectedSectionId}
         onSectionClick={onSectionClick}
         activePageId={activePageId}
@@ -176,7 +176,7 @@ export default function EditorPreviewFrame({
   }, [
     ready,
     TemplateRenderer,
-    siteJson,
+    content,
     selectedSectionId,
     activePageId,
     onSectionClick,

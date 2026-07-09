@@ -22,7 +22,7 @@ vi.mock('@/templates/_generated', () => ({
     'missing-thumb': () => Promise.resolve({
       default: {
         slug: 'missing-thumb',
-        templateJson: {
+        content: {
           mode: 'single',
           templateKey: 'missing-thumb',
           sections: [],
@@ -38,7 +38,7 @@ vi.mock('@/templates/_generated', () => ({
 }));
 
 vi.mock('../validate', () => ({
-  validateTemplateJson: vi.fn(() => ({ errors: [], warnings: [] })),
+  validateContent: vi.fn(() => ({ errors: [], warnings: [] })),
 }));
 
 describe('syncTemplates — thumbnail guard', () => {

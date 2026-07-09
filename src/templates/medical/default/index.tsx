@@ -8,7 +8,7 @@ import { ContentModel } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = medicalDefaultLibrary;
 
-export const defaultTemplateJson: ContentModel = {
+export const defaultContent: ContentModel = {
   mode: 'single',
   templateKey: 'medical-default',
   globalStyles: defaultGlobalStyles,

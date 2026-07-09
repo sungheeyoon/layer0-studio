@@ -34,20 +34,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const site = await useCase.execute(domain);
-    const { content: siteJson } = site;
+    const { content } = site;
     const slugPath = (slug ?? []).join('/');
 
     // Resolve the active page (Multi) so SEO is read per-page.
     let activePageId: string | undefined;
-    if (isMultiContent(siteJson)) {
-      const { pages } = siteJson;
+    if (isMultiContent(content)) {
+      const { pages } = content;
       const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
       activePageId = activePage?.id;
     }
 
     // Explicit PageSeo wins; fall back to hero extraction when none is authored.
-    const seo = resolveActivePageSeo(siteJson, activePageId);
-    const heroSection = allSections(siteJson).find(s => s.type === 'hero');
+    const seo = resolveActivePageSeo(content, activePageId);
+    const heroSection = allSections(content).find(s => s.type === 'hero');
     const heroTitle = getFieldValue(heroSection?.fields['title']) || getFieldValue(heroSection?.fields['heading']) || '';
     const heroSubtitle = getFieldValue(heroSection?.fields['subtitle']) || '';
     const title = seo?.title || site.siteName;
@@ -96,14 +96,14 @@ export default async function PublicSitePage({ params }: Props) {
     notFound();
   }
 
-  const { content: siteJson } = site;
+  const { content } = site;
   const slugPath = (slug ?? []).join('/');
 
   // Resolve the active page (Multi) or guard against stray slugs (Single).
   // Empty slug = home (first page). Unknown / non-routable page → 404.
   let activePageId: string | undefined;
-  if (isMultiContent(siteJson)) {
-    const { pages } = siteJson;
+  if (isMultiContent(content)) {
+    const { pages } = content;
     const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
     if (!activePage || !activePage.visible) notFound();
     activePageId = activePage.id;
@@ -112,7 +112,7 @@ export default async function PublicSitePage({ params }: Props) {
     notFound();
   }
 
-  const templateKey = siteJson.templateKey || 'corporate-default';
+  const templateKey = content.templateKey || 'corporate-default';
   const templateModule = await loadTemplate(templateKey);
 
   if (!templateModule) {
@@ -123,10 +123,10 @@ export default async function PublicSitePage({ params }: Props) {
   const TemplateRenderer = templateModule.default;
 
   const themeVariables = {
-    '--theme-primary': siteJson.globalStyles.primaryColor,
-    '--theme-secondary': siteJson.globalStyles.secondaryColor,
-    '--theme-font-family': siteJson.globalStyles.fontFamily,
-    '--theme-font-size': siteJson.globalStyles.fontSize,
+    '--theme-primary': content.globalStyles.primaryColor,
+    '--theme-secondary': content.globalStyles.secondaryColor,
+    '--theme-font-family': content.globalStyles.fontFamily,
+    '--theme-font-size': content.globalStyles.fontSize,
   } as React.CSSProperties;
 
   return (
@@ -135,7 +135,7 @@ export default async function PublicSitePage({ params }: Props) {
       style={themeVariables}
     >
       <TemplateRenderer
-        siteJson={siteJson}
+        content={content}
         selectedSectionId={null}
         activePageId={activePageId}
         basePath={`/site/${domain}`}

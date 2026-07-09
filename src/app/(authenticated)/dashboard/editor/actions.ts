@@ -31,10 +31,10 @@ export async function loadSiteAction(siteId: string) {
   }
 }
 
-export async function saveSiteJsonAction(siteId: string, siteJson: ContentModel, expectedUpdatedAt: string) {
+export async function saveContentAction(siteId: string, content: ContentModel, expectedUpdatedAt: string) {
   return withUser(async (user, supabase) => {
     const useCase = createSiteWriteUseCase(supabase);
-    const site = await useCase.saveJson(siteId, user.id, siteJson, expectedUpdatedAt);
+    const site = await useCase.saveContent(siteId, user.id, content, expectedUpdatedAt);
     revalidatePath('/dashboard/editor');
     return { success: true as const, updatedAt: site.updatedAt };
   });

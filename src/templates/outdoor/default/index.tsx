@@ -7,7 +7,7 @@ import { ContentModel } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = outdoorDefaultLibrary;
 
-export const defaultTemplateJson: ContentModel = {
+export const defaultContent: ContentModel = {
   mode: 'multi',
   templateKey: 'outdoor-default',
   globalStyles: defaultGlobalStyles,

@@ -20,7 +20,7 @@ export async function listAllSitesAction() {
 export async function createCustomSiteAction(
   userId: string,
   siteName: string,
-  siteJson: ContentModel,
+  content: ContentModel,
   domain?: string,
 ) {
   return withAdmin(async ({ adminSupabase }) => {
@@ -28,7 +28,7 @@ export async function createCustomSiteAction(
     const site = await useCase.executeCustom({
       userId,
       siteName,
-      content: siteJson,
+      content,
       domain,
     });
 

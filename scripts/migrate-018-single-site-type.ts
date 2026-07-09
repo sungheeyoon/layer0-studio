@@ -43,7 +43,7 @@ async function buildSeedNavMap(): Promise<SeedNavMap> {
   const map: SeedNavMap = new Map();
   for (const slug of presetSlugs) {
     const { default: preset } = await presetMap[slug]();
-    const tj = preset.templateJson;
+    const tj = preset.content;
     if (!isSingleContent(tj)) continue; // Multi seeds have no single sections
     const byId = new Map<string, NavMeta>();
     for (const s of tj.sections) {

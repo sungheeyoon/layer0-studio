@@ -39,14 +39,14 @@ export default async function TemplatePreviewPage({ params }: Props) {
     notFound();
   }
 
-  const { content: templateJson } = template;
+  const { content } = template;
   const slugPath = (slug ?? []).join('/');
 
   // Mirror the public site: empty slug = home (first page); unknown / hidden
   // page → 404. Single templates have no sub-paths.
   let activePageId: string | undefined;
-  if (isMultiContent(templateJson)) {
-    const { pages } = templateJson;
+  if (isMultiContent(content)) {
+    const { pages } = content;
     const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
     if (!activePage || !activePage.visible) notFound();
     activePageId = activePage.id;
@@ -55,10 +55,10 @@ export default async function TemplatePreviewPage({ params }: Props) {
   }
 
   const themeVariables = {
-    '--theme-primary': templateJson.globalStyles.primaryColor,
-    '--theme-secondary': templateJson.globalStyles.secondaryColor,
-    '--theme-font-family': templateJson.globalStyles.fontFamily,
-    '--theme-font-size': templateJson.globalStyles.fontSize,
+    '--theme-primary': content.globalStyles.primaryColor,
+    '--theme-secondary': content.globalStyles.secondaryColor,
+    '--theme-font-family': content.globalStyles.fontFamily,
+    '--theme-font-size': content.globalStyles.fontSize,
   } as React.CSSProperties;
 
   return (
@@ -67,8 +67,8 @@ export default async function TemplatePreviewPage({ params }: Props) {
       style={themeVariables}
     >
       <TemplateClientWrapper
-        templateKey={templateJson.templateKey || 'corporate-default'}
-        siteJson={templateJson}
+        templateKey={content.templateKey || 'corporate-default'}
+        content={content}
         selectedSectionId={null}
         activePageId={activePageId}
         basePath={`/preview/${id}`}

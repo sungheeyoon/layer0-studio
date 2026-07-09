@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   "slug": "wedding-default",
-  "templateJson": {
+  "content": {
     "mode": "single",
     "templateKey": "wedding-default",
     "globalStyles": {

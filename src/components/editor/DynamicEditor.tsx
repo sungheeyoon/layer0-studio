@@ -35,7 +35,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { saveSiteJsonAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
+import { saveContentAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import EditorPreviewFrame from './EditorPreviewFrame';
 import { loadTemplate } from '@/templates/registry';
@@ -90,10 +90,10 @@ interface DynamicEditorProps {
 export default function DynamicEditor({ site }: DynamicEditorProps) {
   const locale = useLocale();
   const t = useDictionary().editor;
-  const [siteJson, setSiteJson] = useState<ContentModel>(() => injectKeys(site.content));
+  const [content, setContent] = useState<ContentModel>(() => injectKeys(site.content));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
-  const isMulti = isMultiContent(siteJson);
+  const isMulti = isMultiContent(content);
 
   // Multi sites edit one page at a time (page tabs switch the context). The
   // active page also drives the live preview (`activePageId` → renderer).
@@ -104,14 +104,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // Single sites carry their sections directly (one continuous scroll); they
   // own the rich per-section nav controls (#41).
   const singleSections = useMemo(
-    () => (isSingleContent(siteJson) ? siteJson.sections : []),
-    [siteJson],
+    () => (isSingleContent(content) ? content.sections : []),
+    [content],
   );
 
   // Multi page-management source: array order = nav order.
   const pages = useMemo(
-    () => (isMultiContent(siteJson) ? siteJson.pages : []),
-    [siteJson],
+    () => (isMultiContent(content) ? content.pages : []),
+    [content],
   );
   const activePage = useMemo(
     () => pages.find((p) => p.id === activePageId) ?? pages[0],
@@ -122,12 +122,12 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // sections; Multi → shared header + the active page's sections + shared footer
   // (so the brand, page body and footer of the previewed page are all editable).
   const sections = useMemo<Section[]>(() => {
-    if (isSingleContent(siteJson)) return siteJson.sections;
-    if (isMultiContent(siteJson) && activePage) {
-      return [...siteJson.shared.header, ...activePage.sections, ...siteJson.shared.footer];
+    if (isSingleContent(content)) return content.sections;
+    if (isMultiContent(content) && activePage) {
+      return [...content.shared.header, ...activePage.sections, ...content.shared.footer];
     }
     return [];
-  }, [siteJson, activePage]);
+  }, [content, activePage]);
 
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
     sections[0]?.id ?? null
@@ -143,10 +143,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [conflictDetected, setConflictDetected] = useState(false);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const siteJsonRef = useRef(siteJson);
+  const contentRef = useRef(content);
   const knownUpdatedAtRef = useRef<string>(site.updatedAt);
 
-  useEffect(() => { siteJsonRef.current = siteJson; }, [siteJson]);
+  useEffect(() => { contentRef.current = content; }, [content]);
 
   useEffect(() => () => { if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current); }, []);
 
@@ -175,7 +175,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setAutoSaveStatus('idle');
     autoSaveTimerRef.current = setTimeout(async () => {
       setAutoSaveStatus('saving');
-      const result = await saveSiteJsonAction(site.id, stripKeys(siteJsonRef.current), knownUpdatedAtRef.current);
+      const result = await saveContentAction(site.id, stripKeys(contentRef.current), knownUpdatedAtRef.current);
       if (result && 'error' in result) {
         if (isStaleConflict(result)) {
           setConflictDetected(true);
@@ -208,14 +208,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       }, 10000);
 
       try {
-        const mod = await loadTemplate(siteJson.templateKey || 'corporate-default');
+        const mod = await loadTemplate(content.templateKey || 'corporate-default');
         clearTimeout(timeoutId);
         if (mounted) {
           if (mod) {
             loaded = true;
             setTemplateModule(mod);
           } else {
-            setLoadingError(`${t.loadError.notFoundPrefix}${siteJson.templateKey}${t.loadError.notFoundSuffix}`);
+            setLoadingError(`${t.loadError.notFoundPrefix}${content.templateKey}${t.loadError.notFoundSuffix}`);
           }
         }
       } catch (err) {
@@ -228,12 +228,12 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     };
     fetchTheme();
     return () => { mounted = false; };
-  }, [siteJson.templateKey, t.loadError]);
+  }, [content.templateKey, t.loadError]);
 
   const TemplateRenderer = templateModule?.default;
 
-  const updateSiteJson = useCallback((updater: (json: ContentModel) => void) => {
-    setSiteJson((prev) => {
+  const updateContent = useCallback((updater: (json: ContentModel) => void) => {
+    setContent((prev) => {
       const updated = structuredClone(prev);
       updater(updated);
       return updated;
@@ -243,7 +243,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   const handleFieldChange = useCallback(
     (sectionId: string, fieldKey: string, value: string | ArrayField['items'], assetId?: string) => {
-      updateSiteJson((json) => {
+      updateContent((json) => {
         const section = allSections(json).find(s => s.id === sectionId);
         if (section && section.fields[fieldKey]) {
           const field = section.fields[fieldKey];
@@ -258,16 +258,16 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         }
       });
     },
-    [updateSiteJson]
+    [updateContent]
   );
 
   const handleGlobalStyleChange = useCallback(
     (key: keyof GlobalStyles, value: string) => {
-      updateSiteJson((json) => {
+      updateContent((json) => {
         json.globalStyles[key] = value;
       });
     },
-    [updateSiteJson]
+    [updateContent]
   );
 
   // ── Nav-list edits (reorder / 2-axis visibility / nav label) ──────────────
@@ -289,43 +289,43 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     (event: DragEndEvent) => {
       const { active, over } = event;
       if (over && active.id !== over.id) {
-        updateSiteJson((json) => reorderNavItem(json, String(active.id), String(over.id)));
+        updateContent((json) => reorderNavItem(json, String(active.id), String(over.id)));
       }
     },
-    [updateSiteJson],
+    [updateContent],
   );
 
   const handleToggleNavItemVisible = useCallback(
     (id: string) => {
-      updateSiteJson((json) => toggleNavItemVisible(json, id));
+      updateContent((json) => toggleNavItemVisible(json, id));
     },
-    [updateSiteJson],
+    [updateContent],
   );
 
   const handleToggleNavItemNavVisible = useCallback(
     (id: string) => {
-      updateSiteJson((json) => toggleNavItemNavVisible(json, id));
+      updateContent((json) => toggleNavItemNavVisible(json, id));
     },
-    [updateSiteJson],
+    [updateContent],
   );
 
   const handleRelabelNavItem = useCallback(
     (id: string, label: string) => {
-      updateSiteJson((json) => relabelNavItem(json, id, label));
+      updateContent((json) => relabelNavItem(json, id, label));
     },
-    [updateSiteJson],
+    [updateContent],
   );
 
   // Multi inner-section visibility (shared header/footer + page sections). These
   // are base sections with no nav, so they stay outside the nav-list module.
   const handleToggleSectionVisible = useCallback(
     (sectionId: string) => {
-      updateSiteJson((json) => {
+      updateContent((json) => {
         const section = allSections(json).find((s) => s.id === sectionId);
         if (section) section.visible = !section.visible;
       });
     },
-    [updateSiteJson],
+    [updateContent],
   );
 
   // ── Multi-mode page selection (UI-only — switches the edited/previewed page).
@@ -333,7 +333,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setActivePageId(pageId);
     setActiveTab('content');
     // Re-anchor the section selection to the newly active page's view.
-    const json = siteJsonRef.current;
+    const json = contentRef.current;
     if (isMultiContent(json)) {
       const page = json.pages.find((p) => p.id === pageId);
       setSelectedSectionId(
@@ -350,7 +350,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     setActionError(null);
     setSaving(true);
-    const result = await saveSiteJsonAction(site.id, stripKeys(siteJson), knownUpdatedAtRef.current);
+    const result = await saveContentAction(site.id, stripKeys(content), knownUpdatedAtRef.current);
     if (result && 'error' in result) {
       if (isStaleConflict(result)) {
         setConflictDetected(true);
@@ -367,7 +367,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     setActionError(null);
     setSaving(true);
-    const saveResult = await saveSiteJsonAction(site.id, stripKeys(siteJson), knownUpdatedAtRef.current);
+    const saveResult = await saveContentAction(site.id, stripKeys(content), knownUpdatedAtRef.current);
     if (saveResult && 'error' in saveResult) {
       // Any save failure must abort the publish — otherwise we'd publish stale
       // content and silently drop the user's unsaved edit.
@@ -413,11 +413,11 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // their default in the capture phase (next/link honours e.defaultPrevented);
   // the click still bubbles to section selection. Page switching uses the tabs.
   const themeVariables = useMemo(() => ({
-    '--theme-primary': siteJson.globalStyles.primaryColor,
-    '--theme-secondary': siteJson.globalStyles.secondaryColor,
-    '--theme-font-family': siteJson.globalStyles.fontFamily,
-    '--theme-font-size': siteJson.globalStyles.fontSize,
-  } as React.CSSProperties), [siteJson.globalStyles]);
+    '--theme-primary': content.globalStyles.primaryColor,
+    '--theme-secondary': content.globalStyles.secondaryColor,
+    '--theme-font-family': content.globalStyles.fontFamily,
+    '--theme-font-size': content.globalStyles.fontSize,
+  } as React.CSSProperties), [content.globalStyles]);
 
   useEffect(() => {
     if (selectedSectionId) {
@@ -719,7 +719,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 {t.design.globalHeading}
               </h3>
               <GlobalStylesEditor
-                globalStyles={siteJson.globalStyles}
+                globalStyles={content.globalStyles}
                 onChange={handleGlobalStyleChange}
               />
             </div>
@@ -800,7 +800,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           ) : TemplateRenderer ? (
             <EditorPreviewFrame
               TemplateRenderer={TemplateRenderer}
-              siteJson={siteJson}
+              content={content}
               selectedSectionId={selectedSectionId}
               activePageId={activePageId}
               onSectionClick={handleSectionClick}

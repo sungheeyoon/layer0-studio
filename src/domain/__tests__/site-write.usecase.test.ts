@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { SiteWriteUseCase } from '../usecases/user-site/site-write.usecase';
-import { FakeUserSiteRepo, FakeSiteContentValidator, makeSite, makeTemplateJson } from './fakes';
+import { FakeUserSiteRepo, FakeSiteContentValidator, makeSite, makeContent } from './fakes';
 import {
   ContentModel,
   SingleContent,
@@ -25,7 +25,7 @@ function setup(siteOverrides: Partial<UserSite> = {}, validatorErrors: SiteConte
 // (SITE_ACCESS_DENIED) before touching the repo.
 describe('SiteWriteUseCase — ownership guard', () => {
   const callers: Array<[string, (uc: SiteWriteUseCase, siteId: string, userId: string, token: string) => Promise<unknown>]> = [
-    ['saveJson', (uc, id, u, t) => uc.saveJson(id, u, makeTemplateJson(), t)],
+    ['saveContent', (uc, id, u, t) => uc.saveContent(id, u, makeContent(), t)],
     ['rename', (uc, id, u, t) => uc.rename(id, u, 'New Name', t)],
     ['publish', (uc, id, u, t) => uc.publish(id, u, t)],
     ['unpublish', (uc, id, u, t) => uc.unpublish(id, u, t)],
@@ -51,11 +51,11 @@ describe('SiteWriteUseCase — ownership guard', () => {
 // The owner succeeds with a fresh token and is rejected with STALE_VERSION when
 // the token no longer matches the stored row.
 describe('SiteWriteUseCase — version guard', () => {
-  it('saveJson: fresh token succeeds, stale token throws STALE_VERSION', async () => {
+  it('saveContent: fresh token succeeds, stale token throws STALE_VERSION', async () => {
     const { uc, token } = setup();
-    await uc.saveJson('site-1', 'user-1', makeTemplateJson(), token);
+    await uc.saveContent('site-1', 'user-1', makeContent(), token);
     // The first write advanced the version; reusing the original token is stale.
-    await expect(uc.saveJson('site-1', 'user-1', makeTemplateJson(), token))
+    await expect(uc.saveContent('site-1', 'user-1', makeContent(), token))
       .rejects.toMatchObject({ code: 'STALE_VERSION' });
   });
 
@@ -104,17 +104,17 @@ describe('SiteWriteUseCase — version guard', () => {
   });
 });
 
-// --- saveJson validation gate (#56) ------------------------------------------
-describe('SiteWriteUseCase.saveJson — validation gate', () => {
+// --- saveContent validation gate (#56) ------------------------------------------
+describe('SiteWriteUseCase.saveContent — validation gate', () => {
   it('rejects with INVALID_TEMPLATE_JSON and attaches the issues', async () => {
     const issues = [{ code: 'INVALID_COLOR_FIELD', message: 'not hex', path: 'sections[0].fields.accent' }];
     const { uc, token } = setup({}, issues as never);
-    await expect(uc.saveJson('site-1', 'user-1', makeTemplateJson(), token))
+    await expect(uc.saveContent('site-1', 'user-1', makeContent(), token))
       .rejects.toMatchObject({ code: 'INVALID_TEMPLATE_JSON', issues });
   });
 
   it('preserves array fields when valid', async () => {
-    const json = makeTemplateJson({
+    const json = makeContent({
       sections: [
         {
           id: 'section-1',
@@ -132,7 +132,7 @@ describe('SiteWriteUseCase.saveJson — validation gate', () => {
       ],
     });
     const { uc, token } = setup();
-    const result = await uc.saveJson('site-1', 'user-1', json, token);
+    const result = await uc.saveContent('site-1', 'user-1', json, token);
     const items = asSingle(result.content).sections[0].fields.items as ArrayField;
     expect(items.type).toBe('array');
     expect(items.items).toHaveLength(1);

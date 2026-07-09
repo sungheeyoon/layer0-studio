@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { presetMap, templateMap, getAvailableTemplateKeys, templateCategories } from '@/templates/_generated';
-import { validateTemplateJson } from './validate';
+import { validateContent } from './validate';
 import type { TemplatePreset } from '@/templates/types';
 import fs from 'fs';
 import path from 'path';
@@ -152,10 +152,10 @@ export async function syncTemplates(
     const templateModule = templateModuleLoader ? await templateModuleLoader() : null;
 
     // 2. The Preset carries the full content verbatim (code is source of truth).
-    const content = preset.templateJson;
+    const content = preset.content;
 
     // 3. Validate
-    const validation = validateTemplateJson(content, {
+    const validation = validateContent(content, {
       availableTemplateKeys: getAvailableTemplateKeys(),
       templateLibrary: templateModule?.library
     });

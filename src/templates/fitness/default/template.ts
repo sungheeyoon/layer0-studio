@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   "slug": "fitness-default",
-  "templateJson": {
+  "content": {
     "mode": "single",
     "templateKey": "fitness-default",
     "globalStyles": {

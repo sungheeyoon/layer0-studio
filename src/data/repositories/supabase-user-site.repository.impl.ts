@@ -137,20 +137,20 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     return this.mapRow(data);
   }
 
-  async updateSiteJson(id: string, siteJson: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
+  async updateContent(id: string, content: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
     // Extract new asset usages (Single / Multi page / Multi shared slot_keys).
-    const newUsages = collectAssetUsages(siteJson);
+    const newUsages = collectAssetUsages(content);
 
-    // Call Postgres RPC — atomic lock, usage diff, json update
+    // Call Postgres RPC — atomic lock, usage diff, content update
     const { data: rpcResult, error: rpcError } = await this.supabase.rpc('save_site_template_with_lock', {
       p_site_id: id,
-      p_new_json: siteJson,
+      p_new_json: content,
       p_new_usages: newUsages,
       p_expected_updated_at: expectedUpdatedAt,
     });
 
     if (rpcError) {
-      console.error('[SupabaseUserSiteRepo::updateSiteJson]', rpcError.message);
+      console.error('[SupabaseUserSiteRepo::updateContent]', rpcError.message);
       throw new TemplateError('UNKNOWN');
     }
 

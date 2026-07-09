@@ -48,7 +48,7 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 | **Template** | 한 Category 안의 한 디자인. **모든 시각/구성 자산을 자기 디렉터리 안에 자급자족** (ADR-0001) | `src/templates/<category>/<leaf>/` | 개발자 (코드 PR) 또는 Claude Code (`new-template` 스킬) |
 | **Section component** | 자기 메타 (`componentKey` / `category` / `label` / `fieldsSchema`) 를 동봉하는 self-describing React 컴포넌트 | `<templateDir>/library/<Name>.tsx` | 개발자 |
 | **Template Library** | `componentKey → Section component` 매핑. 한 Template 의 조립 키트. **다른 Template 와 공유 안 됨** | `<templateDir>/library/index.ts` | 개발자 |
-| **Preset** | 코드가 진실인 시드. `templateJson`(ContentModel) + 토큰 | `<templateDir>/template.ts` | 개발자 / LLM |
+| **Preset** | 코드가 진실인 시드. `content`(ContentModel) + 토큰 | `<templateDir>/template.ts` | 개발자 / LLM |
 | **Template (DB row)** | `templates` 테이블 한 행. Preset 에서 Sync 로 시드되거나 어드민이 manual 로 만듦 | DB | sync CLI / 어드민 UI |
 | **UserSite** | Template 을 복사해 사용자가 편집한 인스턴스 | DB `user_sites` | 일반 사용자 |
 | **`templateKey`** | `${category}-${leaf}` 형태 합성 슬러그 (예: `cafe-default`). `templateMap` upsert 키 | `_generated.ts` | codegen |
@@ -58,13 +58,13 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 | 필드 | 코드 (Preset) | DB (어드민) | sync 동작 |
 |---|---|---|---|
 | `slug` | ✅ (upsert 키, 영원히 변경 금지) | — | 일치 보장 |
-| `templateJson` | ✅ | — | 항상 코드값으로 덮어씀 |
+| `content` | ✅ | — | 항상 코드값으로 덮어씀 |
 | `thumbnailUrl` | ✅ (해시 기반) | — | 해시 다르면 재업로드 |
 | `version` | ✅ (semver) | — | 코드값으로 덮어씀 |
 | `name` / `description` / `category` | 신규 row 시드값 only | ✅ | DB 값 있으면 보존 |
 | `status` | — | ✅ | 절대 안 건드림 — 신규 row 는 `'active'` ([ADR-0012](./adr/0012-template-publishing-pipeline.md): 머지=공개 승인) |
 
-> **핵심 약속**: 운영자가 어드민에서 description 을 바꿔도 다음 sync 가 코드값으로 되돌리지 않는다. `templateJson` / 썸네일 / 버전은 **항상 코드 진실** — 어드민에서 코드 preset row 의 JSON 직접 편집은 차단되어 있음 (manual row 만 편집 허용).
+> **핵심 약속**: 운영자가 어드민에서 description 을 바꿔도 다음 sync 가 코드값으로 되돌리지 않는다. `content` / 썸네일 / 버전은 **항상 코드 진실** — 어드민에서 코드 preset row 의 JSON 직접 편집은 차단되어 있음 (manual row 만 편집 허용).
 
 ### 1.2 Sync vs Generate (ADR-0002 의 두 진입점)
 
@@ -127,14 +127,14 @@ ContentModel (single) = {
 ```ts
 interface TemplatePreset {
   slug: string;                          // = templateKey. DB upsert 키. 변경 금지.
-  templateJson: ContentModel;            // ★ DB 에 그대로 시드되는 전체 콘텐츠 (Single/Multi 유니온)
+  content: ContentModel;            // ★ DB 에 그대로 시드되는 전체 콘텐츠 (Single/Multi 유니온)
   thumbnailPath: string;                 // 'public/thumbnails/template-<slug>.webp'
   version: string;                       // semver
   defaults: { name: string; description: string; category: string };
 }
 ```
 
-> Preset 은 `templateJson`(= `ContentModel`)을 **그대로** 들고 있고 sync 가 verbatim 으로 DB `content` 컬럼에 저장한다. 예전 `composition: PresetSection[]` 축약형은 제거됐다 ([ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)) — 필드명은 코드상 여전히 `templateJson` 이지만 타입은 `ContentModel`, DB 컬럼은 `content` (migration 021).
+> Preset 은 `content`(= `ContentModel`)을 **그대로** 들고 있고 sync 가 verbatim 으로 DB `content` 컬럼에 저장한다. 예전 `composition: PresetSection[]` 축약형은 제거됐다 ([ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)). 필드명·타입·DB 컬럼이 모두 `content` 로 일치한다 (필드명은 [ADR-0013](./adr/0013-content-model-rename.md) 후속 정리로 `templateJson`→`content`, DB 컬럼은 migration 021).
 
 ### 2.3 `SectionComponentMeta` & Template Library entry — `src/templates/types.ts`
 
@@ -185,7 +185,7 @@ function libEntry(Component, metaOverride?): TemplateLibraryEntry;
 ```ts
 interface TemplateModule {
   default: ComponentType<TemplateRendererProps>;  // 페이지 레벨 렌더러
-  defaultTemplateJson: ContentModel;              // 시각 토큰 시드 (필드명은 유지, 타입은 ContentModel)
+  defaultContent: ContentModel;              // 시각 토큰 시드 (was defaultTemplateJson — ADR-0013 후속 정리)
   library: TemplateLibrary;
 }
 ```
@@ -293,7 +293,7 @@ src/templates/cafe/default/
 ├── thumbnail.config.ts             # Playwright 캡처 설정
 ├── cafe.module.css                 # 이 Template 전용 CSS (다른 Template 와 공유 안 됨)
 ├── template.ts                     # ← 이 디렉터리의 Preset (= Source of Truth)
-└── index.tsx                       # TemplateRenderer (RenderSingleSite/RenderMultiSite 위임), library/defaultTemplateJson export
+└── index.tsx                       # TemplateRenderer (RenderSingleSite/RenderMultiSite 위임), library/defaultContent export
 ```
 
 ### 3.1 β 모델의 핵심 약속 (ADR-0001)
@@ -360,10 +360,10 @@ RenderSingleSite / RenderMultiSite    ← src/templates/renderSingleSite.tsx · 
 ```
 1. _generated.ts 의 presetMap 순회
 2. preset 1개에 대해:
-   ├─ templateKey 결정 (preset.templateJson.templateKey)
+   ├─ templateKey 결정 (preset.content.templateKey)
    ├─ templateMap[templateKey]() 로드 → TemplateModule (library 포함)
-   ├─ content = preset.templateJson  ← 유도 단계 없이 ContentModel 을 verbatim 사용 (composition 제거됨, ADR-0007)
-   ├─ validateTemplateJson(content, { availableTemplateKeys, templateLibrary: templateModule.library })
+   ├─ content = preset.content  ← 유도 단계 없이 ContentModel 을 verbatim 사용 (composition 제거됨, ADR-0007)
+   ├─ validateContent(content, { availableTemplateKeys, templateLibrary: templateModule.library })
    │     ↳ 에러 1개라도 있으면 SKIP (해당 preset 만)
    ├─ thumbnail 처리:
    │     md5 해시 기반 파일명 (template-<slug>-<hash>.webp)
@@ -403,7 +403,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 
 ## 6. Validate 규칙 카탈로그
 
-`src/lib/template/validate.ts` — `validateTemplateJson(json, options)`. **Site-content 유효성의 단일 소스.** sync 전, `pnpm test`, 어드민 Save, 그리고 **에디터 저장 경로**에서 모두 호출 (#56). 도메인 유스케이스는 `SiteContentValidator` 포트(`src/domain/usecases/ports/site-content-validator.port.ts`)를 통해 호출하고, `LibraryAwareSiteContentValidator`(`src/lib/template/site-content-validator.ts`) 어댑터가 `templateKey` 로 라이브러리를 로드해 이 함수에 위임한다. errors 가 하나라도 있으면 `TemplateError('INVALID_TEMPLATE_JSON')` 로 저장 거부.
+`src/lib/template/validate.ts` — `validateContent(json, options)`. **Site-content 유효성의 단일 소스.** sync 전, `pnpm test`, 어드민 Save, 그리고 **에디터 저장 경로**에서 모두 호출 (#56). 도메인 유스케이스는 `SiteContentValidator` 포트(`src/domain/usecases/ports/site-content-validator.port.ts`)를 통해 호출하고, `LibraryAwareSiteContentValidator`(`src/lib/template/site-content-validator.ts`) 어댑터가 `templateKey` 로 라이브러리를 로드해 이 함수에 위임한다. errors 가 하나라도 있으면 `TemplateError('INVALID_TEMPLATE_JSON')` 로 저장 거부.
 
 옵션:
 
@@ -503,7 +503,7 @@ pnpm tsc --noEmit                 # 타입 체크 (CI 에서 클린 유지)
 새 Template 은 **`new-template` Claude Code 스킬**(`.claude/skills/new-template/`)로 만든다. 명령어를 외우지 않고 자연어로 의뢰하면("아웃도어 브랜드 멀티페이지로 만들어줘") 스킬이 발동해 아래를 수행:
 
 ```
-brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 templateJson `ContentModel` 유니온 직접 작성)
+brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 content `ContentModel` 유니온 직접 작성)
              ──▶ 디렉터리: 가까운 Template 복제 또는 template:scaffold
              ──▶ 6 개 파일 작성 (rich 토큰; gotchas-checklist 준수)
              ──▶ 이미지: pnpm template:image <key> "<query>"
@@ -513,7 +513,7 @@ brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 templateJson `C
 
 생성 결과: `src/templates/<category>/<leaf>/` 안에 6 개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). `pnpm generate:templates` 로 `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 미리보기.
 
-**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateTemplateJson` — `preset.templateJson`(ContentModel) 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared 됨 cross-check (브레이스 밸런스 파서); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
+**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateContent` — `preset.content`(ContentModel) 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared 됨 cross-check (브레이스 밸런스 파서); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
 > `template:verify` 는 템플릿 모듈을 동적 import 하므로 첫 줄에서 `./lib/register-css-stub` 를 로드해 `.module.css` import 가 tsx 에서 깨지지 않게 한다 (sync 와 동일).
 
 **New-category 가드**: 새 category slug 은 `^[a-z][a-z0-9-]{0,39}$` 를 만족해야 하고, 기존 디렉터리에 없는 새 top-level category 는 구조 변경이므로 사람의 명시적 승인 후 만든다 (`scripts/lib/category-gate.ts`, 정확 일치만 — `cafe-studio` 는 `cafe` 와 별개).
@@ -574,7 +574,7 @@ brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 templateJson `C
    templateKey: 'cafe-sunlit',
    ```
 3. **`tokens.ts` 손보기** — primary / secondary, 폰트, 분위기. `designTokens` 같이.
-4. **데이터 손보기** — `template.ts` (`templateJson`) 의 각 section `fields` 값을 새 컨셉에 맞게.
+4. **데이터 손보기** — `template.ts` (`content`) 의 각 section `fields` 값을 새 컨셉에 맞게.
 5. **(필요 시) library 컴포넌트 수정** — β 모델: 이 Template 의 라이브러리는 이 Template 만 씀. 마음대로 손봐도 다른 Template 안 깨짐.
 6. **`pnpm generate:templates`** — `_generated.ts` 자동 갱신 (predev / prebuild 에서도 자동).
 7. **`pnpm template:capture cafe-sunlit`** — 썸네일 생성.
@@ -631,7 +631,7 @@ export const cafeDefaultLibrary: TemplateLibrary = {
 
 **만약 새 컴포넌트가 `'use client'` 라면**: `HeroParallax.meta = {...}` 대신 sibling `HeroParallax.meta.ts` 에 `export const heroParallaxMeta` 로 정의 → `libEntry(HeroParallax, heroParallaxMeta)` 로 명시 전달 (이유는 §10.12).
 
-preset 의 `templateJson` section 에서 사용 — `{ id: 'hero-1', type: 'hero-parallax', visible: true, fields: { ... } }`. `pnpm test` → `pnpm template:sync` → 어드민 Apply.
+preset 의 `content` section 에서 사용 — `{ id: 'hero-1', type: 'hero-parallax', visible: true, fields: { ... } }`. `pnpm test` → `pnpm template:sync` → 어드민 Apply.
 
 **주의**: ADR-0001 — 이 컴포넌트는 cafe-default 전용이다. cafe-cozy 에도 같은 게 필요하면 *복제*. cross-Template 추출 금지.
 
@@ -672,7 +672,7 @@ preset 의 `templateJson` section 에서 사용 — `{ id: 'hero-1', type: 'hero
 
 ### H. 새 페이지 추가 (Multi)
 
-Multi Template 은 `preset.templateJson` 의 `{ mode:'multi', pages:[...] }` 유니온을 직접 작성한다 — 페이지를 추가하려면 `pages[]` 에 `{ id, slug, nav:{visible,label}, sections:[...] }` 원소를 더한다. 각 page 의 `slug` 는 unique 여야 하고(validate `DUPLICATE_PAGE_SLUG`), nav 는 `deriveNav`/`deriveFooterNav` 로 projection 된다. 공개 경로는 `/site/[domain]/[[...slug]]` (빈 slug = 첫 페이지). 참고로 ADR-0001 footnote 의 `pages/<page>/sections/` **디렉터리** 재편(렌더러 코드 구조)은 여전히 미래 작업이다.
+Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니온을 직접 작성한다 — 페이지를 추가하려면 `pages[]` 에 `{ id, slug, nav:{visible,label}, sections:[...] }` 원소를 더한다. 각 page 의 `slug` 는 unique 여야 하고(validate `DUPLICATE_PAGE_SLUG`), nav 는 `deriveNav`/`deriveFooterNav` 로 projection 된다. 공개 경로는 `/site/[domain]/[[...slug]]` (빈 slug = 첫 페이지). 참고로 ADR-0001 footnote 의 `pages/<page>/sections/` **디렉터리** 재편(렌더러 코드 구조)은 여전히 미래 작업이다.
 
 ---
 
@@ -708,8 +708,8 @@ Multi Template 은 `preset.templateJson` 의 `{ mode:'multi', pages:[...] }` 유
 10. **`_generated.ts` 수정 금지**
     수동 편집해도 다음 `predev` / `prebuild` 에서 덮어씀. 새 Template 추가는 디렉터리 / 파일만 만들면 됨.
 
-11. **`globalStyles` 는 `templateJson` 안에 산다**
-    `globalStyles` 는 이제 `preset.templateJson.globalStyles` 로 콘텐츠 유니온 안에 직접 들어간다(별도 `preset.globalStyles` 필드 없음 — composition 제거와 함께 사라짐). 저작 시 `tokens.ts` 의 `defaultGlobalStyles`(얇은 layer)를 시드로 복사해 넣고, 풍부한 토큰은 `designTokens` 로 코드 고정(ADR-0005, §2.5).
+11. **`globalStyles` 는 `content` 안에 산다**
+    `globalStyles` 는 이제 `preset.content.globalStyles` 로 콘텐츠 유니온 안에 직접 들어간다(별도 `preset.globalStyles` 필드 없음 — composition 제거와 함께 사라짐). 저작 시 `tokens.ts` 의 `defaultGlobalStyles`(얇은 layer)를 시드로 복사해 넣고, 풍부한 토큰은 `designTokens` 로 코드 고정(ADR-0005, §2.5).
 
 12. **`'use client'` 컴포넌트의 `Component.meta = {...}` 는 서버에서 안 보임** ⚠️
     Next.js 는 `'use client'` 모듈을 server-side import 시 client reference 로 wrapping 하고 모듈 본문을 서버에서 실행하지 않는다. 그래서 `.tsx` 파일 끝에서 한 `Component.meta = {...}` side-effect 는 server 에는 보이지 않고 → `library['nav'].meta` 가 undefined → sync / validate 시 `Cannot read properties of undefined (reading 'fieldsSchema')` 폭발.
@@ -742,7 +742,7 @@ Multi Template 은 `preset.templateJson` 의 `{ mode:'multi', pages:[...] }` 유
 | Validate 규칙 | `src/lib/template/validate.ts` (+ `__tests__/validate.test.ts`) |
 | Inline-tokens 스캐너 | `src/lib/template/inline-tokens.ts` |
 | Design tokens overlay | `src/lib/template/design-tokens.ts` (`tokensToCssVars`, `OVERLAY_MAP`) |
-| Sync 코어 로직 (preset.`templateJson` 을 `content` 컬럼에 verbatim upsert) | `src/lib/template/sync.ts` (+ `__tests__/sync.test.ts`) |
+| Sync 코어 로직 (preset.`content` 을 `content` 컬럼에 verbatim upsert) | `src/lib/template/sync.ts` (+ `__tests__/sync.test.ts`) |
 | Template assets 업로드 헬퍼 | `src/lib/template/template-assets.ts` |
 | Codegen 스크립트 | `scripts/generate-templates.mjs` |
 | Template 저작 스킬 | `.claude/skills/new-template/` (`SKILL.md` + `gotchas-checklist.md`) |
@@ -770,7 +770,7 @@ Multi Template 은 `preset.templateJson` 의 `{ mode:'multi', pages:[...] }` 유
 - **사용자별 커스텀 Template 업로드** — 보안·격리 비용 큼.
 - **크로스-Template Section 공유** (`src/sections/` 공용 풀) — ADR-0001 위배. 별도 RFC 없이는 X.
 - **사용자 에디터에서 섹션 추가 / 삭제·순서 변경** — 데이터 모델은 가능하지만 UX·검증 추가 비용. 현재 1 차는 preset 구조 고정.
-- **Multi 저작 편의 + 디렉터리 재편** — Multi 사이트는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). Single/Multi 모두 `preset.templateJson` 의 `ContentModel` 유니온을 손으로 작성한다 (§2.2, §9-H; 예전 `composition` 축약형은 제거됨). 남은 미래 작업은 (1) 저작 보일러플레이트를 줄이는 헬퍼와 (2) ADR-0001 footnote 의 `pages/<page>/sections/` **디렉터리** 재편(렌더러 코드 구조)이다.
+- **Multi 저작 편의 + 디렉터리 재편** — Multi 사이트는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). Single/Multi 모두 `preset.content` 의 `ContentModel` 유니온을 손으로 작성한다 (§2.2, §9-H; 예전 `composition` 축약형은 제거됨). 남은 미래 작업은 (1) 저작 보일러플레이트를 줄이는 헬퍼와 (2) ADR-0001 footnote 의 `pages/<page>/sections/` **디렉터리** 재편(렌더러 코드 구조)이다.
 
 ---
 

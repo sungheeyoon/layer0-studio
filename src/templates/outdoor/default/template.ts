@@ -5,7 +5,7 @@ import { TemplatePreset } from '../../types';
  * mountain-trail outdoor brand with seven routable pages (홈 / 스토어 /
  * 컬렉션 / 액티비티 / 저널 / 브랜드 / 문의) plus a shared header + footer.
  *
- * Multi presets carry the `templateJson` union verbatim — `composition` only
+ * Multi presets carry the `content` union verbatim — `composition` only
  * ever emits one page (TEMPLATE_SYSTEM.md §9-H). Nav is projected by
  * `deriveNav`, never stored as a section.
  */
@@ -58,7 +58,7 @@ const IMG = {
 
 const preset: TemplatePreset = {
   slug: 'outdoor-default',
-  templateJson: {
+  content: {
     mode: 'multi',
     templateKey: 'outdoor-default',
     globalStyles: {

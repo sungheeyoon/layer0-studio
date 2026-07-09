@@ -35,7 +35,7 @@ const OVERLAY_MAP: Readonly<Partial<Record<keyof GlobalStyles, string>>> = {
  * tokens (see `OVERLAY_MAP`). Empty / nullish override values are ignored
  * so that the code-defined defaults remain.
  *
- *   const vars = tokensToCssVars(designTokens, siteJson.globalStyles);
+ *   const vars = tokensToCssVars(designTokens, content.globalStyles);
  *   <div style={vars}>...</div>
  */
 export function tokensToCssVars(

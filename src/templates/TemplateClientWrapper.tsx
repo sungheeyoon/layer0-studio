@@ -10,7 +10,7 @@ interface TemplateClientWrapperProps extends Omit<TemplateRendererProps, 'onSect
 
 export default function TemplateClientWrapper({
   templateKey,
-  siteJson,
+  content,
   selectedSectionId,
   activePageId,
   basePath,
@@ -59,7 +59,7 @@ export default function TemplateClientWrapper({
 
   return (
     <TemplateRenderer
-      siteJson={siteJson}
+      content={content}
       selectedSectionId={selectedSectionId}
       activePageId={activePageId}
       basePath={basePath}

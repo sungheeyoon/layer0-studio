@@ -7,7 +7,7 @@ import {
   SiteContentValidationIssue,
 } from '../usecases/ports/site-content-validator.port';
 
-export function makeTemplateJson(overrides: Partial<SingleContent> = {}): ContentModel {
+export function makeContent(overrides: Partial<SingleContent> = {}): ContentModel {
   return {
     mode: 'single',
     templateKey: 'corporate',
@@ -34,7 +34,7 @@ export function makeTemplateJson(overrides: Partial<SingleContent> = {}): Conten
 }
 
 export function makeSite(overrides: Partial<UserSite> = {}): UserSite {
-  const json = makeTemplateJson();
+  const json = makeContent();
   return {
     id: 'site-1',
     userId: 'user-1',
@@ -111,9 +111,9 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return this.sites[idx];
   }
 
-  async updateSiteJson(id: string, siteJson: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
+  async updateContent(id: string, content: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
     const idx = this.guardVersion(id, expectedUpdatedAt);
-    this.sites[idx] = { ...this.sites[idx], content: siteJson, updatedAt: this.nextUpdatedAt() };
+    this.sites[idx] = { ...this.sites[idx], content, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }
 

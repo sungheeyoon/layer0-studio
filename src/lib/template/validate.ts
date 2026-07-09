@@ -29,7 +29,7 @@ const KNOWN_LAYOUTS = ['wide', 'narrow', 'asymmetric', 'default', 'full'];
 const HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 const CSS_LENGTH_RE = /^[\d.]+(%|px|rem|em|vw|vh|ch)$/;
 
-export function validateTemplateJson(
+export function validateContent(
   json: ContentModel,
   options: ValidateOptions = {},
 ): ValidationResult {
@@ -58,7 +58,7 @@ export function validateTemplateJson(
       return { errors, warnings };
     }
   } else {
-    err('UNKNOWN_MODE', `templateJson.mode "${(json as { mode?: string }).mode}" is not 'single' | 'multi'`, 'mode');
+    err('UNKNOWN_MODE', `content.mode "${(json as { mode?: string }).mode}" is not 'single' | 'multi'`, 'mode');
     return { errors, warnings };
   }
 

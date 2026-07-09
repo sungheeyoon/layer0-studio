@@ -54,7 +54,7 @@ export default function TemplateEditorPanel({
   const availableThemes = getAvailableTemplateKeys();
 
   // JSON state
-  const [templateJsonStr, setTemplateJsonStr] = useState(
+  const [contentJsonStr, setContentJsonStr] = useState(
     template ? JSON.stringify(template.content, null, 2) : '',
   );
   const [jsonError, setJsonError] = useState<string | null>(
@@ -81,7 +81,7 @@ export default function TemplateEditorPanel({
   // Handlers
   const handleJsonChange = (value: string) => {
     if (isCodePreset) return; // Read-only for presets
-    setTemplateJsonStr(value);
+    setContentJsonStr(value);
     try {
       if (value.trim() === '') {
         setJsonError('JSON is required');
@@ -97,9 +97,9 @@ export default function TemplateEditorPanel({
   const handleThemeChange = (templateKey: string) => {
     if (isCodePreset) return;
     try {
-      const currentJson = templateJsonStr ? JSON.parse(templateJsonStr) : { templateKey: '' };
+      const currentJson = contentJsonStr ? JSON.parse(contentJsonStr) : { templateKey: '' };
       currentJson.templateKey = templateKey;
-      setTemplateJsonStr(JSON.stringify(currentJson, null, 2));
+      setContentJsonStr(JSON.stringify(currentJson, null, 2));
     } catch {
       // If JSON is invalid, we can't safely update templateKey
     }
@@ -135,7 +135,7 @@ export default function TemplateEditorPanel({
     setIsSubmitting(true);
     setSubmitError(null);
 
-    formData.set('templateJson', templateJsonStr);
+    formData.set('content', contentJsonStr);
     formData.set('thumbnailUrl', thumbnailUrl);
     formData.set('status', status);
 
@@ -157,12 +157,12 @@ export default function TemplateEditorPanel({
     }
 
     setIsSubmitting(false);
-  }, [jsonError, templateJsonStr, thumbnailUrl, isEditing, template, onDone]);
+  }, [jsonError, contentJsonStr, thumbnailUrl, isEditing, template, onDone]);
 
   // Get current templateKey for select input
   let currentThemeKey = 'corporate';
   try {
-    currentThemeKey = JSON.parse(templateJsonStr).templateKey || 'corporate';
+    currentThemeKey = JSON.parse(contentJsonStr).templateKey || 'corporate';
   } catch { /* invalid JSON, keep previous templateKey */ }
 
   const statusVariant =
@@ -356,7 +356,7 @@ export default function TemplateEditorPanel({
                 <Textarea
                   className="resize-none border-none bg-transparent p-0 font-mono text-xs leading-relaxed shadow-none focus-visible:ring-0 dark:bg-transparent"
                   rows={16}
-                  value={templateJsonStr}
+                  value={contentJsonStr}
                   onChange={(e) => handleJsonChange(e.target.value)}
                   readOnly={isCodePreset}
                 />
@@ -373,8 +373,8 @@ export default function TemplateEditorPanel({
           {(() => {
             let parsed: ContentModel | null = null;
             try {
-              if (templateJsonStr) {
-                parsed = JSON.parse(templateJsonStr) as ContentModel;
+              if (contentJsonStr) {
+                parsed = JSON.parse(contentJsonStr) as ContentModel;
               }
             } catch {
               return null;

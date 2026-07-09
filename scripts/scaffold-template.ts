@@ -92,7 +92,7 @@ import { ContentModel } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = ${key}Library;
 
-export const defaultTemplateJson: ContentModel = {
+export const defaultContent: ContentModel = {
   mode: 'single',
   templateKey: '${key}',
   globalStyles: defaultGlobalStyles,
@@ -122,7 +122,7 @@ import { defaultGlobalStyles } from './tokens';
 
 const preset: TemplatePreset = {
   slug: '${key}-default',
-  templateJson: {
+  content: {
     mode: 'single',
     templateKey: '${key}',
     globalStyles: defaultGlobalStyles,
