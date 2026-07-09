@@ -1,6 +1,6 @@
 # 템플릿의 Source of Truth 는 코드 (AI Generate workflow 전제)
 
-**AI template generation workflow** 를 기준으로 설계했기 때문에, Template 의 Source of Truth 는 DB 가 아니라 **코드** 로 유지한다. `pnpm template:sync` 가 코드의 Preset 을 읽어 DB 의 `templates` 행을 upsert 하며, `template_json` / `thumbnail_url` / `version` 은 항상 코드값으로 덮어쓴다. admin 이 DB 에서 편집 가능한 필드는 `name` / `description` / `category` / `status` 뿐이며, 이 필드들은 sync 가 보존한다. admin UI 에서 sync 로 시드된 row 의 JSON 직접 편집은 차단되어 있다.
+**AI template generation workflow** 를 기준으로 설계했기 때문에, Template 의 Source of Truth 는 DB 가 아니라 **코드** 로 유지한다. `pnpm template:sync` 가 코드의 Preset 을 읽어 DB 의 `templates` 행을 upsert 하며, `content`(구 `template_json`, migration 021) / `thumbnail_url` / `version` 은 항상 코드값으로 덮어쓴다. admin 이 DB 에서 편집 가능한 필드는 `name` / `description` / `category` / `status` 뿐이며, 이 필드들은 sync 가 보존한다. admin UI 에서 sync 로 시드된 row 의 JSON 직접 편집은 차단되어 있다.
 
 ## Consequences
 

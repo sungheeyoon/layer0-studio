@@ -4,16 +4,16 @@ The §10 traps from `docs/TEMPLATE_SYSTEM.md`, condensed for authoring. Re-read 
 
 ## Component & library
 
-- [ ] **`'use client'` component → meta goes in a sibling `<Name>.meta.ts`** (named export), registered as `libEntry(Component, meta)`. Server components (no `'use client'`) keep `Component.meta = {...}` inline + `libEntry(Component)`. Reason: client modules don't run their body on the server, so `Component.meta` is invisible to sync/validate → `Cannot read 'dataSchema' of undefined`. (§10.12)
+- [ ] **`'use client'` component → meta goes in a sibling `<Name>.meta.ts`** (named export), registered as `libEntry(Component, meta)`. Server components (no `'use client'`) keep `Component.meta = {...}` inline + `libEntry(Component)`. Reason: client modules don't run their body on the server, so `Component.meta` is invisible to sync/validate → `Cannot read 'fieldsSchema' of undefined`. (§10.12)
 - [ ] **`componentKey` is permanent.** Changing it breaks every live Site using it (renderer console.warn + blank section). New behavior = new key, never rename. (§10.2)
 - [ ] **Don't edit `src/templates/_generated.ts`** — it's codegen. Adding a directory + `pnpm generate:templates` registers it. (§10.10)
 
 ## Fields & data
 
 - [ ] **Every field `value` is a string** — numbers too (`value: '42'`; component does `Number(...)`). (§10.3)
-- [ ] **`required: true` must be declared in `dataSchema`** or it's silently optional → empty at runtime. (§10.6)
+- [ ] **`required: true` must be declared in `fieldsSchema`** or it's silently optional → empty at runtime. (§10.6)
 - [ ] **`array` fields need `itemSchema`**; the component must guard `data.x?.items ?? []` (lazy migration — old Sites lack the array). Don't style by index (`idx === 0`) — order changes in the editor leave design stuck to the slot; put per-item style in `itemSchema` as a `select`. (§10.4, §10.5, §10.14)
-- [ ] **`dataSchema` ↔ JSX must match both ways**: every declared field is read via `getFieldValue`, and every referenced field is declared. `pnpm template:verify` enforces this. (#16 / schema-jsx-consistency)
+- [ ] **`fieldsSchema` ↔ JSX must match both ways**: every declared field is read via `getFieldValue`, and every referenced field is declared. `pnpm template:verify` enforces this. (#16 / schema-jsx-consistency)
 
 ## Tokens & styling
 
@@ -33,6 +33,6 @@ The §10 traps from `docs/TEMPLATE_SYSTEM.md`, condensed for authoring. Re-read 
 
 ## Site type
 
-- [ ] **Single vs Multi changes how `template.ts` is authored.** `TemplateJson` is a discriminated union (`mode`) — narrow with `isSingleTemplate` / `isMultiTemplate`, iterate with `allSections()`. (ADR-0007)
-  - **Single** (`mode:'single'`, `sections[]`): preset uses `composition: PresetSection[]`; sync converts it.
-  - **Multi** (`mode:'multi'`, `shared:{header,footer}` + `pages[]`): **`composition` does NOT work** — `deriveTemplateJsonFromPreset` only ever emits one page (§9-H). Write `template.ts`'s `templateJson` union by hand; clone `src/templates/corporate/multipage` as the template. Each page carries `slug` + `nav:{visible,label}`; `visible` and `nav.visible` are independent axes; nav is **projected** by `deriveNav` / `deriveFooterNav`, never stored as a section. `index.tsx` uses `RenderMultiSite`.
+- [ ] **Single vs Multi changes how `template.ts` is authored.** `ContentModel` is a discriminated union (`mode` / `SiteMode`) — narrow with `isSingleContent` / `isMultiContent`, iterate with `allSections()`. (ADR-0007 / ADR-0013)
+  - **Single** (`mode:'single'`, `sections[]`): preset's `templateJson` is the `{ mode:'single', ... }` union, written directly (the legacy `composition: PresetSection[]` short-hand was removed — ADR-0007).
+  - **Multi** (`mode:'multi'`, `shared:{header,footer}` + `pages[]`): write `template.ts`'s `templateJson` `{ mode:'multi', ... }` union by hand; clone `src/templates/outdoor/default` (능선) as the template. Each page carries `slug` + `nav:{visible,label}`; `visible` and `nav.visible` are independent axes; nav is **projected** by `deriveNav` / `deriveFooterNav`, never stored as a section. `index.tsx` uses `RenderMultiSite`.

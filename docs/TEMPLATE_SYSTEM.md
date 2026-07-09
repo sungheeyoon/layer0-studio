@@ -16,10 +16,10 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 ┌──────────────────────────────────┐         ┌────────────────────────┐    ┌────────────────┐
 │ src/templates/<category>/<leaf>/ │         │ templates              │    │ user_sites     │
 │  ├ tokens.ts                     │         │  ├ slug (PK)           │    │  ├ template_id │
-│  │   (designTokens +             │         │  ├ template_json       │    │  ├ site_json   │
+│  │   (designTokens +             │         │  ├ content             │    │  ├ content     │
 │  │    defaultGlobalStyles)       │         │  ├ thumbnail_url       │    │  └ ...         │
 │  ├ library/*.tsx                 │ ─sync─▶│  ├ version              │ ─┐                  │
-│  │   (.meta.dataSchema)          │         │  └ status (admin only) │  └▶ (사용자 편집)  │
+│  │   (.meta.fieldsSchema)          │         │  └ status (admin only) │  └▶ (사용자 편집)  │
 │  ├ template.ts (= the Preset)    │         └────────────────────────┘    └────────────────┘
 │  ├ thumbnail.config.ts           │                    │
 │  └ index.tsx (Renderer)          │                    ▼
@@ -33,10 +33,10 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
    (브리프 자연어 → 6 개 파일 작성 → 검증 루프 → sync)
 ```
 
-- **코드가 진실 — Template** ([ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)): `template_json` / 썸네일 / `version` 은 항상 코드값으로 덮어씀.
+- **코드가 진실 — Template** ([ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)): `content` (구 `template_json`) / 썸네일 / `version` 은 항상 코드값으로 덮어씀.
 - **DB 가 진실 — UserSite**: 사용자 사이트는 sync 가 안 건드림. 모든 저장은 optimistic concurrency RPC 경유 ([ADR-0004](./adr/0004-optimistic-concurrency-via-rpc.md)).
 - **Template 간 코드 공유 = 0** ([ADR-0001](./adr/0001-beta-model-template-isolation.md) β 모델): cafe-default 와 cafe-cozy 는 component / token / css 를 *전혀* 공유하지 않음.
-- **렌더 순서 = 배열 순서**: `composition: PresetSection[]` 의 배열 순서가 화면 위 → 아래. `section.order` 는 폐기 (Phase 6d / migration 012).
+- **렌더 순서 = 배열 순서**: `sections[]` 의 배열 순서가 화면 위 → 아래. `section.order` 는 폐기 (Phase 6d / migration 012).
 
 ---
 
@@ -46,9 +46,9 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 |---|---|---|---|
 | **Category** | Template 카탈로그 분류 버킷 (cafe / corporate / fitness / interior / legal / medical / outdoor / wedding). **두 가지 표기**: 파일시스템은 **소문자** 디렉터리명(`src/templates/cafe/`), 카탈로그·DB(`templates.category`)·`templateCategories` 값은 **첫 글자 대문자**(`Cafe`) — codegen 이 디렉터리명을 Capitalize 해 만든다. 자세히는 §2.6 | `src/templates/<category>/` 디렉터리 이름 | 개발자 (디렉터리 추가) |
 | **Template** | 한 Category 안의 한 디자인. **모든 시각/구성 자산을 자기 디렉터리 안에 자급자족** (ADR-0001) | `src/templates/<category>/<leaf>/` | 개발자 (코드 PR) 또는 Claude Code (`new-template` 스킬) |
-| **Section component** | 자기 메타 (`componentKey` / `category` / `label` / `dataSchema`) 를 동봉하는 self-describing React 컴포넌트 | `<templateDir>/library/<Name>.tsx` | 개발자 |
+| **Section component** | 자기 메타 (`componentKey` / `category` / `label` / `fieldsSchema`) 를 동봉하는 self-describing React 컴포넌트 | `<templateDir>/library/<Name>.tsx` | 개발자 |
 | **Template Library** | `componentKey → Section component` 매핑. 한 Template 의 조립 키트. **다른 Template 와 공유 안 됨** | `<templateDir>/library/index.ts` | 개발자 |
-| **Preset** | 코드가 진실인 시드. composition + 데이터 + 토큰 오버라이드 | `<templateDir>/template.ts` | 개발자 / LLM |
+| **Preset** | 코드가 진실인 시드. `templateJson`(ContentModel) + 토큰 | `<templateDir>/template.ts` | 개발자 / LLM |
 | **Template (DB row)** | `templates` 테이블 한 행. Preset 에서 Sync 로 시드되거나 어드민이 manual 로 만듦 | DB | sync CLI / 어드민 UI |
 | **UserSite** | Template 을 복사해 사용자가 편집한 인스턴스 | DB `user_sites` | 일반 사용자 |
 | **`templateKey`** | `${category}-${leaf}` 형태 합성 슬러그 (예: `cafe-default`). `templateMap` upsert 키 | `_generated.ts` | codegen |
@@ -79,10 +79,13 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 
 ## 2. 데이터 모델
 
-### 2.1 `TemplateJson` (DB 에 저장되는 형태) — `src/domain/entities/template.entity.ts`
+### 2.1 `ContentModel` (DB 에 저장되는 형태) — `src/domain/entities/template.entity.ts`
+
+> **네이밍**: 이 타입은 예전 `TemplateJson` — `Template` 과 `Site` 가 **공유**하는 콘텐츠 형태라 엔티티 중립 이름 `ContentModel` 로 개명됐다 ([ADR-0013](./adr/0013-content-model-rename.md)). `mode` 판별 구조적 유니온(`SiteMode = 'single' | 'multi'`): `SingleContent | MultiContent`. 아래는 Single 예시.
 
 ```ts
-TemplateJson = {
+ContentModel (single) = {
+  mode: 'single',                       // ★ Site Type 판별자 (SiteMode)
   templateKey: 'cafe-default',          // _generated.ts의 templateMap 키 (= ${category}-${leaf})
   globalStyles: {                       // 사용자 편집 가능한 얇은 layer (ADR-0005)
     primaryColor: '#C96A3A',
@@ -91,62 +94,47 @@ TemplateJson = {
     fontSize: '16px',                   // CSS length
     layout: 'wide',                     // 'wide'|'narrow'|'asymmetric'|'default'|'full'
   },
-  pages: [
+  sections: [                           // ★ Single 은 sections[] 를 루트에 직접 (Page 없음)
     {
-      id: 'home',
-      title: 'Home',
-      slug: '/',                        // 페이지 간 unique
-      order: 0,
-      sections: [
-        {
-          id: 'hero-001',               // 페이지 내 unique, 사용자 사이트에서도 보존
-          type: 'hero',                 // ★ Template Library 의 componentKey 와 매칭
-          visible: true,
-          editable: true,
-          data: {
-            title: { type: 'text', label: 'Main Title', value: '...', editable: true },
-            image: { type: 'image', label: '배경 이미지', value: 'https://...' },
-            // ...
-          },
-        },
-      ],
+      id: 'hero-001',                   // unique, 사용자 사이트에서도 보존
+      type: 'hero',                     // ★ Template Library 의 componentKey 와 매칭
+      visible: true,                    // 서빙 여부
+      nav: { visible: true, label: 'Home' },  // nav projection 소스 (Single Section 만 보유)
+      fields: {                         // ★ (구 `data`) — migration 022 로 개명
+        title: { type: 'text', label: 'Main Title', value: '...', editable: true },
+        image: { type: 'image', label: '배경 이미지', value: 'https://...' },
+        // ...
+      },
     },
   ],
 }
+// Multi 는 대신: { mode: 'multi', templateKey, globalStyles,
+//                  shared: { header: Section[], footer: Section[] },
+//                  pages: [{ id, slug, nav, sections: Section[] }, ...] }
 ```
 
-**필드 타입** (`TemplateField`):
+**필드 타입** (`Field` / `FieldType`):
 
 | `type` | 입력 UI | 비고 |
 |---|---|---|
 | `text` / `textarea` / `url` / `color` / `number` | 자명 | 모든 `value` 는 string (number 도) |
 | `select` | dropdown | `options: string[]` 필요 |
 | `image` | URL + 업로드 | 업로드 시 `assetId` 자동 부여 (ADR-0003 orphan 정리) |
-| `array` | repeated items CRUD | `itemSchema` (Recursive SectionDataSchema) 필수 |
+| `array` | repeated items CRUD | `itemSchema` (Recursive `SectionFieldsSchema`) 필수 |
 
 ### 2.2 `TemplatePreset` (코드 진실) — `src/templates/types.ts`
 
 ```ts
 interface TemplatePreset {
   slug: string;                          // = templateKey. DB upsert 키. 변경 금지.
-  templateKey?: string;                  // composition 사용 시 필수 — slug 와 동일하게 둠
-  composition?: PresetSection[];         // ★ 정식 모델
-  globalStyles?: Partial<TemplateGlobalStyles>;
-  templateJson?: TemplateJson;           // legacy — composition 미사용 시 (사실상 안 씀)
+  templateJson: ContentModel;            // ★ DB 에 그대로 시드되는 전체 콘텐츠 (Single/Multi 유니온)
   thumbnailPath: string;                 // 'public/thumbnails/template-<slug>.webp'
   version: string;                       // semver
   defaults: { name: string; description: string; category: string };
 }
-
-interface PresetSection {
-  id: string;                            // 사용자 사이트에서도 보존되는 안정 ID
-  componentKey: string;                  // Template Library 에 존재해야 함
-  visible?: boolean;
-  data: Record<string, TemplateField>;   // dataSchema 만족 필요
-}
 ```
 
-> `composition` 을 쓰면 `deriveTemplateJsonFromPreset` (`src/lib/template/preset.ts`) 가 sync 시점에 `TemplateJson` 으로 변환해 DB 에 저장한다. **새 Preset 은 항상 `composition`** 을 쓴다.
+> Preset 은 `templateJson`(= `ContentModel`)을 **그대로** 들고 있고 sync 가 verbatim 으로 DB `content` 컬럼에 저장한다. 예전 `composition: PresetSection[]` 축약형은 제거됐다 ([ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)) — 필드명은 코드상 여전히 `templateJson` 이지만 타입은 `ContentModel`, DB 컬럼은 `content` (migration 021).
 
 ### 2.3 `SectionComponentMeta` & Template Library entry — `src/templates/types.ts`
 
@@ -155,16 +143,16 @@ interface SectionComponentMeta {
   componentKey: string;                  // 라이브러리 키 ('hero', 'menu', 'story' …)
   category: string;                      // 'hero' | 'menu' | 'story' | 'footer' | …
   label: string;                         // 어드민 카탈로그용 표시명
-  dataSchema: SectionDataSchema;
+  fieldsSchema: SectionFieldsSchema;
   previewImage?: string;
 }
 
-interface SectionDataSchema {
+interface SectionFieldsSchema {
   [fieldKey: string]: {
-    type: TemplateFieldType;
+    type: FieldType;
     label: string;
     required?: boolean;
-    itemSchema?: SectionDataSchema; // ★ type: 'array' 일 때 필수 (재귀 구조)
+    itemSchema?: SectionFieldsSchema; // ★ type: 'array' 일 때 필수 (재귀 구조)
     minItems?: number; // (선택)
     maxItems?: number; // (선택)
     options?: string[]; // type: 'select' 일 때
@@ -197,7 +185,7 @@ function libEntry(Component, metaOverride?): TemplateLibraryEntry;
 ```ts
 interface TemplateModule {
   default: ComponentType<TemplateRendererProps>;  // 페이지 레벨 렌더러
-  defaultTemplateJson: TemplateJson;              // 시각 토큰 시드 (composition 은 [] 비워둠)
+  defaultTemplateJson: ContentModel;              // 시각 토큰 시드 (필드명은 유지, 타입은 ContentModel)
   library: TemplateLibrary;
 }
 ```
@@ -210,11 +198,11 @@ interface TemplateModule {
 
 ```ts
 // src/templates/cafe/default/tokens.ts
-export const defaultGlobalStyles: TemplateGlobalStyles = { ... };  // 얇은 layer (사용자 편집)
+export const defaultGlobalStyles: GlobalStyles = { ... };  // 얇은 layer (사용자 편집)
 export const designTokens: DesignTokens = { ... };                 // 풍부한 layer (코드 고정)
 ```
 
-**얇은 layer (`TemplateGlobalStyles`)** — 에디터에서 사용자가 편집 가능한 5 개 필드:
+**얇은 layer (`GlobalStyles`)** — 에디터에서 사용자가 편집 가능한 5 개 필드:
 `primaryColor`, `secondaryColor`, `fontFamily`, `fontSize`, `layout`.
 
 **풍부한 layer (`DesignTokens`)** — 코드 고정. 6 개 차원 (`colors`, `fonts`, `spacing`, `radius`, `shadows`, `typography`). 각 차원 entry 는 `--{dimension-singular}-{key}` CSS custom property 가 됨 (`colors.primary` → `--color-primary`).
@@ -326,7 +314,7 @@ src/templates/cafe/default/
 
 `loadTemplate(templateKey)` 헬퍼 (`src/templates/registry.ts`) 가 `templateMap` 을 wrapping. **Backward-compat shim**: bare legacy key (예: `'cafe'`) 가 들어오면 `${key}-default` 로 fallback (migration 015–017 이 user_sites 의 templateKey 를 슬러그 형태로 정렬한 뒤로는 사실상 잔존 보호막).
 
-> **Single / Multi Site Type (구현 완료, ADR-0007):** `TemplateJson` 은 `mode` 판별 구조적 유니온이다 — Single 은 `sections[]`(앵커 nav), Multi 는 `shared:{header,footer}` + `pages[]`(페이지 링크 nav). 렌더는 `renderSingleSite.tsx` / `renderMultiSite.tsx`, Multi 공개 경로는 `/site/[domain]/[[...slug]]`. 데이터 모델·nav projection·2축(`visible`/`nav.visible`)·PageSeo·asset slot_key 의 정식 설명은 [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md) 과 `CONTEXT.md` 글로서리를 본다 (이 문서의 예시는 대부분 Single 기준으로 쓰여 있다).
+> **Single / Multi Site Type (구현 완료, ADR-0007):** `ContentModel` 은 `mode` 판별 구조적 유니온이다 — Single 은 `sections[]`(앵커 nav), Multi 는 `shared:{header,footer}` + `pages[]`(페이지 링크 nav). 렌더는 `renderSingleSite.tsx` / `renderMultiSite.tsx`, Multi 공개 경로는 `/site/[domain]/[[...slug]]`. 데이터 모델·nav projection·2축(`visible`/`nav.visible`)·PageSeo·asset slot_key 의 정식 설명은 [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md) 과 `CONTEXT.md` 글로서리를 본다 (이 문서의 예시는 대부분 Single 기준으로 쓰여 있다).
 
 ### 3.3 미래 구조 방향 (footnote, ADR-0001)
 
@@ -347,7 +335,7 @@ TemplateRenderer (templates/<cat>/<leaf>/index.tsx)
     │  designTokens prop 으로 root 에 CSS var 주입 (ADR-0005)
     ▼
 RenderSingleSite / RenderMultiSite    ← src/templates/renderSingleSite.tsx · renderMultiSite.tsx
-    │  Single: siteJson.sections        Multi: shared.header → active page.sections → shared.footer
+    │  Single: content.sections        Multi: shared.header → active page.sections → shared.footer
     │  sections.map((section) => library[section.type]); nav = deriveNav(source, hrefOf)
     │
     ▼
@@ -372,11 +360,10 @@ RenderSingleSite / RenderMultiSite    ← src/templates/renderSingleSite.tsx · 
 ```
 1. _generated.ts 의 presetMap 순회
 2. preset 1개에 대해:
-   ├─ templateKey 결정 (composition? preset.templateKey : preset.templateJson?.templateKey)
+   ├─ templateKey 결정 (preset.templateJson.templateKey)
    ├─ templateMap[templateKey]() 로드 → TemplateModule (library 포함)
-   ├─ deriveTemplateJsonFromPreset(preset, templateModule)  ← src/lib/template/preset.ts
-   │     composition[] → pages[0].sections[] (id/type/visible/data)
-   ├─ validateTemplateJson(json, { availableTemplateKeys, templateLibrary: templateModule.library })
+   ├─ content = preset.templateJson  ← 유도 단계 없이 ContentModel 을 verbatim 사용 (composition 제거됨, ADR-0007)
+   ├─ validateTemplateJson(content, { availableTemplateKeys, templateLibrary: templateModule.library })
    │     ↳ 에러 1개라도 있으면 SKIP (해당 preset 만)
    ├─ thumbnail 처리:
    │     md5 해시 기반 파일명 (template-<slug>-<hash>.webp)
@@ -384,7 +371,7 @@ RenderSingleSite / RenderMultiSite    ← src/templates/renderSingleSite.tsx · 
    ├─ existing slug 비교:
    │     없음 → INSERT (status='active' — ADR-0012)
    │     있음 → JSON.stringify 비교, 변경 있으면 UPDATE
-   │           (template_json / version / thumbnail_url / updated_at)
+   │           (content / version / thumbnail_url / updated_at)
 3. 변경 있고 dryRun=false 면 template_sync_audit 로그
 ```
 
@@ -423,7 +410,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 ```ts
 {
   availableTemplateKeys?: string[];   // 있으면 templateKey 검증
-  templateLibrary?: TemplateLibrary;   // 있으면 dataSchema 깊은 검증
+  templateLibrary?: TemplateLibrary;   // 있으면 fieldsSchema 깊은 검증
 }
 ```
 
@@ -440,7 +427,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 | `DUPLICATE_PAGE_SLUG` | page.slug 중복 |
 | `DUPLICATE_SECTION_ID` | 페이지 내 section.id 중복 |
 | `UNKNOWN_COMPONENT_KEY` | `templateLibrary` 옵션 + `section.type` 이 라이브러리에 없음 |
-| `MISSING_REQUIRED_FIELD` | `dataSchema[field].required === true` 인데 누락 |
+| `MISSING_REQUIRED_FIELD` | `fieldsSchema[field].required === true` 인데 누락 |
 | `FIELD_TYPE_MISMATCH` | `field.type !== schema[field].type` |
 | `MISSING_FIELD_TYPE` / `MISSING_FIELD_LABEL` / `MISSING_FIELD_VALUE` | 필수 메타 누락 |
 | `NON_STRING_FIELD_VALUE` | `value` 가 string 아님 (array 타입 제외) |
@@ -454,7 +441,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 | Code | 조건 |
 |---|---|
 | `NON_HEX_COLOR` | primary/secondary 가 hex 가 아님 (CSS named color 는 통과) |
-| `UNKNOWN_DATA_FIELD` | `data` 에 schema 에 없는 키 (오타·deprecated 감지) |
+| `UNKNOWN_DATA_FIELD` | `fields` 에 schema 에 없는 키 (오타·deprecated 감지) |
 | `INSECURE_URL` | `image` / `url` 필드가 `http://` (mixed-content 위험) |
 
 ### 6.3 Token enforcement (인라인 색·폰트 차단)
@@ -516,7 +503,7 @@ pnpm tsc --noEmit                 # 타입 체크 (CI 에서 클린 유지)
 새 Template 은 **`new-template` Claude Code 스킬**(`.claude/skills/new-template/`)로 만든다. 명령어를 외우지 않고 자연어로 의뢰하면("아웃도어 브랜드 멀티페이지로 만들어줘") 스킬이 발동해 아래를 수행:
 
 ```
-brief(자연어) ──▶ Site Type 결정 (Single=composition / Multi=templateJson 유니온 직접)
+brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 templateJson `ContentModel` 유니온 직접 작성)
              ──▶ 디렉터리: 가까운 Template 복제 또는 template:scaffold
              ──▶ 6 개 파일 작성 (rich 토큰; gotchas-checklist 준수)
              ──▶ 이미지: pnpm template:image <key> "<query>"
@@ -526,14 +513,14 @@ brief(자연어) ──▶ Site Type 결정 (Single=composition / Multi=template
 
 생성 결과: `src/templates/<category>/<leaf>/` 안에 6 개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). `pnpm generate:templates` 로 `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 미리보기.
 
-**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateTemplateJson` — preset → templateJson 유도 후 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **dataSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared 됨 cross-check (브레이스 밸런스 파서); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
+**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateTemplateJson` — `preset.templateJson`(ContentModel) 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared 됨 cross-check (브레이스 밸런스 파서); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
 > `template:verify` 는 템플릿 모듈을 동적 import 하므로 첫 줄에서 `./lib/register-css-stub` 를 로드해 `.module.css` import 가 tsx 에서 깨지지 않게 한다 (sync 와 동일).
 
 **New-category 가드**: 새 category slug 은 `^[a-z][a-z0-9-]{0,39}$` 를 만족해야 하고, 기존 디렉터리에 없는 새 top-level category 는 구조 변경이므로 사람의 명시적 승인 후 만든다 (`scripts/lib/category-gate.ts`, 정확 일치만 — `cafe-studio` 는 `cafe` 와 별개).
 
 ### 7.2 이미지 호스팅 헬퍼 (Issue #15)
 
-`scripts/lib/image-fetch.ts` 의 `fetchAndHostImage({ query, templateKey, aspectRatio?, role? })` — `dataSchema` 의 `type: 'image'` 필드를 채울 때 사용. **`pnpm template:image <templateKey> "<query>" [aspect]`** CLI 래퍼(`scripts/host-image.ts`)로 호출하면 query 만 정하고 fetch + host + URL 출력을 헬퍼가 처리한다.
+`scripts/lib/image-fetch.ts` 의 `fetchAndHostImage({ query, templateKey, aspectRatio?, role? })` — `fieldsSchema` 의 `type: 'image'` 필드를 채울 때 사용. **`pnpm template:image <templateKey> "<query>" [aspect]`** CLI 래퍼(`scripts/host-image.ts`)로 호출하면 query 만 정하고 fetch + host + URL 출력을 헬퍼가 처리한다.
 
 **동작 순서**:
 1. Unsplash + Pexels 둘 다 query (인증된 env 키 있는 만큼). 결과를 alternate-interleave 로 합쳐 pool 구성.
@@ -587,7 +574,7 @@ brief(자연어) ──▶ Site Type 결정 (Single=composition / Multi=template
    templateKey: 'cafe-sunlit',
    ```
 3. **`tokens.ts` 손보기** — primary / secondary, 폰트, 분위기. `designTokens` 같이.
-4. **데이터 / composition 손보기** — `template.ts` 의 각 section `data` 값을 새 컨셉에 맞게.
+4. **데이터 손보기** — `template.ts` (`templateJson`) 의 각 section `fields` 값을 새 컨셉에 맞게.
 5. **(필요 시) library 컴포넌트 수정** — β 모델: 이 Template 의 라이브러리는 이 Template 만 씀. 마음대로 손봐도 다른 Template 안 깨짐.
 6. **`pnpm generate:templates`** — `_generated.ts` 자동 갱신 (predev / prebuild 에서도 자동).
 7. **`pnpm template:capture cafe-sunlit`** — 썸네일 생성.
@@ -623,7 +610,7 @@ HeroParallax.meta = {
   componentKey: 'hero-parallax',         // ★ 라이브러리 키 — 영원히 고정
   category: 'hero',
   label: 'Hero (Parallax)',
-  dataSchema: {
+  fieldsSchema: {
     title:    { type: 'text',     label: '타이틀',    required: true },
     imageUrl: { type: 'image',    label: '배경 이미지', required: true },
     subtitle: { type: 'textarea', label: '설명' },
@@ -644,7 +631,7 @@ export const cafeDefaultLibrary: TemplateLibrary = {
 
 **만약 새 컴포넌트가 `'use client'` 라면**: `HeroParallax.meta = {...}` 대신 sibling `HeroParallax.meta.ts` 에 `export const heroParallaxMeta` 로 정의 → `libEntry(HeroParallax, heroParallaxMeta)` 로 명시 전달 (이유는 §10.12).
 
-preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-parallax', data: { ... } }`. `pnpm test` → `pnpm template:sync` → 어드민 Apply.
+preset 의 `templateJson` section 에서 사용 — `{ id: 'hero-1', type: 'hero-parallax', visible: true, fields: { ... } }`. `pnpm test` → `pnpm template:sync` → 어드민 Apply.
 
 **주의**: ADR-0001 — 이 컴포넌트는 cafe-default 전용이다. cafe-cozy 에도 같은 게 필요하면 *복제*. cross-Template 추출 금지.
 
@@ -657,9 +644,9 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 
 대안: `new-template` 스킬에 brief 만 던지면 Category 제안 + 슬러그 가드 + 6 파일 작성까지 한 번에. 더 빠름 (시나리오 B).
 
-### E. `dataSchema` 에 `required` 추가/변경
+### E. `fieldsSchema` 에 `required` 추가/변경
 
-기존 preset 의 `data` 에 해당 필드가 누락되어 있으면 `MISSING_REQUIRED_FIELD` error 로 sync 가 막힘. **반드시 같은 PR 에서 모든 영향받는 preset 의 `data` 채우기**. UserSite (`user_sites.site_json`) 는 sync 가 안 건드리므로 사용자가 다음에 편집하기 전까지는 이전 데이터 그대로 — 렌더 시 컴포넌트가 빈 값에 graceful fallback 가지도록 작성.
+기존 preset 의 `fields` 에 해당 필드가 누락되어 있으면 `MISSING_REQUIRED_FIELD` error 로 sync 가 막힘. **반드시 같은 PR 에서 모든 영향받는 preset 의 `fields` 채우기**. UserSite (`user_sites.content`) 는 sync 가 안 건드리므로 사용자가 다음에 편집하기 전까지는 이전 데이터 그대로 — 렌더 시 컴포넌트가 빈 값에 graceful fallback 가지도록 작성.
 
 ### F. Validate 룰 추가
 
@@ -681,15 +668,11 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
    }
    ```
 2. **Preset 데이터**: `items` 배열 안에 각 item 객체 배치.
-3. **컴포넌트 렌더**: `(data.items as ArrayTemplateField).items.map(...)` 으로 렌더. `item.title.value` 대신 `getFieldValue(item.title)` 사용 권장.
+3. **컴포넌트 렌더**: `(fields.items as ArrayField).items.map(...)` 으로 렌더. `item.title.value` 대신 `getFieldValue(item.title)` 사용 권장.
 
-### H. 새 페이지 추가 (현재 제약)
+### H. 새 페이지 추가 (Multi)
 
-`composition` 은 sync 시 `pages[0]` (home) 1 개만 생성 (`src/lib/template/preset.ts`). 다중 페이지가 필요하면:
-- `templateJson` legacy 형태로 직접 작성하거나,
-- `preset.ts` ↔ `deriveTemplateJsonFromPreset` 인터페이스를 확장 (`compositions: Record<pageSlug, PresetSection[]>` 등).
-
-후자는 별도 작업 — 공개 사이트 네비게이션, 에디터 페이지 탭, validate `DUPLICATE_PAGE_SLUG` 룰까지 함께 손봐야 함. ADR-0001 footnote 의 `pages/<page>/sections/` 디렉터리 방향성도 이 시점에 같이 고민.
+Multi Template 은 `preset.templateJson` 의 `{ mode:'multi', pages:[...] }` 유니온을 직접 작성한다 — 페이지를 추가하려면 `pages[]` 에 `{ id, slug, nav:{visible,label}, sections:[...] }` 원소를 더한다. 각 page 의 `slug` 는 unique 여야 하고(validate `DUPLICATE_PAGE_SLUG`), nav 는 `deriveNav`/`deriveFooterNav` 로 projection 된다. 공개 경로는 `/site/[domain]/[[...slug]]` (빈 slug = 첫 페이지). 참고로 ADR-0001 footnote 의 `pages/<page>/sections/` **디렉터리** 재편(렌더러 코드 구조)은 여전히 미래 작업이다.
 
 ---
 
@@ -699,7 +682,7 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
    `.webp`/`.jpg` 어긋나면 sync 가 옛 파일을 업로드하거나 로컬 경로 문자열을 그대로 DB 에 박는다. 두 곳을 항상 일치.
 
 2. **`componentKey` 변경 = 사용자 사이트 깨짐**
-   `user_sites.site_json` 의 `section.type` 이 매칭 안 되면 site 렌더러(`renderSingleSite`/`renderMultiSite`)가 console.warn + skip → 화면 빈칸. componentKey 는 **영원히** 변경 금지. 새 컴포넌트는 새 key 로.
+   `user_sites.content` 의 `section.type` 이 매칭 안 되면 site 렌더러(`renderSingleSite`/`renderMultiSite`)가 console.warn + skip → 화면 빈칸. componentKey 는 **영원히** 변경 금지. 새 컴포넌트는 새 key 로.
 
 3. **모든 `value` 는 string**
    `type: 'number'` 도 `value: '42'`. 컴포넌트에서 `Number(field.value)` 필요. validate 가 `NON_STRING_FIELD_VALUE` 로 잡음.
@@ -710,8 +693,8 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 5. **Lazy Migration & Graceful Fallback**
    기존 Template 컴포넌트에 `array` 필드를 추가한 경우, 기존 UserSite JSON 에는 해당 필드나 `items` 배열이 없을 수 있음. 컴포넌트 구현 시 `data.items?.items ?? []` 처럼 항상 빈 배열 fallback 을 갖추어야 런타임 에러를 방지할 수 있음. (에디터에서 한 번 저장하면 스키마에 맞춰 채워짐)
 
-6. **`required: true` 를 dataSchema 에 안 적으면 silent**
-   필수 필드를 빠뜨려도 sync 통과하고 런타임에 빈 값. `dataSchema` 에 명시할 것.
+6. **`required: true` 를 fieldsSchema 에 안 적으면 silent**
+   필수 필드를 빠뜨려도 sync 통과하고 런타임에 빈 값. `fieldsSchema` 에 명시할 것.
 
 7. **`templateKey` 누락 / legacy 'cafe' → backward-compat shim**
    `loadTemplate('cafe')` 가 들어오면 `'cafe-default'` 로 fallback (`registry.ts`). 의도된 동작 — migration 015 / 016 / 017 이 user_sites 의 templateKey 를 슬러그 형태로 정렬한 뒤로는 잔존 보호막. 디버깅 시간 낭비 흔함.
@@ -725,11 +708,11 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 10. **`_generated.ts` 수정 금지**
     수동 편집해도 다음 `predev` / `prebuild` 에서 덮어씀. 새 Template 추가는 디렉터리 / 파일만 만들면 됨.
 
-11. **`globalStyles` 머지 규칙**
-    `composition` 사용 시 sync 는 `templateModule.defaultTemplateJson.globalStyles` (= `tokens.ts` 시드) ◀ `preset.globalStyles` 순서로 spread. preset 에서 `Partial` 로 일부만 덮을 것.
+11. **`globalStyles` 는 `templateJson` 안에 산다**
+    `globalStyles` 는 이제 `preset.templateJson.globalStyles` 로 콘텐츠 유니온 안에 직접 들어간다(별도 `preset.globalStyles` 필드 없음 — composition 제거와 함께 사라짐). 저작 시 `tokens.ts` 의 `defaultGlobalStyles`(얇은 layer)를 시드로 복사해 넣고, 풍부한 토큰은 `designTokens` 로 코드 고정(ADR-0005, §2.5).
 
 12. **`'use client'` 컴포넌트의 `Component.meta = {...}` 는 서버에서 안 보임** ⚠️
-    Next.js 는 `'use client'` 모듈을 server-side import 시 client reference 로 wrapping 하고 모듈 본문을 서버에서 실행하지 않는다. 그래서 `.tsx` 파일 끝에서 한 `Component.meta = {...}` side-effect 는 server 에는 보이지 않고 → `library['nav'].meta` 가 undefined → sync / validate 시 `Cannot read properties of undefined (reading 'dataSchema')` 폭발.
+    Next.js 는 `'use client'` 모듈을 server-side import 시 client reference 로 wrapping 하고 모듈 본문을 서버에서 실행하지 않는다. 그래서 `.tsx` 파일 끝에서 한 `Component.meta = {...}` side-effect 는 server 에는 보이지 않고 → `library['nav'].meta` 가 undefined → sync / validate 시 `Cannot read properties of undefined (reading 'fieldsSchema')` 폭발.
     **해법**: client 컴포넌트의 meta 는 항상 sibling `<Component>.meta.ts` 에 named export 로 정의하고, `library/index.ts` 에서 `libEntry(Component, componentMeta)` 로 명시 전달. server 컴포넌트는 종전대로 `.meta = {...}` 그대로 OK.
 
 13. **Capture 는 dev server 를 띄움**
@@ -750,7 +733,7 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 
 | 무엇 | 어디 |
 |---|---|
-| `TemplateJson` / `TemplateSection` / `TemplateField` 타입 | `src/domain/entities/template.entity.ts` |
+| `ContentModel` / `Section` / `Field` 타입 (구 `TemplateJson`/`TemplateSection`/`TemplateField`, ADR-0013) | `src/domain/entities/template.entity.ts` |
 | `TemplatePreset` / `SectionComponent` / `TemplateModule` / `DesignTokens` / `NavSectionProps` 타입 | `src/templates/types.ts` (`PresetSection`/`composition` 은 ADR-0007 때 제거됨) |
 | 자동생성 레지스트리 | `src/templates/_generated.ts` (커밋, 수정 금지) |
 | 동적 import 헬퍼 | `src/templates/registry.ts` (`loadTemplate(templateKey)` + legacy shim) |
@@ -759,8 +742,7 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 | Validate 규칙 | `src/lib/template/validate.ts` (+ `__tests__/validate.test.ts`) |
 | Inline-tokens 스캐너 | `src/lib/template/inline-tokens.ts` |
 | Design tokens overlay | `src/lib/template/design-tokens.ts` (`tokensToCssVars`, `OVERLAY_MAP`) |
-| Preset → TemplateJson 변환 | `src/lib/template/preset.ts` |
-| Sync 코어 로직 | `src/lib/template/sync.ts` (+ `__tests__/sync.test.ts`) |
+| Sync 코어 로직 (preset.`templateJson` 을 `content` 컬럼에 verbatim upsert) | `src/lib/template/sync.ts` (+ `__tests__/sync.test.ts`) |
 | Template assets 업로드 헬퍼 | `src/lib/template/template-assets.ts` |
 | Codegen 스크립트 | `scripts/generate-templates.mjs` |
 | Template 저작 스킬 | `.claude/skills/new-template/` (`SKILL.md` + `gotchas-checklist.md`) |
@@ -788,7 +770,7 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 - **사용자별 커스텀 Template 업로드** — 보안·격리 비용 큼.
 - **크로스-Template Section 공유** (`src/sections/` 공용 풀) — ADR-0001 위배. 별도 RFC 없이는 X.
 - **사용자 에디터에서 섹션 추가 / 삭제·순서 변경** — 데이터 모델은 가능하지만 UX·검증 추가 비용. 현재 1 차는 preset 구조 고정.
-- **다중 페이지 *composition* 저작** — Multi 사이트 자체는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). 다만 `composition` 모델은 여전히 1 페이지 전제라, Multi 는 `templateJson` 유니온을 직접 작성한다 (§7.1, §9-H). `composition` 을 다중 페이지로 확장 + ADR-0001 footnote 의 `pages/<page>/sections/` 디렉터리 재편은 미래 작업.
+- **Multi 저작 편의 + 디렉터리 재편** — Multi 사이트는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). Single/Multi 모두 `preset.templateJson` 의 `ContentModel` 유니온을 손으로 작성한다 (§2.2, §9-H; 예전 `composition` 축약형은 제거됨). 남은 미래 작업은 (1) 저작 보일러플레이트를 줄이는 헬퍼와 (2) ADR-0001 footnote 의 `pages/<page>/sections/` **디렉터리** 재편(렌더러 코드 구조)이다.
 
 ---
 
@@ -797,7 +779,9 @@ preset 의 composition 에서 사용 — `{ id: 'hero-1', componentKey: 'hero-pa
 | 번호 | 내용 | 프로덕션 적용 |
 |---|---|---|
 | 011 | `template_sync_audit` 테이블 (sync 감사 로그) | ✅ |
-| 012 | `templates.template_json` / `user_sites.site_json` / `user_sites.template_snapshot` 의 `section.order` 필드 일괄 제거 (Phase 6d) | ✅ |
+| 012 | content JSONB 의 `section.order` 필드 일괄 제거 (Phase 6d; 당시 컬럼명 `template_json`/`site_json`/`template_snapshot`, migration 021 에서 개명) | ✅ |
+| 021 | 컬럼 rename `template_json`/`site_json`/`template_snapshot` → `content`/`content`/`snapshot` + `save_site_template_with_lock` RPC 재작성 (ADR-0013) | ✅ |
+| 022 | section JSONB 키 `data` → `fields` 백필 (전 content 컬럼; `.meta.dataSchema` → `.meta.fieldsSchema` 코드 개명과 짝) | ✅ |
 | 013 | `themeKey` → `templateKey` 일괄 rename (β 모델 정합) | ✅ |
 | 014 | `template_assets` public storage 버킷 (AI 생성 / 스톡 이미지 호스팅, #7) | ✅ |
 | 015 | user_sites templateKey 를 `${category}-${leaf}` 슬러그로 정렬 (β 모델) | 진행 |

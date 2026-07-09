@@ -1,6 +1,6 @@
 # 공유 콘텐츠 형태 타입에서 엔티티 이름을 걷어낸다 — `TemplateJson` → `ContentModel`
 
-> **Status: Accepted — 미구현** (네이밍 확정, 코드/DB 리팩터는 후속 PR + migration 021). 이 문서는 *어떤 이름으로, 왜* 를 고정하기 위한 결정 기록이다.
+> **Status: Accepted — 구현 완료** (코드 리팩터 병합, migration **021**(컬럼 rename + RPC 재작성) + **022**(section `data`→`fields` 백필) 프로덕션 적용). 이 문서는 *어떤 이름으로, 왜* 를 고정하기 위한 결정 기록이다.
 
 `Template`(디자이너 청사진, `templates` 행)과 `Site`(사용자 인스턴스, `user_sites` 행)는 **두 축에서 별개 엔티티**다(axis A: 코드=Template, axis B: 데이터=Site — [ADR-0001](./0001-beta-model-template-isolation.md)). 그런데 둘이 **같은 콘텐츠 형태 타입 하나**를 공유한다: `TemplateJson` 은 `Template.templateJson`, `UserSite.siteJson`, `UserSite.templateSnapshot` 세 필드가 모두 들고 있다. 이 타입 이름에 `Template` 이 박혀 있어, 그것을 들고 있는 `Site` 쪽에서 읽으면 "왜 Site 가 TemplateJson 을?" 하는 인지 마찰이 생긴다.
 
@@ -45,10 +45,9 @@ interface UserSite { content: ContentModel; snapshot: ContentModel; /* … */ } 
 
 - **순수 타입 리네임(DB 영향 0)**: `TemplateJson→ContentModel`, `SinglePageTemplate→SingleContent`, `MultiPageTemplate→MultiContent`, `TemplateBase→ContentModelBase`, `TemplateSection→Section`, `TemplateField→Field`, `TemplateFieldType→FieldType`, 필드 변형 `Base/Text/Select/Image/ArrayTemplateField→Base/Text/Select/Image/ArrayField`(접두어 제거 일관 적용), `TemplatePage→Page`, `TemplateGlobalStyles→GlobalStyles`, `isSingleTemplate/isMultiTemplate→isSingleContent/isMultiContent`, 신설 `SiteMode = ContentModel['mode']`. 타입명은 직렬화되지 않으므로 마이그레이션 불필요.
   - 충돌 해소 1건: `DynamicEditor.tsx` 의 기존 편집기 컴포넌트 `ArrayField`(배열 필드 UI)를 `ArrayFieldEditor` 로 개명해, 타입 `ArrayTemplateField→ArrayField` 와의 동일 파일 이름 충돌을 제거.
-- **DB 컬럼까지 일치시킨다 → migration 021 필요** (코드-DB 이름 완전 일치를 택함):
-  - `templates.template_json → content`, `user_sites.site_json → content`, `user_sites.template_snapshot → snapshot` (`RENAME COLUMN`).
-  - **RPC 재작성 필수** — `save_site_template_with_lock`(010), `save_template`(007)이 `site_json` 을 직접 참조. `RENAME COLUMN` 은 RLS 정책은 자동 승계하지만 함수 본문은 텍스트 컴파일이라 `CREATE OR REPLACE` 로 다시 만들어야 한다.
-  - **JSONB 내부 키 `data → fields` 백필** — Section 의 `data` 키를 `content`/`snapshot` 세 컬럼 전 행에서 `fields` 로 리라이트(마이그레이션 018 급, `.md` runbook 동반). component 의 `.meta.dataSchema → .meta.fieldsSchema` 도 함께.
+- **DB 컬럼까지 일치시킨다 → migration 021 + 022** (코드-DB 이름 완전 일치를 택함; 원안은 1 개 마이그레이션이었으나 컬럼 rename 과 JSONB 백필을 분리해 각각 021/022 로 적용):
+  - **021 (`021_rename_content_columns.sql`)** — `templates.template_json → content`, `user_sites.site_json → content`, `user_sites.template_snapshot → snapshot` (`RENAME COLUMN`). **RPC 재작성** — `save_site_template_with_lock`(010)이 `site_json` 을 직접 참조. `RENAME COLUMN` 은 RLS 정책은 자동 승계하지만 함수 본문은 텍스트 컴파일이라 `CREATE OR REPLACE` 로 `content` 기준 재생성.
+  - **022 (`022_rename_section_data_to_fields.sql`)** — JSONB 내부 키 `data → fields` 백필. Section 의 `data` 키를 `content`/`content`/`snapshot` 세 컬럼 전 행에서 `fields` 로 리라이트(single `sections[]`; multi `shared.header`/`shared.footer` + `pages[].sections[]`). 멱등(`data` 있을 때만 rename). component 의 `.meta.dataSchema → .meta.fieldsSchema` 코드 개명과 짝.
   - `src/data/repositories/supabase-{template,user-site}.repository.impl.ts` 매퍼, `src/types/database.ts`(재생성) 갱신.
 - **왜 컬럼까지 바꾸나** — Clean Architecture 상 도메인 프로퍼티명과 DB 컬럼명은 원래 독립이라 "매퍼가 흡수(컬럼 유지)"도 유효했으나, 지금(데이터 소량·초기)이 코드-DB 이름을 한 번에 맞추기 가장 싼 시점이라는 판단으로 RPC 재작성 비용을 감수한다. (같은 판단이 ADR-0007 migration 018 에서도 적용됐다.)
 

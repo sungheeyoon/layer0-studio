@@ -16,13 +16,13 @@ Authoring a new Template is a **dev-time** task (you/admin stock the catalog or 
 ## Workflow
 
 1. **Pick the Site Type first — Single or Multi** (this decides how `template.ts` is written; ADR-0007, TEMPLATE_SYSTEM.md §9-H):
-   - **Single** (default — one continuous scroll, e.g. a self-intro / landing page): the preset uses a **`composition: PresetSection[]`** array; sync's `deriveTemplateJsonFromPreset` turns it into the Single union. Clone the closest single Template (`src/templates/<cat>/default`).
-   - **Multi** (routable pages, e.g. "outdoor brand with Home / Story / Products / Stores"): **do NOT use `composition`** — composition only ever emits one page. Instead **clone `src/templates/corporate/multipage`** (the only Multi example) and hand-write `template.ts`'s `templateJson: { mode:'multi', shared:{ header, footer }, pages:[ { slug, nav:{visible,label}, sections:[...] } ] }` union directly. Nav is projected by `deriveNav` (don't store it as a section). Served at `/site/[domain]/[[...slug]]`; renderer is `renderMultiSite`.
+   - **Single** (default — one continuous scroll, e.g. a self-intro / landing page): the preset's `templateJson` is a `ContentModel` **Single union** — `{ mode:'single', templateKey, globalStyles, sections:[ { id, type, visible, nav:{visible,label}, fields:{...} } ] }`. Clone the closest single Template (`src/templates/<cat>/default`). (The legacy `composition: PresetSection[]` short-hand was removed — ADR-0007; you now write the union directly.)
+   - **Multi** (routable pages, e.g. "outdoor brand with Home / Story / Products / Stores"): hand-write `template.ts`'s `templateJson: { mode:'multi', templateKey, globalStyles, shared:{ header, footer }, pages:[ { id, slug, nav:{visible,label}, sections:[...] } ] }` union directly. **Clone `src/templates/outdoor/default`** (능선 — the shipping Multi example). Nav is projected by `deriveNav` (don't store it as a section). Served at `/site/[domain]/[[...slug]]`; renderer is `renderMultiSite`.
 2. **Pick the directory path** (TEMPLATE_SYSTEM.md §9):
    - New variant of an existing category → clone the closest Template: `cp -r src/templates/<cat>/<src> src/templates/<cat>/<leaf>` then edit.
    - New concept/category → `pnpm template:scaffold` for an empty skeleton (Single shape).
    - New category slug must match `^[a-z][a-z0-9-]{0,39}$`.
-3. **Fill the files** — `tokens.ts`, `library/*.tsx` (+ `library/index.ts`), `template.ts` (preset: `composition` for Single / `templateJson` union for Multi), `thumbnail.config.ts`, `index.tsx` (Single → `RenderSingleSite`, Multi → `RenderMultiSite`). Use the **rich token pattern** (`tokens.ts` exports `defaultGlobalStyles` + `designTokens`); do **not** add a `.module.css` with `@import` (see gotchas #6, #7).
+3. **Fill the files** — `tokens.ts`, `library/*.tsx` (+ `library/index.ts`), `template.ts` (preset: a `templateJson` `ContentModel` union — Single `mode:'single'` / Multi `mode:'multi'`), `thumbnail.config.ts`, `index.tsx` (Single → `RenderSingleSite`, Multi → `RenderMultiSite`). Use the **rich token pattern** (`tokens.ts` exports `defaultGlobalStyles` + `designTokens`); do **not** add a `.module.css` with `@import` (see gotchas #6, #7).
 4. **Hard rules** (the rest are in the doc): `templateKey = <category>-<leaf>` and is permanent; section array order = render order; every field `value` is a string. Color/font only via `var(--*)` — never inline hex (ESLint **error**).
 5. **Images** — for `type:'image'` fields, decide a query string and host it:
    `pnpm template:image <templateKey> "<query>" [wide|square|portrait]` → prints the public URL to paste into the preset.
@@ -32,7 +32,7 @@ Authoring a new Template is a **dev-time** task (you/admin stock the catalog or 
    pnpm tsc --noEmit              # types
    pnpm lint                      # inline-token rule (error) + chrome rules
    pnpm test                      # validate rules (vitest)
-   pnpm template:verify <key>     # full gate incl. dataSchema↔JSX consistency (the unique check)
+   pnpm template:verify <key>     # full gate incl. fieldsSchema↔JSX consistency (the unique check)
    pnpm template:capture <key>    # thumbnail
    ```
 7. **Visual check** — open `/preview/preset/<templateKey>` and confirm it renders (Multi: check each page route).
