@@ -6,7 +6,7 @@ import {
   createDeleteUserSiteUseCase,
   createAdminUpdateSiteUseCase,
 } from '@/lib/di/container';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 import { revalidatePath } from 'next/cache';
 import { withAdmin } from '@/lib/actions/server-action';
 
@@ -20,7 +20,7 @@ export async function listAllSitesAction() {
 export async function createCustomSiteAction(
   userId: string,
   siteName: string,
-  siteJson: TemplateJson,
+  siteJson: ContentModel,
   domain?: string,
 ) {
   return withAdmin(async ({ adminSupabase }) => {

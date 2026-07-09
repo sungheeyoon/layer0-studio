@@ -76,7 +76,7 @@ describe('tokensToCssVars', () => {
   });
 
   it('does not produce keys for axes that the overlay map does not cover', () => {
-    // layout is in TemplateGlobalStyles but has no CSS-var mapping.
+    // layout is in GlobalStyles but has no CSS-var mapping.
     const vars = tokensToCssVars(sample, { layout: 'wide' });
     expect(Object.keys(vars).every(k => !k.includes('layout'))).toBe(true);
   });

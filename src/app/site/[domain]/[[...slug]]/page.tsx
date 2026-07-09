@@ -6,7 +6,7 @@ import { SITE_URL } from '@/lib/seo/base-url';
 import {
   getFieldValue,
   allSections,
-  isMultiTemplate,
+  isMultiContent,
   resolveActivePageSeo,
 } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     // Resolve the active page (Multi) so SEO is read per-page.
     let activePageId: string | undefined;
-    if (isMultiTemplate(siteJson)) {
+    if (isMultiContent(siteJson)) {
       const { pages } = siteJson;
       const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
       activePageId = activePage?.id;
@@ -102,7 +102,7 @@ export default async function PublicSitePage({ params }: Props) {
   // Resolve the active page (Multi) or guard against stray slugs (Single).
   // Empty slug = home (first page). Unknown / non-routable page → 404.
   let activePageId: string | undefined;
-  if (isMultiTemplate(siteJson)) {
+  if (isMultiContent(siteJson)) {
     const { pages } = siteJson;
     const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
     if (!activePage || !activePage.visible) notFound();

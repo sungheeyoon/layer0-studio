@@ -7,7 +7,7 @@ import {
   createDeleteUserSiteUseCase,
   createAssetUploadUseCase,
 } from '@/lib/di/container';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';
 import { withUser } from '@/lib/actions/server-action';
@@ -31,7 +31,7 @@ export async function loadSiteAction(siteId: string) {
   }
 }
 
-export async function saveSiteJsonAction(siteId: string, siteJson: TemplateJson, expectedUpdatedAt: string) {
+export async function saveSiteJsonAction(siteId: string, siteJson: ContentModel, expectedUpdatedAt: string) {
   return withUser(async (user, supabase) => {
     const useCase = createSiteWriteUseCase(supabase);
     const site = await useCase.saveJson(siteId, user.id, siteJson, expectedUpdatedAt);

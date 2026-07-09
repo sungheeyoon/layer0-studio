@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { presetMap } from '@/templates/_generated';
-import { isMultiTemplate } from '@/domain/entities/template.entity';
+import { isMultiContent } from '@/domain/entities/template.entity';
 import TemplateClientWrapper from '@/templates/TemplateClientWrapper';
 import React from 'react';
 
@@ -31,7 +31,7 @@ export default async function PresetPreviewPage({ params }: Props) {
   // Resolve the active page (Multi) from the slug — same rules as the public
   // site: empty slug = home (first page); unknown / non-routable → 404.
   let activePageId: string | undefined;
-  if (isMultiTemplate(templateJson)) {
+  if (isMultiContent(templateJson)) {
     const { pages } = templateJson;
     const activePage = slugPath === '' ? pages[0] : pages.find((p) => p.slug === slugPath);
     if (!activePage || !activePage.visible) notFound();

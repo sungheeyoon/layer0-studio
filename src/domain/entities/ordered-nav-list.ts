@@ -6,7 +6,7 @@
  * `nav.visible` / relabel) were still duplicated per Site Type. This module is
  * that collapse for writes: a pure generic core over "an ordered list of
  * nav-bearing items" (a Single Site's `SingleSection[]` or a Multi Site's
- * `TemplatePage[]` — both satisfy `{ id, visible, nav }`), plus thin
+ * `Page[]` — both satisfy `{ id, visible, nav }`), plus thin
  * mode-agnostic dispatchers the Editor calls regardless of Site Type.
  *
  * The Single-only pin rule (nav pinned top, footer pinned bottom) lives here
@@ -14,9 +14,9 @@
  */
 import {
   NavMeta,
-  TemplateJson,
+  ContentModel,
   SingleSection,
-  isSingleTemplate,
+  isSingleContent,
 } from './template.entity';
 
 export type MoveDirection = 'up' | 'down';
@@ -112,8 +112,8 @@ export function isSinglePinned(section: SingleSection): boolean {
 // which is the already-`structuredClone`d draft from the Editor's
 // `updateSiteJson` — consistent with every other handler there.
 
-export function moveNavItem(json: TemplateJson, id: string, direction: MoveDirection): void {
-  if (isSingleTemplate(json)) {
+export function moveNavItem(json: ContentModel, id: string, direction: MoveDirection): void {
+  if (isSingleContent(json)) {
     json.sections = moveItem(json.sections, id, direction, isSinglePinned);
   } else {
     json.pages = moveItem(json.pages, id, direction);
@@ -121,32 +121,32 @@ export function moveNavItem(json: TemplateJson, id: string, direction: MoveDirec
 }
 
 /** Drag-and-drop reorder: move `activeId` to `overId`'s slot. See `reorderItem`. */
-export function reorderNavItem(json: TemplateJson, activeId: string, overId: string): void {
-  if (isSingleTemplate(json)) {
+export function reorderNavItem(json: ContentModel, activeId: string, overId: string): void {
+  if (isSingleContent(json)) {
     json.sections = reorderItem(json.sections, activeId, overId, isSinglePinned);
   } else {
     json.pages = reorderItem(json.pages, activeId, overId);
   }
 }
 
-export function toggleNavItemVisible(json: TemplateJson, id: string): void {
-  if (isSingleTemplate(json)) {
+export function toggleNavItemVisible(json: ContentModel, id: string): void {
+  if (isSingleContent(json)) {
     json.sections = toggleVisible(json.sections, id);
   } else {
     json.pages = toggleVisible(json.pages, id);
   }
 }
 
-export function toggleNavItemNavVisible(json: TemplateJson, id: string): void {
-  if (isSingleTemplate(json)) {
+export function toggleNavItemNavVisible(json: ContentModel, id: string): void {
+  if (isSingleContent(json)) {
     json.sections = toggleNavVisible(json.sections, id);
   } else {
     json.pages = toggleNavVisible(json.pages, id);
   }
 }
 
-export function relabelNavItem(json: TemplateJson, id: string, label: string): void {
-  if (isSingleTemplate(json)) {
+export function relabelNavItem(json: ContentModel, id: string, label: string): void {
+  if (isSingleContent(json)) {
     json.sections = relabelNav(json.sections, id, label);
   } else {
     json.pages = relabelNav(json.pages, id, label);

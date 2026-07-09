@@ -1,4 +1,4 @@
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 
 export type TemplateRow = {
   id: string;
@@ -8,7 +8,7 @@ export type TemplateRow = {
   category: string;
   status: 'draft' | 'active' | 'archived';
   thumbnail_url: string | null;
-  template_json: TemplateJson;
+  template_json: ContentModel;
   version: string;
   created_by: string;
   created_at: string;
@@ -22,8 +22,8 @@ export type UserSiteRow = {
   site_name: string;
   domain: string | null;
   status: 'draft' | 'active' | 'suspended';
-  site_json: TemplateJson;
-  template_snapshot: TemplateJson;
+  site_json: ContentModel;
+  template_snapshot: ContentModel;
   published_at: string | null;
   created_at: string;
   updated_at: string;

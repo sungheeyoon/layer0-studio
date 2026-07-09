@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TemplateJson, allSections } from '@/domain/entities/template.entity';
+import { ContentModel, allSections } from '@/domain/entities/template.entity';
 import { templateMap } from '@/templates/_generated';
 import { TemplateLibrary } from '@/templates/types';
 import { Badge } from '@/components/ui/badge';
 
 interface CompositionPreviewProps {
-  templateJson: TemplateJson;
+  templateJson: ContentModel;
 }
 
 export default function CompositionPreview({ templateJson }: CompositionPreviewProps) {

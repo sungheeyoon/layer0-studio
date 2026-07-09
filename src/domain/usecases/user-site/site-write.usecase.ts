@@ -1,5 +1,5 @@
 import { IUserSiteRepository } from '../../repositories/user-site.repository';
-import { TemplateJson } from '../../entities/template.entity';
+import { ContentModel } from '../../entities/template.entity';
 import { UserSite, validateDomainSlug } from '../../entities/user-site.entity';
 import { TemplateError } from '../../errors/template.error';
 import { SiteContentValidator } from '../ports/site-content-validator.port';
@@ -40,7 +40,7 @@ export class SiteWriteUseCase {
   async saveJson(
     siteId: string,
     userId: string,
-    siteJson: TemplateJson,
+    siteJson: ContentModel,
     expectedUpdatedAt: string,
   ): Promise<UserSite> {
     await this.loadOwned(siteId, userId);
@@ -112,7 +112,7 @@ export class SiteWriteUseCase {
    * errors. Warnings do not block (matches the Sync pipeline). The structured
    * issues ride along on the error for server-side logging.
    */
-  private async validate(siteJson: TemplateJson) {
+  private async validate(siteJson: ContentModel) {
     const { errors } = await this.validator.validate(siteJson);
     if (errors.length > 0) {
       throw new TemplateError('INVALID_TEMPLATE_JSON', errors);

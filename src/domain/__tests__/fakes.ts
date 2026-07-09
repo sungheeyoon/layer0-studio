@@ -1,13 +1,13 @@
 import { IUserSiteRepository } from '../repositories/user-site.repository';
 import { UserSite, CreateUserSiteDto, UpdateUserSiteDto } from '../entities/user-site.entity';
-import { TemplateJson, SinglePageTemplate } from '../entities/template.entity';
+import { ContentModel, SingleContent } from '../entities/template.entity';
 import { TemplateError } from '../errors/template.error';
 import {
   SiteContentValidator,
   SiteContentValidationIssue,
 } from '../usecases/ports/site-content-validator.port';
 
-export function makeTemplateJson(overrides: Partial<SinglePageTemplate> = {}): TemplateJson {
+export function makeTemplateJson(overrides: Partial<SingleContent> = {}): ContentModel {
   return {
     mode: 'single',
     templateKey: 'corporate',
@@ -57,11 +57,11 @@ export function makeSite(overrides: Partial<UserSite> = {}): UserSite {
  * was asked to validate so tests can assert the partial-update path validates too.
  */
 export class FakeSiteContentValidator implements SiteContentValidator {
-  validated: TemplateJson[] = [];
+  validated: ContentModel[] = [];
 
   constructor(private errors: SiteContentValidationIssue[] = []) {}
 
-  async validate(json: TemplateJson) {
+  async validate(json: ContentModel) {
     this.validated.push(json);
     return { errors: this.errors, warnings: [] };
   }
@@ -111,7 +111,7 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return this.sites[idx];
   }
 
-  async updateSiteJson(id: string, siteJson: TemplateJson, expectedUpdatedAt: string): Promise<UserSite> {
+  async updateSiteJson(id: string, siteJson: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
     const idx = this.guardVersion(id, expectedUpdatedAt);
     this.sites[idx] = { ...this.sites[idx], siteJson, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];

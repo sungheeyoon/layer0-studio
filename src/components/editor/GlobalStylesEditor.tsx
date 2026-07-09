@@ -1,6 +1,6 @@
 'use client';
 
-import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
+import { GlobalStyles } from '@/domain/entities/template.entity';
 import { useDictionary } from '@/lib/i18n/provider';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/select';
 
 interface GlobalStylesEditorProps {
-  globalStyles: TemplateGlobalStyles;
-  onChange: (key: keyof TemplateGlobalStyles, value: string) => void;
+  globalStyles: GlobalStyles;
+  onChange: (key: keyof GlobalStyles, value: string) => void;
 }
 
 export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalStylesEditorProps) {

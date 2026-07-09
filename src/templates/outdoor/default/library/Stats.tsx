@@ -2,7 +2,7 @@ import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import {
   getFieldValue,
-  ArrayTemplateField,
+  ArrayField,
 } from '@/domain/entities/template.entity';
 
 /**
@@ -12,7 +12,7 @@ import {
 const Stats: SectionComponent = function Stats(props: TemplateSectionProps) {
   const { section } = props;
   const heading = getFieldValue(section.data, 'heading');
-  const items = (section.data.items as ArrayTemplateField | undefined)?.items ?? [];
+  const items = (section.data.items as ArrayField | undefined)?.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-dark)]">

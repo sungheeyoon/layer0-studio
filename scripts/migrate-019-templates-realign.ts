@@ -23,7 +23,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { presetMap, presetSlugs } from '../src/templates/_generated';
-import { isSingleTemplate, type TemplateJson } from '../src/domain/entities/template.entity';
+import { isSingleContent, type ContentModel } from '../src/domain/entities/template.entity';
 import { validateTemplateJson } from '../src/lib/template/validate';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -41,7 +41,7 @@ const isYes = args.includes('--yes');
 interface PresetInfo {
   slug: string;
   version: string;
-  templateJson: TemplateJson;
+  templateJson: ContentModel;
 }
 interface TemplateRow {
   id: string;
@@ -102,7 +102,7 @@ async function run() {
   }
 
   const warnings: string[] = [];
-  const updates: Array<{ id: string; fromSlug: string; toSlug: string; version: string; templateJson: TemplateJson; name: string; status: string }> = [];
+  const updates: Array<{ id: string; fromSlug: string; toSlug: string; version: string; templateJson: ContentModel; name: string; status: string }> = [];
   const deletes: Array<{ id: string; slug: string }> = [];
 
   for (const [tk, preset] of presets) {
@@ -153,7 +153,7 @@ async function run() {
   deletes.forEach((d) => console.log(`  🗑  ${d.slug}`));
   console.log(`\n=== UPDATE (canonical rows → slug==templateKey, new shape) ===`);
   for (const u of updates) {
-    const mode = isSingleTemplate(u.templateJson) ? 'single' : 'multi';
+    const mode = isSingleContent(u.templateJson) ? 'single' : 'multi';
     const rename = u.fromSlug === u.toSlug ? u.toSlug : `${u.fromSlug} → ${u.toSlug}`;
     console.log(`  ✏️  [${u.status}] ${rename}  (v${u.version}, ${mode}, "${u.name}")`);
   }

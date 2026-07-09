@@ -15,7 +15,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { presetMap, presetSlugs } from '../src/templates/_generated';
-import { isSingleTemplate, NavMeta } from '../src/domain/entities/template.entity';
+import { isSingleContent, NavMeta } from '../src/domain/entities/template.entity';
 import {
   migrateSingleSiteJson,
   type SeedNavMap,
@@ -44,7 +44,7 @@ async function buildSeedNavMap(): Promise<SeedNavMap> {
   for (const slug of presetSlugs) {
     const { default: preset } = await presetMap[slug]();
     const tj = preset.templateJson;
-    if (!isSingleTemplate(tj)) continue; // Multi seeds have no single sections
+    if (!isSingleContent(tj)) continue; // Multi seeds have no single sections
     const byId = new Map<string, NavMeta>();
     for (const s of tj.sections) {
       byId.set(s.id, { visible: s.nav.visible, label: s.nav.label });
@@ -109,7 +109,7 @@ async function run() {
 
     if (site.status === 'migrated' || snap.status === 'migrated') {
       const beforeSections = sectionCount(row.site_json);
-      const afterSections = isSingleTemplate(site.json as never)
+      const afterSections = isSingleContent(site.json as never)
         ? (site.json as { sections: unknown[] }).sections.length
         : 0;
       console.log(

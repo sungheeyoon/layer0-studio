@@ -3,9 +3,9 @@ import {
   deriveNav,
   deriveFooterNav,
   resolveActivePageSeo,
-  TemplatePage,
-  MultiPageTemplate,
-  SinglePageTemplate,
+  Page,
+  MultiContent,
+  SingleContent,
 } from '../entities/template.entity';
 
 const globalStyles = {
@@ -23,7 +23,7 @@ function page(
   navVisible: boolean,
   label: string,
   seoTitle?: string,
-): TemplatePage {
+): Page {
   return {
     id,
     slug,
@@ -34,14 +34,14 @@ function page(
   };
 }
 
-const pages: TemplatePage[] = [
+const pages: Page[] = [
   page('p-home', 'home', true, true, 'Home', 'Home Title'),
   page('p-about', 'about', true, true, 'About'),
   page('p-privacy', 'privacy', true, false, 'Privacy'), // routable, footer-only
   page('p-draft', 'draft', false, false, 'Draft'), // unroutable
 ];
 
-const hrefOf = (p: TemplatePage) => (p.id === 'p-home' ? '/' : `/${p.slug}`);
+const hrefOf = (p: Page) => (p.id === 'p-home' ? '/' : `/${p.slug}`);
 
 describe('nav projection — top nav vs footer are complementary', () => {
   it('deriveNav lists only visible + nav.visible pages, in array order', () => {
@@ -65,7 +65,7 @@ describe('nav projection — top nav vs footer are complementary', () => {
 });
 
 describe('resolveActivePageSeo', () => {
-  const multi: MultiPageTemplate = {
+  const multi: MultiContent = {
     mode: 'multi',
     templateKey: 'corporate-multipage',
     globalStyles,
@@ -86,7 +86,7 @@ describe('resolveActivePageSeo', () => {
   });
 
   it('Single: returns the site-level seo', () => {
-    const single: SinglePageTemplate = {
+    const single: SingleContent = {
       mode: 'single',
       templateKey: 'cafe-default',
       globalStyles,

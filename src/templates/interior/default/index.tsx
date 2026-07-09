@@ -4,11 +4,11 @@ import styles from './interior.module.css';
 import { interiorDefaultLibrary } from './library';
 import { RenderSingleSite } from '../../renderSingleSite';
 import { defaultGlobalStyles } from './tokens';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 
 export const library: TemplateLibrary = interiorDefaultLibrary;
 
-export const defaultTemplateJson: TemplateJson = {
+export const defaultTemplateJson: ContentModel = {
   mode: 'single',
   templateKey: 'interior-default',
   globalStyles: defaultGlobalStyles,

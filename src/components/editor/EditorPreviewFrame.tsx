@@ -3,7 +3,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, type ComponentType } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { TemplateRendererProps } from '@/templates/types';
-import type { TemplateJson } from '@/domain/entities/template.entity';
+import type { ContentModel } from '@/domain/entities/template.entity';
 
 /**
  * Fixed desktop *width* the preview renders at, then `transform: scale()`-d to
@@ -28,7 +28,7 @@ const CLONE_MARKER = 'data-editor-preview-clone';
 interface EditorPreviewFrameProps {
   /** The dynamically-loaded template renderer (Single or Multi — same interface). */
   TemplateRenderer: ComponentType<TemplateRendererProps>;
-  siteJson: TemplateJson;
+  siteJson: ContentModel;
   selectedSectionId: string | null;
   activePageId?: string;
   onSectionClick: (sectionId: string) => void;

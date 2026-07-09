@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateTemplateJson } from '../validate';
-import { SinglePageTemplate, ArrayTemplateField } from '@/domain/entities/template.entity';
+import { SingleContent, ArrayField } from '@/domain/entities/template.entity';
 import type { TemplateLibrary } from '@/templates/types';
 
 // -- All shipping templates --
@@ -18,7 +18,7 @@ import { templateMap, getAvailableTemplateKeys } from '@/templates/_generated';
 
 const ALL_TEMPLATE_KEYS = getAvailableTemplateKeys();
 
-function minimalJson(overrides: Partial<SinglePageTemplate> = {}): SinglePageTemplate {
+function minimalJson(overrides: Partial<SingleContent> = {}): SingleContent {
   return {
     mode: 'single',
     templateKey: 'corporate',
@@ -266,7 +266,7 @@ describe('validateTemplateJson — array fields', () => {
       },
     };
     // Test missing required field
-    (json.sections[0].data.items as ArrayTemplateField).items[0] = {}; // title missing
+    (json.sections[0].data.items as ArrayField).items[0] = {}; // title missing
     const result = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
     expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path).toContain('items.items[0].data.title');
@@ -285,7 +285,7 @@ describe('validateTemplateJson — array fields', () => {
     const resultMin = validateTemplateJson(json, { templateLibrary: mockLibrary });
     expect(resultMin.errors.some((e) => e.code === 'ARRAY_ITEMS_BELOW_MIN')).toBe(true);
 
-    (json.sections[0].data.items as ArrayTemplateField).items = [
+    (json.sections[0].data.items as ArrayField).items = [
       { title: { type: 'text', label: 'T', value: '1' } },
       { title: { type: 'text', label: 'T', value: '2' } },
       { title: { type: 'text', label: 'T', value: '3' } }, // maxItems is 2

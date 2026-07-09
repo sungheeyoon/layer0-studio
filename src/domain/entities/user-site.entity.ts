@@ -1,4 +1,4 @@
-import { TemplateJson } from './template.entity';
+import { ContentModel } from './template.entity';
 
 export interface UserSite {
   id: string;
@@ -7,10 +7,10 @@ export interface UserSite {
   siteName: string;
   domain: string | null;
   status: 'draft' | 'active' | 'suspended';
-  siteJson: TemplateJson;
+  siteJson: ContentModel;
   // Immutable snapshot of the original template JSON at site creation time.
   // Intended for future "reset to template" / diff features — not yet consumed by any UI.
-  templateSnapshot: TemplateJson;
+  templateSnapshot: ContentModel;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;

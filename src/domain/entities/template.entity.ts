@@ -1,4 +1,4 @@
-export type TemplateFieldType =
+export type FieldType =
   | 'text'
   | 'textarea'
   | 'image'
@@ -8,38 +8,38 @@ export type TemplateFieldType =
   | 'select'
   | 'array';
 
-interface BaseTemplateField {
+interface BaseField {
   label: string;
   editable?: boolean; // Basic true, hidden in editor if false
 }
 
-export interface TextTemplateField extends BaseTemplateField {
+export interface TextField extends BaseField {
   type: 'text' | 'textarea' | 'url' | 'color' | 'number';
   value: string;
 }
 
-export interface SelectTemplateField extends BaseTemplateField {
+export interface SelectField extends BaseField {
   type: 'select';
   value: string;
   options: string[]; // for 'select' type
 }
 
-export interface ImageTemplateField extends BaseTemplateField {
+export interface ImageField extends BaseField {
   type: 'image';
   value: string; // CDN URL
   assetId?: string | null; // UUID of physical asset for reference counting
 }
 
-export interface ArrayTemplateField extends BaseTemplateField {
+export interface ArrayField extends BaseField {
   type: 'array';
-  items: Array<Record<string, TemplateField>>;
+  items: Array<Record<string, Field>>;
 }
 
-export type TemplateField =
-  | TextTemplateField
-  | SelectTemplateField
-  | ImageTemplateField
-  | ArrayTemplateField;
+export type Field =
+  | TextField
+  | SelectField
+  | ImageField
+  | ArrayField;
 
 /**
  * Safely get the string value of a field.
@@ -49,17 +49,17 @@ export type TemplateField =
  * 1. getFieldValue(field)
  * 2. getFieldValue(data, 'key')
  */
-export function getFieldValue(fieldOrData: TemplateField | Record<string, TemplateField> | undefined, key?: string): string {
+export function getFieldValue(fieldOrData: Field | Record<string, Field> | undefined, key?: string): string {
   if (!fieldOrData) return '';
 
   if (key !== undefined) {
-    const data = fieldOrData as Record<string, TemplateField>;
+    const data = fieldOrData as Record<string, Field>;
     const field = data[key];
     if (!field || field.type === 'array') return '';
     return field.value ?? '';
   }
 
-  const field = fieldOrData as TemplateField;
+  const field = fieldOrData as Field;
   if (field.type === 'array') return '';
   return field.value ?? '';
 }
@@ -79,24 +79,24 @@ export interface NavMeta {
  * Base section — the "content shape" of a section, shared by Single and Multi
  * so section renderers are reused. No `title` (the name lives in the nav source's
  * `nav.label`) and no `editable` (it was always `true` — dead field). Field-level
- * `TemplateField.editable` is kept.
+ * `Field.editable` is kept.
  */
-export interface TemplateSection {
+export interface Section {
   id: string;
   type: string;
   visible: boolean;
-  data: Record<string, TemplateField>;
+  data: Record<string, Field>;
 }
 
 /**
  * Single-mode section — the section itself drives the nav (anchor scroll),
  * so it carries the unified `nav` projection source.
  */
-export interface SingleSection extends TemplateSection {
+export interface SingleSection extends Section {
   nav: NavMeta;
 }
 
-export interface TemplateGlobalStyles {
+export interface GlobalStyles {
   primaryColor: string;
   secondaryColor: string;
   fontFamily: string;
@@ -112,54 +112,57 @@ export interface PageSeo {
 
 /**
  * Multi-mode page — the page drives the nav (page link), so it carries the
- * unified `nav` projection source. Inner sections use base `TemplateSection`
+ * unified `nav` projection source. Inner sections use base `Section`
  * (no nav). No `title` (name = `nav.label`); no `order` (array order = render order).
  */
-export interface TemplatePage {
+export interface Page {
   id: string;
   slug: string;
   visible: boolean; // routable? false → 404 (data preserved)
   nav: NavMeta;
-  sections: TemplateSection[];
+  sections: Section[];
   seo?: PageSeo; // 🔮 Phase 6
 }
 
-interface TemplateBase {
+interface ContentModelBase {
   templateKey: string; // selects the (shared) renderer
-  globalStyles: TemplateGlobalStyles;
+  globalStyles: GlobalStyles;
 }
 
-export interface SinglePageTemplate extends TemplateBase {
+export interface SingleContent extends ContentModelBase {
   mode: 'single';
   sections: SingleSection[]; // nav/footer inline, pinned in the editor
   seo?: PageSeo; // 🔮 Phase 6 (single has one page → site-level)
 }
 
-export interface MultiPageTemplate extends TemplateBase {
+export interface MultiContent extends ContentModelBase {
   mode: 'multi';
-  shared: { header: TemplateSection[]; footer: TemplateSection[] };
-  pages: TemplatePage[];
+  shared: { header: Section[]; footer: Section[] };
+  pages: Page[];
 }
 
 /** Structural union discriminated on `mode`. See ADR-0007. */
-export type TemplateJson = SinglePageTemplate | MultiPageTemplate;
+export type ContentModel = SingleContent | MultiContent;
 
-/** Narrow a TemplateJson to the Single shape. */
-export function isSingleTemplate(json: TemplateJson): json is SinglePageTemplate {
+/** The Site Type discriminator shared by both content variants. See ADR-0007 / ADR-0013. */
+export type SiteMode = ContentModel['mode']; // 'single' | 'multi'
+
+/** Narrow a ContentModel to the Single shape. */
+export function isSingleContent(json: ContentModel): json is SingleContent {
   return json.mode === 'single';
 }
 
-/** Narrow a TemplateJson to the Multi shape. */
-export function isMultiTemplate(json: TemplateJson): json is MultiPageTemplate {
+/** Narrow a ContentModel to the Multi shape. */
+export function isMultiContent(json: ContentModel): json is MultiContent {
   return json.mode === 'multi';
 }
 
 /**
- * Every section in a TemplateJson, regardless of mode — Single's `sections`,
+ * Every section in a ContentModel, regardless of mode — Single's `sections`,
  * or Multi's `shared.header` + `shared.footer` + each page's `sections`.
  * Returns live references (safe to mutate after a structuredClone).
  */
-export function allSections(json: TemplateJson): TemplateSection[] {
+export function allSections(json: ContentModel): Section[] {
   if (json.mode === 'single') return json.sections;
   return [
     ...json.shared.header,
@@ -189,7 +192,7 @@ export function deriveNav<T extends { visible: boolean; nav: NavMeta }>(
  * See ADR-0007 / PLAN_multipage §5 Phase 3.
  */
 export function resolveActivePageSeo(
-  json: TemplateJson,
+  json: ContentModel,
   activePageId?: string,
 ): PageSeo | undefined {
   if (json.mode === 'single') return json.seo;
@@ -204,8 +207,8 @@ export function resolveActivePageSeo(
  * See PLAN_multipage §6 (E).
  */
 export function deriveFooterNav(
-  pages: TemplatePage[],
-  hrefOf: (p: TemplatePage) => string,
+  pages: Page[],
+  hrefOf: (p: Page) => string,
 ): Array<{ label: string; href: string }> {
   return pages
     .filter((p) => p.visible && !p.nav.visible)
@@ -220,7 +223,7 @@ export interface Template {
   category: string;
   status: 'draft' | 'active' | 'archived';
   thumbnailUrl: string | null;
-  templateJson: TemplateJson;
+  templateJson: ContentModel;
   version: string;
   createdBy: string;
   createdAt: string;

@@ -2,7 +2,7 @@ import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import {
   getFieldValue,
-  ArrayTemplateField,
+  ArrayField,
 } from '@/domain/entities/template.entity';
 
 /**
@@ -14,7 +14,7 @@ const Contact: SectionComponent = function Contact(props: TemplateSectionProps) 
   const heading = getFieldValue(section.data, 'heading') || '문의하기';
   const intro = getFieldValue(section.data, 'intro');
   const hours = getFieldValue(section.data, 'hours');
-  const items = (section.data.items as ArrayTemplateField | undefined)?.items ?? [];
+  const items = (section.data.items as ArrayField | undefined)?.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">

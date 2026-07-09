@@ -1,6 +1,6 @@
-import { TemplateGlobalStyles } from '@/domain/entities/template.entity';
+import { GlobalStyles } from '@/domain/entities/template.entity';
 
-export const defaultGlobalStyles: TemplateGlobalStyles = {
+export const defaultGlobalStyles: GlobalStyles = {
   primaryColor: "#1a1a2e",
   secondaryColor: "#e94560",
   fontFamily: "'Inter', sans-serif",

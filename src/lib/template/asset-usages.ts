@@ -1,4 +1,4 @@
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 
 export interface AssetUsage {
   asset_id: string;
@@ -18,7 +18,7 @@ export interface AssetUsage {
  * Page) in addition to every page's sections, so assets placed in a shared
  * header/footer are tracked and never mis-swept.
  */
-export function collectAssetUsages(siteJson: TemplateJson): AssetUsage[] {
+export function collectAssetUsages(siteJson: ContentModel): AssetUsage[] {
   const usages: AssetUsage[] = [];
 
   const collectFromSection = (

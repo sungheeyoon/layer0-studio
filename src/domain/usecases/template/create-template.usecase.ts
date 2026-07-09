@@ -1,5 +1,5 @@
 import { ITemplateRepository } from '../../repositories/template.repository';
-import { TemplateJson } from '../../entities/template.entity';
+import { ContentModel } from '../../entities/template.entity';
 import { TemplateError } from '../../errors/template.error';
 import { SiteContentValidator } from '../ports/site-content-validator.port';
 
@@ -10,7 +10,7 @@ interface CreateTemplateInput {
   category: string;
   status: 'draft' | 'active' | 'archived';
   thumbnailUrl: string | null;
-  templateJson: TemplateJson;
+  templateJson: ContentModel;
   version: string;
   createdBy: string;
 }

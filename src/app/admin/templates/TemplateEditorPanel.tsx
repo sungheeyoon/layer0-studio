@@ -12,7 +12,7 @@ import {
 import { getAvailableTemplateKeys } from '@/templates/registry';
 import { isPresetSlug } from '@/templates/_generated';
 import CompositionPreview from './CompositionPreview';
-import { TemplateJson } from '@/domain/entities/template.entity';
+import { ContentModel } from '@/domain/entities/template.entity';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -371,10 +371,10 @@ export default function TemplateEditorPanel({
 
           {/* Section 4: Composition */}
           {(() => {
-            let parsed: TemplateJson | null = null;
+            let parsed: ContentModel | null = null;
             try {
               if (templateJsonStr) {
-                parsed = JSON.parse(templateJsonStr) as TemplateJson;
+                parsed = JSON.parse(templateJsonStr) as ContentModel;
               }
             } catch {
               return null;

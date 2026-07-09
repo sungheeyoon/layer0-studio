@@ -2,11 +2,11 @@ import React, { ComponentType } from 'react';
 import { TemplateRendererProps, TemplateLibrary, DesignTokens, NavSectionProps } from './types';
 import { tokensToCssVars } from '@/lib/template/design-tokens';
 import {
-  isMultiTemplate,
+  isMultiContent,
   deriveNav,
   deriveFooterNav,
-  TemplateSection,
-  TemplatePage,
+  Section,
+  Page,
 } from '@/domain/entities/template.entity';
 
 interface RenderMultiSiteProps extends TemplateRendererProps {
@@ -37,12 +37,12 @@ export function RenderMultiSite({
   itemClassName,
   designTokens,
 }: RenderMultiSiteProps) {
-  if (!isMultiTemplate(siteJson)) return null;
+  if (!isMultiContent(siteJson)) return null;
   const { shared, pages } = siteJson;
 
   // First page = home (served at the empty slug); others at `${basePath}/${slug}`.
   const homeId = pages[0]?.id;
-  const hrefOf = (p: TemplatePage) =>
+  const hrefOf = (p: Page) =>
     p.id === homeId ? basePath || '/' : `${basePath}/${p.slug}`;
   const navItems = deriveNav(pages, hrefOf);
   // Footer links the reachable-but-not-in-top-nav pages (privacy/terms).
@@ -55,7 +55,7 @@ export function RenderMultiSite({
     ? tokensToCssVars(designTokens, siteJson.globalStyles)
     : undefined;
 
-  const renderSection = (section: TemplateSection) => {
+  const renderSection = (section: Section) => {
     if (!section.visible) return null;
 
     const entry = library[section.type];

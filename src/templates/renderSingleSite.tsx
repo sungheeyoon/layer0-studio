@@ -1,7 +1,7 @@
 import React, { ComponentType } from 'react';
 import { TemplateRendererProps, TemplateLibrary, DesignTokens, NavSectionProps } from './types';
 import { tokensToCssVars } from '@/lib/template/design-tokens';
-import { isSingleTemplate, deriveNav } from '@/domain/entities/template.entity';
+import { isSingleContent, deriveNav } from '@/domain/entities/template.entity';
 
 interface RenderSingleSiteProps extends TemplateRendererProps {
   library: TemplateLibrary;
@@ -30,7 +30,7 @@ export function RenderSingleSite({
   itemClassName,
   designTokens,
 }: RenderSingleSiteProps) {
-  const sections = isSingleTemplate(siteJson) ? siteJson.sections : [];
+  const sections = isSingleContent(siteJson) ? siteJson.sections : [];
 
   // nav = projection of the sections (anchor scroll). The wrapper `<div
   // id="section-${id}">` below is the anchor target. See ADR-0007 §3.1.

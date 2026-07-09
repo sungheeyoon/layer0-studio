@@ -1,6 +1,6 @@
 import { ITemplateRepository } from '../../repositories/template.repository';
 import { IUserSiteRepository } from '../../repositories/user-site.repository';
-import { TemplateJson } from '../../entities/template.entity';
+import { ContentModel } from '../../entities/template.entity';
 import { TemplateError } from '../../errors/template.error';
 
 interface CreateSiteFromTemplateInput {
@@ -12,7 +12,7 @@ interface CreateSiteFromTemplateInput {
 interface CreateCustomSiteInput {
   userId: string;
   siteName: string;
-  siteJson: TemplateJson;
+  siteJson: ContentModel;
   domain?: string;
 }
 
@@ -40,7 +40,7 @@ export class CreateSiteFromTemplateUseCase {
     }
 
     // Deep copy template JSON to user's site
-    const siteJson: TemplateJson = structuredClone(template.templateJson);
+    const siteJson: ContentModel = structuredClone(template.templateJson);
 
     return this.userSiteRepository.create({
       userId: input.userId,

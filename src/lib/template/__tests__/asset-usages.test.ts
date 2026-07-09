@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { collectAssetUsages } from '../asset-usages';
 import {
-  SinglePageTemplate,
-  MultiPageTemplate,
+  SingleContent,
+  MultiContent,
   SingleSection,
 } from '@/domain/entities/template.entity';
 
@@ -15,7 +15,7 @@ const globalStyles = {
 };
 
 // Returns a SingleSection (carries `nav`), which is also assignable wherever a
-// base TemplateSection is expected (Multi shared/page sections).
+// base Section is expected (Multi shared/page sections).
 function imageSection(id: string, key: string, assetId: string): SingleSection {
   return {
     id,
@@ -30,7 +30,7 @@ function imageSection(id: string, key: string, assetId: string): SingleSection {
 
 describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
   it('Single: `${section.id}.${key}`', () => {
-    const single: SinglePageTemplate = {
+    const single: SingleContent = {
       mode: 'single',
       templateKey: 'cafe-default',
       globalStyles,
@@ -42,7 +42,7 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
   });
 
   it('Multi: page sections use `${page.id}...`, shared use `shared.${slot}...`', () => {
-    const multi: MultiPageTemplate = {
+    const multi: MultiContent = {
       mode: 'multi',
       templateKey: 'corporate-multipage',
       globalStyles,
@@ -72,7 +72,7 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
   });
 
   it('ignores non-image fields and images without an assetId', () => {
-    const single: SinglePageTemplate = {
+    const single: SingleContent = {
       mode: 'single',
       templateKey: 'cafe-default',
       globalStyles,
