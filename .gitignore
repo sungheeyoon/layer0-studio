@@ -51,9 +51,10 @@ next-env.d.ts
 # third-party skills (npx skills) land in .claude/skills/ as machine-specific
 # absolute-path symlinks — ignore them. The real files live in .agents/ and are
 # restorable via skills-lock.json (`npx skills experimental_install`). Keep only
-# the in-repo project skill (new-template) tracked.
+# the in-repo project skills (new-template, delete-template) tracked.
 .claude/skills/*
 !.claude/skills/new-template/
+!.claude/skills/delete-template/
 
 # internal portfolio prep notes (interview cheatsheet — not for public)
 docs/PORTFOLIO_ENTRY.md

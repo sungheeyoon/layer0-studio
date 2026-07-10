@@ -399,6 +399,31 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 | `dry_run` | 항상 false (dry-run 은 기록 안 함) |
 | `summary` | { creates, updates, errors, details } JSONB |
 
+### 5.4 Template 삭제 파이프라인 — `template:delete` (sync 의 역방향)
+
+`pnpm template:delete <templateKey>` ⇒ `scripts/delete-template.ts` ⇒ `src/lib/template/delete.ts:deleteTemplate`. **`new-template`/sync 의 대칭 짝** — dev-time 코드 제거 도구다. 런타임 admin 의 Archive/Delete (§8) 와 책임 분리: Archive 는 *운영자가 라이브 카탈로그에서 내리는* 결정, `template:delete` 는 *개발자가 코드베이스에서 Template 을 없애는* 작업.
+
+**입력은 `templateKey` 하나.** Template 이 남기는 흔적(DB row / `template_assets/<key>/` / `template-thumbnails` 썸네일 / `public/thumbnails/template-<key>.webp` / `_generated.ts`)은 모두 key 로 유도되므로 preset 소스를 읽을 필요가 없다. 따라서 **소스는 선택** — 있으면 정상 삭제, 이미 지워졌으면(`rm` 후 남은 찌꺼기) orphan cleanup 으로 같은 도구가 처리한다.
+
+```
+1. buildDeletePlan(key) — 소스 dir 스캔 + findBySlug + user_sites count + storage list
+2. 가드:
+   ├─ EMPTY_MATCH          — 아무것도 안 걸리면 중단 (오타 방지)
+   └─ USER_SITES_REFERENCE — user_sites 가 참조하면 하드 블록 (--force 로만 우회)
+3. dry-run 이면 plan 만 출력하고 종료 (기본값; --apply 로 실제 삭제)
+4. --apply 순서 (전 단계 멱등, 중간 실패 시 재실행 수렴):
+   ├─ DELETE db row        ← ON DELETE RESTRICT 가 최종 게이트. 되돌릴 수 있는 관문을 먼저
+   ├─ template_assets/<key>/ prefix 삭제   ← 여기부터 되돌릴 수 없음(뒤로 배치)
+   ├─ template-thumbnails/thumbnails/template-<key>-<md5>.(webp|png) 삭제
+   ├─ public/thumbnails/template-<key>.webp 삭제 (워킹트리)
+   └─ generate:templates 재생성 (+ template_sync_audit 에 summary.action='delete' 기록)
+5. 소스가 남아있으면 "git rm -r src/templates/<cat>/<leaf>" 안내 — 소스 삭제는 사람/git 책임
+```
+
+**핵심 제약 (하드 블록의 이유)**: UserSite 는 데이터만 복사하고 렌더러 **코드는 serve-time 에 `templateKey` 로 로드**한다(`loadTemplate`). 그래서 user_sites 가 참조하는 Template 의 코드를 지우면 라이브 사이트가 전부 500. DB 의 `user_sites.template_id ON DELETE RESTRICT`(migration 001) 가 row 삭제를 막고, CLI 는 그 전에 count 로 선제 차단한다. 실제 유저가 쓰는 Template 을 내리는 건 삭제가 아니라 **Archive(§8)** 의 영역.
+
+자연어로 의뢰하면(`"landing 템플릿 삭제해줘"`) **`delete-template` 스킬**(`.claude/skills/delete-template/`)이 dry-run→확인→`--apply`→`git rm` 스테이징→regen 까지 수행하고, diff 검토·commit 은 사람에게 남긴다.
+
 ---
 
 ## 6. Validate 규칙 카탈로그
@@ -489,6 +514,11 @@ pnpm template:sync                # default = dry-run, diff만
 pnpm template:sync --apply        # 5초 카운트다운 후 실제 적용
 pnpm template:sync --apply --yes  # 카운트다운 우회 (CI)
 pnpm template:sync <slug-or-prefix>
+
+# Template 삭제 (sync 의 역방향, §5.4 — delete-template 스킬이 감싼다)
+pnpm template:delete <templateKey>            # default = dry-run, 삭제 계획만
+pnpm template:delete <templateKey> --apply    # DB row + storage + public + _generated 정리
+pnpm template:delete <templateKey> --apply --force  # user_sites 하드 블록 우회 (라이브 사이트 깨질 각오)
 
 # Template 디렉터리 스캐폴드 (수동 빈 골격)
 pnpm template:scaffold
@@ -743,10 +773,13 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 | Inline-tokens 스캐너 | `src/lib/template/inline-tokens.ts` |
 | Design tokens overlay | `src/lib/template/design-tokens.ts` (`tokensToCssVars`, `OVERLAY_MAP`) |
 | Sync 코어 로직 (preset.`content` 을 `content` 컬럼에 verbatim upsert) | `src/lib/template/sync.ts` (+ `__tests__/sync.test.ts`) |
+| Delete 코어 로직 (key 로 DB/storage/public/generated 정리, §5.4) | `src/lib/template/delete.ts` |
 | Template assets 업로드 헬퍼 | `src/lib/template/template-assets.ts` |
 | Codegen 스크립트 | `scripts/generate-templates.mjs` |
 | Template 저작 스킬 | `.claude/skills/new-template/` (`SKILL.md` + `gotchas-checklist.md`) |
+| Template 삭제 스킬 | `.claude/skills/delete-template/` (`SKILL.md`) |
 | Sync CLI | `scripts/sync-templates.ts` |
+| Delete CLI | `scripts/delete-template.ts` (`pnpm template:delete`) |
 | Verify CLI (통합 게이트) | `scripts/verify-template.ts` (`pnpm template:verify`) |
 | Capture CLI (Playwright) | `scripts/capture-templates.ts` |
 | Scaffold (빈 골격) | `scripts/scaffold-template.ts` |
@@ -796,4 +829,4 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 
 ## 14. 한 줄 요약
 
-> **Template = 자급자족 디렉터리** (tokens + library + preset + renderer, 다른 Template 와 공유 안 됨 — ADR-0001). **코드가 진실**, Sync 로 DB 반영 (ADR-0002). **새 Template 저작 = `new-template` Claude Code 스킬** (dev-time; brief → 6 파일 → `template:verify` 게이트 → sync). 새 variant = 디렉터리 복제 1 번. 새 Section = `library/` 에 `.meta` 동봉한 `.tsx` 1 개. 새 Category = 디렉터리 통째로 만들면 codegen 이 알아서 등록.
+> **Template = 자급자족 디렉터리** (tokens + library + preset + renderer, 다른 Template 와 공유 안 됨 — ADR-0001). **코드가 진실**, Sync 로 DB 반영 (ADR-0002). **새 Template 저작 = `new-template` Claude Code 스킬** (dev-time; brief → 6 파일 → `template:verify` 게이트 → sync). 새 variant = 디렉터리 복제 1 번. 새 Section = `library/` 에 `.meta` 동봉한 `.tsx` 1 개. 새 Category = 디렉터리 통째로 만들면 codegen 이 알아서 등록. **삭제 = `template:delete <key>` (dry-run→`--apply`) + `git rm`** — sync 의 역방향, `delete-template` 스킬이 감싼다 (§5.4).
