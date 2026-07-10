@@ -43,10 +43,9 @@ src/app/          ← Next.js App Router pages and Server Actions (call use case
     dashboard/
       (with-sidebar)/       ← Route group: dashboard pages that render the sidebar
         layout.tsx          ← Sidebar layout
-        page.tsx            ← /dashboard
-        projects/           ← /dashboard/projects, /dashboard/projects/create
+        page.tsx            ← /dashboard → redirects to /dashboard/projects
+        projects/           ← /dashboard/projects (+ /create) — home of the authenticated area: site summary + resume-editing + site list
         templates/          ← /dashboard/templates
-        domains/            ← /dashboard/domains
         settings/           ← /dashboard/settings
       editor/               ← /dashboard/editor — NO sidebar, full-viewport layout
 src/components/   ← UI components
@@ -70,12 +69,13 @@ src/types/database.ts ← Generated Supabase DB types
 | `/update-password` | Set new password after reset link verification |
 | `/auth/confirm` | OTP verification handler — used by signup confirmation and password-reset flows |
 | `/legal/privacy`, `/legal/terms` | Static legal pages |
-| `/dashboard/*` | Authenticated user area (auth guard in `(authenticated)/layout.tsx`) |
+| `/dashboard/*` | Authenticated user area (auth guard in `(authenticated)/layout.tsx`). `/dashboard` redirects to `/dashboard/projects` |
+| `/dashboard/projects` | Home of the authenticated area — site summary + resume-editing + site list, plus per-site settings (rename/domain/publish/delete) |
 | `/dashboard/templates` | Authenticated template catalog (same data, different chrome) |
 | `/dashboard/projects/create?templateId=<id>` | Provision a new site from a template |
 | `/dashboard/editor?siteId=<id>` | Visual editor — full-viewport, no sidebar (`(authenticated)/dashboard/editor/`) |
 | `/dashboard/settings` | Account settings — change password, delete account |
-| `/admin/*` | Admin area — requires `app_metadata.role === 'admin'` |
+| `/admin/*` | Admin area (**Templates management only**) — requires `app_metadata.role === 'admin'`. `/admin` redirects to `/admin/templates`. (The former global site-moderation table was removed.) |
 | `/site/[domain]` | Public published site renderer |
 | `/preview/[id]` | Preview before publishing |
 | `/api/cron/cleanup-assets` | Cron job: orphan asset cleanup via Supabase RPCs (Bearer `CRON_SECRET`). Schedule: `0 3 * * *` (daily 03:00 UTC) — free Vercel plan limit (1 cron/day) |
