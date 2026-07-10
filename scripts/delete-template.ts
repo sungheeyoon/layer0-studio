@@ -43,7 +43,17 @@ function printPlan(plan: DeleteTemplatePlan) {
   console.log(`  template_assets   : ${plan.assetPaths.length} file(s)`);
   console.log(`  storage thumbnail : ${plan.thumbnailPaths.length} file(s)`);
   console.log(`  public thumbnail  : ${plan.publicThumbnail ? 1 : 0}`);
+  console.log(`  code references   : ${plan.codeReferences.length} file(s)`);
   console.log(`  _generated.ts     : ${plan.sourceDir ? 'no change until git rm' : 'will drop stale key'}`);
+}
+
+function warnCodeReferences(plan: DeleteTemplatePlan) {
+  if (plan.codeReferences.length === 0) return;
+  console.warn(
+    `\n⚠️  ${plan.codeReferences.length} file(s) reference this template's source — they will break tsc\n` +
+      '   once the source dir is removed. Update (repoint or remove) them in the same change:',
+  );
+  for (const f of plan.codeReferences) console.warn(`     - ${f}`);
 }
 
 async function run() {
@@ -76,6 +86,8 @@ async function run() {
       );
       process.exit(1);
     }
+
+    warnCodeReferences(plan);
 
     if (!isApply) {
       console.log('\n💡 Nothing deleted. Re-run with --apply to commit.');

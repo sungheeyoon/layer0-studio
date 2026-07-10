@@ -21,9 +21,11 @@ Deleting a Template is the mirror image of `new-template` (dev-time; users never
    ```
    pnpm template:delete <key>
    ```
-   This prints the plan (db row, `template_assets` file count, storage thumbnail, public webp, `user_sites` refs, source dir). It deletes nothing. Two ways it stops here:
+   This prints the plan (db row, `template_assets` file count, storage thumbnail, public webp, `user_sites` refs, source dir, **code references**). It deletes nothing. Two ways it stops here:
    - **Empty match** → the key matches nothing (likely a typo). Fix the key.
    - **user_sites block** → real sites depend on it. Stop and tell the user; do **not** reach for `--force` without their explicit go-ahead.
+
+   **Watch the `code references` line.** If it's > 0, the CLI lists files that import the template's source (e.g. a test doing `import … '@/templates/<cat>/<leaf>/template'`). Those dangle and break `tsc` the moment the source is removed — you must update (repoint or remove) them in the same change. Step 5's `tsc` gate is the hard catch, but note them now.
 
 3. **Confirm with the user** before applying — deletion removes DB rows and storage permanently (only the source dir is git-recoverable). Surface the dry-run plan and get a yes.
 
@@ -40,7 +42,9 @@ Deleting a Template is the mirror image of `new-template` (dev-time; users never
    ```
    Resolve `<category>/<leaf>` by the **actual directory**, not by splitting the key on `-` (a hyphenated leaf is ambiguous). The CLI's hint prints the correct path.
 
-6. **Hand off to the human.** Stage is done; the human reviews the diff (`git status` will show: removed source dir, regenerated `_generated.ts`, deleted `public/thumbnails/template-<key>.webp`) and commits / opens the PR. **Do not commit for them** unless asked.
+6. **Typecheck gate — run `pnpm tsc --noEmit` after the source is removed.** This is the hard catch for dangling references (the exact gate CI uses). If it fails, some code still imports the deleted template — fix each (repoint to another template, or delete the now-obsolete test case / import), then re-run until clean. Do this **before** handing off, so a broken build never reaches CI.
+
+7. **Hand off to the human.** Stage is done; the human reviews the diff (`git status` will show: removed source dir, regenerated `_generated.ts`, deleted `public/thumbnails/template-<key>.webp`, plus any reference fixes) and commits / opens the PR. **Do not commit for them** unless asked.
 
 ## Orphan cleanup (source already gone)
 
