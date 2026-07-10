@@ -13,7 +13,7 @@ const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) 
 
   return (
     <section
-      className="relative flex min-h-[100dvh] items-center overflow-hidden bg-[var(--color-primary)]"
+      className="relative flex min-h-[calc(100dvh-4rem)] items-center overflow-hidden bg-[var(--color-primary)]"
       style={bgImage ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
     >
       {/* Deep-navy scrim keeps text legible over any photo. */}
