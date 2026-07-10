@@ -7,15 +7,15 @@ import { TemplateLibrary } from '@/templates/types';
 import { Badge } from '@/components/ui/badge';
 
 interface CompositionPreviewProps {
-  templateJson: ContentModel;
+  content: ContentModel;
 }
 
-export default function CompositionPreview({ templateJson }: CompositionPreviewProps) {
+export default function CompositionPreview({ content }: CompositionPreviewProps) {
   const [library, setLibrary] = useState<TemplateLibrary | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const templateKey = templateJson.templateKey;
+    const templateKey = content.templateKey;
     if (templateMap[templateKey]) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(true);
@@ -29,10 +29,10 @@ export default function CompositionPreview({ templateJson }: CompositionPreviewP
     } else {
       setLibrary(null);
     }
-  }, [templateJson.templateKey]);
+  }, [content.templateKey]);
 
   // Flat list of every section (Single: sections[]; Multi: shared + pages).
-  const sections = allSections(templateJson);
+  const sections = allSections(content);
   if (sections.length === 0) return null;
 
   return (

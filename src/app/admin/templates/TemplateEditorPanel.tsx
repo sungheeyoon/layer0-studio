@@ -391,7 +391,7 @@ export default function TemplateEditorPanel({
                   </p>
                 </div>
                 <div className="col-span-8">
-                  <CompositionPreview templateJson={parsed} />
+                  <CompositionPreview content={parsed} />
                 </div>
               </div>
             );
