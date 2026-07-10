@@ -1,4 +1,6 @@
 import { TemplateLibrary, libEntry } from '../../../types';
+import Navigation from './Navigation';
+import { navigationMeta } from './Navigation.meta';
 import Hero from './Hero';
 import Features from './Features';
 import Curriculum from './Curriculum';
@@ -11,6 +13,7 @@ import Location from './Location';
 import Footer from './Footer';
 
 export const academyDefaultLibrary: TemplateLibrary = {
+  nav: libEntry(Navigation, navigationMeta),
   hero: libEntry(Hero),
   features: libEntry(Features),
   curriculum: libEntry(Curriculum),

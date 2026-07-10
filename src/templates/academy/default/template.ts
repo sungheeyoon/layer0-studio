@@ -14,6 +14,18 @@ const preset: TemplatePreset = {
     },
     "sections": [
       {
+        "id": "nav-001",
+        "type": "nav",
+        "visible": true,
+        "nav": { "visible": false, "label": "네비게이션" },
+        "fields": {
+          "brandName": { "value": "우리입시학원", "type": "text", "label": "학원 이름", "editable": true },
+          "brandSubtext": { "value": "ACADEMY", "type": "text", "label": "보조 텍스트", "editable": true },
+          "ctaText": { "value": "상담 신청", "type": "text", "label": "CTA 문구", "editable": true },
+          "ctaUrl": { "value": "#section-contact-001", "type": "url", "label": "CTA 링크", "editable": true }
+        }
+      },
+      {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
@@ -23,7 +35,7 @@ const preset: TemplatePreset = {
           "title": { "value": "성적으로 증명하는\n맞춤 입시 전략", "type": "textarea", "label": "메인 슬로건", "editable": true },
           "subtitle": { "value": "학생 한 명의 목표에서 시작합니다. 진단 → 반 편성 → 주간 관리로 이어지는 체계적인 커리큘럼이 결과를 만듭니다.", "type": "textarea", "label": "보조 설명", "editable": true },
           "ctaText": { "value": "무료 레벨테스트 신청", "type": "text", "label": "상담 버튼 문구", "editable": true },
-          "ctaUrl": { "value": "#contact", "type": "url", "label": "상담 버튼 링크", "editable": true },
+          "ctaUrl": { "value": "#section-contact-001", "type": "url", "label": "상담 버튼 링크", "editable": true },
           "phoneText": { "value": "대표전화 02-123-4567", "type": "text", "label": "전화 안내 문구", "editable": true },
           "backgroundImage": { "value": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80", "type": "image", "label": "배경 이미지", "editable": true }
         }
@@ -32,7 +44,7 @@ const preset: TemplatePreset = {
         "id": "features-001",
         "type": "features",
         "visible": true,
-        "nav": { "visible": false, "label": "특장점" },
+        "nav": { "visible": true, "label": "특장점" },
         "fields": {
           "eyebrow": { "value": "WHY US", "type": "text", "label": "상단 라벨", "editable": true },
           "title": { "value": "우리 학원만의 강점", "type": "text", "label": "섹션 제목", "editable": true },
@@ -52,7 +64,7 @@ const preset: TemplatePreset = {
         "id": "curriculum-001",
         "type": "curriculum",
         "visible": true,
-        "nav": { "visible": false, "label": "커리큘럼" },
+        "nav": { "visible": true, "label": "커리큘럼" },
         "fields": {
           "eyebrow": { "value": "CURRICULUM", "type": "text", "label": "상단 라벨", "editable": true },
           "title": { "value": "커리큘럼 · 반 편성", "type": "text", "label": "섹션 제목", "editable": true },
@@ -72,7 +84,7 @@ const preset: TemplatePreset = {
         "id": "teachers-001",
         "type": "teachers",
         "visible": true,
-        "nav": { "visible": false, "label": "강사진" },
+        "nav": { "visible": true, "label": "강사진" },
         "fields": {
           "eyebrow": { "value": "TEACHERS", "type": "text", "label": "상단 라벨", "editable": true },
           "title": { "value": "검증된 강사진", "type": "text", "label": "섹션 제목", "editable": true },
@@ -92,7 +104,7 @@ const preset: TemplatePreset = {
         "id": "tuition-001",
         "type": "tuition",
         "visible": true,
-        "nav": { "visible": false, "label": "수강료" },
+        "nav": { "visible": true, "label": "수강료" },
         "fields": {
           "eyebrow": { "value": "TUITION", "type": "text", "label": "상단 라벨", "editable": true },
           "title": { "value": "시간표 · 수강료", "type": "text", "label": "섹션 제목", "editable": true },
@@ -112,7 +124,7 @@ const preset: TemplatePreset = {
         "id": "results-001",
         "type": "results",
         "visible": true,
-        "nav": { "visible": false, "label": "합격실적" },
+        "nav": { "visible": true, "label": "합격실적" },
         "fields": {
           "eyebrow": { "value": "RESULTS", "type": "text", "label": "상단 라벨", "editable": true },
           "title": { "value": "숫자로 보는 합격 실적", "type": "text", "label": "섹션 제목", "editable": true },
@@ -145,7 +157,7 @@ const preset: TemplatePreset = {
         "id": "location-001",
         "type": "location",
         "visible": true,
-        "nav": { "visible": false, "label": "오시는길" },
+        "nav": { "visible": true, "label": "오시는 길" },
         "fields": {
           "eyebrow": { "value": "LOCATION", "type": "text", "label": "상단 라벨", "editable": true },
           "title": { "value": "오시는 길", "type": "text", "label": "섹션 제목", "editable": true },
