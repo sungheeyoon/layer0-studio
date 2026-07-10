@@ -2,21 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Globe,
-  Layers,
-  LayoutDashboard,
-  FolderOpen,
-  Settings,
-  SquarePen,
-} from "lucide-react";
+import { Layers } from "lucide-react";
 
 const navItems = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
   { name: "Templates", href: "/admin/templates", icon: Layers },
-  { name: "Projects", href: "/admin/projects", icon: FolderOpen },
-  { name: "Editor", href: "/admin/editor", icon: SquarePen },
-  { name: "Domains", href: "/admin/domains", icon: Globe },
 ] as const;
 
 export default function AdminSidebar() {
@@ -55,17 +44,6 @@ export default function AdminSidebar() {
             </Link>
           );
         })}
-        <Link
-          href="/admin/settings"
-          className={`group mt-auto flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-            pathname.startsWith("/admin/settings")
-              ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-              : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-          }`}
-        >
-          <Settings className="h-4 w-4" />
-          <span>Settings</span>
-        </Link>
       </nav>
     </aside>
   );

@@ -43,7 +43,7 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
             aria-label={t.menuLabel}
             className="flex items-center rounded-full text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <CircleUserRound className="h-6 w-6" />
+            <CircleUserRound className="h-7 w-7" />
           </button>
         )}
       </DropdownMenuTrigger>

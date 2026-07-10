@@ -24,8 +24,8 @@ export default function TopNavBar({ user }: TopNavBarProps) {
       : t.projects;
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between gap-3 border-b border-border bg-background/80 px-6 backdrop-blur-md">
-      <span className="text-body font-medium text-foreground">{title}</span>
+    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between gap-3 border-b border-border bg-background/80 px-6 backdrop-blur-md">
+      <span className="text-title text-foreground">{title}</span>
       <div className="flex items-center gap-2">
         <LocaleToggle className="flex gap-1" />
         <ThemeToggle />

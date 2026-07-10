@@ -166,6 +166,22 @@
     system-ui, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
+
+  /* Global type scale promoted one notch (app-wide, templates included).
+     Overrides Tailwind's default --text-* sizes; line-heights keep their
+     Tailwind defaults. Chrome semantic presets (.text-body/-caption/...) are
+     separate and defined in @layer components below. */
+  --text-xs: 0.8125rem;   /* 13px (was 12) */
+  --text-sm: 1rem;        /* 16px (was 14) */
+  --text-base: 1.125rem;  /* 18px (was 16) */
+  --text-lg: 1.25rem;     /* 20px (was 18) */
+  --text-xl: 1.375rem;    /* 22px (was 20) */
+  --text-2xl: 1.625rem;   /* 26px (was 24) */
+  --text-3xl: 2rem;       /* 32px (was 30) */
+  --text-4xl: 2.5rem;     /* 40px (was 36) */
+  --text-5xl: 3.25rem;    /* 52px (was 48) */
+  --text-6xl: 4rem;       /* 64px (was 60) */
+  --text-7xl: 4.75rem;    /* 76px (was 72) */
 }
 
 @layer base {
@@ -205,25 +221,25 @@
     font-weight: 700;
   }
   .text-heading {
-    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+    font-size: clamp(2.125rem, 1.7rem + 1.7vw, 2.625rem);
     line-height: 1.25;
     letter-spacing: -0.02em;
     font-weight: 600;
   }
   .text-title {
-    font-size: 1.125rem;
+    font-size: 1.5rem;
     line-height: 1.4;
     letter-spacing: -0.015em;
     font-weight: 600;
   }
   .text-body {
-    font-size: 1rem;
+    font-size: 1.1875rem;
     line-height: 1.6;
     letter-spacing: -0.01em;
     font-weight: 400;
   }
   .text-caption {
-    font-size: 0.8125rem;
+    font-size: 1rem;
     line-height: 1.5;
     letter-spacing: 0;
     font-weight: 400;

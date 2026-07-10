@@ -16,7 +16,7 @@ export default function Sidebar() {
   const t = useDictionary().dashboard.sidebar;
 
   return (
-    <aside className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar py-8">
+    <aside className="fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-sidebar-border bg-sidebar py-8">
       <div className="px-6 mb-10">
         <Link href="/dashboard" className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-primary" />
@@ -25,7 +25,7 @@ export default function Sidebar() {
           </span>
         </Link>
       </div>
-      <nav className="flex-1 flex flex-col gap-1 px-3">
+      <nav className="flex-1 flex flex-col gap-1.5 px-3">
         {navItems.map((item) => {
           const isActive = 'exact' in item && item.exact
             ? pathname === item.href
@@ -36,7 +36,7 @@ export default function Sidebar() {
             <Link
               key={item.key}
               href={item.href}
-              className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+              className={`group flex items-center gap-3 rounded-md px-4 py-3.5 text-lg transition-colors ${
                 isActive
                   ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                   : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"

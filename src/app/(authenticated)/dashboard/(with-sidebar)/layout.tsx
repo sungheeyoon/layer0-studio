@@ -16,7 +16,7 @@ export default async function DashboardWithSidebarLayout({ children }: { childre
   return (
     <DashboardDataProvider user={user} initialSites={sites}>
       <Sidebar />
-      <div className="ml-64 flex min-h-screen flex-col bg-background">
+      <div className="ml-72 flex min-h-screen flex-col bg-background">
         <TopNavBar user={user} />
         <main className="flex-1 p-8 md:p-12">
           <div className="mx-auto w-full max-w-[1400px]">

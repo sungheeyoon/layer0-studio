@@ -80,20 +80,6 @@ const UNKNOWN_ERROR: Record<Locale, string> = {
   en: 'An unknown error occurred.',
 };
 
-export const ADMIN_DOMAIN_ERRORS: Record<string, string> = {
-  DOMAIN_TAKEN: 'Domain already in use',
-  INVALID_DOMAIN: 'Invalid domain format (min 3 chars, alphanumeric/hyphen)',
-  STALE_VERSION: 'This site was modified elsewhere. Refresh and try again.',
-};
-
-export const ADMIN_ACTION_ERRORS: Record<string, string> = {
-  SITE_NOT_FOUND: 'Site not found',
-  SITE_ACCESS_DENIED: 'Access denied',
-  FORBIDDEN: 'Admin permission required',
-  UNSUPPORTED_FIELD_TYPE: 'This field type does not support partial updates',
-  STALE_VERSION: 'This site was modified elsewhere. Refresh and try again.',
-};
-
 /**
  * True when a Server Action result is an optimistic-concurrency conflict.
  * Centralizes the STALE_VERSION check so save/publish/metadata paths don't each
@@ -118,12 +104,4 @@ export function getDomainError(code: string | undefined, locale: Locale): string
 
 export function getSiteError(code: string | undefined, locale: Locale, fallback: string): string {
   return SITE_ERRORS[code ?? '']?.[locale] ?? fallback;
-}
-
-export function getAdminDomainError(code: string | undefined): string {
-  return ADMIN_DOMAIN_ERRORS[code ?? ''] ?? code ?? 'An unexpected error occurred';
-}
-
-export function getAdminActionError(code: string | undefined): string {
-  return ADMIN_ACTION_ERRORS[code ?? ''] ?? 'An unexpected error occurred';
 }
