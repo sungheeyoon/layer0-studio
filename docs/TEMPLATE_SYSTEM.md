@@ -406,10 +406,11 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 **입력은 `templateKey` 하나.** Template 이 남기는 흔적(DB row / `template_assets/<key>/` / `template-thumbnails` 썸네일 / `public/thumbnails/template-<key>.webp` / `_generated.ts`)은 모두 key 로 유도되므로 preset 소스를 읽을 필요가 없다. 따라서 **소스는 선택** — 있으면 정상 삭제, 이미 지워졌으면(`rm` 후 남은 찌꺼기) orphan cleanup 으로 같은 도구가 처리한다.
 
 ```
-1. buildDeletePlan(key) — 소스 dir 스캔 + findBySlug + user_sites count + storage list
-2. 가드:
+1. buildDeletePlan(key) — 소스 dir 스캔 + findBySlug + user_sites count + storage list + code-ref 스캔
+2. 가드 / 경고:
    ├─ EMPTY_MATCH          — 아무것도 안 걸리면 중단 (오타 방지)
-   └─ USER_SITES_REFERENCE — user_sites 가 참조하면 하드 블록 (--force 로만 우회)
+   ├─ USER_SITES_REFERENCE — user_sites 가 참조하면 하드 블록 (--force 로만 우회)
+   └─ code references(경고) — 삭제 소스를 import 하는 파일(예: 테스트) 목록. git rm 후 tsc 깨짐 → 함께 수정
 3. dry-run 이면 plan 만 출력하고 종료 (기본값; --apply 로 실제 삭제)
 4. --apply 순서 (전 단계 멱등, 중간 실패 시 재실행 수렴):
    ├─ DELETE db row        ← ON DELETE RESTRICT 가 최종 게이트. 되돌릴 수 있는 관문을 먼저
@@ -418,6 +419,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
    ├─ public/thumbnails/template-<key>.webp 삭제 (워킹트리)
    └─ generate:templates 재생성 (+ template_sync_audit 에 summary.action='delete' 기록)
 5. 소스가 남아있으면 "git rm -r src/templates/<cat>/<leaf>" 안내 — 소스 삭제는 사람/git 책임
+6. (스킬) git rm + generate:templates 후 pnpm tsc --noEmit — 붕 뜬 import 를 로컬에서 잡아 고침(CI 아님)
 ```
 
 **핵심 제약 (하드 블록의 이유)**: UserSite 는 데이터만 복사하고 렌더러 **코드는 serve-time 에 `templateKey` 로 로드**한다(`loadTemplate`). 그래서 user_sites 가 참조하는 Template 의 코드를 지우면 라이브 사이트가 전부 500. DB 의 `user_sites.template_id ON DELETE RESTRICT`(migration 001) 가 row 삭제를 막고, CLI 는 그 전에 count 로 선제 차단한다. 실제 유저가 쓰는 Template 을 내리는 건 삭제가 아니라 **Archive(§8)** 의 영역.

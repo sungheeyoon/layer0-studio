@@ -43,6 +43,14 @@ export interface DeleteTemplatePlan {
   thumbnailPaths: string[];
   /** Absolute path to the committed public thumbnail, or null when absent. */
   publicThumbnail: string | null;
+  /**
+   * Repo-relative code files (outside the template's own dir) that reference the
+   * template's source path — e.g. a test importing `@/templates/<cat>/<leaf>/...`.
+   * These dangle the moment the source dir is git-rm'd and break `tsc`. Surfaced
+   * as a warning so they get updated in the same change (the skill's post-removal
+   * `tsc` gate is the hard catch).
+   */
+  codeReferences: string[];
 }
 
 export interface DeleteTemplateResult {
@@ -136,6 +144,37 @@ async function listThumbnailPaths(
     .map((f) => `${THUMBNAILS_PREFIX}/${f.name}`);
 }
 
+/**
+ * Grep the tracked codebase for files that reference the template's source path
+ * (e.g. `import x from '@/templates/<cat>/<leaf>/template'`). These break `tsc`
+ * once the source dir is removed. Path-based (precise); needs the source dir
+ * present to know the path, so returns [] for orphan cleanup. git-grep only —
+ * degrades to [] if git is unavailable (the skill's tsc gate still catches).
+ */
+function findCodeReferences(projectRoot: string, sourceDirRel: string | null): string[] {
+  if (!sourceDirRel) return [];
+  const norm = (p: string) => p.split('\\').join('/');
+  const relDir = norm(sourceDirRel);
+  const frag = relDir.replace(/^src\//, ''); // e.g. "templates/<cat>/<leaf>"
+  try {
+    const out = execFileSync(
+      'git',
+      ['grep', '-l', '--fixed-strings', frag, '--', 'src', 'scripts'],
+      { cwd: projectRoot, encoding: 'utf8' },
+    );
+    return out
+      .split('\n')
+      .map((s) => norm(s.trim()))
+      .filter(Boolean)
+      // The template's own files reference each other via relative paths, and
+      // _generated.ts is regenerated — neither is a dangling ref to fix.
+      .filter((f) => !f.startsWith(relDir))
+      .filter((f) => f !== 'src/templates/_generated.ts');
+  } catch {
+    return []; // git grep exits 1 when there are no matches
+  }
+}
+
 async function countUserSites(
   supabase: SupabaseClient,
   templateRowId: string,
@@ -164,6 +203,8 @@ export async function buildDeletePlan(
   const publicAbs = path.join(projectRoot, 'public', 'thumbnails', `template-${templateKey}.webp`);
   const publicThumbnail = fs.existsSync(publicAbs) ? publicAbs : null;
 
+  const codeReferences = findCodeReferences(projectRoot, source?.rel ?? null);
+
   return {
     templateKey,
     sourceDir: source?.abs ?? null,
@@ -173,6 +214,7 @@ export async function buildDeletePlan(
     assetPaths,
     thumbnailPaths,
     publicThumbnail,
+    codeReferences,
   };
 }
 
