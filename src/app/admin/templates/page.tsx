@@ -10,7 +10,7 @@ export default async function TemplatesPage() {
   const canPublish = user?.app_metadata?.canPublishTemplates === true;
 
   if ('error' in templates) {
-    return <div className="p-8 text-destructive">Error: {templates.error}</div>;
+    return <div className="p-8 text-destructive">오류: {templates.error}</div>;
   }
 
   return (

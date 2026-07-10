@@ -17,7 +17,7 @@ import type { User } from '@supabase/supabase-js';
 // archive) is the genuine human decision and is gated by `canPublishTemplates`
 // — separate from the admin role (ADR-0006). Registration is automated now, so
 // this capability no longer guards "Apply Sync"; it guards the live toggles.
-const PUBLISH_GUARD_ERROR = 'UNAUTHORIZED_TO_PUBLISH';
+const PUBLISH_GUARD_ERROR = '게시 권한이 없습니다';
 
 function lacksPublishRight(user: User): boolean {
   return user.app_metadata?.canPublishTemplates !== true;
@@ -28,7 +28,7 @@ function lacksPublishRight(user: User): boolean {
 export async function uploadThumbnailAction(formData: FormData) {
   return withAdmin(async ({ adminSupabase }) => {
     const file = formData.get('file') as File;
-    if (!file || file.size === 0) return { error: 'NO_FILE' };
+    if (!file || file.size === 0) return { error: '파일이 없습니다' };
 
     const ext = file.name.split('.').pop() ?? 'jpg';
     const fileName = `${crypto.randomUUID()}.${ext}`;
@@ -76,7 +76,7 @@ export async function createTemplateAction(formData: FormData) {
     try {
       content = JSON.parse(contentJsonStr);
     } catch {
-      return { error: 'INVALID_TEMPLATE_JSON' };
+      return { error: '잘못된 템플릿 JSON입니다' };
     }
 
     // Creating a directly-public template is a publish decision (ADR-0012 §5);
@@ -133,7 +133,7 @@ export async function updateTemplateAction(formData: FormData) {
       try {
         updateData.content = JSON.parse(contentJsonStr);
       } catch {
-        return { error: 'INVALID_TEMPLATE_JSON' };
+        return { error: '잘못된 템플릿 JSON입니다' };
       }
     }
 

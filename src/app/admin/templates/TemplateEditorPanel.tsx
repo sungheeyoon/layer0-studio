@@ -58,7 +58,7 @@ export default function TemplateEditorPanel({
     template ? JSON.stringify(template.content, null, 2) : '',
   );
   const [jsonError, setJsonError] = useState<string | null>(
-    template ? null : 'JSON is required'
+    template ? null : 'JSON을 입력해야 합니다'
   );
 
   // Thumbnail state
@@ -84,13 +84,13 @@ export default function TemplateEditorPanel({
     setContentJsonStr(value);
     try {
       if (value.trim() === '') {
-        setJsonError('JSON is required');
+        setJsonError('JSON을 입력해야 합니다');
         return;
       }
       JSON.parse(value);
       setJsonError(null);
     } catch {
-      setJsonError('Invalid JSON format');
+      setJsonError('잘못된 JSON 형식입니다');
     }
   };
 
@@ -123,7 +123,7 @@ export default function TemplateEditorPanel({
 
     setIsUploading(false);
     if ('error' in result && result.error) {
-      setUploadError(`Upload failed: ${result.error}`);
+      setUploadError(`업로드 실패: ${result.error}`);
       setThumbnailPreview(thumbnailUrl); // Rollback
     } else if ('url' in result && result.url) {
       setThumbnailUrl(result.url);
@@ -173,9 +173,9 @@ export default function TemplateEditorPanel({
       <div className="max-w-4xl p-12">
         {/* Header */}
         <header className="mb-12">
-          <span className="text-xs font-medium text-muted-foreground">Configuration</span>
+          <span className="text-xs font-medium text-muted-foreground">설정</span>
           <h2 className="mt-1 text-2xl font-semibold tracking-tight">
-            {isEditing ? `Edit ${template.name}` : 'New template'}
+            {isEditing ? `${template.name} 편집` : '새 템플릿'}
           </h2>
         </header>
 
@@ -187,28 +187,28 @@ export default function TemplateEditorPanel({
           {/* Section 1: Basic Info */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
-              <h3 className="text-sm font-semibold">Basic info</h3>
+              <h3 className="text-sm font-semibold">기본 정보</h3>
               <p className="mt-2 text-xs text-muted-foreground">
-                Identity and metadata for this template.
+                이 템플릿의 이름과 메타데이터입니다.
               </p>
             </div>
             <div className="col-span-8 space-y-6">
               {/* Title */}
               <div className="space-y-1.5">
-                <Label htmlFor="tpl-name">Template title</Label>
+                <Label htmlFor="tpl-name">템플릿 이름</Label>
                 <Input
                   id="tpl-name"
                   type="text"
                   name="name"
                   required
                   defaultValue={template?.name ?? ''}
-                  placeholder="Modern Corporate"
+                  placeholder="예: 모던 코퍼레이트"
                 />
               </div>
 
               {/* Theme Key Selector */}
               <div className="space-y-1.5">
-                <Label>Renderer key</Label>
+                <Label>렌더러 키</Label>
                 <Select
                   value={currentThemeKey}
                   onValueChange={handleThemeChange}
@@ -227,20 +227,20 @@ export default function TemplateEditorPanel({
 
               {/* Description */}
               <div className="space-y-1.5">
-                <Label htmlFor="tpl-description">Description</Label>
+                <Label htmlFor="tpl-description">설명</Label>
                 <Textarea
                   id="tpl-description"
                   rows={2}
                   name="description"
                   defaultValue={template?.description ?? ''}
-                  placeholder="A short description shown in the catalog."
+                  placeholder="카탈로그에 표시될 짧은 설명입니다."
                 />
               </div>
 
               {/* Slug + Category */}
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1.5">
-                  <Label htmlFor="tpl-slug">Slug (URL)</Label>
+                  <Label htmlFor="tpl-slug">슬러그 (URL)</Label>
                   <Input
                     id="tpl-slug"
                     type="text"
@@ -250,7 +250,7 @@ export default function TemplateEditorPanel({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="tpl-category">Category</Label>
+                  <Label htmlFor="tpl-category">카테고리</Label>
                   <Input
                     id="tpl-category"
                     type="text"
@@ -264,10 +264,10 @@ export default function TemplateEditorPanel({
               {/* Status indicator (read-only) */}
               {isEditing && (
                 <div className="space-y-1.5">
-                  <Label>Current status</Label>
+                  <Label>현재 상태</Label>
                   <div>
-                    <Badge variant={statusVariant} className="capitalize">
-                      {template.status}
+                    <Badge variant={statusVariant}>
+                      {template.status === 'active' ? '활성' : template.status === 'draft' ? '초안' : '보관됨'}
                     </Badge>
                   </div>
                 </div>
@@ -278,9 +278,9 @@ export default function TemplateEditorPanel({
           {/* Section 2: Thumbnail */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
-              <h3 className="text-sm font-semibold">Thumbnail</h3>
+              <h3 className="text-sm font-semibold">썸네일</h3>
               <p className="mt-2 text-xs text-muted-foreground">
-                Upload a preview image. Stored in Supabase Storage.
+                미리보기 이미지를 업로드하세요. Supabase Storage에 저장됩니다.
               </p>
             </div>
             <div className="col-span-8">
@@ -299,21 +299,21 @@ export default function TemplateEditorPanel({
                 ) : (
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <ImagePlus className="h-6 w-6" />
-                    <span className="text-xs">Click to upload</span>
+                    <span className="text-xs">클릭하여 업로드</span>
                   </div>
                 )}
 
                 {/* Uploading overlay */}
                 {isUploading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/70">
-                    <span className="animate-pulse text-xs">Uploading...</span>
+                    <span className="animate-pulse text-xs">업로드 중...</span>
                   </div>
                 )}
 
                 {/* Hover overlay */}
                 {!isUploading && thumbnailPreview && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 transition-opacity group-hover:opacity-100">
-                    <span className="text-xs font-medium">Change image</span>
+                    <span className="text-xs font-medium">이미지 변경</span>
                   </div>
                 )}
               </div>
@@ -340,9 +340,9 @@ export default function TemplateEditorPanel({
           {/* Section 3: Data Schema */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
-              <h3 className="text-sm font-semibold">Data schema</h3>
+              <h3 className="text-sm font-semibold">데이터 스키마</h3>
               <p className="mt-2 text-xs text-muted-foreground">
-                The JSON object that powers dynamic sections.
+                동적 섹션을 구성하는 JSON 객체입니다.
               </p>
             </div>
             <div className="col-span-8">
@@ -385,9 +385,9 @@ export default function TemplateEditorPanel({
             return (
               <div className="grid grid-cols-12 gap-8">
                 <div className="col-span-4">
-                  <h3 className="text-sm font-semibold">Composition</h3>
+                  <h3 className="text-sm font-semibold">구성</h3>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Sections included in this template.
+                    이 템플릿에 포함된 섹션입니다.
                   </p>
                 </div>
                 <div className="col-span-8">
@@ -399,7 +399,7 @@ export default function TemplateEditorPanel({
 
           {/* Submit error */}
           {submitError && (
-            <p className="text-xs text-destructive">Error: {submitError}</p>
+            <p className="text-xs text-destructive">오류: {submitError}</p>
           )}
 
           {/* Actions */}
@@ -410,7 +410,7 @@ export default function TemplateEditorPanel({
               className="text-muted-foreground"
               onClick={onDone}
             >
-              Discard changes
+              변경 사항 취소
             </Button>
             <div className="flex gap-3">
               {/* Save as Draft */}
@@ -424,7 +424,7 @@ export default function TemplateEditorPanel({
                   handleSubmit(fd, 'draft');
                 }}
               >
-                {isSubmitting ? 'Saving...' : 'Save draft'}
+                {isSubmitting ? '저장 중...' : '초안 저장'}
               </Button>
 
               {/* Deploy Template (→active) — publish, gated by canPublishTemplates (ADR-0012 §5). */}
@@ -434,7 +434,7 @@ export default function TemplateEditorPanel({
                   disabled={!!jsonError || isSubmitting || isUploading}
                   onClick={() => setShowDeployConfirm(true)}
                 >
-                  {isSubmitting ? 'Deploying...' : 'Deploy template'}
+                  {isSubmitting ? '배포 중...' : '템플릿 배포'}
                 </Button>
               )}
             </div>
@@ -446,14 +446,14 @@ export default function TemplateEditorPanel({
       <AlertDialog open={showDeployConfirm} onOpenChange={setShowDeployConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Deploy template?</AlertDialogTitle>
+            <AlertDialogTitle>템플릿을 배포할까요?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will set the template status to <strong>Active</strong> and make it publicly available to all users.
-              {isEditing && template.status !== 'active' && ` The current status will change from ${template.status} to active.`}
+              템플릿 상태를 <strong>활성</strong>으로 바꿔 모든 사용자에게 공개합니다.
+              {isEditing && template.status !== 'active' && ` 현재 상태가 ${template.status === 'draft' ? '초안' : '보관됨'}에서 활성으로 변경됩니다.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>취소</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 setShowDeployConfirm(false);
@@ -462,7 +462,7 @@ export default function TemplateEditorPanel({
                 await handleSubmit(fd, 'active');
               }}
             >
-              Deploy
+              배포
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

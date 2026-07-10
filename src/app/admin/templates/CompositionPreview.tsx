@@ -38,8 +38,8 @@ export default function CompositionPreview({ content }: CompositionPreviewProps)
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-medium text-muted-foreground">Section composition</h4>
-        {loading && <span className="animate-pulse text-xs text-muted-foreground">Loading metadata...</span>}
+        <h4 className="text-xs font-medium text-muted-foreground">섹션 구성</h4>
+        {loading && <span className="animate-pulse text-xs text-muted-foreground">메타데이터 불러오는 중...</span>}
       </div>
 
       <div className="space-y-2">
@@ -98,7 +98,7 @@ export default function CompositionPreview({ content }: CompositionPreviewProps)
 
       {!library && !loading && (
         <p className="text-xs italic text-muted-foreground">
-          Metadata library not available for this template. Using legacy slot validation.
+          이 템플릿에 대한 메타데이터 라이브러리를 사용할 수 없습니다. 레거시 슬롯 검증을 사용합니다.
         </p>
       )}
     </div>

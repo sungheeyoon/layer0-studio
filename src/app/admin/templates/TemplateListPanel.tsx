@@ -77,7 +77,7 @@ export default function TemplateListPanel({
     setDeleteError(null);
     const result = await deleteTemplateAction(id);
     if (result && 'error' in result) {
-      setDeleteError({ id, message: `Failed to delete: ${result.error}` });
+      setDeleteError({ id, message: `삭제 실패: ${result.error}` });
     } else {
       setConfirmDeleteId(null);
       onDelete?.(id);
@@ -124,36 +124,36 @@ export default function TemplateListPanel({
     <section className="col-span-4 overflow-y-auto border-r border-border bg-muted/30">
       <div className="sticky top-0 z-10 bg-muted/30 p-8 pb-4 backdrop-blur">
         <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-sm font-semibold tracking-tight">Templates</h2>
+          <h2 className="text-sm font-semibold tracking-tight">템플릿</h2>
           <span className="text-xs text-muted-foreground tabular-nums">
-            {templates.length} total
+            총 {templates.length}개
           </span>
         </div>
 
         {/* Sync Controls */}
         <div className="mb-6 rounded-lg border border-border bg-card p-4">
           <span className="text-xs font-medium text-muted-foreground">
-            Code sync (emergency)
+            코드 동기화 (긴급용)
           </span>
           <p className="mt-1 mb-4 text-xs text-muted-foreground">
-            Registration runs automatically after a production deploy. Use this
-            only as a fallback (e.g. the deploy webhook failed).
+            등록은 프로덕션 배포 후 자동으로 실행됩니다. 배포 웹훅이 실패한 경우 등
+            예외 상황에서만 사용하세요.
           </p>
           <Button size="sm" variant="outline" className="w-full" onClick={() => setShowSyncModal(true)}>
-            Force re-sync
+            강제 재동기화
           </Button>
         </div>
 
         <div className="flex items-center gap-2 border-b border-border pb-2">
           <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">Filter: All categories</span>
+          <span className="text-xs text-muted-foreground">필터: 전체 카테고리</span>
         </div>
       </div>
 
       <div className="space-y-3 px-8 pb-12">
         {templates.length === 0 && (
           <p className="pt-4 text-xs text-muted-foreground">
-            No templates yet. Create your first template to get started.
+            아직 템플릿이 없습니다. 첫 번째 템플릿을 만들어 시작하세요.
           </p>
         )}
 
@@ -192,13 +192,13 @@ export default function TemplateListPanel({
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
                     <Badge variant="outline">{template.category}</Badge>
                     <Badge variant={isPresetSlug(template.slug) ? 'secondary' : 'outline'}>
-                      {isPresetSlug(template.slug) ? 'Code' : 'Manual'}
+                      {isPresetSlug(template.slug) ? '코드' : '수동'}
                     </Badge>
                     {isActive ? (
-                      <Badge>Active</Badge>
+                      <Badge>활성</Badge>
                     ) : (
                       <Badge variant="outline">
-                        {template.status === 'draft' ? 'Draft' : 'Archived'}
+                        {template.status === 'draft' ? '초안' : '보관됨'}
                       </Badge>
                     )}
                   </div>
@@ -217,13 +217,13 @@ export default function TemplateListPanel({
                         onClick={() => setConfirmActivateId(template.id)}
                       >
                         <Rocket className="h-3 w-3" />
-                        {activatingId === template.id ? 'Activating...' : 'Activate'}
+                        {activatingId === template.id ? '활성화 중...' : '활성화'}
                       </Button>
                     )}
                     {/* Secondary actions — revealed on hover to keep the list calm. */}
                     <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <Button size="xs" variant="ghost" onClick={() => onEdit(template)}>
-                      Edit
+                      편집
                     </Button>
                     {/* Archive / Revert — takedown & re-publish, gated by
                         canPublishTemplates (ADR-0012 §5). */}
@@ -234,7 +234,7 @@ export default function TemplateListPanel({
                         className="text-muted-foreground"
                         onClick={() => setConfirmArchiveId(template.id)}
                       >
-                        Archive
+                        보관
                       </Button>
                     )}
                     {canPublish && template.status === 'archived' && (
@@ -244,7 +244,7 @@ export default function TemplateListPanel({
                         disabled={revertingId === template.id}
                         onClick={() => handleRevertToDraft(template.id)}
                       >
-                        {revertingId === template.id ? 'Reverting...' : 'Revert to draft'}
+                        {revertingId === template.id ? '되돌리는 중...' : '초안으로 되돌리기'}
                       </Button>
                     )}
                     <Button
@@ -253,7 +253,7 @@ export default function TemplateListPanel({
                       className="text-destructive hover:text-destructive"
                       onClick={() => { setConfirmDeleteId(template.id); setDeleteError(null); }}
                     >
-                      Delete
+                      삭제
                     </Button>
                     </div>
                   </div>
@@ -271,24 +271,24 @@ export default function TemplateListPanel({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete template?</AlertDialogTitle>
+            <AlertDialogTitle>템플릿을 삭제할까요?</AlertDialogTitle>
             <AlertDialogDescription>
               {deleteTarget?.name}
               <br />
-              This action cannot be undone. Sites already created from this template will not be affected.
+              이 작업은 되돌릴 수 없습니다. 이미 이 템플릿으로 만들어진 사이트에는 영향을 주지 않습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {deleteError?.id === confirmDeleteId && deleteError && (
             <p className="text-xs text-destructive">{deleteError.message}</p>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingId === confirmDeleteId}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingId === confirmDeleteId}>취소</AlertDialogCancel>
             <Button
               variant="destructive"
               disabled={deletingId === confirmDeleteId}
               onClick={() => confirmDeleteId && handleDelete(confirmDeleteId)}
             >
-              {deletingId === confirmDeleteId ? 'Deleting...' : 'Delete permanently'}
+              {deletingId === confirmDeleteId ? '삭제 중...' : '영구 삭제'}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -301,20 +301,20 @@ export default function TemplateListPanel({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive template?</AlertDialogTitle>
+            <AlertDialogTitle>템플릿을 보관할까요?</AlertDialogTitle>
             <AlertDialogDescription>
               {archiveTarget?.name}
               <br />
-              이 템플릿은 공개 카탈로그에서 숨겨집니다. 리스트에서 &quot;Revert to draft&quot;를 클릭하거나, Edit → Save draft로 수정 상태로 되돌릴 수 있습니다.
+              이 템플릿은 공개 카탈로그에서 숨겨집니다. 리스트에서 &quot;초안으로 되돌리기&quot;를 클릭하거나, 편집 → 초안 저장으로 수정 상태로 되돌릴 수 있습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={archivingId === confirmArchiveId}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={archivingId === confirmArchiveId}>취소</AlertDialogCancel>
             <AlertDialogAction
               disabled={archivingId === confirmArchiveId}
               onClick={() => confirmArchiveId && handleArchive(confirmArchiveId)}
             >
-              {archivingId === confirmArchiveId ? 'Archiving...' : 'Archive'}
+              {archivingId === confirmArchiveId ? '보관 중...' : '보관'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -327,20 +327,20 @@ export default function TemplateListPanel({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Activate template?</AlertDialogTitle>
+            <AlertDialogTitle>템플릿을 활성화할까요?</AlertDialogTitle>
             <AlertDialogDescription>
               {activateTarget?.name}
               <br />
-              상태를 <strong>Active</strong>로 바꿔 공개 카탈로그에 노출합니다. 사용자가 이 템플릿으로 사이트를 만들 수 있게 됩니다. 언제든 &quot;Archive&quot;로 다시 숨길 수 있습니다.
+              상태를 <strong>활성</strong>으로 바꿔 공개 카탈로그에 노출합니다. 사용자가 이 템플릿으로 사이트를 만들 수 있게 됩니다. 언제든 &quot;보관&quot;으로 다시 숨길 수 있습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={activatingId === confirmActivateId}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={activatingId === confirmActivateId}>취소</AlertDialogCancel>
             <AlertDialogAction
               disabled={activatingId === confirmActivateId}
               onClick={(e) => { e.preventDefault(); if (confirmActivateId) handleActivate(confirmActivateId); }}
             >
-              {activatingId === confirmActivateId ? 'Activating...' : 'Activate'}
+              {activatingId === confirmActivateId ? '활성화 중...' : '활성화'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -356,17 +356,17 @@ export default function TemplateListPanel({
       >
         <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Force re-sync (emergency)</DialogTitle>
+            <DialogTitle>강제 재동기화 (긴급용)</DialogTitle>
             <DialogDescription>
-              Manually re-register code presets to the database. Normally this is
-              automatic after a production deploy — use only as a fallback.
+              코드 프리셋을 데이터베이스에 수동으로 다시 등록합니다. 보통은 프로덕션
+              배포 후 자동으로 실행되며, 예외 상황에서만 사용하세요.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto py-2">
             {syncError && (
               <div className="mb-6 rounded-md bg-destructive/10 p-4 text-xs text-destructive">
-                Error: {syncError}
+                오류: {syncError}
               </div>
             )}
 
@@ -374,16 +374,16 @@ export default function TemplateListPanel({
               <div className="text-xs leading-relaxed text-muted-foreground">
                 이 작업은 코드베이스에 정의된 템플릿 프리셋을 데이터베이스와 동기화합니다.
                 <br /><br />
-                - <strong>Preview sync:</strong> 변경 사항을 미리 봅니다. (안전)
+                - <strong>동기화 미리보기:</strong> 변경 사항을 미리 봅니다. (안전)
                 <br />
-                - <strong>Apply sync:</strong> 실제 데이터베이스에 반영합니다. (관리자 권한 필요)
+                - <strong>동기화 적용:</strong> 실제 데이터베이스에 반영합니다. (관리자 권한 필요)
               </div>
             )}
 
             {isSyncing && (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="mb-4 h-6 w-6 animate-spin text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Processing sync...</span>
+                <span className="text-xs text-muted-foreground">동기화 처리 중...</span>
               </div>
             )}
 
@@ -391,10 +391,10 @@ export default function TemplateListPanel({
               <div className="space-y-6">
                 <div className="grid grid-cols-4 gap-3">
                   {[
-                    { label: 'New', value: syncSummary.creates },
-                    { label: 'Updated', value: syncSummary.updates },
-                    { label: 'Errors', value: syncSummary.errors, danger: true },
-                    { label: 'Unchanged', value: syncSummary.noChange, muted: true },
+                    { label: '신규', value: syncSummary.creates },
+                    { label: '업데이트', value: syncSummary.updates },
+                    { label: '오류', value: syncSummary.errors, danger: true },
+                    { label: '변경 없음', value: syncSummary.noChange, muted: true },
                   ].map((cell) => (
                     <div key={cell.label} className="rounded-md border border-border bg-card p-3">
                       <div className="mb-1 text-xs text-muted-foreground">{cell.label}</div>
@@ -406,7 +406,7 @@ export default function TemplateListPanel({
                 </div>
 
                 <div className="space-y-2">
-                  <span className="text-xs font-medium text-muted-foreground">Details</span>
+                  <span className="text-xs font-medium text-muted-foreground">상세 내역</span>
                   <div className="max-h-[300px] overflow-x-auto rounded-md bg-muted p-4 font-mono text-xs">
                     {syncSummary.details.map((d, i) => (
                       <div key={i} className="mb-2 last:mb-0">
@@ -437,11 +437,11 @@ export default function TemplateListPanel({
               disabled={isSyncing}
               onClick={() => handleSync(true)}
             >
-              Preview sync
+              동기화 미리보기
             </Button>
             {canPublish && (
               <Button disabled={isSyncing} onClick={() => handleSync(false)}>
-                Apply sync
+                동기화 적용
               </Button>
             )}
           </DialogFooter>

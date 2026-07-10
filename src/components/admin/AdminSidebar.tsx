@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Layers } from "lucide-react";
 
 const navItems = [
-  { name: "Templates", href: "/admin/templates", icon: Layers },
+  { name: "템플릿", href: "/admin/templates", icon: Layers },
 ] as const;
 
 export default function AdminSidebar() {
@@ -17,7 +17,7 @@ export default function AdminSidebar() {
         <Link href="/admin" className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-primary" />
           <span className="text-title font-semibold tracking-tight text-sidebar-foreground">
-            Layer0 Admin
+Layer0 관리자
           </span>
         </Link>
       </div>
