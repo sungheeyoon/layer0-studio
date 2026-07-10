@@ -2,8 +2,9 @@
 
 import { UserSite } from "@/domain/entities/user-site.entity";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { ArrowRight, Clock, Search, X } from "lucide-react";
 import {
   updateSiteDomainAction,
   publishSiteAction,
@@ -15,6 +16,7 @@ import { getDomainError, getSiteError, isStaleConflict } from "@/lib/errors/mess
 import { useDashboardData } from "../DashboardDataProvider";
 import { useDictionary, useLocale } from "@/lib/i18n/provider";
 import SiteListTable from "@/components/dashboard/SiteListTable";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -183,8 +185,82 @@ export default function ProjectsClient() {
 
   const isNameDirty = settingsSite && editSiteName.trim() !== settingsSite.siteName;
 
+  const activeNodes = sites.filter((site) => site.status === 'active').length;
+  const draftStates = sites.filter((site) => site.status !== 'active').length;
+  const stats = [
+    { label: t.home.totalSites, value: sites.length },
+    { label: t.home.activeNodes, value: activeNodes },
+    { label: t.home.draftStates, value: draftStates },
+  ];
+
   return (
-    <div className="w-full max-w-[1400px]">
+    <div className="w-full">
+      {/* Site summary + resume-editing — folded in from the former overview home */}
+      <div className="mb-12 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
+        <section className="flex flex-col">
+          <h2 className="text-caption mb-4 font-medium uppercase tracking-wider text-muted-foreground">
+            {t.home.siteSummary}
+          </h2>
+          <Card className="flex-1 justify-center p-8">
+            <div className="grid grid-cols-3 divide-x divide-border">
+              {stats.map((stat) => (
+                <div key={stat.label} className="flex flex-col items-center justify-center gap-1.5 px-2">
+                  <span className="text-4xl font-semibold tracking-tight tabular-nums">
+                    {String(stat.value).padStart(2, '0')}
+                  </span>
+                  <span className="text-caption text-muted-foreground">{stat.label}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
+
+        <section className="flex flex-col">
+          <h2 className="text-caption mb-4 font-medium uppercase tracking-wider text-muted-foreground">
+            {t.home.resumeWork}
+          </h2>
+          <Card className="flex-1 justify-between gap-5 p-6">
+            {selectedSite ? (
+              <>
+                <div className="flex items-start gap-3">
+                  <div className="text-title flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-muted font-semibold uppercase text-muted-foreground">
+                    {selectedSite.siteName.charAt(0)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-title truncate">{selectedSite.siteName}</h3>
+                      <Badge variant={selectedSite.status === 'active' ? 'default' : 'secondary'}>
+                        {selectedSite.status === 'active' ? t.common.published : t.common.draft}
+                      </Badge>
+                    </div>
+                    <p className="text-caption mt-1.5 flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      {formatDate(selectedSite.updatedAt)}
+                    </p>
+                  </div>
+                </div>
+                <Button asChild className="w-full">
+                  <Link href={`/dashboard/editor?siteId=${selectedSite.id}`}>
+                    {t.home.continueEditing}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+                <p className="text-body text-muted-foreground">{t.home.noRecent}</p>
+                <Button asChild>
+                  <Link href="/dashboard/templates">
+                    {t.home.startFromTemplate}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </Card>
+        </section>
+      </div>
+
       {/* Header */}
       <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
@@ -244,8 +320,10 @@ export default function ProjectsClient() {
               <dd className="text-body font-medium">{formatDate(selectedSite.createdAt).split(' ')[0]}</dd>
             </div>
             <div className="flex items-center justify-between border-b border-border pb-2">
-              <dt className="text-caption text-muted-foreground">{t.projects.instanceUuid}</dt>
-              <dd className="text-body font-medium">{selectedSite.id.substring(0, 12)}</dd>
+              <dt className="text-caption text-muted-foreground">{t.projects.primaryDomain}</dt>
+              <dd className="text-body truncate font-medium">
+                {selectedSite.domain || <span className="text-muted-foreground">{t.domains.noDomainSet}</span>}
+              </dd>
             </div>
           </dl>
         </Card>
@@ -258,7 +336,7 @@ export default function ProjectsClient() {
             <>
               <DialogHeader>
                 <DialogTitle>{t.projects.configuration}</DialogTitle>
-                <DialogDescription>{settingsSite.id}</DialogDescription>
+                <DialogDescription>{settingsSite.siteName}</DialogDescription>
               </DialogHeader>
 
               <div className="mt-6 space-y-8">

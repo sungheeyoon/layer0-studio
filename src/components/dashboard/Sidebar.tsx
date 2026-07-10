@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderOpen, Globe, LayoutGrid, Layers, Settings } from "lucide-react";
+import { FolderOpen, Layers, Settings } from "lucide-react";
 import { useDictionary } from "@/lib/i18n/provider";
 
 const navItems = [
-  { key: "overview", href: "/dashboard", icon: LayoutGrid, exact: true },
-  { key: "templates", href: "/dashboard/templates", icon: Layers },
   { key: "projects", href: "/dashboard/projects", icon: FolderOpen },
-  { key: "domains", href: "/dashboard/domains", icon: Globe },
+  { key: "templates", href: "/dashboard/templates", icon: Layers },
   { key: "settings", href: "/dashboard/settings", icon: Settings },
 ] as const;
 

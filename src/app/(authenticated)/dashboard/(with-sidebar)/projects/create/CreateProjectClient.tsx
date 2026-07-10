@@ -42,7 +42,7 @@ export default function CreateProjectClient({ template }: CreateProjectClientPro
   };
 
   return (
-    <div className="w-full max-w-5xl">
+    <div className="mx-auto w-full max-w-5xl">
       <header className="mb-10">
         <h1 className="text-heading">{t.title}</h1>
         <p className="text-body mt-2 text-muted-foreground">{t.subtitle}</p>

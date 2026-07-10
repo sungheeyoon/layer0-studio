@@ -3,14 +3,7 @@
 import { useTransition } from "react";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import {
-  CircleUserRound,
-  Loader2,
-  LogOut,
-  ShieldCheck,
-  User as UserIcon,
-  Wallet,
-} from "lucide-react";
+import { CircleUserRound, Loader2, LogOut, Settings } from "lucide-react";
 import { logoutAction } from "@/app/login/actions";
 import { useDictionary } from "@/lib/i18n/provider";
 import {
@@ -47,7 +40,7 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
         ) : (
           <button
             type="button"
-            aria-label={t.userProfile}
+            aria-label={t.menuLabel}
             className="flex items-center rounded-full text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             <CircleUserRound className="h-6 w-6" />
@@ -63,21 +56,9 @@ export default function ProfileDropdown({ user, children }: ProfileDropdownProps
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="#">
-            <UserIcon className="h-4 w-4" />
-            {t.userProfile}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="#">
-            <ShieldCheck className="h-4 w-4" />
-            {t.securitySettings}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="#">
-            <Wallet className="h-4 w-4" />
-            {t.billing}
+          <Link href="/dashboard/settings">
+            <Settings className="h-4 w-4" />
+            {t.settings}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

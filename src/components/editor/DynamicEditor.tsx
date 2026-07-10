@@ -767,7 +767,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           {publishedUrl === 'NO_DOMAIN' && (
             <div className="mt-4 rounded-md border border-warning/30 bg-warning/10 p-4 text-center text-xs leading-relaxed text-warning">
               {t.published.line1}
-              <a href="/dashboard/domains" className="mx-1 font-medium underline hover:text-warning/80">
+              <a href="/dashboard/projects" className="mx-1 font-medium underline hover:text-warning/80">
                 {t.published.setDomainLink}
               </a>
               {t.published.line2}
