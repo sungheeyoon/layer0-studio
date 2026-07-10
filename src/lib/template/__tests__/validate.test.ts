@@ -11,7 +11,6 @@ import interiorPreset from '@/templates/interior/default/template';
 import legalPreset from '@/templates/legal/default/template';
 import medicalPreset from '@/templates/medical/default/template';
 import weddingPreset from '@/templates/wedding/default/template';
-import cafeModernPreset from '@/templates/cafe/modern/template';
 import cafeCozyPreset from '@/templates/cafe/cozy/template';
 
 import { templateMap, getAvailableTemplateKeys } from '@/templates/_generated';
@@ -330,7 +329,7 @@ describe('validateContent — warnings', () => {
   });
 });
 
-// ─── Integration: all 9 presets must have zero errors ──────────────
+// ─── Integration: all 8 presets must have zero errors ──────────────
 
 describe('all presets — errors must be zero', () => {
   const cases = [
@@ -341,7 +340,6 @@ describe('all presets — errors must be zero', () => {
     { name: 'legal-default',     preset: legalPreset,      templateKey: 'legal-default' },
     { name: 'medical-default',   preset: medicalPreset,    templateKey: 'medical-default' },
     { name: 'wedding-default',   preset: weddingPreset,    templateKey: 'wedding-default' },
-    { name: 'cafe-modern',       preset: cafeModernPreset, templateKey: 'cafe-modern' },
     { name: 'cafe-cozy',         preset: cafeCozyPreset,   templateKey: 'cafe-cozy' },
   ];
 
