@@ -71,7 +71,7 @@ export function libEntry(
 
 /**
  * A seed template stored in code.
- * templateJson / thumbnailPath / version — code is source of truth (sync always overwrites).
+ * content / thumbnailPath / version — code is source of truth (sync always overwrites).
  * defaults.* — seed-only; DB value is preserved if the row already exists.
  */
 export interface TemplatePreset {
@@ -79,17 +79,17 @@ export interface TemplatePreset {
   slug: string;
 
   /**
-   * The full template JSON seeded into the DB. A `mode`-discriminated union
+   * The full ContentModel seeded into the DB. A `mode`-discriminated union
    * (Single / Multi) — the Preset is the source of truth, carried verbatim
    * (the legacy `composition` short-hand was removed, see ADR-0007).
    */
-  templateJson: ContentModel;
+  content: ContentModel;
 
   /** Relative path from project root, e.g. 'public/thumbnails/template-cafe.jpg' */
   thumbnailPath: string;
   /**
    * Semver, displayed + audited. NOT a monotonic gate: sync applies whenever
-   * `templateJson` / `version` / `thumbnail` differs from the DB — in EITHER
+   * `content` / `version` / `thumbnail` differs from the DB — in EITHER
    * direction. This is deliberate (ADR-0012 §6): it's what makes `git revert`
    * of a bad template work as a rollback (the reverted, lower version re-applies
    * the previous JSON). Do NOT "fix" sync into a forward-only `>` comparison —
@@ -107,7 +107,7 @@ export interface TemplatePreset {
 
 /** Template overall page renderer Props */
 export interface TemplateRendererProps {
-  siteJson: ContentModel;
+  content: ContentModel;
   selectedSectionId: string | null;
   onSectionClick?: (sectionId: string) => void;
   activePageId?: string; // ID of the page to render
@@ -145,7 +145,7 @@ export interface NavSectionProps extends TemplateSectionProps {
 
 export interface TemplateModule {
   default: ComponentType<TemplateRendererProps>;
-  defaultTemplateJson: ContentModel;
+  defaultContent: ContentModel;
   library: TemplateLibrary;
 }
 

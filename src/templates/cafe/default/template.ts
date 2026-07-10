@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   "slug": "cafe-default",
-  "templateJson": {
+  "content": {
     "mode": "single",
     "templateKey": "cafe-default",
     "globalStyles": {

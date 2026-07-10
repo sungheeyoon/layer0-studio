@@ -9,7 +9,7 @@
  * Steps:
  *   1. `tsc --noEmit`              global type check (errors filtered to template dir)
  *   2. `eslint src/templates/<key>/` Issue #8 token enforcement included
- *   3. `validateTemplateJson`       derived from preset
+ *   3. `validateContent`       derived from preset
  *   4. `validateTemplateFiles`      file-level scan (#8 rules)
  *   5. fieldsSchema ↔ JSX consistency (declared vs referenced field keys)
  *   6. `template:capture <key>`     Playwright thumbnail capture
@@ -25,7 +25,7 @@ import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-import { validateTemplateJson } from '../../src/lib/template/validate';
+import { validateContent } from '../../src/lib/template/validate';
 import { validateTemplateFiles } from '../../src/lib/template/inline-tokens';
 import {
   presetMap,
@@ -109,7 +109,7 @@ function runEslint(templateRoot: string): StepResult {
   };
 }
 
-// ─── Step 3: validateTemplateJson ────────────────────────────────────────────
+// ─── Step 3: validateContent ────────────────────────────────────────────
 
 export async function runValidateJson(templateKey: string): Promise<StepResult> {
   const presetLoader = (presetMap as Record<string, () => Promise<{ default: import('../../src/templates/types').TemplatePreset }>>)[templateKey];
@@ -131,10 +131,10 @@ export async function runValidateJson(templateKey: string): Promise<StepResult> 
   const preset = (await presetLoader()).default;
   const templateModule = await templateLoader();
 
-  // The Preset carries the full templateJson verbatim (code is source of truth).
-  const templateJson = preset.templateJson;
+  // The Preset carries the full content verbatim (code is source of truth).
+  const content = preset.content;
 
-  const result = validateTemplateJson(templateJson, {
+  const result = validateContent(content, {
     availableTemplateKeys: getAvailableTemplateKeys(),
     templateLibrary: templateModule.library,
   });
@@ -149,7 +149,7 @@ export async function runValidateJson(templateKey: string): Promise<StepResult> 
   const warns = result.warnings.length > 0
     ? result.warnings.map(w => `(warn) [${w.code}] ${w.message} (${w.path ?? ''})`)
     : ['no warnings'];
-  return { name: 'validate-json', ok: true, messages: ['validateTemplateJson clean', ...warns] };
+  return { name: 'validate-json', ok: true, messages: ['validateContent clean', ...warns] };
 }
 
 // ─── Step 4: validateTemplateFiles (#8 file-level rules) ─────────────────────

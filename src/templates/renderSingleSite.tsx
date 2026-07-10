@@ -9,7 +9,7 @@ interface RenderSingleSiteProps extends TemplateRendererProps {
   itemClassName?: (sectionId: string) => string;
   /**
    * Rich design tokens. When provided, the root div carries
-   * `style={tokensToCssVars(designTokens, siteJson.globalStyles)}` so every
+   * `style={tokensToCssVars(designTokens, content.globalStyles)}` so every
    * descendant `var(--color-*)` / `var(--font-*)` reference resolves to the
    * template's palette, with user globalStyles overrides applied on top.
    */
@@ -22,7 +22,7 @@ interface RenderSingleSiteProps extends TemplateRendererProps {
  * Multi-mode rendering is a separate entrypoint (Phase 2). See ADR-0007.
  */
 export function RenderSingleSite({
-  siteJson,
+  content,
   selectedSectionId,
   onSectionClick,
   library,
@@ -30,14 +30,14 @@ export function RenderSingleSite({
   itemClassName,
   designTokens,
 }: RenderSingleSiteProps) {
-  const sections = isSingleContent(siteJson) ? siteJson.sections : [];
+  const sections = isSingleContent(content) ? content.sections : [];
 
   // nav = projection of the sections (anchor scroll). The wrapper `<div
   // id="section-${id}">` below is the anchor target. See ADR-0007 §3.1.
   const navItems = deriveNav(sections, (s) => `#section-${s.id}`);
 
   const rootStyle = designTokens
-    ? tokensToCssVars(designTokens, siteJson.globalStyles)
+    ? tokensToCssVars(designTokens, content.globalStyles)
     : undefined;
 
   return (

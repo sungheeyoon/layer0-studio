@@ -24,7 +24,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { presetMap, presetSlugs } from '../src/templates/_generated';
 import { isSingleContent, type ContentModel } from '../src/domain/entities/template.entity';
-import { validateTemplateJson } from '../src/lib/template/validate';
+import { validateContent } from '../src/lib/template/validate';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -41,7 +41,7 @@ const isYes = args.includes('--yes');
 interface PresetInfo {
   slug: string;
   version: string;
-  templateJson: ContentModel;
+  content: ContentModel;
 }
 interface TemplateRow {
   id: string;
@@ -56,7 +56,7 @@ async function buildPresets(): Promise<Map<string, PresetInfo>> {
   const presets = new Map<string, PresetInfo>();
   for (const tk of presetSlugs) {
     const { default: p } = await presetMap[tk]();
-    presets.set(tk, { slug: p.slug, version: p.version, templateJson: p.templateJson });
+    presets.set(tk, { slug: p.slug, version: p.version, content: p.content });
   }
   return presets;
 }
@@ -102,7 +102,7 @@ async function run() {
   }
 
   const warnings: string[] = [];
-  const updates: Array<{ id: string; fromSlug: string; toSlug: string; version: string; templateJson: ContentModel; name: string; status: string }> = [];
+  const updates: Array<{ id: string; fromSlug: string; toSlug: string; version: string; content: ContentModel; name: string; status: string }> = [];
   const deletes: Array<{ id: string; slug: string }> = [];
 
   for (const [tk, preset] of presets) {
@@ -118,7 +118,7 @@ async function run() {
     const canonical = actives[0] ?? group[0];
 
     // Validate the code preset before planning a write.
-    const res = validateTemplateJson(preset.templateJson, { availableTemplateKeys });
+    const res = validateContent(preset.content, { availableTemplateKeys });
     if (res.errors.length > 0) {
       warnings.push(`validation errors for "${tk}" preset — skipped: ${res.errors.map((e) => e.code).join(', ')}`);
       continue;
@@ -129,7 +129,7 @@ async function run() {
       fromSlug: canonical.slug,
       toSlug: preset.slug,
       version: preset.version,
-      templateJson: preset.templateJson,
+      content: preset.content,
       name: canonical.name,
       status: canonical.status,
     });
@@ -153,7 +153,7 @@ async function run() {
   deletes.forEach((d) => console.log(`  🗑  ${d.slug}`));
   console.log(`\n=== UPDATE (canonical rows → slug==templateKey, new shape) ===`);
   for (const u of updates) {
-    const mode = isSingleContent(u.templateJson) ? 'single' : 'multi';
+    const mode = isSingleContent(u.content) ? 'single' : 'multi';
     const rename = u.fromSlug === u.toSlug ? u.toSlug : `${u.fromSlug} → ${u.toSlug}`;
     console.log(`  ✏️  [${u.status}] ${rename}  (v${u.version}, ${mode}, "${u.name}")`);
   }
@@ -179,7 +179,7 @@ async function run() {
   for (const u of updates) {
     const { error: e } = await supabase
       .from('templates')
-      .update({ slug: u.toSlug, version: u.version, template_json: u.templateJson, updated_at: new Date().toISOString() })
+      .update({ slug: u.toSlug, version: u.version, template_json: u.content, updated_at: new Date().toISOString() })
       .eq('id', u.id);
     if (e) console.error(`  ✗ update ${u.toSlug}: ${e.message}`);
     else upd++;

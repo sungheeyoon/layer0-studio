@@ -69,12 +69,12 @@ export async function createTemplateAction(formData: FormData) {
     const category = formData.get('category') as string;
     const status = (formData.get('status') as string) || 'draft';
     const thumbnailUrl = formData.get('thumbnailUrl') as string;
-    const templateJsonStr = formData.get('templateJson') as string;
+    const contentJsonStr = formData.get('content') as string;
 
     // Parse JSON
-    let templateJson: ContentModel;
+    let content: ContentModel;
     try {
-      templateJson = JSON.parse(templateJsonStr);
+      content = JSON.parse(contentJsonStr);
     } catch {
       return { error: 'INVALID_TEMPLATE_JSON' };
     }
@@ -93,7 +93,7 @@ export async function createTemplateAction(formData: FormData) {
       category: category || 'general',
       status: status as 'draft' | 'active' | 'archived',
       thumbnailUrl: thumbnailUrl || null,
-      content: templateJson,
+      content,
       version: '1.0.0',
       createdBy: user.id,
     });
@@ -112,7 +112,7 @@ export async function updateTemplateAction(formData: FormData) {
     const category = formData.get('category') as string;
     const status = formData.get('status') as string;
     const thumbnailUrl = formData.get('thumbnailUrl') as string;
-    const templateJsonStr = formData.get('templateJson') as string;
+    const contentJsonStr = formData.get('content') as string;
 
     const updateData: Record<string, unknown> = {};
     if (name) updateData.name = name;
@@ -129,9 +129,9 @@ export async function updateTemplateAction(formData: FormData) {
       return { error: PUBLISH_GUARD_ERROR };
     }
 
-    if (templateJsonStr) {
+    if (contentJsonStr) {
       try {
-        updateData.templateJson = JSON.parse(templateJsonStr);
+        updateData.content = JSON.parse(contentJsonStr);
       } catch {
         return { error: 'INVALID_TEMPLATE_JSON' };
       }

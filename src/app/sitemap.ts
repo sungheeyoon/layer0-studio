@@ -31,13 +31,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const row of data ?? []) {
     const base = `${SITE_URL}/site/${row.domain}`;
     const lastModified = row.published_at ?? now;
-    const siteJson = row.content as ContentModel | null;
+    const content = row.content as ContentModel | null;
 
-    if (siteJson && isMultiContent(siteJson)) {
+    if (content && isMultiContent(content)) {
       // Every routable (visible) Page gets a URL: the first page = home (base),
       // the rest at `${base}/${slug}`. Pages hidden from the top nav are still
       // routable, so they are included too.
-      siteJson.pages.forEach((page, index) => {
+      content.pages.forEach((page, index) => {
         if (!page.visible) return;
         siteEntries.push({
           url: index === 0 ? base : `${base}/${page.slug}`,

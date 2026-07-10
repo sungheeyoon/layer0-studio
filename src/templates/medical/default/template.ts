@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   "slug": "medical-default",
-  "templateJson": {
+  "content": {
     "mode": "single",
     "templateKey": "medical-default",
     "globalStyles": {

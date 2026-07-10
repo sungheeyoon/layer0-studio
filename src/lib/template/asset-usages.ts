@@ -18,7 +18,7 @@ export interface AssetUsage {
  * Page) in addition to every page's sections, so assets placed in a shared
  * header/footer are tracked and never mis-swept.
  */
-export function collectAssetUsages(siteJson: ContentModel): AssetUsage[] {
+export function collectAssetUsages(content: ContentModel): AssetUsage[] {
   const usages: AssetUsage[] = [];
 
   const collectFromSection = (
@@ -34,17 +34,17 @@ export function collectAssetUsages(siteJson: ContentModel): AssetUsage[] {
     }
   };
 
-  if (siteJson && siteJson.mode === 'single') {
-    for (const section of siteJson.sections ?? []) {
+  if (content && content.mode === 'single') {
+    for (const section of content.sections ?? []) {
       collectFromSection(section, '');
     }
-  } else if (siteJson && siteJson.mode === 'multi') {
+  } else if (content && content.mode === 'multi') {
     for (const slot of ['header', 'footer'] as const) {
-      for (const section of siteJson.shared?.[slot] ?? []) {
+      for (const section of content.shared?.[slot] ?? []) {
         collectFromSection(section, `shared.${slot}.`);
       }
     }
-    for (const page of siteJson.pages ?? []) {
+    for (const page of content.pages ?? []) {
       for (const section of page.sections ?? []) {
         collectFromSection(section, `${page.id}.`);
       }

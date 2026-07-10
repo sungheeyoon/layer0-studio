@@ -12,7 +12,7 @@ import {
 // ---------------------------------------------------------------------------
 // Self-contained Multi fixture. RenderMultiSite is generic Multi infra used by a
 // shipping Multi template (outdoor-default) and the routes/sitemap/editor. We
-// exercise it here with a minimal in-test library + siteJson rather than coupling
+// exercise it here with a minimal in-test library + content rather than coupling
 // the test to any shipping template's content. (corporate-multipage, a former
 // minimal Multi example, was removed — see migration 020.)
 // ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ const library: TemplateLibrary = {
 
 const text = (value: string) => ({ text: { type: 'text' as const, label: 'Text', value } });
 
-const siteJson: ContentModel = {
+const content: ContentModel = {
   mode: 'multi',
   templateKey: 'fixture-multi',
   globalStyles: {
@@ -118,7 +118,7 @@ const BASE = '/site/acme';
 function render(activePageId: string): string {
   return renderToStaticMarkup(
     <RenderMultiSite
-      siteJson={siteJson}
+      content={content}
       selectedSectionId={null}
       activePageId={activePageId}
       basePath={BASE}
@@ -129,11 +129,11 @@ function render(activePageId: string): string {
 
 describe('RenderMultiSite — Multi tracer assembly', () => {
   it('the fixture is a Multi Site with a shared header/footer and ≥2 pages', () => {
-    expect(isMultiContent(siteJson)).toBe(true);
-    if (!isMultiContent(siteJson)) return;
-    expect(siteJson.shared.header.length).toBeGreaterThan(0);
-    expect(siteJson.shared.footer.length).toBeGreaterThan(0);
-    expect(siteJson.pages.length).toBeGreaterThanOrEqual(2);
+    expect(isMultiContent(content)).toBe(true);
+    if (!isMultiContent(content)) return;
+    expect(content.shared.header.length).toBeGreaterThan(0);
+    expect(content.shared.footer.length).toBeGreaterThan(0);
+    expect(content.pages.length).toBeGreaterThanOrEqual(2);
   });
 
   it('renders shared header → home page sections → shared footer (home only)', () => {

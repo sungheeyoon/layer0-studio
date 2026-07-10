@@ -110,7 +110,7 @@ export function isSinglePinned(section: SingleSection): boolean {
 // The Editor's single entry points: pick the nav-source array (+ pin rule) by
 // `mode` and write the result back onto `json`. They mutate the passed `json`,
 // which is the already-`structuredClone`d draft from the Editor's
-// `updateSiteJson` — consistent with every other handler there.
+// `updateContent` — consistent with every other handler there.
 
 export function moveNavItem(json: ContentModel, id: string, direction: MoveDirection): void {
   if (isSingleContent(json)) {

@@ -27,7 +27,7 @@ interface RenderMultiSiteProps extends TemplateRendererProps {
  * home page links to `basePath`, every other page to `${basePath}/${slug}`.
  */
 export function RenderMultiSite({
-  siteJson,
+  content,
   selectedSectionId,
   onSectionClick,
   activePageId,
@@ -37,8 +37,8 @@ export function RenderMultiSite({
   itemClassName,
   designTokens,
 }: RenderMultiSiteProps) {
-  if (!isMultiContent(siteJson)) return null;
-  const { shared, pages } = siteJson;
+  if (!isMultiContent(content)) return null;
+  const { shared, pages } = content;
 
   // First page = home (served at the empty slug); others at `${basePath}/${slug}`.
   const homeId = pages[0]?.id;
@@ -52,7 +52,7 @@ export function RenderMultiSite({
     pages.find((p) => p.id === activePageId) ?? pages[0];
 
   const rootStyle = designTokens
-    ? tokensToCssVars(designTokens, siteJson.globalStyles)
+    ? tokensToCssVars(designTokens, content.globalStyles)
     : undefined;
 
   const renderSection = (section: Section) => {

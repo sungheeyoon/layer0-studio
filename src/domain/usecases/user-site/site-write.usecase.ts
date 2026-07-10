@@ -13,7 +13,7 @@ import { SiteContentValidator } from '../ports/site-content-validator.port';
  *      silent overwrite cannot be expressed by omitting it (ADR-0004 hardened
  *      from a convention into a structural invariant).
  *
- * The repository writes (`update` / `updateSiteJson`) throw STALE_VERSION when the
+ * The repository writes (`update` / `updateContent`) throw STALE_VERSION when the
  * token no longer matches the stored row. Admin (ownership-bypass) writes live in
  * AdminUpdateSiteUseCase; create/delete are not version-guarded mutations and stay
  * in their own use cases.
@@ -36,16 +36,16 @@ export class SiteWriteUseCase {
     return site;
   }
 
-  /** Replace the Site's JSON. */
-  async saveJson(
+  /** Replace the Site's content. */
+  async saveContent(
     siteId: string,
     userId: string,
-    siteJson: ContentModel,
+    content: ContentModel,
     expectedUpdatedAt: string,
   ): Promise<UserSite> {
     await this.loadOwned(siteId, userId);
-    await this.validate(siteJson);
-    return this.userSiteRepo.updateSiteJson(siteId, siteJson, expectedUpdatedAt);
+    await this.validate(content);
+    return this.userSiteRepo.updateContent(siteId, content, expectedUpdatedAt);
   }
 
   /** Rename the Site. */
@@ -112,8 +112,8 @@ export class SiteWriteUseCase {
    * errors. Warnings do not block (matches the Sync pipeline). The structured
    * issues ride along on the error for server-side logging.
    */
-  private async validate(siteJson: ContentModel) {
-    const { errors } = await this.validator.validate(siteJson);
+  private async validate(content: ContentModel) {
+    const { errors } = await this.validator.validate(content);
     if (errors.length > 0) {
       throw new TemplateError('INVALID_TEMPLATE_JSON', errors);
     }

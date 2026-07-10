@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncTemplates } from '../sync';
 
-// Mock presetMap and validateTemplateJson
+// Mock presetMap and validateContent
 // post-β: presetMap/templateMap keys are templateKeys; templateCategories maps to category.
 vi.mock('@/templates/_generated', () => ({
   templateMap: {},
@@ -11,7 +11,7 @@ vi.mock('@/templates/_generated', () => ({
     'test-default': () => Promise.resolve({
       default: {
         slug: 'test-default',
-        templateJson: {
+        content: {
           mode: 'single',
           templateKey: 'test-default',
           sections: [],
@@ -29,7 +29,7 @@ vi.mock('@/templates/_generated', () => ({
 }));
 
 vi.mock('../validate', () => ({
-  validateTemplateJson: vi.fn(() => ({ errors: [], warnings: [] }))
+  validateContent: vi.fn(() => ({ errors: [], warnings: [] }))
 }));
 
 describe('syncTemplates', () => {

@@ -2,7 +2,7 @@ import { TemplatePreset } from '../../types';
 
 const preset: TemplatePreset = {
   "slug": "interior-default",
-  "templateJson": {
+  "content": {
     "mode": "single",
     "templateKey": "interior-default",
     "globalStyles": {
