@@ -79,6 +79,7 @@ _Avoid_: active (the literal status string, fine in code; "Live" in conversation
 
 **Suspended**:
 A state an admin can put a Site into to take it down. Distinct from draft — a Suspended Site has been Published at least once, evidenced by a non-null `publishedAt`. While Suspended, the Site is not Live.
+_Note_: the state and its use case (`AdminUpdateSiteUseCase.updateStatus`) still exist, but the in-app admin surface that triggered it (the global site-moderation table at `/admin`) was **removed** — `/admin` is now Templates-only. Suspension is currently only reachable at the data/use-case level, not through any UI.
 
 **Sync** (verb):
 The operation that reconciles Presets (code) into Templates (DB). Reads every Preset file, validates each Section against its Section component's `fieldsSchema`, and upserts matching Template rows. Dry-run by default; commits only with `--apply`. **Runs automatically after a production deploy** — registration is no longer a manual admin step ([ADR-0012](./docs/adr/0012-template-publishing-pipeline.md)): a successful deploy triggers `POST /api/admin/sync-templates`, new rows land as `active` (merge = publish approval). The admin UI keeps an emergency **Force re-sync** only. Logged to the `template_sync_audit` table.
