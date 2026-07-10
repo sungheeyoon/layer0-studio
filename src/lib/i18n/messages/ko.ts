@@ -183,6 +183,7 @@ export const ko = {
       business: '비즈니스',
       wedding: '웨딩',
       outdoor: '아웃도어',
+      academy: '학원',
     },
   },
   dashboard: {

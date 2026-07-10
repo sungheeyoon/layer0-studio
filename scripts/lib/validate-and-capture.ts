@@ -33,6 +33,17 @@ import {
   getAvailableTemplateKeys,
 } from '../../src/templates/_generated';
 
+/**
+ * On Windows `spawnSync('pnpm', …)` throws ENOENT (status null) because the
+ * executable is `pnpm.cmd`, and spawning `pnpm.cmd` directly now throws EINVAL
+ * (Node's CVE-2024-27980 mitigation blocks `.cmd`/`.bat` without a shell). The
+ * runTsc/runEslint/runCapture steps would then misreport this as a failing gate
+ * ("tsc failed but no diagnostic mentions the template dir"). Running through a
+ * shell on Windows resolves the launcher correctly; Linux CI keeps the direct
+ * spawn. Args here are static/whitespace-free, so shell concatenation is safe.
+ */
+const SPAWN_WIN_SHELL = process.platform === 'win32';
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface StepResult {
@@ -73,7 +84,7 @@ function runTsc(templateRoot: string): StepResult {
   // No per-dir tsc, so run global and filter diagnostics to those that touch
   // the template's path. Other (unrelated) errors are reported separately at
   // the end so the user still sees them.
-  const proc = spawnSync('pnpm', ['exec', 'tsc', '--noEmit'], { encoding: 'utf-8' });
+  const proc = spawnSync('pnpm', ['exec', 'tsc', '--noEmit'], { encoding: 'utf-8', shell: SPAWN_WIN_SHELL });
   const allOut = (proc.stdout ?? '') + (proc.stderr ?? '');
   if (proc.status === 0) return { name: 'tsc', ok: true, messages: ['tsc clean'] };
 
@@ -99,7 +110,7 @@ function runTsc(templateRoot: string): StepResult {
 
 function runEslint(templateRoot: string): StepResult {
   const relative = path.relative(process.cwd(), templateRoot);
-  const proc = spawnSync('pnpm', ['exec', 'eslint', relative], { encoding: 'utf-8' });
+  const proc = spawnSync('pnpm', ['exec', 'eslint', relative], { encoding: 'utf-8', shell: SPAWN_WIN_SHELL });
   const out = (proc.stdout ?? '') + (proc.stderr ?? '');
   if (proc.status === 0) return { name: 'eslint', ok: true, messages: ['eslint clean'] };
   return {
@@ -491,6 +502,7 @@ function runCapture(templateKey: string): StepResult {
   const proc = spawnSync('pnpm', ['template:capture', templateKey], {
     encoding: 'utf-8',
     stdio: ['inherit', 'pipe', 'pipe'],
+    shell: SPAWN_WIN_SHELL,
   });
   const out = (proc.stdout ?? '') + (proc.stderr ?? '');
   if (proc.status !== 0) {

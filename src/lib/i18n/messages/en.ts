@@ -180,6 +180,7 @@ export const en: Messages = {
       business: 'Business',
       wedding: 'Wedding',
       outdoor: 'Outdoor',
+      academy: 'Academy',
     },
   },
   dashboard: {

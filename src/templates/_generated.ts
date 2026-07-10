@@ -3,6 +3,7 @@
 import type { TemplateModule, TemplatePreset } from './types';
 
 export const templateMap: Record<string, () => Promise<TemplateModule>> = {
+  'academy-default': () => import('./academy/default'),
   'cafe-cozy': () => import('./cafe/cozy'),
   'cafe-default': () => import('./cafe/default'),
   'cafe-modern': () => import('./cafe/modern'),
@@ -16,6 +17,7 @@ export const templateMap: Record<string, () => Promise<TemplateModule>> = {
 } as const;
 
 export const presetMap: Record<string, () => Promise<{ default: TemplatePreset }>> = {
+  'academy-default': () => import('./academy/default/template'),
   'cafe-cozy': () => import('./cafe/cozy/template'),
   'cafe-default': () => import('./cafe/default/template'),
   'cafe-modern': () => import('./cafe/modern/template'),
@@ -29,6 +31,7 @@ export const presetMap: Record<string, () => Promise<{ default: TemplatePreset }
 } as const;
 
 export const presetSlugs = [
+  'academy-default',
   'cafe-cozy',
   'cafe-default',
   'cafe-modern',
@@ -43,6 +46,7 @@ export const presetSlugs = [
 
 /** Maps templateKey → category (Capitalized parent dir name, source of truth) */
 export const templateCategories: Record<string, string> = {
+  'academy-default': 'Academy',
   'cafe-cozy': 'Cafe',
   'cafe-default': 'Cafe',
   'cafe-modern': 'Cafe',
