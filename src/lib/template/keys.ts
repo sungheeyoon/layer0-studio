@@ -1,4 +1,18 @@
-import { ContentModel, allSections } from '@/domain/entities/template.entity';
+import { ContentModel, Field, allSections } from '@/domain/entities/template.entity';
+
+/**
+ * The editor-only `_key` Field stamped on every array item for stable React
+ * keys. Single source, shared by `injectKeys` (on load) and `makeEmptyItem`
+ * (on add). Stripped before persisting — see `stripKeys`.
+ */
+export function makeItemKey(): Field {
+  return {
+    type: 'text',
+    value: Math.random().toString(36).slice(2),
+    label: '_key',
+    editable: false,
+  };
+}
 
 /**
  * Injects temporary stable keys for array items in the editor.
@@ -11,12 +25,7 @@ export function injectKeys(json: ContentModel): ContentModel {
       if (field.type === 'array' && field.items) {
         field.items.forEach((item) => {
           if (!item._key) {
-            item._key = {
-              type: 'text',
-              value: Math.random().toString(36).slice(2),
-              label: '_key',
-              editable: false,
-            };
+            item._key = makeItemKey();
           }
         });
       }
