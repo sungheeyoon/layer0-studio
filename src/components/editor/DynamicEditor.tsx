@@ -20,6 +20,16 @@ import {
   relabelNavItem,
 } from '@/domain/entities/ordered-nav-list';
 import {
+  setFieldValue,
+  setItemFieldAt,
+  addItem,
+  removeItemAt,
+  moveItemAt,
+  canAddItem,
+  canRemoveItem,
+} from '@/domain/entities/field-edit';
+import { makeEmptyItem } from '@/lib/template/field-factory';
+import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -243,20 +253,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   const handleFieldChange = useCallback(
     (sectionId: string, fieldKey: string, value: string | ArrayField['items'], assetId?: string) => {
-      updateContent((json) => {
-        const section = allSections(json).find(s => s.id === sectionId);
-        if (section && section.fields[fieldKey]) {
-          const field = section.fields[fieldKey];
-          if (field.type === 'array' && Array.isArray(value)) {
-            field.items = value;
-          } else if (field.type !== 'array' && typeof value === 'string') {
-            field.value = value;
-            if (assetId !== undefined && field.type === 'image') {
-              field.assetId = assetId;
-            }
-          }
-        }
-      });
+      updateContent((json) => setFieldValue(json, sectionId, fieldKey, value, assetId));
     },
     [updateContent]
   );
@@ -1074,63 +1071,27 @@ function ArrayFieldEditor({
 
   const handleAddItem = () => {
     if (!itemSchema) return;
-    if (maxItems !== undefined && items.length >= maxItems) {
+    if (!canAddItem(items, maxItems)) {
       onError(`${t.field.maxItemsErrorPrefix}${maxItems}${t.field.maxItemsErrorSuffix}`);
       return;
     }
-
-    const newItem: Record<string, Field> = {
-      _key: { type: 'text', value: Math.random().toString(36).slice(2), label: '_key', editable: false },
-    };
-
-    // Initialize fields based on itemSchema
-    Object.entries(itemSchema).forEach(([key, schema]) => {
-      if (schema.type === 'array') {
-        newItem[key] = { type: 'array', label: schema.label, items: [] };
-      } else if (schema.type === 'image') {
-        newItem[key] = { type: 'image', label: schema.label, value: '' };
-      } else if (schema.type === 'select') {
-        newItem[key] = { type: 'select', label: schema.label, value: schema.options?.[0] || '', options: schema.options || [] };
-      } else {
-        newItem[key] = { type: schema.type as 'text' | 'textarea' | 'url' | 'color' | 'number', label: schema.label, value: '' };
-      }
-    });
-
-    onChange([...items, newItem]);
+    onChange(addItem(items, makeEmptyItem(itemSchema)));
   };
 
   const handleRemoveItem = (index: number) => {
-    if (minItems !== undefined && items.length <= minItems) {
+    if (!canRemoveItem(items, minItems)) {
       onError(`${t.field.minItemsErrorPrefix}${minItems}${t.field.minItemsErrorSuffix}`);
       return;
     }
-    const next = [...items];
-    next.splice(index, 1);
-    onChange(next);
+    onChange(removeItemAt(items, index));
   };
 
   const handleMoveItem = (index: number, direction: 'up' | 'down') => {
-    const next = [...items];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= items.length) return;
-
-    const [moved] = next.splice(index, 1);
-    next.splice(targetIndex, 0, moved);
-    onChange(next);
+    onChange(moveItemAt(items, index, direction));
   };
 
   const handleItemFieldChange = (index: number, fieldKey: string, value: string | ArrayField['items'], assetId?: string) => {
-    const next = structuredClone(items);
-    const field = next[index][fieldKey];
-    if (field.type === 'array' && Array.isArray(value)) {
-      field.items = value;
-    } else if (field.type !== 'array' && typeof value === 'string') {
-      field.value = value;
-      if (assetId !== undefined && field.type === 'image') {
-        field.assetId = assetId;
-      }
-    }
-    onChange(next);
+    onChange(setItemFieldAt(items, index, fieldKey, value, assetId));
   };
 
   return (
@@ -1144,9 +1105,9 @@ function ArrayFieldEditor({
           variant="ghost"
           size="icon-sm"
           onClick={handleAddItem}
-          disabled={maxItems !== undefined && items.length >= maxItems}
+          disabled={!canAddItem(items, maxItems)}
           className="text-primary hover:text-primary"
-          title={maxItems !== undefined && items.length >= maxItems ? `${t.field.maxReachedPrefix}${maxItems}${t.field.maxReachedSuffix}` : t.field.addItem}
+          title={!canAddItem(items, maxItems) ? `${t.field.maxReachedPrefix}${maxItems}${t.field.maxReachedSuffix}` : t.field.addItem}
         >
           <PlusCircle className="size-5" />
         </Button>
@@ -1178,9 +1139,9 @@ function ArrayFieldEditor({
               <button
                 type="button"
                 onClick={() => handleRemoveItem(index)}
-                disabled={minItems !== undefined && items.length <= minItems}
+                disabled={!canRemoveItem(items, minItems)}
                 className="text-muted-foreground transition-colors hover:text-destructive disabled:cursor-not-allowed disabled:opacity-30"
-                title={minItems !== undefined && items.length <= minItems ? `${t.field.minRequiredPrefix}${minItems}${t.field.minRequiredSuffix}` : t.field.delete}
+                title={!canRemoveItem(items, minItems) ? `${t.field.minRequiredPrefix}${minItems}${t.field.minRequiredSuffix}` : t.field.delete}
               >
                 <Trash2 className="size-4" />
               </button>
