@@ -13,7 +13,7 @@ export default function Footer({
           <span className="h-1.5 w-1.5 rounded-full bg-primary" />
           Layer0 Studio
         </span>
-        <span>© 2024 Layer0 Studio. All rights reserved.</span>
+        <span>© 2026 Layer0 Studio. All rights reserved.</span>
       </div>
       <div className="flex items-center gap-6">
         <Link className="transition-colors hover:text-foreground" href="/legal/terms">
