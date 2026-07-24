@@ -3,11 +3,15 @@
 import { createClient } from '@/utils/supabase/server';
 import {
   createListTemplatesUseCase,
-  createCreateSiteFromTemplateUseCase,
+} from '@/lib/di/template-read';
+import {
   createListUserSitesUseCase,
-  createSiteWriteUseCase,
+} from '@/lib/di/site-read';
+import {
+  createCreateSiteFromTemplateUseCase,
   createDeleteUserSiteUseCase,
-} from '@/lib/di/container';
+} from '@/lib/di/site-write';
+import { createSiteWriteUseCase } from '@/lib/di/site-content-write';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { withUser } from '@/lib/actions/server-action';

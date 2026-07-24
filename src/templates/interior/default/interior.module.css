@@ -1,5 +1,3 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
-
 .themeRoot {
   --i-dark: var(--theme-bg, #0C0A08);
   --i-warm: #161210;
@@ -34,7 +32,7 @@
   --i-svg-port-cool-2: rgba(16, 20, 16, 1);
   --i-svg-port-cool-3: rgba(14, 16, 22, 1);
 
-  font-family: var(--theme-font-family, 'Pretendard', system-ui, sans-serif);
+  font-family: var(--theme-font-family, 'Pretendard Variable', 'Pretendard', system-ui, sans-serif);
   font-size: var(--theme-font-size, 16px);
   background-color: var(--i-dark);
   color: #E8E0D4;

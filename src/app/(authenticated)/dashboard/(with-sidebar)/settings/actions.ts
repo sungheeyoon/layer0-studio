@@ -1,7 +1,7 @@
 'use server';
 
 import { createAdminClient } from '@/utils/supabase/server';
-import { createChangePasswordUseCase } from '@/lib/di/container';
+import { createChangePasswordUseCase } from '@/lib/di/auth';
 import { redirect } from 'next/navigation';
 import { withUser } from '@/lib/actions/server-action';
 

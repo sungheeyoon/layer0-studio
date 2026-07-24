@@ -13,7 +13,7 @@ import type { DesignTokens } from '@/templates/types';
 export const defaultGlobalStyles: GlobalStyles = {
     primaryColor: '#C96A3A',         // terra
     secondaryColor: '#231509',       // espresso
-    fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+    fontFamily: "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
     fontSize: '16px',
     layout: 'wide',
 };
@@ -37,7 +37,7 @@ export const designTokens: DesignTokens = {
     cream:          '#F0E9DC',
   },
   fonts: {
-    base:    "'Pretendard', 'Apple SD Gothic Neo', sans-serif",  // themable
+    base:    "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",  // themable
     serif:   "'Playfair Display', Georgia, serif",
     display: "'DM Sans', sans-serif",
   },

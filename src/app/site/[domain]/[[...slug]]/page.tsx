@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { createGetPublishedSiteUseCase } from '@/lib/di/container';
+import { createGetPublishedSiteUseCase } from '@/lib/di/site-read';
 import { loadTemplate } from '@/templates/registry';
 import { SITE_URL } from '@/lib/seo/base-url';
 import {

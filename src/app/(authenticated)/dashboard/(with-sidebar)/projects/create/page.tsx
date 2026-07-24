@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { createGetTemplateUseCase } from '@/lib/di/container';
+import { createGetTemplateUseCase } from '@/lib/di/template-read';
 import { redirect } from 'next/navigation';
 import CreateProjectClient from './CreateProjectClient';
 

@@ -8,7 +8,7 @@ const preset: TemplatePreset = {
     "globalStyles": {
       "primaryColor": "#C96A3A",
       "secondaryColor": "#231509",
-      "fontFamily": "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+      "fontFamily": "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
       "fontSize": "16px",
       "layout": "wide"
     },

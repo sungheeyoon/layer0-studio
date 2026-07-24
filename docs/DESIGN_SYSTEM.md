@@ -22,9 +22,11 @@ this first. The lint guard will **fail your build** if you reach for raw colors.
    by ESLint `local/no-raw-color-classes` at **error** severity.
 2. **Icons = lucide-react only.** The `material-symbols` font was removed — using
    it renders broken literal text. `import { X } from "lucide-react"`.
-3. **Font = Pretendard** (Korean-first), wired via `next/font` → `--font-sans`.
-   Never reintroduce Inter or the legacy `font-body` / `font-headline` /
-   `font-label` utilities (also guard-blocked).
+3. **Font = Pretendard** (Korean-first), wired from the official package's
+   unicode-range dynamic subset CSS → `--font-sans`. Never preload a single full
+   Hangul font or import Pretendard from an external CDN. Never reintroduce Inter
+   or the legacy `font-body` / `font-headline` / `font-label` utilities (also
+   guard-blocked).
 4. **Build UI from the shadcn primitives** in `src/components/ui/` (Button,
    Input, Label, Select, Card, Badge, Dialog, AlertDialog, Tabs, …). Don't
    hand-roll `<button>`/`<input>`/`<select>` with bespoke styling.
@@ -128,5 +130,5 @@ To run just the burn-down check: `pnpm lint | grep -c no-raw-color-classes`
 - [ADR-0011](./adr/0011-studio-ui-redesign-shadcn-pretendard.md) — the decision + rationale
 - `src/app/globals.css` — token definitions
 - `src/components/ui/` — primitives · `components.json` — shadcn config
-- `src/lib/fonts.ts` — Pretendard wiring · `src/components/ThemeProvider.tsx` — next-themes
+- `src/app/globals.css` — Pretendard dynamic subset wiring · `src/components/ThemeProvider.tsx` — next-themes
 - `eslint-rules/no-raw-color-classes.mjs` — the guard

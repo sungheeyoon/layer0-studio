@@ -1,6 +1,7 @@
 import Sidebar from "@/components/dashboard/Sidebar";
 import TopNavBar from "@/components/dashboard/TopNavBar";
-import { getCurrentUser, getCurrentUserSites } from "@/lib/auth/current-user";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { getCurrentUserSites } from "@/lib/auth/current-user-sites";
 import { DashboardDataProvider } from "./DashboardDataProvider";
 
 export default async function DashboardWithSidebarLayout({ children }: { children: React.ReactNode }) {

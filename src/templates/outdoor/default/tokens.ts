@@ -16,7 +16,7 @@ import type { DesignTokens } from '@/templates/types';
 export const defaultGlobalStyles: GlobalStyles = {
   primaryColor: '#3F4A37',   // pine — deep moss green
   secondaryColor: '#C2602F', // clay — trail amber accent
-  fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+  fontFamily: "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
   fontSize: '16px',
   layout: 'wide',
 };
@@ -40,6 +40,6 @@ export const designTokens: DesignTokens = {
     'on-dark': '#EDEAE0',      // text on dark/forest bands
   },
   fonts: {
-    base: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+    base: "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
   },
 };

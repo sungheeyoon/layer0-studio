@@ -27,6 +27,23 @@ const OVERLAY_MAP: Readonly<Partial<Record<keyof GlobalStyles, string>>> = {
   fontSize:       '--font-size',
 };
 
+function normalizePretendardFamily(value: string): string {
+  if (/(['"])Pretendard Variable\1/.test(value)) return value;
+
+  const quotedLegacyFamily = /(['"])Pretendard\1/;
+  if (quotedLegacyFamily.test(value)) {
+    return value.replace(
+      quotedLegacyFamily,
+      (family) => `${family[0]}Pretendard Variable${family[0]}, ${family}`,
+    );
+  }
+
+  return value.replace(
+    /\bPretendard\b(?!\s+Variable)/,
+    "'Pretendard Variable', Pretendard",
+  );
+}
+
 /**
  * Convert a template's rich `DesignTokens` to a flat CSS custom property
  * object suitable for spreading into `style={{}}` on the template root.
@@ -49,7 +66,8 @@ export function tokensToCssVars(
     if (!entries) continue;
     const prefix = PREFIX_BY_DIMENSION[dim];
     for (const [key, value] of Object.entries(entries)) {
-      vars[`${prefix}${key}`] = value;
+      vars[`${prefix}${key}`] =
+        dim === 'fonts' ? normalizePretendardFamily(value) : value;
     }
   }
 
@@ -57,7 +75,11 @@ export function tokensToCssVars(
     for (const [field, cssVar] of Object.entries(OVERLAY_MAP) as Array<[keyof GlobalStyles, string]>) {
       const value = overrides[field];
       if (value !== undefined && value !== null && value !== '') {
-        vars[cssVar] = String(value);
+        const stringValue = String(value);
+        vars[cssVar] =
+          field === 'fontFamily'
+            ? normalizePretendardFamily(stringValue)
+            : stringValue;
       }
     }
   }

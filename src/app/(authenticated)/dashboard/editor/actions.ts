@@ -3,10 +3,14 @@
 import { createClient } from '@/utils/supabase/server';
 import {
   createGetUserSiteUseCase,
-  createSiteWriteUseCase,
+} from '@/lib/di/site-read';
+import {
   createDeleteUserSiteUseCase,
+} from '@/lib/di/site-write';
+import { createSiteWriteUseCase } from '@/lib/di/site-content-write';
+import {
   createAssetUploadUseCase,
-} from '@/lib/di/container';
+} from '@/lib/di/asset';
 import { ContentModel } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';

@@ -144,6 +144,7 @@ export function validateTemplateFiles(templateDir: string): ValidationIssue[] {
   for (const file of files) {
     if (isTokensFile(file)) continue;
     const source = fs.readFileSync(file, 'utf-8');
+    const relativeFile = path.relative(templateDir, file).split(path.sep).join('/');
     for (const v of scanInlineTokens(source)) {
       issues.push({
         code: v.code,
@@ -151,7 +152,7 @@ export function validateTemplateFiles(templateDir: string): ValidationIssue[] {
           v.code === 'INLINE_COLOR_LITERAL'
             ? `Inline color literal "${v.match}" — use var(--*) tokens instead`
             : `Inline font-family "${v.match}" — use var(--font-*) tokens instead`,
-        path: `${path.relative(templateDir, file)}:${v.line}:${v.column}`,
+        path: `${relativeFile}:${v.line}:${v.column}`,
       });
     }
   }

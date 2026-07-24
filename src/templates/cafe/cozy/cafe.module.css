@@ -12,7 +12,7 @@
   --c-dust-light: #B5A898;
   --c-cream: #F0E9DC;
 
-  font-family: var(--theme-font-family, 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
+  font-family: var(--theme-font-family, 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
   font-size: var(--theme-font-size, 16px);
   background-color: var(--c-linen);
   color: var(--c-espresso);

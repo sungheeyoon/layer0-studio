@@ -16,7 +16,7 @@
   --m-kakao-yellow-hover: #F5DC00;
   --m-kakao-text:         #391D1D;
 
-  font-family: var(--theme-font-family, 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
+  font-family: var(--theme-font-family, 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
   font-size: var(--theme-font-size, 16px);
   background-color: var(--m-cream);
   color: var(--m-charcoal);

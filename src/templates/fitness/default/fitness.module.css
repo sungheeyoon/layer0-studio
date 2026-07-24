@@ -11,7 +11,7 @@
   --f-lime: var(--theme-primary, #CDFF00);
   --f-lime-dim: rgba(205,255,0,0.08);
 
-  font-family: var(--theme-font-family, 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
+  font-family: var(--theme-font-family, 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
   font-size: var(--theme-font-size, 16px);
   background-color: var(--f-void);
   color: var(--f-snow);
@@ -29,7 +29,7 @@
 }
 
 .fontBody {
-  font-family: 'Barlow', 'Pretendard', sans-serif;
+  font-family: 'Barlow', 'Pretendard Variable', 'Pretendard', sans-serif;
 }
 
 .bgSurface {

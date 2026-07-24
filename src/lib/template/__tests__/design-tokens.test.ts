@@ -23,7 +23,9 @@ describe('tokensToCssVars', () => {
     expect(vars['--color-primary']).toBe('#C96A3A');
     expect(vars['--color-secondary']).toBe('#231509');
     expect(vars['--color-surface']).toBe('#F5F0E8');
-    expect(vars['--font-base']).toBe("'Pretendard', sans-serif");
+    expect(vars['--font-base']).toBe(
+      "'Pretendard Variable', 'Pretendard', sans-serif",
+    );
     expect(vars['--font-serif']).toBe("'Playfair Display', serif");
     expect(vars['--spacing-sm']).toBe('0.5rem');
     expect(vars['--spacing-md']).toBe('1rem');
@@ -58,6 +60,15 @@ describe('tokensToCssVars', () => {
     expect(vars['--font-serif']).toBe("'Playfair Display', serif"); // unchanged
   });
 
+  it('keeps persisted legacy Pretendard stacks compatible with the variable family', () => {
+    const vars = tokensToCssVars(sample, {
+      fontFamily: "'Playfair Display', 'Pretendard', sans-serif",
+    });
+    expect(vars['--font-base']).toBe(
+      "'Playfair Display', 'Pretendard Variable', 'Pretendard', sans-serif",
+    );
+  });
+
   it('applies fontSize override to --font-size', () => {
     const vars = tokensToCssVars(sample, { fontSize: '18px' });
     expect(vars['--font-size']).toBe('18px');
@@ -72,7 +83,9 @@ describe('tokensToCssVars', () => {
     });
     expect(vars['--color-primary']).toBe('#C96A3A');
     expect(vars['--color-secondary']).toBe('#231509');
-    expect(vars['--font-base']).toBe("'Pretendard', sans-serif");
+    expect(vars['--font-base']).toBe(
+      "'Pretendard Variable', 'Pretendard', sans-serif",
+    );
   });
 
   it('does not produce keys for axes that the overlay map does not cover', () => {

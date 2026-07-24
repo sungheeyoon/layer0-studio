@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
-import { createSignupUseCase } from '@/lib/di/container';
+import { createSignupUseCase } from '@/lib/di/auth';
 import { withAction } from '@/lib/actions/server-action';
 
 export async function signupAction(formData: FormData) {

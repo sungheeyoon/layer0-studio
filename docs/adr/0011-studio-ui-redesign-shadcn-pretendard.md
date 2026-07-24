@@ -1,6 +1,6 @@
 # Studio UI 를 shadcn 시맨틱 토큰 + Pretendard 로 재설계하고 블루프린트 컨셉을 폐기한다
 
-> **Status: Accepted.** Studio chrome(마케팅 랜딩·인증·대시보드·에디터·설정·admin)의 비주얼 시스템을 전면 재설계한다. 도면(블루프린트/크로스헤어/제로-radius) 컨셉을 폐기하고 관습적 SaaS 룩으로 전환, 컬러 어휘를 **shadcn 식 시맨틱 토큰** 하나로 통일, 한글 1차 타겟에 맞춰 **Pretendard** + 한글 최적 타입 스케일을 도입한다. 라이트/다크 양 테마, lucide 아이콘, primary = Indigo. 발행 Site / Template(`src/templates/*`)은 범위 외. `redesign/studio-ui` 브랜치에서 빅뱅으로 작업하고 완성 후 1회 머지한다.
+> **Status: Accepted, font delivery amended 2026-07-24.** Studio chrome(마케팅 랜딩·인증·대시보드·에디터·설정·admin)의 비주얼 시스템을 전면 재설계한다. 도면(블루프린트/크로스헤어/제로-radius) 컨셉을 폐기하고 관습적 SaaS 룩으로 전환, 컬러 어휘를 **shadcn 식 시맨틱 토큰** 하나로 통일, 한글 1차 타겟에 맞춰 **Pretendard** + 한글 최적 타입 스케일을 도입한다. 라이트/다크 양 테마, lucide 아이콘, primary = Indigo. 발행 Site / Template(`src/templates/*`)은 범위 외. `redesign/studio-ui` 브랜치에서 빅뱅으로 작업하고 완성 후 1회 머지한다.
 
 ## 맥락
 
@@ -19,7 +19,7 @@ i18n(ADR-0010) 적용 과정에서 Studio chrome 의 비주얼 시스템이 한�
 
 랜딩·인증·대시보드·에디터·설정·admin 등 **Studio 자체 화면**(`src/app`, `src/components`, 단 `src/templates` 제외)에만 적용한다.
 
-- **발행 Site / Template(`src/templates/*`)은 제외** — 사용자가 편집하는 데이터·코드이지 제품 chrome 이 아니다(다른 축). Template 의 `tokens.ts`/`.module.css` 는 손대지 않으며 [ADR-0005](./0005-design-tokens-gradual-migration.md)(Template 디자인 토큰 점진 마이그)와 무충돌.
+- **발행 Site / Template(`src/templates/*`)은 제외** — 사용자가 편집하는 데이터·코드이지 제품 chrome 이 아니다(다른 축). Template 의 디자인 토큰과 시각 정체성은 [ADR-0005](./0005-design-tokens-gradual-migration.md)의 별도 축이다. 단, 루트에서 이미 제공하는 Pretendard와 동일한 외부 폰트 import는 중복 네트워크 요청을 막기 위해 제거할 수 있다.
 
 ### 2. 도면 컨셉 폐기 → 관습적 SaaS
 
@@ -39,11 +39,14 @@ i18n(ADR-0010) 적용 과정에서 Studio chrome 의 비주얼 시스템이 한�
 - 현 코드에는 shadcn 흔적이 전무(`components.json`·radix·cva·`src/components/ui`·`cn()` 없음)하므로 신규 도입이다.
 - Tailwind v4 + Next 16 + React 19 조합을 지원하나, init 시 `@theme` 토큰과 shadcn CSS 변수 매핑을 `globals.css` 에서 **하나로 정리**해야 한다(이중 정의 금지).
 
-### 5. 한글 폰트 — Pretendard 단일(ko+en)
+### 5. 한글 폰트 — Pretendard 단일(ko+en), unicode-range 동적 서브셋
 
 `Inter` 를 폐기하고 **Pretendard** 를 단일 UI 폰트로 쓴다. 라틴+한글을 한 폰트로 커버하며 라틴 모양이 Inter 와 유사해 영문 품질 손실이 없다.
 
-- `next/font/local` 로 **자체 호스팅**(가변폰트, 레이아웃 시프트·외부 요청 제거). `--font-sans` 토큰에 연결.
+- 최초에는 `next/font/local`로 2.01MB 전체 가변 폰트 파일을 루트에서 preload했다. 이는 한 페이지에 필요한 글자 수와 무관하게 전체 파일을 초기 요청에 포함하므로 모바일 초기 로딩 비용이 컸다.
+- `pretendard` 공식 패키지의 `pretendardvariable-dynamic-subset.css`를 빌드에 포함한다. 92개 `unicode-range` 조각 중 현재 페이지의 글자 범위만 브라우저가 요청하며, 개별 빌드 산출물은 최대 약 44KB다.
+- CSS와 폰트 파일은 Next.js 빌드 산출물로 **자체 호스팅**한다. 외부 CDN 요청은 없고 `font-display: swap`을 유지한다. `--font-sans` 토큰은 `"Pretendard Variable"`에 연결한다.
+- 루트에서 전체 폰트를 preload하지 않는다. Template CSS가 같은 Pretendard를 jsDelivr에서 다시 import하지 않도록 한다.
 
 ### 6. 타이포 — 한글 최적 시맨틱 타입 스케일
 
@@ -95,7 +98,8 @@ Google Fonts `<link>`(렌더 블로킹) 로 불러오던 Material Symbols(15개 
 - **단일 거대 머지** — 작업 기간 동안 메인과 분리(`redesign/studio-ui`). 완성 전 부분 머지 안 함. 머지 게이트(tsc/lint/2테마 스크린샷) 통과가 조건.
 - **신규 의존성** — radix-ui, cva, `tailwind-merge`/`clsx`, lucide-react, next-themes 추가. Material Symbols `<link>` 제거.
 - **`globals.css` 전면 재작성** — MD3 `@theme` 덤프 제거, shadcn 시맨틱 토큰(라이트/다크) 정의, `--font-sans`=Pretendard, 타입 스케일·radius 토큰. `cursor: crosshair`·blueprint 유틸 삭제.
-- **`src/app/layout.tsx`** — Inter import 제거→Pretendard(`next/font/local`), `<html className="light">` 하드코딩 제거→`next-themes` provider, Material Symbols `<link>` 제거.
+- **`src/app/layout.tsx` / `globals.css`** — Inter 및 `next/font/local` 전체 파일 preload 제거→공식 Pretendard 동적 서브셋을 전역 CSS에 포함, `<html className="light">` 하드코딩 제거→`next-themes` provider, Material Symbols `<link>` 제거.
+- **폰트 회귀 게이트** — `scripts/verify-initial-assets.ts`가 루트 전체 Pretendard preload와 초기 CSS 내부 외부 Pretendard import를 실패 처리한다.
 - **컴포넌트 전수 수정(~66 tsx)** — raw 색·`text-outline`·아이콘·프리미티브 교체. eslint 가드가 회귀 차단.
 - **i18n(ADR-0010) 무영향** — 카피/딕셔너리 계층은 그대로. 단 ADR-0010 (e) 의 "장식성 영문(테크노 정체성)" 일부는 본 재설계로 시각적 컨텍스트가 바뀌므로 화면별로 재검토.
 - **DB 변경 없음** — 순수 프론트/렌더 계층.
@@ -103,7 +107,7 @@ Google Fonts `<link>`(렌더 블로킹) 로 불러오던 Material Symbols(15개 
 
 ## 관련
 
-- [ADR-0005](./0005-design-tokens-gradual-migration.md) — Template 디자인 토큰(별도 축). 본 결정은 Studio chrome 만 다루며 Template `tokens.ts`/`.module.css` 를 건드리지 않는다.
+- [ADR-0005](./0005-design-tokens-gradual-migration.md) — Template 디자인 토큰은 별도 축이다. 본 결정은 Studio chrome 을 다루며, Template 파일은 시각 정체성을 변경하지 않고 중복 외부 Pretendard import 제거와 `"Pretendard Variable"` family 호환에 필요한 범위만 수정한다.
 - [ADR-0010](./0010-bilingual-i18n-infra.md) — i18n chrome 카피. 본 재설계는 그 카피 계층 위의 비주얼만 교체(무충돌).
 - CLAUDE.md "Environment variables / 디자인" — `globals.css` 토큰 체계가 MD3→shadcn 으로 전환됨.
 - 작업 브랜치: `redesign/studio-ui` (빅뱅, 완성 후 메인 1회 머지).

@@ -1,7 +1,7 @@
 .themeRoot {
   /* Rich design-token CSS vars are injected on this root by RenderSingleSite
      (tokensToCssVars), with user globalStyles overlaid. */
-  font-family: var(--font-base, 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
+  font-family: var(--font-base, 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
   font-size: var(--font-size, 16px);
   color: var(--color-ink, #1a2233);
   background: var(--color-surface, #ffffff);

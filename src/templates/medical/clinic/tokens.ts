@@ -17,7 +17,7 @@ import type { DesignTokens } from '@/templates/types';
 export const defaultGlobalStyles: GlobalStyles = {
   primaryColor: '#2563EB',   // medical blue — trust, primary CTAs
   secondaryColor: '#0E7490', // fresh teal — kickers / small accents
-  fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+  fontFamily: "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
   fontSize: '16px',
   layout: 'wide',
 };
@@ -41,6 +41,6 @@ export const designTokens: DesignTokens = {
     'on-dark': '#EAF2FB',      // text on navy bands
   },
   fonts: {
-    base: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+    base: "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
   },
 };

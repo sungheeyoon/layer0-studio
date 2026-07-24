@@ -7,7 +7,6 @@ import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
 import { I18nProvider } from "@/lib/i18n/provider";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { pretendard } from "@/lib/fonts";
 import "./globals.css";
 
 const SITE_NAME = "Layer0 Studio";
@@ -44,7 +43,7 @@ export default async function RootLayout({
   const [user, locale] = await Promise.all([getCurrentUser(), getLocale()]);
   const dictionary = getDictionary(locale);
   return (
-    <html lang={locale} className={pretendard.variable} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <ThemeProvider
           attribute="class"

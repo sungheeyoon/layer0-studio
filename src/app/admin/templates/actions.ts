@@ -3,10 +3,14 @@
 import {
   createListTemplatesUseCase,
   createGetTemplateUseCase,
+} from '@/lib/di/template-read';
+import {
   createCreateTemplateUseCase,
   createUpdateTemplateUseCase,
+} from '@/lib/di/template-content-write';
+import {
   createDeleteTemplateUseCase,
-} from '@/lib/di/container';
+} from '@/lib/di/template-write';
 import { ContentModel } from '@/domain/entities/template.entity';
 import { revalidatePath } from 'next/cache';
 import { syncTemplates } from '@/lib/template/sync';

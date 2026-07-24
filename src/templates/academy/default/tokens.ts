@@ -13,7 +13,7 @@ import type { DesignTokens } from '@/templates/types';
 export const defaultGlobalStyles: GlobalStyles = {
   primaryColor: '#1B2A4A',   // deep navy — 신뢰
   secondaryColor: '#1F7A5C', // green — 합격/성장
-  fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+  fontFamily: "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
   fontSize: '16px',
   layout: 'wide',
 };
@@ -39,7 +39,7 @@ export const designTokens: DesignTokens = {
     accent:         '#C9A24B',    // gold — 실적 강조
   },
   fonts: {
-    base:    "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-    display: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+    base:    "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+    display: "'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif",
   },
 };

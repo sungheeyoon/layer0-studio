@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { createGetTemplateUseCase } from '@/lib/di/container';
+import { createGetTemplateUseCase } from '@/lib/di/template-read';
 import { isMultiContent } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
