@@ -88,19 +88,22 @@ describe('validateContent — structure', () => {
   });
 });
 
-describe('validateContent — color fields (#56)', () => {
-  it('errors when a color field value is not hex', () => {
+describe('validateContent — color fields (#56, downgraded per ADR-0015)', () => {
+  it('warns — but does not block — when a color field value is not hex', () => {
     const json = minimalJson();
     json.sections[0].fields.accent = { type: 'color', label: 'Accent', value: 'red', editable: true };
     const result = validateContent(json);
-    expect(result.errors.some((e) => e.code === 'INVALID_COLOR_FIELD')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'INVALID_COLOR_FIELD')).toBe(true);
+    // The save must still go through: the editor's color input is free text, so
+    // every keystroke of a hex value passes through a non-hex state.
+    expect(result.errors).toHaveLength(0);
   });
 
   it('passes when a color field value is a valid hex', () => {
     const json = minimalJson();
     json.sections[0].fields.accent = { type: 'color', label: 'Accent', value: '#ff0066', editable: true };
     const result = validateContent(json);
-    expect(result.errors.filter((e) => e.code === 'INVALID_COLOR_FIELD')).toHaveLength(0);
+    expect(result.warnings.filter((w) => w.code === 'INVALID_COLOR_FIELD')).toHaveLength(0);
   });
 });
 
@@ -138,18 +141,43 @@ describe('validateContent — globalStyles', () => {
     expect(result.errors.filter((e) => e.code === 'INVALID_COLOR')).toHaveLength(0);
   });
 
-  it('errors on invalid fontSize', () => {
+  it('warns — but does not block — on invalid fontSize', () => {
     const json = minimalJson();
     json.globalStyles.fontSize = 'big';
     const result = validateContent(json);
-    expect(result.errors.some((e) => e.code === 'INVALID_FONT_SIZE')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'INVALID_FONT_SIZE')).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
-  it('errors on unknown layout', () => {
+  it('warns — but does not block — on unknown layout', () => {
     const json = minimalJson();
     json.globalStyles.layout = 'superwide';
     const result = validateContent(json);
-    expect(result.errors.some((e) => e.code === 'UNKNOWN_LAYOUT')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'UNKNOWN_LAYOUT')).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('warns — but does not block — on an empty colour', () => {
+    const json = minimalJson();
+    json.globalStyles.primaryColor = '';
+    const result = validateContent(json);
+    expect(result.warnings.some((w) => w.code === 'INVALID_COLOR')).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  // The guard for ADR-0015's principle: no rule a user can reach from an editor
+  // input may block the save. If a new blocking rule lands on globalStyles, this
+  // fails and forces the author to justify it as a renderer/integrity break.
+  it('never blocks a save on any globalStyles value the editor can produce', () => {
+    const json = minimalJson();
+    json.globalStyles = {
+      primaryColor: '',
+      secondaryColor: 'not-a-colour',
+      fontFamily: '',
+      fontSize: '16',
+      layout: 'full-width',
+    };
+    expect(validateContent(json).errors).toHaveLength(0);
   });
 });
 

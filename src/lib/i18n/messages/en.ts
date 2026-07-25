@@ -364,7 +364,6 @@ export const en: Messages = {
       fontFamily: 'Font Family',
       baseFontSize: 'Base Font Size',
       fontSizePlaceholder: 'e.g. 16px',
-      layoutStyle: 'Layout Style',
     },
     autosave: {
       saving: 'Saving…',

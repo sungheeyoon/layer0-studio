@@ -20,7 +20,6 @@ interface GlobalStylesEditorProps {
 export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalStylesEditorProps) {
   const t = useDictionary().editor.design;
   const fontOptions = ['Inter', 'Playfair Display', 'Roboto', 'Noto Sans KR', 'Montserrat'];
-  const layoutOptions = ['asymmetric', 'centered', 'full-width'];
 
   return (
     <div className="space-y-6">
@@ -88,20 +87,12 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
         />
       </div>
 
-      {/* Layout */}
-      <div className="space-y-2">
-        <Label>{t.layoutStyle}</Label>
-        <Select value={globalStyles.layout} onValueChange={(v) => onChange('layout', v)}>
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {layoutOptions.map((layout) => (
-              <SelectItem key={layout} value={layout}>{layout}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {/*
+        No `layout` control — see ADR-0015. `globalStyles.layout` reaches no
+        renderer (no CSS variable, no OVERLAY_MAP entry), and the dropdown that
+        used to sit here offered values outside the validator's allow-list,
+        which permanently blocked saving for any Site that picked one.
+      */}
     </div>
   );
 }
