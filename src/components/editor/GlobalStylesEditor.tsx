@@ -4,6 +4,7 @@ import { GlobalStyles } from '@/domain/entities/template.entity';
 import { useDictionary } from '@/lib/i18n/provider';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FieldIssues } from './FieldIssues';
 import {
   Select,
   SelectContent,
@@ -15,9 +16,14 @@ import {
 interface GlobalStylesEditorProps {
   globalStyles: GlobalStyles;
   onChange: (key: keyof GlobalStyles, value: string) => void;
+  /**
+   * Warning codes per `globalStyles` key. These describe how a value will render
+   * on the published Site; none of them stops a save (ADR-0015 §5).
+   */
+  issues: Record<string, string[]>;
 }
 
-export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalStylesEditorProps) {
+export default function GlobalStylesEditor({ globalStyles, onChange, issues }: GlobalStylesEditorProps) {
   const t = useDictionary().editor.design;
   const fontOptions = ['Inter', 'Playfair Display', 'Roboto', 'Noto Sans KR', 'Montserrat'];
 
@@ -40,6 +46,7 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
             onChange={(e) => onChange('primaryColor', e.target.value)}
           />
         </div>
+        <FieldIssues codes={issues.primaryColor} />
       </div>
 
       {/* Secondary Color */}
@@ -59,6 +66,7 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
             onChange={(e) => onChange('secondaryColor', e.target.value)}
           />
         </div>
+        <FieldIssues codes={issues.secondaryColor} />
       </div>
 
       {/* Font Family */}
@@ -85,6 +93,7 @@ export default function GlobalStylesEditor({ globalStyles, onChange }: GlobalSty
           onChange={(e) => onChange('fontSize', e.target.value)}
           placeholder={t.fontSizePlaceholder}
         />
+        <FieldIssues codes={issues.fontSize} />
       </div>
 
       {/*
