@@ -68,24 +68,32 @@ export function validateContent(
   } else {
     const gs = json.globalStyles;
 
+    // The four rules below are WARNINGS, not errors — see ADR-0015. Each is
+    // reachable from a free-text editor input, and the worst outcome of saving
+    // one is a CSS custom property that renders at its fallback. Blocking the
+    // save instead held every *other* edit in the same ContentModel hostage to
+    // one typo, which is the strictly worse failure.
     if (!gs.primaryColor) {
-      err('INVALID_COLOR', 'globalStyles.primaryColor is required', 'globalStyles.primaryColor');
+      warn('INVALID_COLOR', 'globalStyles.primaryColor is required', 'globalStyles.primaryColor');
     } else if (!HEX_RE.test(gs.primaryColor)) {
       warn('NON_HEX_COLOR', `globalStyles.primaryColor "${gs.primaryColor}" is not a hex color`, 'globalStyles.primaryColor');
     }
 
     if (!gs.secondaryColor) {
-      err('INVALID_COLOR', 'globalStyles.secondaryColor is required', 'globalStyles.secondaryColor');
+      warn('INVALID_COLOR', 'globalStyles.secondaryColor is required', 'globalStyles.secondaryColor');
     } else if (!HEX_RE.test(gs.secondaryColor)) {
       warn('NON_HEX_COLOR', `globalStyles.secondaryColor "${gs.secondaryColor}" is not a hex color`, 'globalStyles.secondaryColor');
     }
 
     if (gs.fontSize && !CSS_LENGTH_RE.test(gs.fontSize)) {
-      err('INVALID_FONT_SIZE', `globalStyles.fontSize "${gs.fontSize}" is not a valid CSS length`, 'globalStyles.fontSize');
+      warn('INVALID_FONT_SIZE', `globalStyles.fontSize "${gs.fontSize}" is not a valid CSS length`, 'globalStyles.fontSize');
     }
 
+    // `layout` is read by no renderer at all — it is injected as no CSS variable
+    // by any of the four render paths and appears in no OVERLAY_MAP entry. A
+    // field nothing consumes has no standing to block a save.
     if (gs.layout && !KNOWN_LAYOUTS.includes(gs.layout)) {
-      err('UNKNOWN_LAYOUT', `globalStyles.layout "${gs.layout}" is not in allowed values: ${KNOWN_LAYOUTS.join(', ')}`, 'globalStyles.layout');
+      warn('UNKNOWN_LAYOUT', `globalStyles.layout "${gs.layout}" is not in allowed values: ${KNOWN_LAYOUTS.join(', ')}`, 'globalStyles.layout');
     }
   }
 
@@ -222,11 +230,13 @@ export function validateContent(
             );
           }
 
-          // Rule 11: color fields must hold a hex value (blocking).
-          // The editor color picker emits hex; a non-hex value silently breaks
-          // the token mechanism it feeds (ADR-0005).
+          // Rule 11: color fields should hold a hex value (warning — ADR-0015).
+          // A non-hex value degrades the token it feeds (ADR-0005), but the
+          // editor's color input is free text, so every intermediate keystroke
+          // ("#", "#a", "#ab") passes through this state. Blocking here turned
+          // an in-progress edit into an unsavable ContentModel.
           if (field.type === 'color' && typeof field.value === 'string' && !HEX_RE.test(field.value)) {
-            err(
+            warn(
               'INVALID_COLOR_FIELD',
               `color field "${fieldKey}" value "${field.value}" is not a hex color`,
               fieldRef,

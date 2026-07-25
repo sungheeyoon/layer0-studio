@@ -367,7 +367,6 @@ export const ko = {
       fontFamily: '글꼴',
       baseFontSize: '기본 글자 크기',
       fontSizePlaceholder: '예: 16px',
-      layoutStyle: '레이아웃 스타일',
     },
     autosave: {
       saving: '저장 중…',
