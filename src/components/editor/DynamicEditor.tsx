@@ -51,8 +51,10 @@ import EditorPreviewFrame from './EditorPreviewFrame';
 import { loadTemplate } from '@/templates/registry';
 import { SectionFieldsSchema, TemplateModule } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
-import { getSiteError, isStaleConflict } from '@/lib/errors/messages';
+import { getSiteError } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
+import { nextSaveDelay } from '@/lib/editor/autosave-schedule';
+import { createWriteQueue } from '@/lib/editor/write-queue';
 import { useLocale, useDictionary } from '@/lib/i18n/provider';
 import {
   ChevronUp,
@@ -96,6 +98,9 @@ import {
 interface DynamicEditorProps {
   site: UserSite;
 }
+
+/** The result of one write attempt, normalised so callers branch on a code. */
+type SaveOutcome = { ok: true; updatedAt: string } | { ok: false; code: string };
 
 export default function DynamicEditor({ site }: DynamicEditorProps) {
   const locale = useLocale();
@@ -147,18 +152,18 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const [publishing, setPublishing] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const lastSaveRef = useRef<number>(0);
 
   const [isDirty, setIsDirty] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [conflictDetected, setConflictDetected] = useState(false);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** When the oldest edit not yet handed to a request arrived — anchors MAX_WAIT. */
+  const pendingSinceRef = useRef<number | null>(null);
   const contentRef = useRef(content);
   const knownUpdatedAtRef = useRef<string>(site.updatedAt);
+  const mountedRef = useRef(true);
 
   useEffect(() => { contentRef.current = content; }, [content]);
-
-  useEffect(() => () => { if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current); }, []);
 
   useEffect(() => {
     if (autoSaveStatus !== 'saved') return;
@@ -172,34 +177,107 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     return () => window.removeEventListener('beforeunload', guard);
   }, [isDirty]);
 
-  const applySuccessfulSave = useCallback((updatedAt: string) => {
-    knownUpdatedAtRef.current = updatedAt;
-    setIsDirty(false);
-    setAutoSaveStatus('saved');
-    lastSaveRef.current = Date.now();
+  // Every write to this Site — auto-save, Save draft, Publish, unmount flush —
+  // goes through one queue, so two of our own requests never race on the same
+  // `expectedUpdatedAt`. See `write-queue.ts` and ADR-0015 §3.
+  const enqueueWrite = useRef(createWriteQueue()).current;
+
+  /**
+   * One save attempt. Reads the content and the concurrency token at *execution*
+   * time rather than enqueue time, so a queued save always ships the newest edit
+   * and a token freshened by whatever ran ahead of it.
+   *
+   * Never throws. A Server Action rejects on transport failure, and this runs in
+   * places — a timer callback, an unmount cleanup — with no caller to catch it.
+   */
+  const runSave = useCallback(async (): Promise<SaveOutcome> => {
+    try {
+      const result = await saveContentAction(
+        site.id,
+        stripKeys(contentRef.current),
+        knownUpdatedAtRef.current,
+      );
+      if ('error' in result) return { ok: false, code: result.error };
+      knownUpdatedAtRef.current = result.updatedAt;
+      return { ok: true, updatedAt: result.updatedAt };
+    } catch (err) {
+      console.error('[editor] save request failed:', err);
+      return { ok: false, code: 'UNKNOWN' };
+    }
+  }, [site.id]);
+
+  const enqueueSave = useCallback(() => enqueueWrite(runSave), [enqueueWrite, runSave]);
+
+  /**
+   * Stand down the debounce because the caller is taking over the save. Clearing
+   * the timer alone is not enough — the MAX_WAIT anchor has to go with it, or the
+   * next edit inherits a deadline measured from an edit that has already shipped.
+   */
+  const cancelScheduledSave = useCallback(() => {
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+    pendingSinceRef.current = null;
   }, []);
 
+  const runAutoSave = useCallback(async () => {
+    autoSaveTimerRef.current = null;
+    pendingSinceRef.current = null;
+    setAutoSaveStatus('saving');
+    const outcome = await enqueueSave();
+    if (!mountedRef.current) return;
+    if (outcome.ok) {
+      setIsDirty(false);
+      setAutoSaveStatus('saved');
+    } else if (outcome.code === 'STALE_VERSION') {
+      setAutoSaveStatus('idle');
+      setConflictDetected(true);
+    } else {
+      // Every failure gets the banner, not just INVALID_TEMPLATE_JSON. A failed
+      // auto-save used to show one 12px grey line and nothing else, which is how
+      // a save that stopped working stayed unnoticed.
+      setAutoSaveStatus('error');
+      setActionError(getSiteError(outcome.code, locale, t.saveFailedFallback));
+    }
+  }, [enqueueSave, locale, t.saveFailedFallback]);
+
   const scheduleAutoSave = useCallback(() => {
-    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    const now = Date.now();
+    if (pendingSinceRef.current === null) pendingSinceRef.current = now;
     setIsDirty(true);
     setAutoSaveStatus('idle');
-    autoSaveTimerRef.current = setTimeout(async () => {
-      setAutoSaveStatus('saving');
-      const result = await saveContentAction(site.id, stripKeys(contentRef.current), knownUpdatedAtRef.current);
-      if (result && 'error' in result) {
-        if (isStaleConflict(result)) {
-          setConflictDetected(true);
-        } else {
-          setAutoSaveStatus('error');
-          if (result.error === 'INVALID_TEMPLATE_JSON') {
-            setActionError(getSiteError(result.error, locale, t.saveFailedFallback));
-          }
-        }
-      } else if (result && 'updatedAt' in result) {
-        applySuccessfulSave(result.updatedAt);
-      }
-    }, 4000);
-  }, [site.id, applySuccessfulSave, locale, t.saveFailedFallback]);
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(
+      () => { void runAutoSave(); },
+      nextSaveDelay(pendingSinceRef.current, now),
+    );
+  }, [runAutoSave]);
+
+  const enqueueSaveRef = useRef(enqueueSave);
+  useEffect(() => { enqueueSaveRef.current = enqueueSave; }, [enqueueSave]);
+
+  // Unmount flush — the loss path ADR-0015 §2 closes. Leaving by the chrome's
+  // back Link (SPA navigation) or the browser Back button unmounts this without
+  // ever firing `beforeunload`, and the old cleanup only cleared the timer, so
+  // the pending edit died in silence. The page survives both, so an un-awaited
+  // request still completes.
+  //
+  // A live debounce timer is the precise signal for "edits exist that no request
+  // has picked up yet": every edit reschedules it, every dispatch clears it.
+  // Fire-and-forget — there is no longer a surface to report a failure on.
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (!autoSaveTimerRef.current) return;
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+      void enqueueSaveRef.current().then((outcome) => {
+        if (!outcome.ok) console.error('[editor] unmount flush failed:', outcome.code);
+      });
+    };
+  }, []);
 
   const [templateModule, setTemplateModule] = useState<TemplateModule | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
@@ -339,62 +417,70 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     }
   }, []);
 
+  // No throttle guard here any more — the old 2-second one keyed off the last
+  // *successful* save, so it let a click through while an auto-save was still in
+  // flight (the self-conflict this queue removes) and swallowed the click right
+  // after one succeeded. The disabled button covers double-clicks.
   const handleSave = async () => {
-    const now = Date.now();
-    if (now - lastSaveRef.current < 2000) return;
-    lastSaveRef.current = now;
-
-    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    cancelScheduledSave();
     setActionError(null);
     setSaving(true);
-    const result = await saveContentAction(site.id, stripKeys(content), knownUpdatedAtRef.current);
-    if (result && 'error' in result) {
-      if (isStaleConflict(result)) {
-        setConflictDetected(true);
-      } else {
-        setActionError(getSiteError(result.error, locale, t.saveFailedFallback));
-      }
-    } else if (result && 'updatedAt' in result) {
-      applySuccessfulSave(result.updatedAt);
+    const outcome = await enqueueSave();
+    if (!mountedRef.current) return;
+    if (outcome.ok) {
+      setIsDirty(false);
+      setAutoSaveStatus('saved');
+    } else if (outcome.code === 'STALE_VERSION') {
+      setConflictDetected(true);
+    } else {
+      setActionError(getSiteError(outcome.code, locale, t.saveFailedFallback));
     }
     setSaving(false);
   };
 
   const handlePublish = async () => {
-    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    cancelScheduledSave();
     setActionError(null);
     setSaving(true);
-    const saveResult = await saveContentAction(site.id, stripKeys(content), knownUpdatedAtRef.current);
-    if (saveResult && 'error' in saveResult) {
+
+    // Save and publish enter the queue as ONE task. Splitting them would let a
+    // queued auto-save land in between, bumping `updated_at` and making the
+    // publish's own token stale.
+    const outcome = await enqueueWrite(async (): Promise<SaveOutcome & { phase: 'save' | 'publish' }> => {
+      const saved = await runSave();
       // Any save failure must abort the publish — otherwise we'd publish stale
       // content and silently drop the user's unsaved edit.
-      if (isStaleConflict(saveResult)) {
-        setConflictDetected(true);
-      } else {
-        setActionError(getSiteError(saveResult.error, locale, t.saveFailedFallback));
+      if (!saved.ok) return { ...saved, phase: 'save' };
+      if (mountedRef.current) setPublishing(true);
+      try {
+        const result = await publishSiteAction(site.id, knownUpdatedAtRef.current);
+        // `?? 'UNKNOWN'` because publishSiteAction's union includes its own
+        // RATE_LIMITED branch, which widens `error` to `string | undefined`.
+        if ('error' in result) return { ok: false, code: result.error ?? 'UNKNOWN', phase: 'publish' };
+        // Publish bumps updated_at; keep the token fresh for the next write.
+        knownUpdatedAtRef.current = result.updatedAt;
+        return { ok: true, updatedAt: result.updatedAt, phase: 'publish' };
+      } catch (err) {
+        console.error('[editor] publish request failed:', err);
+        return { ok: false, code: 'UNKNOWN', phase: 'publish' };
       }
-      setSaving(false);
-      return;
-    } else if (saveResult && 'updatedAt' in saveResult) {
-      applySuccessfulSave(saveResult.updatedAt);
-    }
-    setPublishing(true);
-    const result = await publishSiteAction(site.id, knownUpdatedAtRef.current);
+    });
 
-    if (result && 'error' in result) {
-      if (isStaleConflict(result)) {
-        setConflictDetected(true);
-      } else {
-        setActionError(getSiteError(result.error, locale, t.publishFailedFallback));
-      }
+    if (!mountedRef.current) return;
+    if (outcome.ok) {
+      setIsDirty(false);
+      setAutoSaveStatus('saved');
+      setPublishedUrl(site.domain ? `/site/${site.domain}` : 'NO_DOMAIN');
+    } else if (outcome.code === 'STALE_VERSION') {
+      setConflictDetected(true);
     } else {
-      // Publish bumps updated_at; keep the token fresh for the next save.
-      if ('updatedAt' in result) applySuccessfulSave(result.updatedAt);
-      if (site.domain) {
-        setPublishedUrl(`/site/${site.domain}`);
-      } else {
-        setPublishedUrl('NO_DOMAIN');
-      }
+      setActionError(
+        getSiteError(
+          outcome.code,
+          locale,
+          outcome.phase === 'save' ? t.saveFailedFallback : t.publishFailedFallback,
+        ),
+      );
     }
     setPublishing(false);
     setSaving(false);
