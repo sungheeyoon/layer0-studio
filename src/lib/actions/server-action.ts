@@ -4,6 +4,7 @@ import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { TemplateError } from '@/domain/errors/template.error';
 import { AuthError } from '@/domain/errors/auth.error';
 import { AssetValidationError } from '@/domain/entities/asset.entity';
+import { isAccountErased } from '@/lib/auth/current-user';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type SupabaseAdminClient = Awaited<ReturnType<typeof createAdminClient>>;
@@ -74,7 +75,7 @@ export async function withUser<T>(
 ): Promise<ActionResult<T>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'UNAUTHORIZED' };
+  if (!user || isAccountErased(user)) return { error: 'UNAUTHORIZED' };
   try {
     return await handler(user, supabase);
   } catch (err) {

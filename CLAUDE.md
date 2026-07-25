@@ -124,7 +124,17 @@ Image uploads in the editor use a Reserve-Confirm pattern to avoid orphaned stor
 2. Client uploads directly to Supabase Storage (`user_assets` bucket)
 3. `confirmUploadAction` — marks the DB record `active` and returns the public CDN URL
 
-Orphan cleanup runs via the cron endpoint using `sweep_orphaned_assets` and `claim_cleanup_task` Supabase RPC functions. Daily (not hourly) due to the Hobby plan's 1-cron/day limit — see the ADR for migration path when this changes.
+Orphan cleanup runs via the cron endpoint using `sweep_orphaned_assets` and `claim_cleanup_task` Supabase RPC functions, batched per invocation within a time budget (up to `MAX_QUEUE_ITEMS_PER_RUN`). Daily (not hourly) due to the Hobby plan's 1-cron/day limit — see the ADR for migration path when this changes.
+
+### Account Erasure (Tombstone-first)
+
+See [ADR-0014](./docs/adr/0014-account-erasure-tombstone-pipeline.md). `deleteAccountAction` (`src/app/(authenticated)/dashboard/(with-sidebar)/settings/actions.ts`) no longer deletes rows directly — it calls `DeleteAccountUseCase` (`src/domain/usecases/delete-account.usecase.ts`), which orchestrates a fixed, non-regressable order against `IAccountErasureRepository`:
+1. **`requestErasure`** — the commit point. `request_account_erasure(p_user_id)` RPC (migration 024) runs one transaction: insert an `account_deletions` request row, delete the user's `assets`/`user_sites` rows. A `BEFORE DELETE` trigger on `assets` copies each row's storage path into `asset_tombstones` *before* it disappears — a table with no FK to `assets` or `auth.users`, so it outlives both. `assets.user_id` / `user_sites.user_id` are `ON DELETE CASCADE` (safe now that the trigger runs first — trigger-then-CASCADE order is load-bearing, see the migration file).
+2. **`markDeleted`** — sets `app_metadata.deletedAt`, checked by the `(authenticated)` layout guard and `withUser` (`isAccountErased()` in `src/lib/auth/current-user.ts`) so the account is locked out immediately, before slower steps run.
+3. **`drainStorage`** — best-effort inline removal of the just-tombstoned paths; never throws. Anything left over stays `pending`/`failed` in `asset_tombstones` for the cron worker (`claim_asset_tombstones`, migration 025) to retry.
+4. **`deleteAuthUser`** — `auth.admin.deleteUser`, always last.
+
+`templates.created_by` / `template_sync_audit.performed_by` went to `ON DELETE SET NULL` separately in migration 023 (#116 — the urgent partial-destruction bug this ADR's design fully addresses). Pre-existing storage leaks (from before this pipeline existed) aren't retroactively fixed — run `pnpm reconcile:orphaned-assets` (dry-run by default, `--apply` to delete) to find and clear them.
 
 ### Supabase clients
 
@@ -147,7 +157,7 @@ Production builds **hard-fail** if `NEXT_PUBLIC_SITE_URL` is missing (`next.conf
 
 ### Database migrations
 
-Migrations live in `docs/migrations/` (001–022; `.sql` files, plus `.md` runbooks for the data backfills 018/019). Apply manually via the Supabase dashboard SQL editor or `supabase db push`. All migrations through 022 are applied to production. Notable:
+Migrations live in `docs/migrations/` (001–025; `.sql` files, plus `.md` runbooks for the data backfills 018/019). Apply manually via the Supabase dashboard SQL editor or `supabase db push`. All migrations through 025 are applied to production. Notable:
 - `009_storage_bucket_hardening.sql` — bucket-level MIME/size on `user_assets` and admin-only writes on `template-thumbnails`
 - `010_optimistic_concurrency.sql` — replaces `save_site_template_with_lock` to accept `p_expected_updated_at` and return `'OK' | 'STALE_VERSION'` (powers editor Conflict modal)
 - `011_template_sync_audit.sql` — `template_sync_audit` table for `pnpm template:sync` audit trail
@@ -160,6 +170,9 @@ Migrations live in `docs/migrations/` (001–022; `.sql` files, plus `.md` runbo
 - `020_normalize_template_categories.sql` — normalize `templates.category` to the canonical Capitalized catalog form
 - `021_rename_content_columns.sql` — the `ContentModel` rename ([ADR-0013](./docs/adr/0013-content-model-rename.md)) reflected to DB: `RENAME COLUMN templates.template_json → content`, `user_sites.site_json → content`, `user_sites.template_snapshot → snapshot`, plus a `CREATE OR REPLACE` of `save_site_template_with_lock` (function body references the column by text, so RENAME COLUMN does not update it). **Destructive/coordinated deploy** — old- and new-column code cannot coexist. **Applied to prod.**
 - `022_rename_section_data_to_fields.sql` — JSONB backfill for the same rename: every Section's top-level `data` key → `fields` across all three content columns (single `sections[]`; multi `shared.header`/`shared.footer` + `pages[].sections[]`). Idempotent (rewrites only when `data` is present). Pairs with the code rename `.meta.dataSchema → .meta.fieldsSchema`. **Applied to prod.**
+- `023_fk_set_null_on_user_delete.sql` — fixes #116 (active prod data-loss bug): `templates.created_by` / `template_sync_audit.performed_by` reference `auth.users` with no `ON DELETE` rule, so deleting a user who ever published a template fails the `auth.admin.deleteUser` step with an FK violation *after* their `user_sites`/`assets` rows are already committed-deleted (the settings delete action is not transactional) — account survives, everything else is gone. Switches both (nullable) FKs to `ON DELETE SET NULL`, preserving the publish audit trail. Full account-deletion pipeline redesign is separate — see [ADR-0014](./docs/adr/0014-account-erasure-tombstone-pipeline.md). **Applied to prod.**
+- `024_account_erasure_tombstone.sql` — implements #117 / [ADR-0014](./docs/adr/0014-account-erasure-tombstone-pipeline.md): `asset_tombstones` (storage paths only, no FK to `assets`/`auth.users`) fed by a `BEFORE DELETE` trigger on `assets`; only once that trigger exists does it become safe to add `ON DELETE CASCADE` on `assets.user_id` / `user_sites.user_id` (order is load-bearing — see the file's comments); `account_deletions` request-audit table (no FK to `auth.users`, survives it); `request_account_erasure(p_user_id)` RPC — the single-transaction commit point (request row + row deletes + Tombstone issuance). **Applied to prod.**
+- `025_claim_asset_tombstones.sql` — batch claim RPC (`claim_asset_tombstones(p_limit)`) for the Tombstone-drain cron worker, mirroring `claim_cleanup_task`'s `SKIP LOCKED` pattern (008) but sized for a batch since there are no existing `LIMIT 1` callers to stay compatible with. **Applied to prod.**
 
 ### Deployment
 

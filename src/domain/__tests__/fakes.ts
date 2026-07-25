@@ -6,6 +6,7 @@ import {
   SiteContentValidator,
   SiteContentValidationIssue,
 } from '../usecases/ports/site-content-validator.port';
+import { IAccountErasureRepository } from '../repositories/account-erasure.repository';
 
 export function makeContent(overrides: Partial<SingleContent> = {}): ContentModel {
   return {
@@ -142,5 +143,45 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
 
   async delete(id: string) {
     this.sites = this.sites.filter(s => s.id !== id);
+  }
+}
+
+/**
+ * Fake account-erasure repo for DeleteAccountUseCase tests. Records the call
+ * order (and the paths handed to drainStorage) so tests can assert the
+ * storage-before-auth business rule without a real DB/storage backend.
+ */
+export class FakeAccountErasureRepository implements IAccountErasureRepository {
+  calls: string[] = [];
+  drainedPaths: string[] = [];
+  tombstonePaths: string[];
+
+  /** Name of a post-commit step to throw from, to test the durability boundary. */
+  constructor(
+    tombstonePaths: string[] = ['user-1/asset-1/photo.png'],
+    private failStep?: 'markDeleted' | 'drainStorage' | 'deleteAuthUser',
+  ) {
+    this.tombstonePaths = tombstonePaths;
+  }
+
+  async requestErasure(_userId: string) {
+    this.calls.push('requestErasure');
+    return this.tombstonePaths;
+  }
+
+  async markDeleted(_userId: string) {
+    this.calls.push('markDeleted');
+    if (this.failStep === 'markDeleted') throw new Error('markDeleted failed');
+  }
+
+  async drainStorage(paths: string[]) {
+    this.calls.push('drainStorage');
+    this.drainedPaths = paths;
+    if (this.failStep === 'drainStorage') throw new Error('drainStorage failed');
+  }
+
+  async deleteAuthUser(_userId: string) {
+    this.calls.push('deleteAuthUser');
+    if (this.failStep === 'deleteAuthUser') throw new Error('deleteAuthUser failed');
   }
 }
