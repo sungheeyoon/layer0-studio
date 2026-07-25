@@ -19,6 +19,7 @@
     "template:verify:ci": "tsx scripts/verify-templates-ci.ts",
     "performance:verify": "tsx scripts/verify-initial-assets.ts",
     "template:image": "tsx --env-file=.env.local scripts/host-image.ts",
+    "reconcile:orphaned-assets": "tsx --env-file=.env.local scripts/reconcile-orphaned-assets.ts",
     "predev": "node scripts/generate-templates.mjs",
     "prebuild": "node scripts/generate-templates.mjs"
   },

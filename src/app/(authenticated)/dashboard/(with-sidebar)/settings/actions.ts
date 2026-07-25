@@ -1,7 +1,7 @@
 'use server';
 
 import { createAdminClient } from '@/utils/supabase/server';
-import { createChangePasswordUseCase } from '@/lib/di/auth';
+import { createChangePasswordUseCase, createDeleteAccountUseCase } from '@/lib/di/auth';
 import { redirect } from 'next/navigation';
 import { withUser } from '@/lib/actions/server-action';
 
@@ -16,25 +16,15 @@ export async function changePasswordAction(password: string) {
 export async function deleteAccountAction() {
   return withUser(async (user, supabase) => {
     const adminSupabase = await createAdminClient();
+    const useCase = createDeleteAccountUseCase(adminSupabase);
 
-    // 1. Delete user sites
-    await adminSupabase.from('user_sites').delete().eq('user_id', user.id);
+    // Orchestration (commit point -> lock -> storage drain -> auth delete) is
+    // owned by DeleteAccountUseCase per ADR-0014 — this action just runs it
+    // and tears down the caller's own session.
+    await useCase.execute(user.id);
 
-    // 2. Delete user assets
-    await adminSupabase.from('assets').delete().eq('user_id', user.id);
-
-    // 3. Delete user from Supabase Auth
-    const { error: deleteError } = await adminSupabase.auth.admin.deleteUser(user.id);
-
-    if (deleteError) {
-      console.error('[deleteAccountAction] Error:', deleteError);
-      return { error: 'UNKNOWN' };
-    }
-
-    // 4. Sign out current session
     await supabase.auth.signOut();
 
-    // Redirect to home or login page after successful deletion
     redirect('/');
   });
 }
