@@ -98,7 +98,7 @@ The operation that synthesizes a new **Preset** from a natural-language brief vi
 _Avoid_: Tracer (an internal PR-series label, not a product term), scaffold (the lower-level `pnpm template:scaffold` skeleton-only command), AI gen.
 
 **Editor**:
-The authenticated visual editing surface a User uses to modify their Site. Loads the Site's Template at runtime; lets the User edit each Section's Fields, reorder Sections (Single — with the nav/footer Sections pinned), reorder Pages (Multi), and toggle `visible` / `nav.visible`. Users **cannot create or delete** Pages or Sections — the information architecture is template-author-defined (see [ADR-0007](./docs/adr/0007-single-multi-site-type-structural-union.md)). Persists edits through an optimistic-concurrency RPC that rejects stale writes (see [ADR-0004](./docs/adr/0004-optimistic-concurrency-via-rpc.md)). Distinct from the **Renderer**.
+The authenticated visual editing surface a User uses to modify their Site. Loads the Site's Template at runtime; lets the User edit each Section's Fields, reorder Sections (Single — with the nav/footer Sections pinned), reorder Pages (Multi), and toggle `visible` / `nav.visible`. Users **cannot create or delete** Pages or Sections — the information architecture is template-author-defined (see [ADR-0007](./docs/adr/0007-single-multi-site-type-structural-union.md)). Persists edits on three independent defences, because an edit can go missing three unrelated ways (see [ADR-0015](./docs/adr/0015-edit-loss-paths-exhaustive-defense.md)): an optimistic-concurrency RPC rejects a write that would overwrite another tab's (see [ADR-0004](./docs/adr/0004-optimistic-concurrency-via-rpc.md)); leaving the Editor flushes whatever the debounce is still holding, and no edit is held past a fixed ceiling however long the User keeps typing; and a validation rule may stop a save only when saving would break the **Renderer**, never merely because a value would look wrong (see **Blocking rule / Warning rule**). Distinct from the **Renderer**.
 _Avoid_: builder, designer, dashboard.
 
 **Blocking rule / Warning rule**:
@@ -124,7 +124,7 @@ _Avoid_: theme runtime, view.
 ## Example dialogue
 
 > **Dev:** "Customer's confused — they updated their menu but their **Site** still shows the old items."
-> **PM:** "Did they hit save in the **Editor**? Auto-save fires after a few seconds of idle, so a hard refresh while typing could lose the in-flight edit."
+> **PM:** "Did they hit save in the **Editor**? Auto-save fires a few seconds after they stop typing, and leaving the editor flushes whatever is still pending — so an edit only goes missing if the save itself failed. Did they see an error?"
 > **Dev:** "They saved. But the **Site** is **Live** — does the **Renderer** cache?"
 > **PM:** "The Live **Renderer** reads fresh **Site** content per request. Different question — is this a **Site** they made from the **cafe Template**, or a custom one?"
 > **Dev:** "From the cafe **Template**. The menu's an **array Field** on the menu **Section**."
