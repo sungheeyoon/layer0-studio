@@ -365,6 +365,15 @@ export const en: Messages = {
       baseFontSize: 'Base Font Size',
       fontSizePlaceholder: 'e.g. 16px',
     },
+    // Input warnings — these never block a save (ADR-0015). They describe how the
+    // Site will look, so the wording stays descriptive rather than imperative.
+    validation: {
+      INVALID_COLOR: 'Empty — the default colour will be used.',
+      NON_HEX_COLOR: 'Not a #RRGGBB value; the default colour may be used.',
+      INVALID_COLOR_FIELD: 'Not a #RRGGBB value; the default colour may be used.',
+      INVALID_FONT_SIZE: 'Needs a unit — e.g. 16px, 1.2rem',
+      INSECURE_URL: 'An http:// address may be blocked by some browsers.',
+    },
     autosave: {
       saving: 'Saving…',
       saved: '✓ Saved',

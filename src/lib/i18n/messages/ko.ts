@@ -368,6 +368,15 @@ export const ko = {
       baseFontSize: '기본 글자 크기',
       fontSizePlaceholder: '예: 16px',
     },
+    // 입력값 경고 — 저장을 막지 않는다 (ADR-0015). 사이트에 어떻게 보일지를
+    // 알려줄 뿐이므로 문장은 지시가 아니라 설명에 가깝게 쓴다.
+    validation: {
+      INVALID_COLOR: '비어 있어 기본 색상으로 표시됩니다.',
+      NON_HEX_COLOR: '#RRGGBB 형식이 아니라 기본 색상으로 표시될 수 있습니다.',
+      INVALID_COLOR_FIELD: '#RRGGBB 형식이 아니라 기본 색상으로 표시될 수 있습니다.',
+      INVALID_FONT_SIZE: '단위가 필요합니다 — 예: 16px, 1.2rem',
+      INSECURE_URL: 'http:// 주소라 일부 브라우저에서 이미지가 차단될 수 있습니다.',
+    },
     autosave: {
       saving: '저장 중…',
       saved: '✓ 저장됨',

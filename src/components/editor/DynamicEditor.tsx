@@ -48,6 +48,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { saveContentAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import EditorPreviewFrame from './EditorPreviewFrame';
+import { FieldIssues } from './FieldIssues';
 import { loadTemplate } from '@/templates/registry';
 import { SectionFieldsSchema, TemplateModule } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
@@ -55,6 +56,13 @@ import { getSiteError } from '@/lib/errors/messages';
 import { injectKeys, stripKeys } from '@/lib/template/keys';
 import { nextSaveDelay } from '@/lib/editor/autosave-schedule';
 import { createWriteQueue } from '@/lib/editor/write-queue';
+import {
+  indexIssues,
+  fieldIssueKey,
+  EMPTY_ISSUE_INDEX,
+  type IssueIndex,
+} from '@/lib/editor/content-issues';
+import { validateContent } from '@/lib/template/validate';
 import { useLocale, useDictionary } from '@/lib/i18n/provider';
 import {
   ChevronUp,
@@ -319,6 +327,21 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   }, [content.templateKey, t.loadError]);
 
   const TemplateRenderer = templateModule?.default;
+
+  // The same rules the server runs, run here so a Warning rule surfaces under the
+  // field that caused it rather than as a slightly wrong colour on the published
+  // Site (ADR-0015 §5). `validateContent` is pure and imports nothing but types,
+  // so this is the identical function — not a second copy of the rules that could
+  // drift out of step. Only `warnings` is read: this reports, it never blocks.
+  //
+  // Runs against the rendered `content` rather than `stripKeys(content)` to avoid
+  // cloning tens of KB on every keystroke. The editor-only `_key` lives on array
+  // items, which can only produce codes `indexIssues` drops anyway.
+  const issueIndex = useMemo<IssueIndex>(() => {
+    if (!templateModule) return EMPTY_ISSUE_INDEX;
+    const { warnings } = validateContent(content, { templateLibrary: templateModule.library });
+    return indexIssues(warnings);
+  }, [content, templateModule]);
 
   const updateContent = useCallback((updater: (json: ContentModel) => void) => {
     setContent((prev) => {
@@ -682,6 +705,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                 schema={templateModule?.library[section.type]?.meta.fieldsSchema}
                                 onFieldChange={handleFieldChange}
                                 onError={setActionError}
+                                issues={issueIndex.fields}
                               />
                             </div>
                           )}
@@ -781,6 +805,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                       schema={templateModule?.library[section.type]?.meta.fieldsSchema}
                                       onFieldChange={handleFieldChange}
                                       onError={setActionError}
+                                      issues={issueIndex.fields}
                                     />
                                   </div>
                                 )}
@@ -804,6 +829,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               <GlobalStylesEditor
                 globalStyles={content.globalStyles}
                 onChange={handleGlobalStyleChange}
+                issues={issueIndex.globalStyles}
               />
             </div>
           )}
@@ -978,6 +1004,7 @@ function SectionFields({
   schema,
   onFieldChange,
   onError,
+  issues,
 }: {
   section: Section;
   schema?: SectionFieldsSchema;
@@ -988,6 +1015,8 @@ function SectionFields({
     assetId?: string,
   ) => void;
   onError: (msg: string) => void;
+  /** Warning codes keyed by {@link fieldIssueKey} — see `content-issues.ts`. */
+  issues: Record<string, string[]>;
 }) {
   return (
     <div className="space-y-6">
@@ -1002,11 +1031,13 @@ function SectionFields({
             maxItems={schema?.[fieldKey]?.maxItems}
             onChange={(val, aid) => onFieldChange(section.id, fieldKey, val, aid)}
             onError={onError}
+            issueCodes={issues[fieldIssueKey(section.id, fieldKey)]}
           />
         ))}
     </div>
   );
 }
+
 
 interface DynamicFieldProps {
   field: Field;
@@ -1015,9 +1046,11 @@ interface DynamicFieldProps {
   maxItems?: number;
   onChange: (value: string | ArrayField['items'], assetId?: string) => void;
   onError: (msg: string) => void;
+  /** Warning codes for this field, rendered inline. Never blocks the save. */
+  issueCodes?: string[];
 }
 
-function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError }: DynamicFieldProps) {
+function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError, issueCodes }: DynamicFieldProps) {
   const t = useDictionary().editor;
   const [isUploading, setIsUploading] = useState(false);
 
@@ -1133,6 +1166,8 @@ function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError
           onChange={(e) => onChange(e.target.value)}
         />
       )}
+
+      <FieldIssues codes={issueCodes} />
     </div>
   );
 }
