@@ -2,7 +2,7 @@
 
 > 노코드 웹사이트 빌더 — 비개발자가 Template 을 골라 시각적으로 편집하고 자신의 Subdomain 으로 배포할 수 있는 SaaS 플랫폼.
 
-![Layer0 Studio editor](public/hero-editor.png)
+![Layer0 Studio editor](docs/portfolio/screenshots/editor.webp)
 
 - 🔗 **Live**: https://layer0-studio.vercel.app
 
@@ -16,15 +16,21 @@ Clean Architecture — 의존성은 안쪽으로만 흐릅니다. Server Action�
 
 ```mermaid
 flowchart LR
-    Client[Client] --> Action[Server Action]
-    Action --> DI[DI Factory]
-    DI --> UC[Use Case]
-    UC --> Repo[Repository]
-    Repo --> DB[(Supabase)]
+  C["Client"] --> SA["Server Action"]
+  SA --> DI["DI Factory"]
+  DI --> R["Read Use Case"]
+  DI --> W["Write Use Case"]
+  R --> RP["Repository"]
+  W --> VAL["Content Validator<br/>+ Template Registry<br/>(Template CSS 11개)"]
+  W --> RP
+  RP --> DB[("Supabase")]
+  style R fill:#d4edda,stroke:#28a745,stroke-width:1.5px
+  style VAL fill:#fff3cd,stroke:#d39e00,stroke-width:1.5px
 ```
 
 - **Domain layer** — 순수 비즈니스 로직(엔티티, 리포지토리 인터페이스, 유스케이스). Vitest 단위 테스트는 도메인 레이어만 in-memory fake로 검증합니다.
 - **요청별 DI** — 싱글톤 없이 매 요청마다 새 Supabase 클라이언트로 조립. 인증 컨텍스트가 절대 누설되지 않습니다.
+- **읽기 / 쓰기 경로 분리** ([ADR-0008](docs/adr/0008-keep-explicit-di-factories.md)) — DI Factory 를 범용 resolver 로 합치지 않고 유스케이스별로 명시해 둡니다. 검증이 필요한 쓰기 경로만 Content Validator 와 Template Registry(=Template CSS 11개)를 끌어오고, 가벼운 읽기 경로는 그 무게를 지지 않습니다.
 - **타입드 에러** — Use Case가 던지는 도메인 에러 코드를 클라이언트가 한국어 메시지로 매핑(`src/lib/errors/messages.ts`).
 
 상세 구현은 [프레임워크 없는 DI · Clean Architecture를 작게 적용하기](https://layer0-studio.vercel.app/articles/clean-architecture.html).
@@ -53,7 +59,7 @@ CRON_SECRET=                   # /api/cron/cleanup-assets Bearer 토큰
 
 각 Template 은 `src/templates/<category>/<leaf>/` 안에 자기 토큰·라이브러리·렌더러를 모두 가진 자급식(self-contained) 구조 — Template 간 코드는 *전혀* 공유하지 않습니다 (DRY 보다 isolation 우선, [ADR-0001](docs/adr/0001-beta-model-template-isolation.md)). **코드가 source of truth**, `pnpm template:sync` 가 DB 로 반영 ([ADR-0002](docs/adr/0002-templates-source-of-truth-is-code.md)) — 디렉터리만 추가하면 codegen 이 자동으로 레지스트리에 등록.
 
-Site 는 **Single**(한 스크롤, `sections[]`)과 **Multi**(라우팅되는 `pages[]` + 공유 header/footer) 두 Site Type 으로 나뉘며 생성 시 `mode` 로 고정됩니다 (`ContentModel` 구조적 유니온, [ADR-0007](docs/adr/0007-single-multi-site-type-structural-union.md)). 현재 8 개 Category 에 걸쳐 10 개 Template(Single 9 + Multi `outdoor-default` 능선).
+Site 는 **Single**(한 스크롤, `sections[]`)과 **Multi**(라우팅되는 `pages[]` + 공유 header/footer) 두 Site Type 으로 나뉘며 생성 시 `mode` 로 고정됩니다 (`ContentModel` 구조적 유니온, [ADR-0007](docs/adr/0007-single-multi-site-type-structural-union.md)). 현재 9 개 Category 에 걸쳐 11 개 Template(Single 9 + Multi 2 — `outdoor-default` 능선, `medical-clinic` 온유의원).
 
 새 Template 은 Claude Code 의 `new-template` 스킬이 자연어 brief 로부터 자급식 디렉터리(토큰·라이브러리·프리셋·렌더러)를 만들고 verify 게이트까지 통과시키는 방식으로 저작합니다.
 
