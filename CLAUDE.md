@@ -208,3 +208,4 @@ Production: https://layer0-studio.vercel.app (Vercel).
 - **Issue tracker** — GitHub Issues in `sungheeyoon/layer0-studio` via `gh`. See `docs/agents/issue-tracker.md`.
 - **Triage labels** — `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context layout (`CONTEXT.md` + `docs/adr/`). See `docs/agents/domain.md`.
+- **Skill installation** — third-party skills are **not vendored here**; they come from the machine-global `~/.claude/skills`. The only skills this repo owns are `.claude/skills/{new,delete}-template/`. Don't run `npx skills` inside this repo.

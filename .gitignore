@@ -43,15 +43,16 @@ next-env.d.ts
 
 # agent artifacts
 .gemini/
+# npx skills 저장소 — Claude 는 .claude/skills 만 읽으므로 커밋 대상 아님
+.agents/
 
 # local scripts (migration helpers, one-off tooling — add to personal .git/info/exclude)
 .claude/*
 # …but project skills are version-controlled (shared dev-time tooling)
 !.claude/skills/
-# third-party skills (npx skills) land in .claude/skills/ as machine-specific
-# absolute-path symlinks — ignore them. The real files live in .agents/ and are
-# restorable via skills-lock.json (`npx skills experimental_install`). Keep only
-# the in-repo project skills (new-template, delete-template) tracked.
+# 서드파티 스킬은 이 레포에 벤더링하지 않는다 — 머신 전역
+# (~/.claude/skills → ~/.agents/skills) 에서 공급된다. 추적되는 건 이 레포가
+# 소유한 스킬 2개뿐.
 .claude/skills/*
 !.claude/skills/new-template/
 !.claude/skills/delete-template/
