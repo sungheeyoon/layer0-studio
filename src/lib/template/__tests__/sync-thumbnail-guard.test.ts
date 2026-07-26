@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncTemplates } from '../sync';
 
 /**
- * Regression test for the thumbnail-clobber guard (friction doc TODO-2).
+ * Regression test for the thumbnail-clobber guard (PR #92).
  *
  * When a preset's `thumbnailPath` points at a file that does NOT exist on disk,
  * the upload never runs and the computed URL is still the raw

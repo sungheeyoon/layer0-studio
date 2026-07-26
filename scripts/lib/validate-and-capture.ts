@@ -442,10 +442,10 @@ export function checkFieldsSchemaJsxConsistency(templateRoot: string): StepResul
 // ─── Step 5.5: thumbnailPath ↔ config output ↔ file on disk ──────────────────
 
 /**
- * Guard against the regression that broke every catalog thumbnail (see
- * docs/template-authoring-friction.md TODO-2): a preset's `thumbnailPath`
- * silently drifting from the `thumbnail.config.ts` `output` (or pointing at a
- * file that doesn't exist). When that happens `template:sync` would try to
+ * Guard against the regression that broke every catalog thumbnail (fixed in
+ * PR #92): a preset's `thumbnailPath` silently drifting from the
+ * `thumbnail.config.ts` `output` (or pointing at a file that doesn't
+ * exist). When that happens `template:sync` would try to
  * upload a missing file and, pre-#92, overwrote the live storage URL with a
  * broken local path string.
  *
@@ -573,7 +573,7 @@ export async function validateAndCapture(
 
   // 7: thumbnailPath guard — runs AFTER capture so a freshly-authored template's
   //    webp already exists on disk. Blocking: a drifted/missing thumbnailPath is
-  //    exactly the regression that broke the whole catalog (friction-doc TODO-2).
+  //    exactly the regression that broke the whole catalog (fixed in PR #92).
   const thumb = await runThumbnailPath(opts.templateKey, opts.templateRoot);
   steps.push(thumb);
   if (!thumb.ok) return { ok: false, steps, thumbnailPath };

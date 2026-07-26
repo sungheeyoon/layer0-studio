@@ -39,7 +39,9 @@ ko/en 양방향 i18n 은 **빌더 제품**(랜딩, 인증, 대시보드, 에디�
 
 ### 5. 미들웨어 불변
 
-경로 프리픽스를 안 쓰므로 `src/middleware.ts`(서브도메인 rewrite, Supabase 세션 갱신)는 **변경하지 않는다**. `PLATFORM_PREFIXES`/`isPlatformPath` 를 locale-aware 로 고칠 필요가 없어 [ADR-0009](./0009-subdomain-public-serving.md) 의 서브도메인 라우팅과 무충돌.
+경로 프리픽스를 안 쓰므로 `src/middleware.ts` 는 **변경하지 않는다**. 이 결정의 값어치는 [ADR-0009](./0009-subdomain-public-serving.md) 의 서브도메인 rewrite 가 언젠가 들어와도 locale 인지 로직을 그 안에 섞을 필요가 없다는 데 있다 — 두 결정이 미들웨어에서 만나지 않는다.
+
+> **사실 정정 (2026-07-26 감사):** 이 절은 원래 `src/middleware.ts` 를 "서브도메인 rewrite, Supabase 세션 갱신" 이라 서술하고 `PLATFORM_PREFIXES`/`isPlatformPath` 를 언급했다. 셋 다 존재하지 않는다 — ADR-0009 가 미구현으로 남았기 때문이다. 현재 미들웨어는 `updateSession(request)` 호출 한 줄이 전부다. 결정("건드리지 않는다")은 유효하고, 틀린 것은 대상에 대한 서술뿐이었다.
 
 ### 6. 에러 레지스트리는 별도 모듈로 유지
 
@@ -65,5 +67,5 @@ ko/en 양방향 i18n 은 **빌더 제품**(랜딩, 인증, 대시보드, 에디�
 ## 관련
 
 - PRD #79 / 이슈 #80(인프라+로그인 tracer bullet)·#81(랜딩)·#82(인증)·#83(대시보드)·#84(에디터+설정) — 구현 단위.
-- [ADR-0009](./0009-subdomain-public-serving.md) — 미들웨어 host 분기를 본 결정이 건드리지 않는다(경로 프리픽스 미도입).
+- [ADR-0009](./0009-subdomain-public-serving.md) — 경로 프리픽스를 도입하지 않으므로, 그 결정이 구현될 때 미들웨어에서 충돌하지 않는다 (0009 는 현재 미구현).
 - CLAUDE.md "src/lib/errors" — 도메인 코드 → 표시 문자열 매핑이 locale-aware 로 확장됨.

@@ -69,7 +69,7 @@ export function RenderMultiSite({
     // Inject the derived page links into the known nav-driving sections: the
     // top nav (`type === 'nav'`, in shared.header) gets the in-nav pages; the
     // footer (`type === 'footer'`) gets the reachable-but-hidden pages. All
-    // other sections take plain props. See PLAN_multipage §3.3 / §6 (E).
+    // other sections take plain props. See ADR-0007.
     const injected =
       section.type === 'nav' ? navItems : section.type === 'footer' ? footerItems : null;
     const inner =

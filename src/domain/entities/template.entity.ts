@@ -189,7 +189,7 @@ export function deriveNav<T extends { visible: boolean; nav: NavMeta }>(
  * The explicit SEO for the page being served: Multi → the active page's `seo`
  * (falls back to the first/home page), Single → the Site-level `seo`. Returns
  * `undefined` when none is authored, so callers can fall back to extraction.
- * See ADR-0007 / PLAN_multipage §5 Phase 3.
+ * See ADR-0007.
  */
 export function resolveActivePageSeo(
   json: ContentModel,
@@ -204,7 +204,7 @@ export function resolveActivePageSeo(
  * Multi footer page links — the complement of the top nav: pages that are
  * reachable (`visible`) but deliberately kept out of the top nav
  * (`!nav.visible`), e.g. privacy / terms. Same shape as `deriveNav`.
- * See PLAN_multipage §6 (E).
+ * See ADR-0007 ("nav 는 저장하지 않는다 — projection").
  */
 export function deriveFooterNav(
   pages: Page[],

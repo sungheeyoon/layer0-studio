@@ -171,8 +171,8 @@ export async function syncTemplates(
 
     const existing = existingMap.get(preset.slug);
 
-    // Resolve thumbnail bytes → bucket URL (ADR-0012). Guard (friction doc
-    // TODO-2): on an UPDATE miss, keep the existing row's URL rather than
+    // Resolve thumbnail bytes → bucket URL (ADR-0012). Guard (PR #92):
+    // on an UPDATE miss, keep the existing row's URL rather than
     // clobbering it with a non-URL / null.
     const thumb = await resolveThumbnail(supabase, preset, { dryRun, thumbnailBaseUrl });
     if (!thumb.resolved) {

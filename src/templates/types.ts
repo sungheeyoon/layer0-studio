@@ -137,7 +137,7 @@ export interface NavItem {
  * `TemplateSectionProps` (which only carries its own `section`), so the site
  * renderer projects the menu (`deriveNav`) and injects it directly into the
  * `type === 'nav'` section. `navItems` is supplied by the renderer (always
- * present — possibly empty). See ADR-0007 / PLAN_multipage §3.3.
+ * present — possibly empty). See ADR-0007.
  */
 export interface NavSectionProps extends TemplateSectionProps {
   navItems: NavItem[];

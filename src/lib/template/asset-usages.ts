@@ -9,7 +9,7 @@ export interface AssetUsage {
  * Collect the image-asset usages of a Site, each keyed by a stable `slot_key`
  * so the save RPC can diff old vs new usages and sweep only true orphans.
  *
- * slot_key namespace (ADR-0007, PLAN_multipage §6 (F)):
+ * slot_key namespace (ADR-0007 Consequences):
  *   Single:        `${section.id}.${key}`
  *   Multi page:    `${page.id}.${section.id}.${key}`
  *   Multi shared:  `shared.${slot}.${section.id}.${key}`   (slot = header | footer)

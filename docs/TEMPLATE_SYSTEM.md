@@ -1,9 +1,9 @@
 # Template System — Layer0 Studio
 
-_대상: Template / Section component 를 추가·수정하거나 sync · generate 파이프라인을 손볼 개발자_
-_최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
+_대상: Template / Section component 를 추가·수정하거나 저작 · sync 파이프라인을 손볼 개발자_
+_최종 갱신: 2026-07-26 (문서 감사 — 사실관계 정정 및 중복 절제)_
 
-> 본 문서는 `CONTEXT.md` 의 도메인 어휘 (Template / Category / Section / Preset / Sync / Generate / Design Tokens / Global Styles) 와 `docs/adr/0001`–`0006` 을 기반으로 한다. 두 문서를 먼저 일별하면 본 문서가 자연스럽게 읽힌다.
+> 본 문서는 `CONTEXT.md` 의 도메인 어휘 (Template / Category / Section / Preset / Sync / Design Tokens / Global Styles) 와 `docs/adr/` 를 기반으로 한다. 특히 [ADR-0001](./adr/0001-beta-model-template-isolation.md)(isolation) · [ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)(코드가 진실) · [ADR-0005](./adr/0005-design-tokens-gradual-migration.md)(토큰 점진 전환) · [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)(Single/Multi) · [ADR-0012](./adr/0012-template-publishing-pipeline.md)(등록·공개 파이프라인) 를 먼저 일별하면 본 문서가 자연스럽게 읽힌다.
 
 이 문서 한 장만 읽으면 **(1) 시스템이 어떻게 굴러가는지**, **(2) 새 Template / Section 을 어떻게 추가하는지**, **(3) 어디를 만지면 무엇이 깨지는지** 모두 파악할 수 있도록 만든다. 추가 컨텍스트는 모두 코드에 있다 — 이 문서가 가리키는 위치만 따라가면 된다.
 
@@ -44,7 +44,7 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 
 | 용어 | 무엇 | 어디 산다 | 누가 만든다 |
 |---|---|---|---|
-| **Category** | Template 카탈로그 분류 버킷 (cafe / corporate / fitness / interior / legal / medical / outdoor / wedding). **두 가지 표기**: 파일시스템은 **소문자** 디렉터리명(`src/templates/cafe/`), 카탈로그·DB(`templates.category`)·`templateCategories` 값은 **첫 글자 대문자**(`Cafe`) — codegen 이 디렉터리명을 Capitalize 해 만든다. 자세히는 §2.6 | `src/templates/<category>/` 디렉터리 이름 | 개발자 (디렉터리 추가) |
+| **Category** | Template 카탈로그 분류 버킷 (현재 목록은 `ls -d src/templates/*/`). **두 가지 표기**: 파일시스템은 **소문자** 디렉터리명(`src/templates/cafe/`), 카탈로그·DB(`templates.category`)·`templateCategories` 값은 **첫 글자 대문자**(`Cafe`) — codegen 이 디렉터리명을 Capitalize 해 만든다. 자세히는 §2.6 | `src/templates/<category>/` 디렉터리 이름 | 개발자 (디렉터리 추가) |
 | **Template** | 한 Category 안의 한 디자인. **모든 시각/구성 자산을 자기 디렉터리 안에 자급자족** (ADR-0001) | `src/templates/<category>/<leaf>/` | 개발자 (코드 PR) 또는 Claude Code (`new-template` 스킬) |
 | **Section component** | 자기 메타 (`componentKey` / `category` / `label` / `fieldsSchema`) 를 동봉하는 self-describing React 컴포넌트 | `<templateDir>/library/<Name>.tsx` | 개발자 |
 | **Template Library** | `componentKey → Section component` 매핑. 한 Template 의 조립 키트. **다른 Template 와 공유 안 됨** | `<templateDir>/library/index.ts` | 개발자 |
@@ -66,14 +66,14 @@ _최종 갱신: 2026-05-22 (β 모델 기준 전면 개정)_
 
 > **핵심 약속**: 운영자가 어드민에서 description 을 바꿔도 다음 sync 가 코드값으로 되돌리지 않는다. `content` / 썸네일 / 버전은 **항상 코드 진실** — 어드민에서 코드 preset row 의 JSON 직접 편집은 차단되어 있음 (manual row 만 편집 허용).
 
-### 1.2 Sync vs Generate (ADR-0002 의 두 진입점)
+### 1.2 저작과 Sync — 두 진입점 (ADR-0002)
 
-- **Sync** (운영) — *기존 코드* → DB. `pnpm template:sync`. 매 배포마다.
-- **Generate** (창작) — *자연어 brief* → 새 코드 파일들 (그 다음 Sync 가 필요). **`new-template` Claude Code 스킬**(`.claude/skills/new-template/`)이 dev-time 에 수행. 사람/Claude Code 가 6 개 파일을 작성하고 검증 게이트를 돌린다 — 사용자(최종 고객)는 Template 을 만들지 않는다.
+- **저작** (창작) — *자연어 brief* → 새 코드 파일들. **`new-template` Claude Code 스킬**(`.claude/skills/new-template/`)이 dev-time 에 수행하며 6 개 파일을 쓰고 검증 게이트를 돌린다. 사용자(최종 고객)는 Template 을 만들지 않는다.
+- **Sync** (운영) — *기존 코드* → DB. `pnpm template:sync`. 프로덕션 배포 성공 후 자동([ADR-0012](./adr/0012-template-publishing-pipeline.md)).
 
-둘 다 *코드가 진실* 약속을 지킨다 — Generate 도 DB 에 직접 쓰지 않음 (sync 경유).
+저작은 DB 에 직접 쓰지 않는다 — 반드시 sync 를 경유한다. 그래서 *코드가 진실* 약속이 유지된다.
 
-> **이력**: 구버전엔 `pnpm template:generate` 라는 LLM API 4-stage CLI 파이프라인(`scripts/generate-template.ts`, Tracer #11–#17)이 있었으나, **Claude Code 스킬로 대체하며 제거됨** (눈먼 한 방 생성 + 사람 인계 대신, Claude Code 가 검증 루프를 자기가 닫고 추가 API 비용 0). 검증/이미지/카테고리 가드 로직(`validate-and-capture.ts`/`image-fetch.ts`/`category-gate.ts`)은 스킬의 도구로 살아남았다.
+> **이력**: 구버전엔 `pnpm template:generate` 라는 LLM API 4-stage CLI 파이프라인(`scripts/generate-template.ts`, Tracer #11–#17)이 있었으나 **Claude Code 스킬로 대체하며 제거됐다** (눈먼 한 방 생성 + 사람 인계 대신, Claude Code 가 검증 루프를 자기가 닫고 추가 API 비용 0). 검증/이미지/카테고리 가드 로직(`validate-and-capture.ts`/`image-fetch.ts`/`category-gate.ts`)은 스킬의 도구로 살아남았다. **"Generate" 를 고유명사처럼 쓰지 말 것** — 그런 명령도, 그런 도메인 용어도 지금은 없다. 그냥 "저작(authoring)" 이다.
 
 ---
 
@@ -231,7 +231,11 @@ export const designTokens: DesignTokens = { ... };                 // 풍부한 
 
 **컴포넌트 사용**: 인라인 hex 금지 (§6.3 ESLint 룰). `var(--color-primary)`, `var(--font-base)` 등 참조만 허용.
 
-**현재 적용 상태** (ADR-0005): **cafe-default** 만 풍부 토큰 패턴 적용 완료 (#9 demo). 나머지 8 개 Template 는 각자 `.module.css` 에 기존 `--{prefix}-{name}` 패턴 유지 — **의도적인 점진 전환**. 각 Template 가 다른 이유로 손볼 때 자연스럽게 새 패턴으로 옮긴다. 신규 Template (스킬 저작) 은 무조건 rich 패턴 (마이그 부담 줄이기 위해).
+**현재 적용 상태** (ADR-0005) — **문서가 아니라 코드에서 확인한다**: `grep -l designTokens src/templates/*/*/tokens.ts`. rich 패턴을 쓰는 Template 와 legacy `.module.css`(`--{prefix}-{name}`) Template 가 **의도적으로 공존**하며, 각 Template 가 다른 이유로 손볼 때 자연스럽게 옮겨간다. "전부 전환됨" 이 목표 상태가 아니다.
+
+**신규 Template (스킬 저작) 은 무조건 rich 패턴** — 마이그 부담을 늘리지 않기 위해.
+
+> 이 목록을 문서에 박아두면 반드시 낡는다. 2026-07-26 감사 시점에 이 절과 CLAUDE.md·CONTEXT.md·ADR-0005 가 모두 "cafe-default 만" 이라고 적고 있었으나 실제로는 네 개가 전환을 마친 상태였고, 그중 둘은 `.module.css` 를 아예 갖지 않는 완전 전환이었다.
 
 ### 2.6 Category 표기 규칙 — 소문자 디렉터리 / 대문자 카탈로그
 
@@ -276,7 +280,7 @@ Template 을 **어느 크기 기준으로 디자인하고, 그게 썸네일·에
 
 ```
 src/templates/cafe/default/
-├── tokens.ts                       # defaultGlobalStyles + designTokens (rich, cafe-default 만)
+├── tokens.ts                       # defaultGlobalStyles (+ designTokens 는 rich 패턴일 때, §2.5)
 ├── library/
 │   ├── index.ts                    # cafeDefaultLibrary: { componentKey: { Component, meta } }
 │   ├── HeroImage.tsx               # 서버 컴포넌트: 본문 끝에 Component.meta = {...}
@@ -497,10 +501,9 @@ Section component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변�
 
 ## 7. CLI / 명령 한 장 요약
 
-```bash
-# 코드 생성
-pnpm generate:templates           # _generated.ts 재생성 (predev/prebuild 에 자동 연결)
+명령 목록 자체는 `CLAUDE.md` 에도 있다. 여기 있는 이유는 **플래그와 변형**이고, 그건 이 문서에만 있다.
 
+```bash
 # Template 저작 (new-template 스킬이 검증 루프에서 사용)
 pnpm template:verify <templateKey>                # 통합 게이트(tsc/eslint/validate/schema↔jsx/capture)
 pnpm template:verify <templateKey> --skip-capture # 느린 썸네일 단계만 생략
@@ -525,9 +528,8 @@ pnpm template:delete <templateKey> --apply --force  # user_sites 하드 블록 �
 # Template 디렉터리 스캐폴드 (수동 빈 골격)
 pnpm template:scaffold
 
-# 검증
-pnpm test                         # vitest — validate 규칙 + sync 단위 테스트
-pnpm tsc --noEmit                 # 타입 체크 (CI 에서 클린 유지)
+# CI 게이트 (전 Template, capture 생략)
+pnpm template:verify:ci
 ```
 
 ### 7.1 Template 저작 흐름 (`new-template` 스킬)
@@ -545,10 +547,14 @@ brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 content `Conten
 
 생성 결과: `src/templates/<category>/<leaf>/` 안에 6 개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). `pnpm generate:templates` 로 `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 미리보기.
 
+> **프리뷰 렌더 검증은 capture 로만 가능하다 — `curl` 로는 안 된다.** `TemplateClientWrapper` 가 `loadTemplate()` 를 `useEffect` 안에서 동적 import 하므로 SSR HTML 에는 직렬화된 props JSON 만 들어가고 섹션 DOM 은 없다. `curl /preview/preset/<key>` 결과에 섹션이 안 보이는 건 렌더 실패가 아니라 **의도된 동작**이다. 실제 렌더/레이아웃 확인은 Playwright capture 또는 브라우저로 한다.
+
 **검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateContent` — `preset.content`(ContentModel) 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared 됨 cross-check (브레이스 밸런스 파서); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
 > `template:verify` 는 템플릿 모듈을 동적 import 하므로 첫 줄에서 `./lib/register-css-stub` 를 로드해 `.module.css` import 가 tsx 에서 깨지지 않게 한다 (sync 와 동일).
 
-**New-category 가드**: 새 category slug 은 `^[a-z][a-z0-9-]{0,39}$` 를 만족해야 하고, 기존 디렉터리에 없는 새 top-level category 는 구조 변경이므로 사람의 명시적 승인 후 만든다 (`scripts/lib/category-gate.ts`, 정확 일치만 — `cafe-studio` 는 `cafe` 와 별개).
+**New-category 규칙**: 새 category slug 은 `^[a-z][a-z0-9-]{0,39}$` 를 만족해야 하고, 기존 디렉터리에 없는 새 top-level category 는 구조 변경이므로 사람의 명시적 승인 후 만든다. 판정은 정확 일치만 — `cafe-studio` 는 `cafe` 의 변형이 아니라 새 category 다.
+
+> **⚠️ 이 규칙은 현재 강제되지 않는다 (2026-07-26 감사).** `scripts/lib/category-gate.ts` 가 판정 함수(`validateCategorySlug` / `isExistingCategory` / `listExistingCategories`)를 제공하지만 **호출부가 자기 테스트뿐**이다 — 제거된 `template:generate` CLI 가 유일한 소비자였고, `new-template` 스킬은 이 모듈을 쓰지 않으며 SKILL.md 에도 승인 단계가 없다. 즉 지금은 **작업자의 판단에 의존하는 규약**이지 게이트가 아니다. 배선 여부는 [#125](https://github.com/sungheeyoon/layer0-studio/issues/125) 에서 다룬다.
 
 ### 7.2 이미지 호스팅 헬퍼 (Issue #15)
 
@@ -809,23 +815,11 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 
 ---
 
-## 13. Migration 히스토리 (템플릿 관련만)
+## 13. Migration 히스토리
 
-| 번호 | 내용 | 프로덕션 적용 |
-|---|---|---|
-| 011 | `template_sync_audit` 테이블 (sync 감사 로그) | ✅ |
-| 012 | content JSONB 의 `section.order` 필드 일괄 제거 (Phase 6d; 당시 컬럼명 `template_json`/`site_json`/`template_snapshot`, migration 021 에서 개명) | ✅ |
-| 021 | 컬럼 rename `template_json`/`site_json`/`template_snapshot` → `content`/`content`/`snapshot` + `save_site_template_with_lock` RPC 재작성 (ADR-0013) | ✅ |
-| 022 | section JSONB 키 `data` → `fields` 백필 (전 content 컬럼; `.meta.dataSchema` → `.meta.fieldsSchema` 코드 개명과 짝) | ✅ |
-| 013 | `themeKey` → `templateKey` 일괄 rename (β 모델 정합) | ✅ |
-| 014 | `template_assets` public storage 버킷 (AI 생성 / 스톡 이미지 호스팅, #7) | ✅ |
-| 015 | user_sites templateKey 를 `${category}-${leaf}` 슬러그로 정렬 (β 모델) | 진행 |
-| 016 | 015 후속 fix | 진행 |
-| 017 | custom templateKey fix | 진행 |
+`docs/migrations/` 의 001–025 가 **전부 프로덕션 적용됨.** 각 파일 헤더 주석이 무엇을 왜 했는지 설명하므로 요약본이 아니라 파일을 읽는다 — 여기 표를 두면 세 번째 사본이 되고, 실제로 그렇게 낡았다(2026-07-26 감사 시점에 이 절은 015–017 을 "진행" 으로 표시하고 018 이후를 통째로 누락하고 있었다).
 
-`registry.ts` 의 backward-compat shim (legacy 'cafe' → 'cafe-default') 은 015 / 016 / 017 정착 후 제거 예정.
-
-전체 시스템 이력 (Phase 1 ~ 6d, β 마이그) 은 git log 참고 — 커밋 메시지에 phase 번호와 의도가 적혀 있음. 본 문서는 **현재 동작하는 상태**만 기술한다.
+전체 시스템 이력 (Phase 1 ~ 6d, β 마이그) 은 git log 를 본다 — 커밋 메시지에 phase 번호와 의도가 적혀 있다. 본 문서는 **현재 동작하는 상태**만 기술한다.
 
 ---
 

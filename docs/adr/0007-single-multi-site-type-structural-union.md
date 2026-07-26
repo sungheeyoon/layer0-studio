@@ -1,6 +1,6 @@
 # Single / Multi 는 구조적으로 분리된 Site Type — nav 는 projection
 
-> **Status: Accepted — 구현 완료** (PR #45–#54). `TemplateJson` 유니온·`renderSingleSite`/`renderMultiSite`·`[[...slug]]` 라우팅·양쪽 에디터·nav/footer projection·PageSeo·sitemap·asset slot_key 까지 전부 반영됨. 설계 원문/단계는 [`docs/plans/PLAN_multipage.md`](../plans/PLAN_multipage.md) 참고.
+> **Status: Accepted — 구현 완료** (PR #45–#54). `TemplateJson` 유니온·`renderSingleSite`/`renderMultiSite`·`[[...slug]]` 라우팅·양쪽 에디터·nav/footer projection·PageSeo·sitemap·asset slot_key 까지 전부 반영됨. (설계 원문이던 `docs/plans/PLAN_multipage.md` 는 구현 완료 후 삭제 — 본 ADR 이 그 결정을 승계한다. 당시 단계별 계획이 필요하면 git 이력의 PR #45–#54 를 본다.)
 >
 > **용어 note (ADR-0013 이후):** 아래 본문·코드블록의 타입 이름은 *설계 당시* 이름이다. [ADR-0013](./0013-content-model-rename.md) 이 구조는 그대로 둔 채 이름만 개명했다 — `TemplateJson→ContentModel`, `TemplateSection→Section`, `TemplateField→Field`, `TemplatePage→Page`, `TemplateGlobalStyles→GlobalStyles`, `isSingle/MultiTemplate→isSingle/MultiContent`, section 의 `data`→`fields`(migration 022), 신설 `SiteMode='single'|'multi'`. 현재 이름 기준 정식 설명은 CONTEXT.md / TEMPLATE_SYSTEM.md 를 본다.
 
@@ -44,12 +44,11 @@ nav 객체 모양·필터 규칙(`visible && nav.visible`)·라벨 출처(`nav.l
 
 - **기존 Single `user_sites` 마이그레이션 완료** — **migration 018** (`docs/migrations/018_single_site_type.md`, 프로덕션 적용됨; PLAN 초안의 "015" 번호가 아니라 실제로는 018 로 실행, `templates` 테이블 정렬은 **019**): `{ pages:[home] }` → `{ mode:'single', sections }` 평탄화, `data.label` 키 → `eyebrow`, nav 섹션 `menu1~N` 제거, 각 섹션 `nav:{visible,label}` 주입, `editable` 제거, slot_key `${page.id}.${section.id}.${key}` → `${section.id}.${key}` (다음 저장 시 RPC self-heal). 위험은 낮음(평탄화+리네임, nav/footer 들어올리기 아님).
 - **`mode` 분기는 사이트 수준 엔트리포인트에 모으되**, 실제로는 렌더·에디터·검증·영속화(asset slot_key)·키주입 ~5개 축에서 mode-aware fork 가 발생한다 — "의도된 분기"로 수용.
-- **Multi 는 기존 Single 템플릿을 개조하지 않고 새 템플릿으로 출시** — 최초 예시였던 `corporate-multipage` 는 이후 제거됨(migration 020). **현재 출시되는 Multi 템플릿은 `outdoor-default`(능선)** 이며 나머지 9 개는 Single. Multi 렌더링 인프라(`renderMultiSite`, `[[...slug]]` 라우팅)는 `outdoor-default` 가 실사용 중이고, `renderMultiSite.test` 는 출시 템플릿 콘텐츠에 결합하지 않도록 자체 인라인 픽스처로 렌더러를 검증한다.
+- **Multi 는 기존 Single 템플릿을 개조하지 않고 새 템플릿으로 출시** — 최초 예시였던 최소 구현 `corporate-multipage` 는 이후 제거됐다(migration 020). Multi 렌더링 인프라(`renderMultiSite`, `[[...slug]]` 라우팅)는 실사용 중이다. 어느 Template 이 Multi 인지는 문서가 아니라 코드에서 확인한다 — `grep -l "mode: 'multi'" src/templates/*/*/template.ts`. `renderMultiSite.test` 는 출시 템플릿 콘텐츠에 결합하지 않도록 자체 인라인 픽스처로 렌더러를 검증한다.
 - nav 컴포넌트는 `type === 'nav'` 로 식별해 `navItems` 를 직접 주입(메타 카테고리 탐색 같은 추가 추상화 없음).
 
 ## 관련
 
-- 설계 원문: [`docs/plans/PLAN_multipage.md`](../plans/PLAN_multipage.md)
 - [ADR-0001](./0001-beta-model-template-isolation.md) — Template isolation. 0001 의 "Future direction"(디렉터리 `pages/<page>/sections/` 발전)은 *디렉터리/렌더러 코드* 차원의 미해결 항목으로 남으며, 본 ADR 은 그와 독립인 **데이터 모델(TemplateJson)** 차원의 결정이다.
 - [ADR-0004](./0004-optimistic-concurrency-via-rpc.md) — 저장 RPC 가 유니온 스키마(특히 multi `shared`)를 통과시키는지 확인 필요.
 - CONTEXT.md — Site Type(single/multi), nav projection, `visible`/`nav.visible` 2축, "composition"·"page" flagged ambiguity 갱신 대상.
