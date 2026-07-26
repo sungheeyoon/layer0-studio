@@ -1,0 +1,8 @@
+flowchart LR
+  A["자동 저장"] --> RPC
+  B["수동 저장"] --> RPC
+  C["게시"] --> RPC
+  RPC["save RPC"] --> X["같은 버전 토큰으로 경합<br/>자기 자신과 충돌"]
+  D["화면 이탈"] --> Y["저장되지 않음"]
+  style X fill:#f8d7da,stroke:#dc3545,stroke-width:1.5px
+  style Y fill:#f8d7da,stroke:#dc3545,stroke-width:1.5px

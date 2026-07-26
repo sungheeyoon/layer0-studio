@@ -1,0 +1,11 @@
+flowchart LR
+  A["자동 저장<br/>4초 idle · 15초 상한"] --> Q
+  B["수동 저장"] --> Q
+  C["게시"] --> Q
+  D["화면 이탈 flush"] --> Q
+  Q["Write Queue<br/>단일 직렬화"] --> RPC["save RPC<br/>버전 검사"]
+  RPC -->|"일치"| DB[("저장 완료")]
+  RPC -->|"불일치"| CF["충돌 모달"]
+  style A fill:#d4edda,stroke:#28a745,stroke-width:1.5px
+  style D fill:#d4edda,stroke:#28a745,stroke-width:1.5px
+  style Q fill:#d4edda,stroke:#28a745,stroke-width:1.5px

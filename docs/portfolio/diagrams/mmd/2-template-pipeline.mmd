@@ -1,0 +1,7 @@
+flowchart LR
+  D["템플릿 디렉터리<br/>추가"] --> CG["codegen<br/>Registry 자동 등록"]
+  CG --> CI["CI 게이트<br/>타입 · Lint · 테스트<br/>스키마 ↔ 렌더러 일관성"]
+  CI --> DP["프로덕션 배포"]
+  DP --> SY["카탈로그 자동 반영"]
+  style D fill:#d4edda,stroke:#28a745,stroke-width:1.5px
+  style CI fill:#fff3cd,stroke:#d39e00,stroke-width:1.5px

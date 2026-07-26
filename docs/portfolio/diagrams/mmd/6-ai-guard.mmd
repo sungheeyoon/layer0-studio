@@ -1,0 +1,11 @@
+flowchart LR
+  I["AI 생성 코드"] --> G1["Schema<br/>검증"]
+  G1 --> G2["단계별<br/>승인"]
+  G2 --> G3["Validation<br/>규칙"]
+  G3 --> G4["ESLint<br/>커스텀 룰"]
+  G4 --> G5["Sync<br/>재검증"]
+  G5 --> M["Merge · 배포"]
+  G4 -. "위반 시" .-> F["빌드 실패"]
+  style I fill:#f8d7da,stroke:#dc3545,stroke-width:1.5px
+  style F fill:#f8d7da,stroke:#dc3545,stroke-width:1.5px
+  style M fill:#d4edda,stroke:#28a745,stroke-width:1.5px

@@ -1,0 +1,11 @@
+flowchart LR
+  C["Client"] --> SA["Server Action"]
+  SA --> DI["DI Factory"]
+  DI --> R["Read Use Case"]
+  DI --> W["Write Use Case"]
+  R --> RP["Repository"]
+  W --> VAL["Content Validator<br/>+ Template Registry<br/>(Template CSS 11개)"]
+  W --> RP
+  RP --> DB[("Supabase")]
+  style R fill:#d4edda,stroke:#28a745,stroke-width:1.5px
+  style VAL fill:#fff3cd,stroke:#d39e00,stroke-width:1.5px
