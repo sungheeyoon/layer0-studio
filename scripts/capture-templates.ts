@@ -96,9 +96,6 @@ async function captureTheme(templateKey: string, config: ThumbnailConfig, browse
   if (config.source.startsWith('preview://')) {
     const presetKey = config.source.replace('preview://', '');
     url = `http://localhost:3000/preview/preset/${presetKey}`;
-  } else if (config.source.startsWith('templates-ui/')) {
-    const htmlPath = join(ROOT, config.source);
-    url = pathToFileURL(htmlPath).href;
   } else {
     url = config.source;
   }

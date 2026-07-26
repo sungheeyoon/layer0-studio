@@ -754,7 +754,7 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
     **해법**: client 컴포넌트의 meta 는 항상 sibling `<Component>.meta.ts` 에 named export 로 정의하고, `library/index.ts` 에서 `libEntry(Component, componentMeta)` 로 명시 전달. server 컴포넌트는 종전대로 `.meta = {...}` 그대로 OK.
 
 13. **Capture 는 dev server 를 띄움**
-    `thumbnail.config.ts` 의 `source` 가 `preview://` 로 시작하면 `capture-templates.ts` 가 자동으로 `pnpm dev` 를 백그라운드로 실행. CI 에서는 `templates-ui/*.html` 파일 source 를 쓰면 server-less.
+    `thumbnail.config.ts` 의 `source` 가 `preview://` 로 시작하면 `capture-templates.ts` 가 자동으로 `pnpm dev` 를 백그라운드로 실행. 서버 없이 캡처하려면 `source` 에 `file://` URL 을 직접 준다.
 
 14. **인덱스 기반 스타일링의 한계 (Array Field)**
     `Array Field` 항목을 렌더링할 때 `idx === 0` 처럼 인덱스에 따라 스타일 (예: 넓은 카드, 특정 아이콘) 을 다르게 주면, 사용자가 에디터에서 항목 순서를 바꿀 때 디자인 요소가 항목을 따라가지 않고 '슬롯' 에 고정되는 현상이 발생함. "항목에 종속된 디자인" 이 필요하다면 `itemSchema` 에 `style` 이나 `icon` 같은 `select` 필드를 추가하여 사용자가 직접 지정하게 하는 것이 좋음.
