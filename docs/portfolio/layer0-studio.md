@@ -20,7 +20,7 @@
 
 > 사용자는 템플릿을 선택하여 새로운 사이트를 생성합니다.
 
-![Template List](./screenshots/template-list.png)
+![Template List](./screenshots/template-list.webp)
 
 ---
 
@@ -28,7 +28,7 @@
 
 > 생성한 사이트를 시각적으로 편집하며 변경 사항을 즉시 확인할 수 있습니다.
 
-![Visual Editor](./screenshots/editor.png)
+![Visual Editor](./screenshots/editor.webp)
 
 ---
 
