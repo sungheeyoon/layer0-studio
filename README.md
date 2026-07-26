@@ -24,9 +24,12 @@ flowchart LR
   W --> VAL["Content Validator<br/>+ Template Registry<br/>(Template CSS 11개)"]
   W --> RP
   RP --> DB[("Supabase")]
-  style R fill:#d4edda,stroke:#28a745,stroke-width:1.5px
-  style VAL fill:#fff3cd,stroke:#d39e00,stroke-width:1.5px
+  style R fill:#d4edda,stroke:#28a745,stroke-width:1.5px,color:#14532d
+  style VAL fill:#fff3cd,stroke:#d39e00,stroke-width:1.5px,color:#5c3d00
 ```
+
+> 🟩 **읽기 경로** — Repository 로 바로 내려가는 가벼운 경로.
+> 🟨 **쓰기 경로의 검증 관문** — 여기서만 Content Validator 와 Template Registry 를 끌어옵니다.
 
 - **Domain layer** — 순수 비즈니스 로직(엔티티, 리포지토리 인터페이스, 유스케이스). Vitest 단위 테스트는 도메인 레이어만 in-memory fake로 검증합니다.
 - **요청별 DI** — 싱글톤 없이 매 요청마다 새 Supabase 클라이언트로 조립. 인증 컨텍스트가 절대 누설되지 않습니다.
