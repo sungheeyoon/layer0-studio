@@ -6,22 +6,24 @@ import type { TemplateRendererProps } from '@/templates/types';
 import type { ContentModel } from '@/domain/entities/template.entity';
 
 /**
- * Fixed desktop *width* the preview renders at, then `transform: scale()`-d to
- * fill the editor's preview panel. Rendering inline in the panel would resolve
- * `vh`/breakpoints against the (smaller) panel, not a real screen — the iframe
- * gives us a real 1440-wide desktop viewport regardless of panel size, and the
- * layout/breakpoints are always the consistent 1440 desktop view.
+ * Fixed desktop viewport the preview renders at, then `transform: scale()`-d
+ * *down* to fit the editor's preview panel. Rendering inline in the panel would
+ * resolve `vh`/breakpoints against the (smaller) panel, not a real screen — the
+ * iframe gives us a real 1440×900 desktop viewport regardless of panel size.
  *
- * - `scale = panelWidth / 1440` fills the panel width. It may exceed 1 on a wide
- *   monitor (the canvas is magnified) — `transform: scale()` is uniform, so this
- *   never distorts/stretches; the 1440 layout just renders larger.
- * - The iframe *height* is derived as `panelHeight / scale` so the scaled canvas
- *   exactly fills the panel height. That keeps the iframe the *only* scroller (no
- *   double/outer scrollbar regardless of scale) and makes `100vh` track the
- *   visible preview, so the hero fills the frame like a real browser window.
+ * Both dimensions are fixed on purpose: the preview is a proportionally correct
+ * *miniature* of a desktop browser window, not a panel-shaped one. `100vh` inside
+ * the frame is 900 logical px — the same fraction of the fold a real desktop
+ * visitor sees — so heroes crop identically.
+ *
+ * - `scale = min(panelW / 1440, panelH / 900, 1)` — contain-fit, uniform (never
+ *   distorts) and capped at 1 so a wide monitor never *magnifies* past 1:1.
+ *   Leftover panel space becomes letterbox margin around the centered frame.
+ * - The iframe keeps its own 1440×900 viewport, so it stays the *only* scroller
+ *   (no double/outer scrollbar) — scrolling it mirrors scrolling a real window.
  */
 const VIEWPORT_WIDTH = 1440;
-const FALLBACK_HEIGHT = 900;
+const VIEWPORT_HEIGHT = 900;
 
 const CLONE_MARKER = 'data-editor-preview-clone';
 
@@ -72,11 +74,12 @@ export default function EditorPreviewFrame({
   const [ready, setReady] = useState(false);
   const [panel, setPanel] = useState({ w: 0, h: 0 });
 
-  // Scale to fill the panel width (uniform — never distorts; see header comment).
-  const scale = panel.w ? panel.w / VIEWPORT_WIDTH : 1;
-  // Derive the iframe's logical height so the scaled canvas fills the panel height
-  // exactly → the iframe is the only scroller (no outer/double scrollbar).
-  const frameHeight = panel.h ? Math.round(panel.h / scale) : FALLBACK_HEIGHT;
+  // Contain-fit the fixed desktop viewport into the panel (uniform — never
+  // distorts), capped at 1:1 so a wide panel doesn't magnify. See header comment.
+  const scale =
+    panel.w && panel.h
+      ? Math.min(panel.w / VIEWPORT_WIDTH, panel.h / VIEWPORT_HEIGHT, 1)
+      : 1;
 
   // ── Measure the panel to size & scale the canvas ──────────────────────────
   useLayoutEffect(() => {
@@ -184,21 +187,24 @@ export default function EditorPreviewFrame({
   ]);
 
   return (
-    // No outer scroll — the scaled canvas fills the panel and the iframe is the
-    // only scroller.
-    <div ref={wrapperRef} className="flex h-full w-full justify-center overflow-hidden">
-      {/* Placeholder = the *scaled* canvas footprint (width floored so sub-pixel
-          rounding never exceeds the panel; height = full panel height). */}
+    // No outer scroll — the scaled canvas is letterboxed inside the panel and the
+    // iframe is the only scroller.
+    <div ref={wrapperRef} className="flex h-full w-full items-center justify-center overflow-hidden">
+      {/* Placeholder = the *scaled* canvas footprint, floored so sub-pixel
+          rounding never exceeds the panel. */}
       <div
-        style={{ width: Math.floor(VIEWPORT_WIDTH * scale), height: panel.h || FALLBACK_HEIGHT * scale }}
-        className="shrink-0 shadow-2xl"
+        style={{
+          width: Math.floor(VIEWPORT_WIDTH * scale),
+          height: Math.floor(VIEWPORT_HEIGHT * scale),
+        }}
+        className="shrink-0 overflow-hidden rounded-md shadow-2xl"
       >
         <iframe
           ref={iframeRef}
           title="preview"
           style={{
             width: VIEWPORT_WIDTH,
-            height: frameHeight,
+            height: VIEWPORT_HEIGHT,
             border: 0,
             backgroundColor: 'white',
             transform: `scale(${scale})`,
