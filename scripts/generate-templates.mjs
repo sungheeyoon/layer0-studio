@@ -94,4 +94,8 @@ const lines = [
 ];
 
 writeFileSync(outputFile, lines.join('\n'), 'utf-8');
-console.log(`generate:templates — wrote ${templates.length} templates across ${categories.length} categories.`);
+// Count categories that actually yielded a template — `categories` is every
+// top-level dir, which includes non-category ones like `__tests__` that
+// contribute no leaf. Deriving from `templates` needs no skip-list upkeep.
+const categoryCount = new Set(templates.map((t) => t.category)).size;
+console.log(`generate:templates — wrote ${templates.length} templates across ${categoryCount} categories.`);
