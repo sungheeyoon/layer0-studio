@@ -16,24 +16,16 @@ Clean Architecture — 의존성은 안쪽으로만 흐릅니다. Server Action�
 
 ```mermaid
 flowchart LR
-  C["Client"] --> SA["Server Action"]
-  SA --> DI["DI Factory"]
-  DI --> R["Read Use Case"]
-  DI --> W["Write Use Case"]
-  R --> RP["Repository"]
-  W --> VAL["Content Validator<br/>+ Template Registry<br/>(Template CSS 11개)"]
-  W --> RP
-  RP --> DB[("Supabase")]
-  style R fill:#d4edda,stroke:#28a745,stroke-width:1.5px,color:#14532d
-  style VAL fill:#fff3cd,stroke:#d39e00,stroke-width:1.5px,color:#5c3d00
+    Client[Client] --> Action[Server Action]
+    Action --> DI[DI Factory]
+    DI --> UC[Use Case]
+    UC --> Repo[Repository]
+    Repo --> DB[(Supabase)]
 ```
-
-> 🟩 **읽기 경로** — Repository 로 바로 내려가는 가벼운 경로.
-> 🟨 **쓰기 경로의 검증 관문** — 여기서만 Content Validator 와 Template Registry 를 끌어옵니다.
 
 - **Domain layer** — 순수 비즈니스 로직(엔티티, 리포지토리 인터페이스, 유스케이스). Vitest 단위 테스트는 도메인 레이어만 in-memory fake로 검증합니다.
 - **요청별 DI** — 싱글톤 없이 매 요청마다 새 Supabase 클라이언트로 조립. 인증 컨텍스트가 절대 누설되지 않습니다.
-- **읽기 / 쓰기 경로 분리** ([ADR-0008](docs/adr/0008-keep-explicit-di-factories.md)) — DI Factory 를 범용 resolver 로 합치지 않고 유스케이스별로 명시해 둡니다. 검증이 필요한 쓰기 경로만 Content Validator 와 Template Registry(=Template CSS 11개)를 끌어오고, 가벼운 읽기 경로는 그 무게를 지지 않습니다.
+- **읽기 / 쓰기 경로 분리** ([ADR-0008](docs/adr/0008-keep-explicit-di-factories.md)) — 검증이 필요한 쓰기 경로만 Content Validator 와 Template Registry 를 끌어오고, 읽기 경로는 그 의존성을 아예 import 하지 않습니다.
 - **타입드 에러** — Use Case가 던지는 도메인 에러 코드를 클라이언트가 한국어 메시지로 매핑(`src/lib/errors/messages.ts`).
 
 상세 구현은 [프레임워크 없는 DI · Clean Architecture를 작게 적용하기](https://layer0-studio.vercel.app/articles/clean-architecture.html).
