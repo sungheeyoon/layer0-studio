@@ -148,7 +148,7 @@ Required in `.env.local` (and in Vercel project env for deploys):
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_SITE_URL=       # e.g. https://layer0.studio — used by sitemap, robots, metadataBase, OG canonical
+NEXT_PUBLIC_SITE_URL=       # e.g. https://layer0-studio.vercel.app — used by sitemap, robots, metadataBase, OG canonical
 CRON_SECRET=                # Bearer token validated by /api/cron/cleanup-assets
 TEMPLATE_SYNC_SECRET=       # Bearer token validated by POST /api/admin/sync-templates (template registration, ADR-0012). Mirror the SAME value as a GitHub Actions secret — .github/workflows/register-templates.yml uses it to call the endpoint after a production deploy.
 ```

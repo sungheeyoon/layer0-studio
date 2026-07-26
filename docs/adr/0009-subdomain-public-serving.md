@@ -2,6 +2,8 @@
 
 > **Status: Accepted — 미구현** (2026-07-26 확인). 결정만 존재하고 코드는 없다 — `src/middleware.ts` 에 host 분기·internal rewrite 가 **없으며**, 공개 Site 는 여전히 경로 기반 `/site/<slug>` 로 서빙된다. 아래 본문은 **구현할 때 따를 설계**이지 현재 동작의 설명이 아니다.
 >
+> **미구현 이유는 코드가 아니라 인프라 선행 조건이다.** 아래 Consequences 가 전제하는 것은 커스텀 도메인 `layer0.studio` + `*` 와일드카드 등록인데, 현재 프로덕션 origin 은 `layer0-studio.vercel.app` 이다. 그리고 같은 Consequences 가 스스로 명시하듯 **`*.vercel.app` 에서는 서브도메인 동작이 성립하지 않는다**(host 가 `ROOT_DOMAIN` 과 불일치). `NEXT_PUBLIC_ROOT_DOMAIN` env 도 아직 코드·`.env.local.example` 어디에도 없다. 즉 이 결정은 미들웨어를 쓰지 않아서 막힌 게 아니라 **도메인 연결이 선행 조건**이며, 그것 없이는 구현해도 검증할 환경이 없다.
+>
 > 원 결정: 공개 Site 서빙을 경로 기반(`layer0.studio/site/<slug>`)에서 **서브도메인 기반**(`<slug>.layer0.studio`)으로 전환한다. `/site/[domain]` 라우트 핸들러는 그대로 재사용하되, 미들웨어 host 분기 + internal rewrite 를 그 앞단에 둔다.
 
 ## 맥락

@@ -66,7 +66,7 @@ pnpm dev                           # http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_SITE_URL=          # 예: https://layer0.studio — sitemap, robots, metadataBase, OG canonical
+NEXT_PUBLIC_SITE_URL=          # 예: https://layer0-studio.vercel.app — sitemap, robots, metadataBase, OG canonical
 CRON_SECRET=                   # /api/cron/cleanup-assets Bearer 토큰
 TEMPLATE_SYNC_SECRET=          # POST /api/admin/sync-templates Bearer 토큰 (Template 등록, ADR-0012)
 ```
