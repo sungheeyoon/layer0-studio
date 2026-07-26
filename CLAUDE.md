@@ -25,7 +25,7 @@ TypeScript checking: `pnpm tsc --noEmit`. Tests live in `src/domain/__tests__/` 
 
 ## Architecture
 
-Layer0 Studio is a no-code website builder built on **Next.js 16** (App Router), **Supabase** (auth + DB + storage), and **Tailwind CSS v4**. Users pick a Template, edit it visually, and publish it to a Subdomain (see `CONTEXT.md` for the canonical glossary; `docs/adr/` for architectural decisions worth remembering).
+Layer0 Studio is a no-code website builder built on **Next.js 16** (App Router), **Supabase** (auth + DB + storage), and **Tailwind CSS v4**. Users pick a Template, edit it visually, and publish it to a public URL (today: the path-based `/site/<slug>` renderer — Subdomain serving is designed but **not implemented**, see [ADR-0009](./docs/adr/0009-subdomain-public-serving.md)) (see `CONTEXT.md` for the canonical glossary; `docs/adr/` for architectural decisions worth remembering).
 
 ### Layer structure
 

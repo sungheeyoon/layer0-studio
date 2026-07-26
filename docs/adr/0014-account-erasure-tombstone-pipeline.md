@@ -1,5 +1,7 @@
 # Account Erasure 는 Tombstone 을 먼저 남기는 원자적 커밋 지점 + 재개 가능한 파이프라인
 
+> **Status: Accepted — 구현 완료.** `DeleteAccountUseCase` + `SupabaseAccountErasureRepository`, migration **024**(`asset_tombstones` 트리거 + `request_account_erasure` RPC)·**025**(`claim_asset_tombstones`) 프로덕션 적용.
+
 계정 삭제는 DB·Storage·Auth 세 시스템에 걸친 비가역 연산이라 단일 트랜잭션으로 표현할 수 없다. 그래서 **커밋 지점 하나**(요청 기록 + 행 삭제 + **Tombstone** 발행을 한 트랜잭션에 묶음)를 정의하고, 나머지(스토리지 드레인 → auth principal 파기)는 그 뒤에 오는 **멱등·재개 가능한 단계**로 둔다. 커밋 지점을 통과한 순간 사용자는 잠기고 Site 는 어두워지며, 이후 단계가 아직 안 돌았어도 그 사실은 변하지 않는다.
 
 ## 배경 — 무엇이 실제로 깨져 있었나

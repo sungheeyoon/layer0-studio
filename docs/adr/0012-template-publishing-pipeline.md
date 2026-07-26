@@ -1,6 +1,6 @@
 # 템플릿 퍼블리싱 파이프라인 — 등록은 배포 후 자동, 공개는 머지로
 
-> **Status: Accepted.** `new-template` 스킬로 저작한 Template 의 **등록(Register)** 과 **공개(Publish)** 를 분리하되, 둘 다 사람의 수동 단계에서 걷어낸다. 등록은 **프로덕션 배포 성공 직후 CI 가 자동**(`template:sync --apply`)으로 수행하고, 첫 공개는 **PR 머지 = 승인**으로 보아 신규 행을 곧바로 `active` 로 만든다. 운영 중 긴급 내림(takedown)·재공개만 `canPublishTemplates` 런타임 토글로 남긴다. 현행 어드민 "Sync from Code → Apply Sync" 수동 2단계를 폐기(비상용으로 축소)한다. ADR-0002(코드가 source of truth)·ADR-0006(canPublishTemplates 분리)를 잇고 후자의 스코프를 재정의한다.
+> **Status: Accepted — 구현 완료** (`.github/workflows/register-templates.yml` → `POST /api/admin/sync-templates`). `new-template` 스킬로 저작한 Template 의 **등록(Register)** 과 **공개(Publish)** 를 분리하되, 둘 다 사람의 수동 단계에서 걷어낸다. 등록은 **프로덕션 배포 성공 직후 CI 가 자동**(`template:sync --apply`)으로 수행하고, 첫 공개는 **PR 머지 = 승인**으로 보아 신규 행을 곧바로 `active` 로 만든다. 운영 중 긴급 내림(takedown)·재공개만 `canPublishTemplates` 런타임 토글로 남긴다. 현행 어드민 "Sync from Code → Apply Sync" 수동 2단계를 폐기(비상용으로 축소)한다. ADR-0002(코드가 source of truth)·ADR-0006(canPublishTemplates 분리)를 잇고 후자의 스코프를 재정의한다.
 
 ## 맥락
 

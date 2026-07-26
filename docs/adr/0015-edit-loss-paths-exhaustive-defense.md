@@ -1,5 +1,7 @@
 # 편집 손실은 동시성 문제가 아니라 경로의 집합이다 — 전수 열거와 방어
 
+> **Status: Accepted — 구현 완료.** 언마운트 flush · `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`) · 단일 write queue (`src/lib/editor/write-queue.ts`) · blocking→warning 강등 · `layout` 에디터 컨트롤 제거.
+
 [ADR-0004](./0004-optimistic-concurrency-via-rpc.md) 는 편집 손실을 **동시성 문제**로 모델링하고 그 한 갈래(탭 간 silent overwrite)를 RPC 로 정확히 막았다. 그 결정은 지금도 옳다. 문제는 그것이 손실의 **유일한** 갈래인 것처럼 취급됐다는 점이다. 같은 데이터가 사라지는 경로는 그 뒤로도 열려 있었고, 각각 전혀 다른 메커니즘을 갖고 있었다.
 
 이 ADR 은 손실 경로를 전수 열거하고, 각 경로에 대해 **어디까지 막고 어디부터 막지 않는지**를 명시한다. 부분적으로만 열거된 위협 모델이 이 결함의 원인이었으므로, 열거 자체가 결정의 일부다.

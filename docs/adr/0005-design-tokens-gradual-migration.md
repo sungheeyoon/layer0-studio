@@ -1,6 +1,8 @@
 # Rich Design Tokens — 점진적 마이그레이션 (cafe-default 부터)
 
-Rich Design Tokens 패턴 (`tokens.ts` 에서 `designTokens` 객체를 export → `tokensToCssVars()` 로 CSS 변수 펼침) 은 현재 **cafe-default Template 에만** 적용되어 있다. 나머지 8 개 legacy Template 는 기존의 per-Template `.module.css` 패턴을 유지한다. 이는 **미완성 상태가 아니라 의도적인 점진 전환 (gradual migration)** 이다.
+> **Status: Accepted — 부분 구현 (의도).** `cafe-default` 만 rich 패턴을 쓰고 나머지 Template 는 legacy `.module.css` 를 유지한다. **여기서 "부분"은 결함이 아니라 결정의 내용 그 자체** — "완료"로 바뀌는 것이 목표 상태가 아니다.
+
+Rich Design Tokens 패턴 (`tokens.ts` 에서 `designTokens` 객체를 export → `tokensToCssVars()` 로 CSS 변수 펼침) 은 현재 **cafe-default Template 에만** 적용되어 있다. 나머지 10 개 legacy Template 는 기존의 per-Template `.module.css` 패턴을 유지한다. 이는 **미완성 상태가 아니라 의도적인 점진 전환 (gradual migration)** 이다.
 
 ## Why not bulk-migrate
 

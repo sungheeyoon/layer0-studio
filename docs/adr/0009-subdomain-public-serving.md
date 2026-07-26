@@ -1,6 +1,8 @@
 # 게시된 Site 는 서브도메인(`<slug>.layer0.studio`)에서 read-only public origin 으로 서빙한다
 
-> **Status: Accepted.** 공개 Site 서빙을 경로 기반(`layer0.studio/site/<slug>`)에서 **서브도메인 기반**(`<slug>.layer0.studio`)으로 전환한다. `/site/[domain]` 라우트 핸들러는 그대로 재사용하되, 미들웨어 host 분기 + internal rewrite 를 그 앞단에 둔다.
+> **Status: Accepted — 미구현** (2026-07-26 확인). 결정만 존재하고 코드는 없다 — `src/middleware.ts` 에 host 분기·internal rewrite 가 **없으며**, 공개 Site 는 여전히 경로 기반 `/site/<slug>` 로 서빙된다. 아래 본문은 **구현할 때 따를 설계**이지 현재 동작의 설명이 아니다.
+>
+> 원 결정: 공개 Site 서빙을 경로 기반(`layer0.studio/site/<slug>`)에서 **서브도메인 기반**(`<slug>.layer0.studio`)으로 전환한다. `/site/[domain]` 라우트 핸들러는 그대로 재사용하되, 미들웨어 host 분기 + internal rewrite 를 그 앞단에 둔다.
 
 ## 맥락
 

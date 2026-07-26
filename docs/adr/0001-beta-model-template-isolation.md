@@ -1,5 +1,7 @@
 # β 모델 — Template 단위 isolation 우선 (DRY 위배)
 
+> **Status: Accepted — 구현 완료.** 11 개 Template 전부 `src/templates/<category>/<leaf>/` 아래에 `tokens.ts`·`library/`·`template.ts`·`index.tsx` 를 자체 보유한다.
+
 β 아키텍처는 최대 재사용(DRY)보다 **Template 단위 독립성(isolation)** 을 우선한다. 각 Template 는 하나의 독립적인 작은 앱처럼 동작하며, 디자인마다 레이아웃 구조·텍스트 스타일·컴포넌트 계층·시각적 방향성이 크게 달라질 수 있다. 따라서 일부 Section component 는 Template 간 중복되어 존재할 수 있으며, 이는 의도된 설계 선택이다.
 
 ## Future direction

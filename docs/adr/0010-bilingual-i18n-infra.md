@@ -1,6 +1,6 @@
 # Studio 빌더 UI 는 쿠키 기반 ko/en 양방향 i18n 으로 서빙한다
 
-> **Status: Accepted.** Studio 빌더 제품(마케팅 랜딩·인증·대시보드·에디터·설정)의 UI 카피를 `src/lib/i18n` 의 **타입드 딕셔너리**(ko canonical + en 동일 타입)로 중앙화한다. locale 은 **쿠키 기반**으로 결정·영속화하며 **URL 을 바꾸지 않는다**. 발행 Site/Template 콘텐츠와 admin 은 범위 외. PRD #79, 이슈 #80–#84 로 구현 완료.
+> **Status: Accepted — 구현 완료** (`src/lib/i18n/messages/{ko,en}.ts`, 기본 `ko`). Studio 빌더 제품(마케팅 랜딩·인증·대시보드·에디터·설정)의 UI 카피를 `src/lib/i18n` 의 **타입드 딕셔너리**(ko canonical + en 동일 타입)로 중앙화한다. locale 은 **쿠키 기반**으로 결정·영속화하며 **URL 을 바꾸지 않는다**. 발행 Site/Template 콘텐츠와 admin 은 범위 외. PRD #79, 이슈 #80–#84 로 구현 완료.
 
 ## 맥락
 

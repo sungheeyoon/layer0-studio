@@ -1,6 +1,6 @@
 # Studio UI 를 shadcn 시맨틱 토큰 + Pretendard 로 재설계하고 블루프린트 컨셉을 폐기한다
 
-> **Status: Accepted, font delivery amended 2026-07-24.** Studio chrome(마케팅 랜딩·인증·대시보드·에디터·설정·admin)의 비주얼 시스템을 전면 재설계한다. 도면(블루프린트/크로스헤어/제로-radius) 컨셉을 폐기하고 관습적 SaaS 룩으로 전환, 컬러 어휘를 **shadcn 식 시맨틱 토큰** 하나로 통일, 한글 1차 타겟에 맞춰 **Pretendard** + 한글 최적 타입 스케일을 도입한다. 라이트/다크 양 테마, lucide 아이콘, primary = Indigo. 발행 Site / Template(`src/templates/*`)은 범위 외. `redesign/studio-ui` 브랜치에서 빅뱅으로 작업하고 완성 후 1회 머지한다.
+> **Status: Accepted — 구현 완료, font delivery amended 2026-07-24.** Studio chrome(마케팅 랜딩·인증·대시보드·에디터·설정·admin)의 비주얼 시스템을 전면 재설계한다. 도면(블루프린트/크로스헤어/제로-radius) 컨셉을 폐기하고 관습적 SaaS 룩으로 전환, 컬러 어휘를 **shadcn 식 시맨틱 토큰** 하나로 통일, 한글 1차 타겟에 맞춰 **Pretendard** + 한글 최적 타입 스케일을 도입한다. 라이트/다크 양 테마, lucide 아이콘, primary = Indigo. 발행 Site / Template(`src/templates/*`)은 범위 외. `redesign/studio-ui` 브랜치에서 빅뱅으로 작업하고 완성 후 1회 머지한다.
 
 ## 맥락
 

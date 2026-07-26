@@ -1,5 +1,7 @@
 # Asset 업로드는 Reserve-Confirm + 일일 orphan cleanup (현재 무료 플랜 제약)
 
+> **Status: Accepted — 구현 완료.** `initUploadAction`/`confirmUploadAction` (에디터 Server Actions) + `/api/cron/cleanup-assets` 일일 크론.
+
 > 파일명에 남은 `two-phase` 는 작성 시점 용어. 정확한 명칭은 **Reserve-Confirm** (init = reserve, confirm = activate). 분산 트랜잭션 프로토콜인 2-Phase Commit (2PC) 과는 다르다.
 
 이미지 업로드는 `initUploadAction` (pending row 생성) → 클라이언트가 Supabase Storage 에 직접 업로드 → `confirmUploadAction` (row 를 active 로 마킹) 의 **Reserve-Confirm 패턴**을 쓴다. 네트워크 단절·세션 만료·창 닫힘 등으로 발생하는 orphan 파일 정리를 *전제로 한* 설계이다.

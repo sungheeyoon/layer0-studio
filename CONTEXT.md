@@ -1,6 +1,6 @@
 # Layer0 Studio
 
-A no-code website builder. Users pick a **Template**, edit it visually, and publish it to a custom subdomain as a **Site**.
+A no-code website builder. Users pick a **Template**, edit it visually, and publish it to a public URL as a **Site**.
 
 ## Language
 
@@ -74,7 +74,7 @@ _Avoid_: account deletion, account removal, deactivation (nothing is retained), 
 An authenticated principal. Role is either `user` (the default) or `admin`.
 
 **Subdomain**:
-The slug a User picks to publish their Site under — the `myshop` in `myshop.layer0.studio`. Stored in `user_sites.domain`; validated by `validateDomainSlug`; rejects entries in `RESERVED_DOMAINS`. Lowercase letters, digits, hyphens; 3–50 chars; no leading/trailing hyphen. **Required to Publish** (a Site without a Subdomain cannot go Live — `DOMAIN_REQUIRED`). The Subdomain is the Site's **read-only public origin**: it serves the published result and never the editor — editing happens only on the apex dashboard (where the login session lives, host-only), so a Subdomain is sessionless. A request to `<slug>.layer0.studio` is internally **rewritten** by middleware to the shared `/site/[domain]` renderer (the path is internal, never the public URL); platform paths (`/api`, `/dashboard`, …) on a Subdomain — and apex `/site/*` direct access — 404. See [ADR-0009](./docs/adr/0009-subdomain-public-serving.md).
+The slug a User picks to publish their Site under — the `myshop` in `myshop.layer0.studio`. Stored in `user_sites.domain`; validated by `validateDomainSlug`; rejects entries in `RESERVED_DOMAINS`. Lowercase letters, digits, hyphens; 3–50 chars; no leading/trailing hyphen. **Required to Publish** (a Site without a Subdomain cannot go Live — `DOMAIN_REQUIRED`). **Subdomain serving is designed but NOT implemented** — a published Site is currently served at the path-based `/site/<slug>` URL, and `src/middleware.ts` has no host branch. Everything that follows describes the *intended* behaviour, not today's: the Subdomain is the Site's **read-only public origin**, serving the published result and never the editor — editing happens only on the apex dashboard (where the login session lives, host-only), so a Subdomain is sessionless. A request to `<slug>.layer0.studio` is internally **rewritten** by middleware to the shared `/site/[domain]` renderer (the path is internal, never the public URL); platform paths (`/api`, `/dashboard`, …) on a Subdomain — and apex `/site/*` direct access — 404. See [ADR-0009](./docs/adr/0009-subdomain-public-serving.md).
 _Avoid_: domain (overloaded — see Flagged ambiguities), slug, hostname, URL.
 
 **Publish** (verb):
@@ -82,7 +82,7 @@ The User action that takes a Site from not-yet-served to **Live** for the first 
 _Avoid_: deploy, release, go-live (the noun phrase).
 
 **Live** (adjective):
-A Site is Live when it is currently being served at its Subdomain. Equivalent to `status === 'active'`. The two non-Live states are *draft* (never Published) and **Suspended** (admin-disabled).
+A Site is Live when it is currently being served at its public URL (today `/site/<slug>` — see **Subdomain**). Equivalent to `status === 'active'`. The two non-Live states are *draft* (never Published) and **Suspended** (admin-disabled).
 _Avoid_: active (the literal status string, fine in code; "Live" in conversation), published (overloaded with `publishedAt`).
 
 **Suspended**:

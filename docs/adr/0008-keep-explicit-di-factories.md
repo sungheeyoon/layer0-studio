@@ -1,6 +1,6 @@
 # DI 조립은 명시적 per-use-case 팩토리로 유지하고 의존성 비용 경계로 분할한다
 
-> **Status: Accepted, amended 2026-07-24** (#61). use case 당 하나의 `create*UseCase(supabase)` 팩토리를 **의도적으로 유지**하되, 모든 팩토리를 한 파일에서 export하지 않고 의존성 비용과 read/write 경계에 따라 모듈을 나눈다.
+> **Status: Accepted — 구현 완료, amended 2026-07-24** (#61). use case 당 하나의 `create*UseCase(supabase)` 팩토리를 **의도적으로 유지**하되, 모든 팩토리를 한 파일에서 export하지 않고 의존성 비용과 read/write 경계에 따라 모듈을 나눈다.
 
 최초 결정 당시 `src/lib/di/container.ts` 는 19개 use case 를 감싸는 거의 동일한 팩토리로 이루어져 있었다. 각 팩토리는 사실상 `new SomeRepoImpl(supabase); new SomeUseCase(repo)` 두 줄이다. 보일러플레이트처럼 보이고, 아키텍처 리뷰는 주기적으로 "여러 얕은 어댑터를 하나의 깊은 resolver 로 접어라"라고 재제안할 것이다(#61). 이 ADR 은 그 제안을 **명시적으로 기각**해 재논의를 차단한다.
 
