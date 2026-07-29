@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { UserSite } from "@/domain/entities/user-site.entity";
 import {
   updateSiteDomainAction,
@@ -247,6 +248,7 @@ export default function SiteSettingsDialog({
                 onClick={handleVerifyDomain}
                 disabled={isBusy || !editDomain}
               >
+                {isVerifying && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isVerifying ? t.projects.verifying : t.projects.verify}
               </Button>
             </div>
@@ -272,6 +274,7 @@ export default function SiteSettingsDialog({
               {statusError && <p className="text-caption mt-1 text-destructive">{statusError}</p>}
             </div>
             <Button variant="outline" onClick={handleToggleStatus} disabled={isBusy}>
+              {isTogglingStatus && <Loader2 className="h-4 w-4 animate-spin" />}
               {isTogglingStatus ? t.projects.processing : site.status === 'active' ? t.projects.suspend : t.projects.publish}
             </Button>
           </div>
@@ -294,6 +297,7 @@ export default function SiteSettingsDialog({
                     {t.projects.cancel}
                   </Button>
                   <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isBusy}>
+                    {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
                     {isDeleting ? t.projects.deleting : t.projects.confirmDelete}
                   </Button>
                 </div>
@@ -312,6 +316,7 @@ export default function SiteSettingsDialog({
           {t.projects.close}
         </Button>
         <Button onClick={handleCommitName} disabled={!isNameDirty || isBusy}>
+          {isSavingName && <Loader2 className="h-4 w-4 animate-spin" />}
           {isSavingName ? t.projects.saving : t.projects.commit}
         </Button>
       </DialogFooter>
