@@ -21,10 +21,11 @@ const PREFIX_BY_DIMENSION: Record<keyof DesignTokens, string> = {
  * name their token accordingly (e.g. `colors.primary`, `fonts.base`).
  */
 const OVERLAY_MAP: Readonly<Partial<Record<keyof GlobalStyles, string>>> = {
-  primaryColor:   '--color-primary',
-  secondaryColor: '--color-secondary',
-  fontFamily:     '--font-base',
-  fontSize:       '--font-size',
+  primaryColor:    '--color-primary',
+  secondaryColor:  '--color-secondary',
+  backgroundColor: '--color-surface',
+  fontFamily:      '--font-base',
+  fontSize:        '--font-size',
 };
 
 function normalizePretendardFamily(value: string): string {
@@ -42,6 +43,23 @@ function normalizePretendardFamily(value: string): string {
     /\bPretendard\b(?!\s+Variable)/,
     "'Pretendard Variable', Pretendard",
   );
+}
+
+/**
+ * The legacy channel, for Templates that ship no `designTokens`: their
+ * `.module.css` reads `var(--theme-<axis>, <fallback>)`, and every render path
+ * (public Site, Site preview, preset preview, editor) spreads this object onto
+ * the wrapper. Kept beside `OVERLAY_MAP` because the two are the same decision
+ * — *which globalStyles axes are themable* — expressed for the two paths.
+ */
+export function globalStylesToThemeVars(gs: GlobalStyles): Record<string, string> {
+  return {
+    '--theme-primary': gs.primaryColor,
+    '--theme-secondary': gs.secondaryColor,
+    '--theme-bg': gs.backgroundColor,
+    '--theme-font-family': gs.fontFamily,
+    '--theme-font-size': gs.fontSize,
+  };
 }
 
 /**

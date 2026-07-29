@@ -57,6 +57,7 @@ async function run() {
 export const defaultGlobalStyles: GlobalStyles = {
   primaryColor: '#000000',
   secondaryColor: '#ffffff',
+  backgroundColor: '#ffffff',
   fontFamily: 'sans-serif',
   fontSize: '16px',
   layout: 'wide',

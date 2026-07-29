@@ -8,6 +8,7 @@ const preset: TemplatePreset = {
     "globalStyles": {
       "primaryColor": "#1a1a2e",
       "secondaryColor": "#e94560",
+      "backgroundColor": "#ffffff",
       "fontFamily": "'Inter', sans-serif",
       "fontSize": "16px",
       "layout": "wide"

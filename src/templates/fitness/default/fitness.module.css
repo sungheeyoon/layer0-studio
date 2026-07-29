@@ -2,9 +2,12 @@
 
 .themeRoot {
   --f-void: var(--theme-bg, #080808);
-  --f-surface: #141414;
-  --f-panel: #1E1E1E;
-  --f-border: #2A2A2A;
+
+  /* Tonal siblings of --f-void. Dark template → each step mixes toward white,
+     so the ladder survives whatever background the user picks. */
+  --f-surface: color-mix(in srgb, var(--f-void) 95%, #fff);
+  --f-panel: color-mix(in srgb, var(--f-void) 91%, #fff);
+  --f-border: color-mix(in srgb, var(--f-void) 86%, #fff);
   --f-muted: #5A5A5A;
   --f-soft: #9A9A9A;
   --f-snow: #F2F2EE;

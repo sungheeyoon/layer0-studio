@@ -63,6 +63,7 @@ import {
   type IssueIndex,
 } from '@/lib/editor/content-issues';
 import { validateContent } from '@/lib/template/validate';
+import { globalStylesToThemeVars } from '@/lib/template/design-tokens';
 import { useLocale, useDictionary } from '@/lib/i18n/provider';
 import {
   ChevronUp,
@@ -339,7 +340,12 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // items, which can only produce codes `indexIssues` drops anyway.
   const issueIndex = useMemo<IssueIndex>(() => {
     if (!templateModule) return EMPTY_ISSUE_INDEX;
-    const { warnings } = validateContent(content, { templateLibrary: templateModule.library });
+    const { warnings } = validateContent(content, {
+      templateLibrary: templateModule.library,
+      // The Template's own background is the reference the polarity rule needs:
+      // its text tokens are tuned for that luminance and do not follow the user.
+      templateDefaultBackground: templateModule.defaultContent.globalStyles.backgroundColor,
+    });
     return indexIssues(warnings);
   }, [content, templateModule]);
 
@@ -518,12 +524,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // links (and Single anchors) shouldn't navigate the editor away. Neutralise
   // their default in the capture phase (next/link honours e.defaultPrevented);
   // the click still bubbles to section selection. Page switching uses the tabs.
-  const themeVariables = useMemo(() => ({
-    '--theme-primary': content.globalStyles.primaryColor,
-    '--theme-secondary': content.globalStyles.secondaryColor,
-    '--theme-font-family': content.globalStyles.fontFamily,
-    '--theme-font-size': content.globalStyles.fontSize,
-  } as React.CSSProperties), [content.globalStyles]);
+  const themeVariables = useMemo(
+    () => globalStylesToThemeVars(content.globalStyles) as React.CSSProperties,
+    [content.globalStyles],
+  );
 
   useEffect(() => {
     if (selectedSectionId) {

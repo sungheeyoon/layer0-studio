@@ -361,6 +361,7 @@ export const en: Messages = {
       globalHeading: 'Global Design',
       primaryColor: 'Primary Color',
       secondaryColor: 'Secondary Color',
+      backgroundColor: 'Background Color',
       fontFamily: 'Font Family',
       baseFontSize: 'Base Font Size',
       fontSizePlaceholder: 'e.g. 16px',
@@ -373,6 +374,7 @@ export const en: Messages = {
       INVALID_COLOR_FIELD: 'Not a #RRGGBB value; the default colour may be used.',
       INVALID_FONT_SIZE: 'Needs a unit — e.g. 16px, 1.2rem',
       INSECURE_URL: 'An http:// address may be blocked by some browsers.',
+      BACKGROUND_POLARITY_FLIPPED: "This template's text colours are tuned for its original background brightness and do not follow. Text may be hard to read.",
     },
     autosave: {
       saving: 'Saving…',

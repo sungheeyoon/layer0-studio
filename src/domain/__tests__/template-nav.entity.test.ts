@@ -11,6 +11,7 @@ import {
 const globalStyles = {
   primaryColor: '#000000',
   secondaryColor: '#ffffff',
+  backgroundColor: '#ffffff',
   fontFamily: 'Inter',
   fontSize: '16px',
   layout: 'wide',

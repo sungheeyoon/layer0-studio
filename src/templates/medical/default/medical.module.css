@@ -2,7 +2,9 @@
 
 .themeRoot {
   --m-cream: var(--theme-bg, #F9F7F3);
-  --m-cream-dark: #F0EBE1;
+
+  /* Tonal sibling of --m-cream. Light template → mix toward black. */
+  --m-cream-dark: color-mix(in srgb, var(--m-cream) 95%, #000);
   --m-charcoal: var(--theme-primary, #1C1917);
   --m-charcoal-mid: #3C3835;
   --m-gold: var(--theme-secondary, #C8A97E);

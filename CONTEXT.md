@@ -59,11 +59,11 @@ Two **independent** axes. `visible` = whether it is served at all (a Multi Page 
 ### Design
 
 **Design Tokens**:
-A Template's complete visual identity as a typed object — `colors`, `fonts`, `spacing`, `radius`, `shadows`, `typography`. Code-fixed, never user-editable, injected at the template root as CSS custom properties.
+A Template's complete visual identity as a typed object — `colors`, `fonts`, `spacing`, `radius`, `shadows`, `typography`. Code-owned, never user-editable, injected at the template root as CSS custom properties. **Not copied per Site** — the renderer imports them at serve time, so an edit here restyles every existing Site on that Template. That is the intended fleet-wide repair channel; a redesign forks to a new leaf instead.
 _Avoid_: theme tokens, palette, design system, CSS variables (the mechanism, not the concept).
 
 **Global Styles**:
-The small set of user-editable visual knobs carried inside a Template — `primaryColor`, `secondaryColor`, `fontFamily`, `fontSize`. Editing them in the Editor overlays specific Design Tokens.
+The small set of user-editable visual knobs carried inside a Template — `primaryColor`, `secondaryColor`, `backgroundColor`, `fontFamily`, `fontSize`. Editing them in the Editor overlays specific Design Tokens. Unlike Design Tokens they are **copied per Site**, so changing a Template's defaults never reaches a Site that already exists.
 _Avoid_: globalStyles (the field name, fine in code), theme overrides, brand settings.
 
 ### Editing and serving

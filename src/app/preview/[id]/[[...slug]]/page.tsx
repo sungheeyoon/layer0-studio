@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetTemplateUseCase } from '@/lib/di/template-read';
 import { isMultiContent } from '@/domain/entities/template.entity';
+import { globalStylesToThemeVars } from '@/lib/template/design-tokens';
 import type { Metadata } from 'next';
 import React from 'react';
 import TemplateClientWrapper from '@/templates/TemplateClientWrapper';
@@ -54,12 +55,7 @@ export default async function TemplatePreviewPage({ params }: Props) {
     notFound();
   }
 
-  const themeVariables = {
-    '--theme-primary': content.globalStyles.primaryColor,
-    '--theme-secondary': content.globalStyles.secondaryColor,
-    '--theme-font-family': content.globalStyles.fontFamily,
-    '--theme-font-size': content.globalStyles.fontSize,
-  } as React.CSSProperties;
+  const themeVariables = globalStylesToThemeVars(content.globalStyles) as React.CSSProperties;
 
   return (
     <main

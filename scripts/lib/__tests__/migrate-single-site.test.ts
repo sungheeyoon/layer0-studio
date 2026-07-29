@@ -20,7 +20,7 @@ const seedNav: SeedNavMap = new Map([
 function legacy(menuOverrides: Record<string, string> = {}) {
   return {
     templateKey: 'cafe-default',
-    globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'x', fontSize: '16px', layout: 'wide' },
+    globalStyles: { primaryColor: '#000', secondaryColor: '#fff', backgroundColor: '#fff', fontFamily: 'x', fontSize: '16px', layout: 'wide' },
     pages: [
       {
         id: 'home',

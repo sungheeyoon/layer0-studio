@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { createGetPublishedSiteUseCase } from '@/lib/di/site-read';
 import { loadTemplate } from '@/templates/registry';
+import { globalStylesToThemeVars } from '@/lib/template/design-tokens';
 import { SITE_URL } from '@/lib/seo/base-url';
 import {
   getFieldValue,
@@ -122,12 +123,7 @@ export default async function PublicSitePage({ params }: Props) {
 
   const TemplateRenderer = templateModule.default;
 
-  const themeVariables = {
-    '--theme-primary': content.globalStyles.primaryColor,
-    '--theme-secondary': content.globalStyles.secondaryColor,
-    '--theme-font-family': content.globalStyles.fontFamily,
-    '--theme-font-size': content.globalStyles.fontSize,
-  } as React.CSSProperties;
+  const themeVariables = globalStylesToThemeVars(content.globalStyles) as React.CSSProperties;
 
   return (
     <main

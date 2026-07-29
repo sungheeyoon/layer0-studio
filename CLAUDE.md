@@ -119,7 +119,19 @@ Route groups make URLs non-obvious from the file tree, so this table is authorit
 
 **Two axes of copy/share — don't conflate them:**
 - *Template ↔ Template (code):* nothing is shared. Each Template owns its copies.
-- *Site ↔ Template (runtime):* instantiating a Site deep-copies the Template's `content` (`structuredClone`), but the **renderer code is shared** — loaded at serve time by `templateKey` via `loadTemplate()`. So Template edits never reach existing Sites, and "a Site is a copy" means its data, not its code.
+- *Site ↔ Template (runtime):* instantiating a Site deep-copies the Template's `content` (`structuredClone`), but the **renderer code is shared** — loaded at serve time by `templateKey` via `loadTemplate()`. "A Site is a copy" means its data, not its code.
+
+**What a Template edit does and does not reach.** The split above cuts both ways, and only one half is safe:
+
+| You change | Existing Sites |
+|---|---|
+| `template.ts` preset, `defaultGlobalStyles` | ❌ untouched — they hold their own deep copy |
+| `designTokens`, `.module.css`, any `library/*.tsx` | ✅ **applies on next request** — the renderer is loaded live |
+
+So a renderer edit is a fleet-wide edit. Two consequences that bite:
+
+- **Renaming or deleting a `componentKey` silently deletes content.** Old Sites still carry `type: '<OldKey>'`; `library[type]` misses and both renderers `console.warn` + `return null` (`renderSingleSite.tsx:48`, `renderMultiSite.tsx:61`). No error, no 500 — the section just stops appearing, and the warn goes to a server log nobody reads. **Renderer changes must be additive.** For a breaking change, fork to a new leaf directory: `templateKey` is permanent, and `delete.ts`'s `USER_SITES_REFERENCE` guard already refuses to delete a Template that Sites still reference, so the old renderer stays alive for them.
+- **`designTokens` edits restyle live Sites.** That is the *only* channel for a fleet-wide repair (a failing contrast ratio, a dead font CDN), so it is a feature — but use it for repairs, not redesigns. Each `tokens.ts` states the ownership split at the top of both exports.
 
 **Site Types (Single / Multi)** ([ADR-0007](./docs/adr/0007-single-multi-site-type-structural-union.md)): `ContentModel` is a structural union on `mode` (`SiteMode = 'single' | 'multi'`), **fixed at creation** — a Single never evolves into a Multi. Narrow with `isSingleContent` / `isMultiContent`; iterate every section regardless of mode with `allSections()`.
 - **Single**: `sections: SingleSection[]` at the root, each carrying `nav:{visible,label}`. `renderSingleSite.tsx`; nav is anchor-scroll (`#section-<id>`). Editor pins nav top / footer bottom.

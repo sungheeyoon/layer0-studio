@@ -99,6 +99,16 @@ export interface SingleSection extends Section {
 export interface GlobalStyles {
   primaryColor: string;
   secondaryColor: string;
+  /**
+   * Page background. Overlays the template's `colors.surface` token — every
+   * Template names its background `surface`, so the mapping is uniform.
+   *
+   * A Template's card / border tones derive from this via `color-mix`, so they
+   * follow whatever the user picks. Text colours do **not** derive from it;
+   * a background that leaves body text unreadable is surfaced as a warning
+   * (`GLOBAL_STYLE_LOW_CONTRAST`) and still saves — see ADR-0015 rule 4.
+   */
+  backgroundColor: string;
   fontFamily: string;
   fontSize: string;
   layout: string;

@@ -38,7 +38,7 @@ function makeSingle(): SingleContent {
     mode: 'single',
     templateKey: 'corporate-default',
     globalStyles: {
-      primaryColor: '#000', secondaryColor: '#fff',
+      primaryColor: '#000', secondaryColor: '#fff', backgroundColor: '#fff',
       fontFamily: 'sans-serif', fontSize: '16px', layout: 'default',
     },
     sections: [
@@ -59,7 +59,7 @@ function makeMulti(): MultiContent {
     mode: 'multi',
     templateKey: 'outdoor-default',
     globalStyles: {
-      primaryColor: '#000', secondaryColor: '#fff',
+      primaryColor: '#000', secondaryColor: '#fff', backgroundColor: '#fff',
       fontFamily: 'sans-serif', fontSize: '16px', layout: 'default',
     },
     shared: {

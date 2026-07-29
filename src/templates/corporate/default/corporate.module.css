@@ -9,9 +9,12 @@
   --corp-on-image-fg: #ffffff;
   --corp-on-image-fg-muted: #eeeeee;
 
+  /* User-editable page background (globalStyles.backgroundColor). */
+  --corp-bg: var(--theme-bg, #ffffff);
+
   color: #333;
   line-height: 1.5;
-  background: #fff;
+  background: var(--corp-bg);
 }
 
 .selectedSlot {

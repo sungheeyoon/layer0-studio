@@ -8,6 +8,7 @@ const preset: TemplatePreset = {
     "globalStyles": {
       "primaryColor": "#0f172a",
       "secondaryColor": "#92400e",
+      "backgroundColor": "#fafaf9",
       "fontFamily": "'Pretendard Variable', 'Pretendard', system-ui, sans-serif",
       "fontSize": "16px",
       "layout": "wide"

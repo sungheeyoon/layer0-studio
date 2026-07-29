@@ -15,6 +15,7 @@ export function makeContent(overrides: Partial<SingleContent> = {}): ContentMode
     globalStyles: {
       primaryColor: '#000',
       secondaryColor: '#fff',
+      backgroundColor: '#ffffff',
       fontFamily: 'sans-serif',
       fontSize: '16px',
       layout: 'default',

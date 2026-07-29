@@ -90,6 +90,7 @@ ContentModel (single) = {
   globalStyles: {                       // 사용자 편집 가능한 얇은 layer (ADR-0005)
     primaryColor: '#C96A3A',
     secondaryColor: '#231509',
+    backgroundColor: '#F5F0E8',         // 페이지 배경 → --color-surface
     fontFamily: "'Playfair Display', sans-serif",
     fontSize: '16px',                   // CSS length
     layout: 'wide',                     // 'wide'|'narrow'|'asymmetric'|'default'|'full'
@@ -202,8 +203,9 @@ export const defaultGlobalStyles: GlobalStyles = { ... };  // 얇은 layer (사�
 export const designTokens: DesignTokens = { ... };                 // 풍부한 layer (코드 고정)
 ```
 
-**얇은 layer (`GlobalStyles`)** — 에디터에서 사용자가 편집 가능한 5 개 필드:
-`primaryColor`, `secondaryColor`, `fontFamily`, `fontSize`, `layout`.
+**얇은 layer (`GlobalStyles`)** — 에디터에서 사용자가 편집 가능한 6 개 필드:
+`primaryColor`, `secondaryColor`, `backgroundColor`, `fontFamily`, `fontSize`, `layout`.
+Site 생성 시 `content` 로 deep-copy 되므로 **여기를 고쳐도 기존 Site 에는 닿지 않는다.**
 
 **풍부한 layer (`DesignTokens`)** — 코드 고정. 6 개 차원 (`colors`, `fonts`, `spacing`, `radius`, `shadows`, `typography`). 각 차원 entry 는 `--{dimension-singular}-{key}` CSS custom property 가 됨 (`colors.primary` → `--color-primary`).
 
@@ -213,10 +215,23 @@ export const designTokens: DesignTokens = { ... };                 // 풍부한 
 |---|---|
 | `primaryColor` | `--color-primary` |
 | `secondaryColor` | `--color-secondary` |
+| `backgroundColor` | `--color-surface` |
 | `fontFamily` | `--font-base` |
 | `fontSize` | `--font-size` |
 
 → 사용자가 `primaryColor` 만 바꿔도 사이트 전역의 `var(--color-primary)` 참조가 즉시 propagate.
+
+**배경색의 톤 형제는 파생시킬 것.** 유저가 `backgroundColor` 를 바꾸면 `--color-surface` 만 움직인다. 카드·테두리처럼 배경의 밝기 계단 위에 있는 토큰을 고정값으로 두면 배경만 어두워지고 카드는 밝은 채로 남아 **계층이 뒤집힌다.** `color-mix` 로 파생시켜 따라오게 한다:
+
+```ts
+surface:        '#F5F0E8',                                          // themable
+'surface-dark': 'color-mix(in srgb, var(--color-surface) 94%, #000)', // 밝은 템플릿 → 검정 쪽
+cream:          'color-mix(in srgb, var(--color-surface) 97%, #000)',
+```
+
+어두운 템플릿(fitness·interior·wedding)은 `#fff` 쪽으로 섞는다. 반대로 hero/footer 의 **역전 밴드**(`surface-dark` 가 자기 `on-dark` 글자색을 갖는 경우)는 배경 형제가 아니므로 고정값으로 둔다.
+
+글자색(`ink`/`muted`/`dust`)은 파생 대상이 아니다 — 코드 소유이며 템플릿 기본 배경의 밝기에 맞춰져 있다. 유저가 명암을 뒤집으면 `BACKGROUND_POLARITY_FLIPPED` 경고가 에디터에 뜬다. **경고일 뿐 저장은 막지 않는다** (ADR-0015 규칙 4).
 
 **적용 방법**: Template `index.tsx` 에서 site 렌더러(Single → `RenderSingleSite`, Multi → `RenderMultiSite`)에 `designTokens` prop 전달:
 

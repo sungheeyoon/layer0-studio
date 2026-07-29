@@ -8,10 +8,12 @@
   --l-accent-muted: #fef3c7;
   --l-text-primary: #0c0a09;
   --l-text-secondary: #57534e;
-  --l-surface: #fafaf9;
-  --l-surface-warm: #f8f7f4;
-  --l-surface-warmer: #f0ece4;
-  --l-border: #e7e5e4;
+  --l-surface: var(--theme-bg, #fafaf9);
+
+  /* Tonal siblings of --l-surface. Light template → mix toward black. */
+  --l-surface-warm: color-mix(in srgb, var(--l-surface) 99%, #000);
+  --l-surface-warmer: color-mix(in srgb, var(--l-surface) 94%, #000);
+  --l-border: color-mix(in srgb, var(--l-surface) 92%, #000);
 
   font-family: var(--theme-font-family, 'Pretendard Variable', 'Pretendard', system-ui, sans-serif);
   font-size: var(--theme-font-size, 16px);

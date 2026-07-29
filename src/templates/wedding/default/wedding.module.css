@@ -5,10 +5,12 @@
   --w-blush-deep: #c9868b;
   --w-gold: var(--theme-secondary, #d4a96a);
   --w-cream: #f5f0eb;
-  --w-bg: #0a0908;
-  --w-surface: #13110f;
-  --w-surface-2: #1e1b18;
-  --w-surface-3: #2a2622;
+  --w-bg: var(--theme-bg, #0a0908);
+
+  /* Tonal siblings of --w-bg. Dark template → each step mixes toward white. */
+  --w-surface: color-mix(in srgb, var(--w-bg) 96%, #fff);
+  --w-surface-2: color-mix(in srgb, var(--w-bg) 92%, #fff);
+  --w-surface-3: color-mix(in srgb, var(--w-bg) 87%, #fff);
   --w-border: rgba(232, 180, 184, 0.12);
   --w-text: #f5f0eb;
   --w-text-muted: rgba(245, 240, 235, 0.5);

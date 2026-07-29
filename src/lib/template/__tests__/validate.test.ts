@@ -24,6 +24,7 @@ function minimalJson(overrides: Partial<SingleContent> = {}): SingleContent {
     globalStyles: {
       primaryColor: '#1a1a2e',
       secondaryColor: '#e94560',
+      backgroundColor: '#ffffff',
       fontFamily: 'Inter, sans-serif',
       fontSize: '16px',
       layout: 'wide',
@@ -173,11 +174,70 @@ describe('validateContent — globalStyles', () => {
     json.globalStyles = {
       primaryColor: '',
       secondaryColor: 'not-a-colour',
+      backgroundColor: 'not-a-colour',
       fontFamily: '',
       fontSize: '16',
       layout: 'full-width',
     };
     expect(validateContent(json).errors).toHaveLength(0);
+  });
+
+  it('warns when backgroundColor is missing or not a hex colour', () => {
+    const json = minimalJson();
+    json.globalStyles.backgroundColor = '';
+    const missing = validateContent(json);
+    expect(missing.warnings.some((w) => w.code === 'INVALID_COLOR' && w.path === 'globalStyles.backgroundColor')).toBe(true);
+
+    json.globalStyles.backgroundColor = 'papayawhip';
+    const nonHex = validateContent(json);
+    expect(nonHex.warnings.some((w) => w.code === 'NON_HEX_COLOR' && w.path === 'globalStyles.backgroundColor')).toBe(true);
+  });
+});
+
+describe('validateContent — background polarity (text colours are code-fixed)', () => {
+  // A Template's text tokens are tuned for the luminance of its own default
+  // background and do NOT follow the user's pick (only the tonal surface
+  // siblings derive). Flipping a light Template to a dark background therefore
+  // leaves dark text on a dark page. Warned, never blocked — ADR-0015 rule 4.
+  const withBg = (bg: string) => {
+    const json = minimalJson();
+    json.globalStyles.backgroundColor = bg;
+    return json;
+  };
+
+  it('warns when a light template is given a dark background', () => {
+    const result = validateContent(withBg('#1B2A41'), { templateDefaultBackground: '#F5F0E8' });
+    expect(result.warnings.some((w) => w.code === 'BACKGROUND_POLARITY_FLIPPED')).toBe(true);
+    expect(result.warnings.find((w) => w.code === 'BACKGROUND_POLARITY_FLIPPED')?.path)
+      .toBe('globalStyles.backgroundColor');
+  });
+
+  it('warns when a dark template is given a light background', () => {
+    const result = validateContent(withBg('#FFFFFF'), { templateDefaultBackground: '#080808' });
+    expect(result.warnings.some((w) => w.code === 'BACKGROUND_POLARITY_FLIPPED')).toBe(true);
+  });
+
+  it('stays silent when the background keeps the template polarity', () => {
+    const darker = validateContent(withBg('#E8DFD0'), { templateDefaultBackground: '#F5F0E8' });
+    expect(darker.warnings.some((w) => w.code === 'BACKGROUND_POLARITY_FLIPPED')).toBe(false);
+
+    const lighter = validateContent(withBg('#1E1E1E'), { templateDefaultBackground: '#080808' });
+    expect(lighter.warnings.some((w) => w.code === 'BACKGROUND_POLARITY_FLIPPED')).toBe(false);
+  });
+
+  it('stays silent when the template default is unknown (no false positives)', () => {
+    const result = validateContent(withBg('#1B2A41'));
+    expect(result.warnings.some((w) => w.code === 'BACKGROUND_POLARITY_FLIPPED')).toBe(false);
+  });
+
+  it('stays silent when either colour is not parseable as hex', () => {
+    const result = validateContent(withBg('papayawhip'), { templateDefaultBackground: '#F5F0E8' });
+    expect(result.warnings.some((w) => w.code === 'BACKGROUND_POLARITY_FLIPPED')).toBe(false);
+  });
+
+  it('never blocks the save', () => {
+    const result = validateContent(withBg('#000000'), { templateDefaultBackground: '#FFFFFF' });
+    expect(result.errors).toHaveLength(0);
   });
 });
 

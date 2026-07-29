@@ -69,6 +69,26 @@ export default function GlobalStylesEditor({ globalStyles, onChange, issues }: G
         <FieldIssues codes={issues.secondaryColor} />
       </div>
 
+      {/* Background Color */}
+      <div className="space-y-2">
+        <Label htmlFor="backgroundColor">{t.backgroundColor}</Label>
+        <div className="flex items-center gap-2">
+          <input
+            id="backgroundColor"
+            type="color"
+            value={globalStyles.backgroundColor}
+            onChange={(e) => onChange('backgroundColor', e.target.value)}
+            className="size-9 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
+          />
+          <Input
+            className="font-mono"
+            value={globalStyles.backgroundColor}
+            onChange={(e) => onChange('backgroundColor', e.target.value)}
+          />
+        </div>
+        <FieldIssues codes={issues.backgroundColor} />
+      </div>
+
       {/* Font Family */}
       <div className="space-y-2">
         <Label>{t.fontFamily}</Label>

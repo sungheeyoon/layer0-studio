@@ -23,11 +23,45 @@ export interface ValidateOptions {
   availableTemplateKeys?: string[];
   /** Phase 6: Provides component library and their fields schemas for deep validation. */
   templateLibrary?: TemplateLibrary;
+  /**
+   * The Template's own `defaultGlobalStyles.backgroundColor`. Only the
+   * background-polarity rule reads it; omit it and that rule stays silent
+   * rather than guessing (a wrong warning is worse than none).
+   */
+  templateDefaultBackground?: string;
 }
 
 const KNOWN_LAYOUTS = ['wide', 'narrow', 'asymmetric', 'default', 'full'];
 const HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 const CSS_LENGTH_RE = /^[\d.]+(%|px|rem|em|vw|vh|ch)$/;
+
+/**
+ * WCAG relative luminance, 0 (black) … 1 (white). Returns null for anything
+ * that is not a 3- or 6-digit hex colour.
+ */
+function relativeLuminance(hex: string): number | null {
+  if (!HEX_RE.test(hex)) return null;
+
+  let body = hex.slice(1);
+  if (body.length === 3) body = body.split('').map((c) => c + c).join('');
+
+  const channel = (pair: string) => {
+    const srgb = parseInt(pair, 16) / 255;
+    return srgb <= 0.03928 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+  };
+
+  return (
+    0.2126 * channel(body.slice(0, 2)) +
+    0.7152 * channel(body.slice(2, 4)) +
+    0.0722 * channel(body.slice(4, 6))
+  );
+}
+
+/**
+ * WCAG's own light/dark split: the luminance at which black and white text
+ * contrast equally (√(1.05 × 0.05) − 0.05).
+ */
+const LUMINANCE_MIDPOINT = 0.1791;
 
 export function validateContent(
   json: ContentModel,
@@ -83,6 +117,35 @@ export function validateContent(
       warn('INVALID_COLOR', 'globalStyles.secondaryColor is required', 'globalStyles.secondaryColor');
     } else if (!HEX_RE.test(gs.secondaryColor)) {
       warn('NON_HEX_COLOR', `globalStyles.secondaryColor "${gs.secondaryColor}" is not a hex color`, 'globalStyles.secondaryColor');
+    }
+
+    if (!gs.backgroundColor) {
+      warn('INVALID_COLOR', 'globalStyles.backgroundColor is required', 'globalStyles.backgroundColor');
+    } else if (!HEX_RE.test(gs.backgroundColor)) {
+      warn('NON_HEX_COLOR', `globalStyles.backgroundColor "${gs.backgroundColor}" is not a hex color`, 'globalStyles.backgroundColor');
+    }
+
+    // A Template's text tokens (`ink`, `muted`, `dust`, …) are code-owned and
+    // tuned for the luminance of its own default background. Only the tonal
+    // *surface* siblings derive from the user's pick. So crossing the light/dark
+    // midpoint leaves the text where it was — dark type on a dark page.
+    //
+    // Warned, never blocked: a deliberately inverted palette is a legitimate
+    // taste call, and the renderer still works (ADR-0015 rule 4). Silent when
+    // the Template default is unknown, so no caller gets a guessed warning.
+    if (options.templateDefaultBackground && gs.backgroundColor) {
+      const chosen = relativeLuminance(gs.backgroundColor);
+      const base = relativeLuminance(options.templateDefaultBackground);
+      if (
+        chosen !== null && base !== null &&
+        (chosen > LUMINANCE_MIDPOINT) !== (base > LUMINANCE_MIDPOINT)
+      ) {
+        warn(
+          'BACKGROUND_POLARITY_FLIPPED',
+          `globalStyles.backgroundColor "${gs.backgroundColor}" flips this template from a ${base > LUMINANCE_MIDPOINT ? 'light' : 'dark'} background to a ${chosen > LUMINANCE_MIDPOINT ? 'light' : 'dark'} one; its text colours do not follow`,
+          'globalStyles.backgroundColor',
+        );
+      }
     }
 
     if (gs.fontSize && !CSS_LENGTH_RE.test(gs.fontSize)) {

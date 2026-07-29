@@ -2,15 +2,15 @@
 
 .themeRoot {
   --c-linen: var(--theme-bg, #F5F0E8);
-  --c-linen-dark: #EBE4D5;
   --c-espresso: var(--theme-secondary, #231509);
   --c-espresso-soft: #3D2A1A;
   --c-terra: var(--theme-primary, #C96A3A);
-  --c-terra-dim: rgba(201,106,58,0.10);
-  --c-caramel: #B8874A;
   --c-dust: #8C7B6B;
-  --c-dust-light: #B5A898;
-  --c-cream: #F0E9DC;
+
+  /* Tonal siblings of --c-linen — kept in step with the user's background,
+     otherwise a darker page inverts the card/border hierarchy. */
+  --c-linen-dark: color-mix(in srgb, var(--c-linen) 94%, #000);
+  --c-cream: color-mix(in srgb, var(--c-linen) 97%, #000);
 
   font-family: var(--theme-font-family, 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
   font-size: var(--theme-font-size, 16px);

@@ -74,6 +74,7 @@ const content: ContentModel = {
   globalStyles: {
     primaryColor: 'var(--color-primary)',
     secondaryColor: 'var(--color-secondary)',
+    backgroundColor: 'var(--color-surface)',
     fontFamily: 'var(--font-base)',
     fontSize: '16px',
     layout: 'default',

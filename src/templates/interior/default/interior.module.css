@@ -1,11 +1,13 @@
 .themeRoot {
   --i-dark: var(--theme-bg, #0C0A08);
-  --i-warm: #161210;
+
+  /* Tonal siblings of --i-dark. Dark template → mix toward white. */
+  --i-warm: color-mix(in srgb, var(--i-dark) 96%, #fff);
   --i-gold: var(--theme-primary, #C9A96E);
   --i-gold-light: #E8D5B0;
   --i-cream: #F2EBE0;
   --i-muted: #7A6E60;
-  --i-surface: #1C1915;
+  --i-surface: color-mix(in srgb, var(--i-dark) 94%, #fff);
 
   /* One-off solid bgs (extracted from inline literals) */
   --i-dark-deepest: #080704;   /* Footer */

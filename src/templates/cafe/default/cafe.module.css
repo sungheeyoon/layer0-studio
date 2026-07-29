@@ -1,17 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&family=DM+Sans:wght@300;400;500&display=swap');
 
+/*
+ * This Template has migrated to rich `designTokens` (ADR-0005), so every
+ * `--color-*` / `--font-*` var is set by `tokensToCssVars(designTokens,
+ * globalStyles)` as an **inline style on this very element** (see
+ * `renderSingleSite.tsx`: `<div className={className} style={rootStyle}>`).
+ * Inline beats the class, so re-declaring those vars here would be shadowed
+ * dead code — and a second place to keep the surface derivation in sync.
+ * `tokens.ts` is the only source. Legacy `--theme-*` fallbacks are not needed
+ * either: `backgroundColor` reaches `--color-surface` through the overlay map.
+ */
 .themeRoot {
-  --color-surface: var(--theme-bg, #F5F0E8);
-  --color-surface-dark: #EBE4D5;
-  --color-secondary: var(--theme-secondary, #231509);
-  --color-secondary-soft: #3D2A1A;
-  --color-primary: var(--theme-primary, #C96A3A);
-  --color-primary-dim: rgba(201,106,58,0.10);
-  --color-caramel: #B8874A;
-  --color-dust: #8C7B6B;
-  --color-dust-light: #B5A898;
-  --color-cream: #F0E9DC;
-
   font-family: var(--font-base, 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', sans-serif);
   font-size: var(--font-size, 16px);
   background-color: var(--color-surface);

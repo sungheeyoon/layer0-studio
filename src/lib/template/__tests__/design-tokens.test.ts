@@ -54,6 +54,17 @@ describe('tokensToCssVars', () => {
     expect(vars['--color-surface']).toBe('#F5F0E8'); // unchanged
   });
 
+  it('applies backgroundColor override to --color-surface', () => {
+    const vars = tokensToCssVars(sample, { backgroundColor: '#1B2A41' });
+    expect(vars['--color-surface']).toBe('#1B2A41');
+    expect(vars['--color-primary']).toBe('#C96A3A'); // unchanged
+  });
+
+  it('leaves --color-surface at the template default when backgroundColor is empty', () => {
+    const vars = tokensToCssVars(sample, { backgroundColor: '' });
+    expect(vars['--color-surface']).toBe('#F5F0E8');
+  });
+
   it('applies fontFamily override to --font-base', () => {
     const vars = tokensToCssVars(sample, { fontFamily: "'Inter', sans-serif" });
     expect(vars['--font-base']).toBe("'Inter', sans-serif");

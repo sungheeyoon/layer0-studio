@@ -26,6 +26,7 @@ const USER_ACTIONABLE_CODES: ReadonlySet<string> = new Set([
   'INVALID_COLOR_FIELD',
   'INVALID_FONT_SIZE',
   'INSECURE_URL',
+  'BACKGROUND_POLARITY_FLIPPED',
 ]);
 
 /**

@@ -364,6 +364,7 @@ export const ko = {
       globalHeading: '전역 디자인',
       primaryColor: '주요 색상',
       secondaryColor: '보조 색상',
+      backgroundColor: '배경 색상',
       fontFamily: '글꼴',
       baseFontSize: '기본 글자 크기',
       fontSizePlaceholder: '예: 16px',
@@ -376,6 +377,7 @@ export const ko = {
       INVALID_COLOR_FIELD: '#RRGGBB 형식이 아니라 기본 색상으로 표시될 수 있습니다.',
       INVALID_FONT_SIZE: '단위가 필요합니다 — 예: 16px, 1.2rem',
       INSECURE_URL: 'http:// 주소라 일부 브라우저에서 이미지가 차단될 수 있습니다.',
+      BACKGROUND_POLARITY_FLIPPED: '이 템플릿의 글자색은 원래 배경 밝기에 맞춰져 있어 따라 바뀌지 않습니다. 글씨가 잘 안 보일 수 있습니다.',
     },
     autosave: {
       saving: '저장 중…',
