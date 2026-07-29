@@ -244,9 +244,15 @@ cream:          'color-mix(in srgb, var(--color-surface) 97%, #000)',
 />
 ```
 
+**⚠️ `designTokens` 를 넘기는 순간, 같은 변수를 `.module.css` 에도 선언하면 그쪽은 죽은 코드다.** 렌더러는 `className` 과 inline `style` 을 **같은 엘리먼트**에 붙이는데(`renderSingleSite.tsx`: `<div className={className} style={rootStyle}>`), inline 이 class 를 이긴다. 따라서 `.themeRoot { --color-surface: … }` 는 `tokensToCssVars` 가 내보내는 `--color-surface` 에 영구히 가려진다.
+
+읽히지 않을 뿐 아니라 **파생 공식을 두 곳에 유지해야 하는 함정**이 된다 — 한쪽만 고치면 아무 일도 안 일어나고, 왜 안 먹는지 찾느라 시간을 쓴다. rich 로 전환한 Template 의 `.module.css` 에는 **토큰 선언을 남기지 말고** 레이아웃·애니메이션 등 구조 CSS 만 둔다 (legacy `var(--theme-*, …)` fallback 도 마찬가지로 불필요 — `backgroundColor` 는 오버레이 맵으로 `--color-surface` 에 도달한다). 실제 예: `src/templates/cafe/default/cafe.module.css`.
+
+아직 전환하지 않은 Template 은 반대다. `designTokens` 를 export 하지 않으므로 `tokensToCssVars`/`OVERLAY_MAP` 경로가 아예 돌지 않고, 유저 편집값은 **오직** page-level `--theme-*` 주입(`globalStylesToThemeVars`, `src/lib/template/design-tokens.ts`)으로만 도달한다. 그래서 legacy `.module.css` 는 `var(--theme-bg, #F5F0E8)` 형태의 fallback 을 반드시 유지해야 한다.
+
 **컴포넌트 사용**: 인라인 hex 금지 (§6.3 ESLint 룰). `var(--color-primary)`, `var(--font-base)` 등 참조만 허용.
 
-**현재 적용 상태** (ADR-0005) — **문서가 아니라 코드에서 확인한다**: `grep -l designTokens src/templates/*/*/tokens.ts`. rich 패턴을 쓰는 Template 와 legacy `.module.css`(`--{prefix}-{name}`) Template 가 **의도적으로 공존**하며, 각 Template 가 다른 이유로 손볼 때 자연스럽게 옮겨간다. "전부 전환됨" 이 목표 상태가 아니다.
+**현재 적용 상태** (ADR-0005) — **문서가 아니라 코드에서 확인한다**: `grep -l "export const designTokens" src/templates/*/*/tokens.ts` (맨 이름으로 grep 하면 미전환 Template 의 주석까지 걸린다). rich 패턴을 쓰는 Template 와 legacy `.module.css`(`--{prefix}-{name}`) Template 가 **의도적으로 공존**하며, 각 Template 가 다른 이유로 손볼 때 자연스럽게 옮겨간다. "전부 전환됨" 이 목표 상태가 아니다.
 
 **신규 Template (스킬 저작) 은 무조건 rich 패턴** — 마이그 부담을 늘리지 않기 위해.
 

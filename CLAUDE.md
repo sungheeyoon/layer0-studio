@@ -40,6 +40,10 @@ pnpm reconcile:orphaned-assets  # Find/clear pre-existing storage leaks (dry-run
 
 TypeScript checking: `pnpm tsc --noEmit`. Tests use in-memory fakes — no DB required.
 
+**Two kinds of test.** Most are pure logic and run in vitest's default `node` environment. Component tests that need a DOM opt in per file with a `// @vitest-environment jsdom` docblock — the default stays `node` so the logic tests keep their speed. `vitest.setup.ts` fills the jsdom gaps Radix trips over (`ResizeObserver`, `matchMedia`, pointer capture), guarded on `window` so it is inert under `node`. `@testing-library`'s auto-cleanup only self-registers under `globals: true`, which this repo does not use — component test files need their own `afterEach(cleanup)` or the previous test's markup stays in the document.
+
+A regression test is only worth the line if you have watched it fail: revert the fix, confirm red, restore. Expect some of a batch to stay green — a test can be a correct guard without being a regression detector, but you only know which is which by looking.
+
 **CI gate before merge** (`.github/workflows/ci.yml`): `generate:templates` → `tsc --noEmit` → `lint` → `test` → `template:verify:ci`. `performance:verify` is **not** in CI (it needs a running server).
 
 ## Architecture
@@ -106,6 +110,13 @@ Route groups make URLs non-obvious from the file tree, so this table is authorit
 
 "Chrome" = landing/auth/dashboard/editor/settings/admin/legal/error. It does **not** include `src/templates/**`, which keeps its own per-Template design tokens ([ADR-0005](./docs/adr/0005-design-tokens-gradual-migration.md)). Don't cross the streams.
 
+### Client state in chrome components
+
+Two conventions, neither enforced by tooling. Both come from a bug where deleting a *second* site silently did nothing — the first always worked, so it shipped.
+
+1. **In-flight state is `useTransition`, not a hand-rolled `useState<boolean>`.** A manual flag must be cleared on every exit — success, handled error, *and* throw — and nothing checks that you did. One transition per action keeps them independent; keep a `try/catch` inside each callback so a throw surfaces inline instead of hitting the error boundary. See `projects/SiteSettingsDialog.tsx`.
+2. **Transient UI state lives in the component that renders it,** not in a parent that outlives it. State held above its UI has to be cleared by hand — usually a reset list in an effect that falls behind the fields it covers. `react-hooks/set-state-in-effect` warnings are the smell.
+
 ### Template system
 
 **Read `docs/TEMPLATE_SYSTEM.md` before any template work.** The rules that bite:
@@ -139,7 +150,7 @@ So a renderer edit is a fleet-wide edit. Two consequences that bite:
 - **nav is projected, not stored** — `deriveNav(source, hrefOf)` filters `visible && nav.visible`; `deriveFooterNav` projects the complement for the Multi footer. `visible` and `nav.visible` are **independent axes**.
 - Per-page SEO via `resolveActivePageSeo()` feeds `generateMetadata`; the sitemap enumerates every routable Page.
 
-**Design tokens:** `tokens.ts` may export `defaultGlobalStyles` (thin, user-editable) alone, or additionally `designTokens` (rich, code-fixed: `colors`/`fonts`/`spacing`/`radius`/`shadows`/`typography`) which the renderer receives as a prop and expands to CSS custom properties via `tokensToCssVars()`. **The rich pattern is the target for new Templates**; legacy ones still define `--{prefix}-{name}` in `.module.css`. Migration is deliberately gradual, one Template at a time, and "partial" is the decision — not a defect to finish ([ADR-0005](./docs/adr/0005-design-tokens-gradual-migration.md)). To see which Templates have migrated: `grep -l designTokens src/templates/*/*/tokens.ts`.
+**Design tokens:** `tokens.ts` may export `defaultGlobalStyles` (thin, user-editable) alone, or additionally `designTokens` (rich, code-fixed: `colors`/`fonts`/`spacing`/`radius`/`shadows`/`typography`) which the renderer receives as a prop and expands to CSS custom properties via `tokensToCssVars()`. **The rich pattern is the target for new Templates**; legacy ones still define `--{prefix}-{name}` in `.module.css`. Migration is deliberately gradual, one Template at a time, and "partial" is the decision — not a defect to finish ([ADR-0005](./docs/adr/0005-design-tokens-gradual-migration.md)). To see which Templates have migrated: `grep -l "export const designTokens" src/templates/*/*/tokens.ts` — match the `export const`, not the bare name, which unmigrated Templates also mention in prose.
 
 **`array` field type:** components can declare repeating-item fields in `fieldsSchema` (menu items, FAQ rows); the editor renders add/remove/reorder and validates each item against its `itemSchema`. Phase 2 (Collections — separate table + RLS) is deferred; see `docs/plans/PLAN_crud_array_field.md` for the trigger conditions.
 

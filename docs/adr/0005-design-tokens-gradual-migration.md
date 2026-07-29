@@ -2,7 +2,7 @@
 
 > **Status: Accepted — 부분 구현 (의도).** rich 패턴을 쓰는 Template 와 legacy `.module.css` 를 쓰는 Template 가 공존한다. **여기서 "부분"은 결함이 아니라 결정의 내용 그 자체** — "전부 전환됨"이 목표 상태가 아니다.
 >
-> **현황은 문서가 아니라 코드에서 확인한다:** `grep -l designTokens src/templates/*/*/tokens.ts`. (이 목록을 문서에 박아두면 반드시 낡는다 — 실제로 2026-07-26 감사 시점에 이 ADR·CLAUDE.md·CONTEXT.md·TEMPLATE_SYSTEM.md 가 모두 "cafe-default 만" 이라고 적고 있었으나 실제로는 **네 개**가 전환을 마친 상태였다. 결정이 예측한 대로 굴러갔는데 문서만 멈춰 있었다.)
+> **현황은 문서가 아니라 코드에서 확인한다:** `grep -l "export const designTokens" src/templates/*/*/tokens.ts`. (`export const` 까지 포함해야 한다 — 전환하지 않은 Template 의 주석도 `designTokens` 를 *언급*하므로, 맨 이름만 grep 하면 11개가 전부 걸린다.) (이 목록을 문서에 박아두면 반드시 낡는다 — 실제로 2026-07-26 감사 시점에 이 ADR·CLAUDE.md·CONTEXT.md·TEMPLATE_SYSTEM.md 가 모두 "cafe-default 만" 이라고 적고 있었으나 실제로는 **네 개**가 전환을 마친 상태였다. 결정이 예측한 대로 굴러갔는데 문서만 멈춰 있었다.)
 
 Rich Design Tokens 패턴 (`tokens.ts` 에서 `designTokens` 객체를 export → 렌더러가 prop 으로 받아 `tokensToCssVars()` 로 CSS 변수 펼침) 과 legacy per-Template `.module.css` 패턴은 **의도적으로 공존한다.** 미완성 상태가 아니라 점진 전환 (gradual migration) 이다.
 
