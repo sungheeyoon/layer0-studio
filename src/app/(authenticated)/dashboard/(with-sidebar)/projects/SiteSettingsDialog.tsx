@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Dialog,
+  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -38,25 +40,23 @@ interface SiteSettingsDialogProps {
 }
 
 /**
- * Everything inside the site settings dialog, including all of its transient
- * state: the two form drafts, the four error slots, the success flags and the
- * delete confirmation step.
+ * The site settings dialog — the `Dialog` shell as well as its contents, so that
+ * the rule "cannot be closed mid-request" sits next to the flags that know a
+ * request is running. The parent decides only *whether* to render it.
  *
- * That state lives here rather than in `ProjectsClient` on purpose. It used to
- * sit in the parent, which meant it outlived the dialog and had to be cleared by
- * hand in an effect keyed on the selected site — a list that had to be kept in
- * step with every field added. It fell out of step: `isDeleting` was missing,
+ * It owns all of its transient state too: the two form drafts, the four error
+ * slots, the success flags and the delete confirmation step. That state used to
+ * live in `ProjectsClient`, where it outlived the dialog and had to be cleared
+ * by hand in an effect keyed on the selected site — a list that had to be kept
+ * in step with every field added. It fell out of step: `isDeleting` was missing,
  * and the second delete in a session was dead on arrival.
  *
- * The parent now mounts this under `key={site.id}`, so React discards and
- * rebuilds the state whenever a different site is configured. There is no reset
- * list to maintain, and no way for one site's state to be read as another's.
- *
  * In-flight flags are `useTransition`, not booleans: its pending state ends when
- * the transition settles, whatever the outcome, so no exit path can leak a
- * stuck spinner. Each callback keeps its own try/catch — a throw escaping a
- * transition reaches the error boundary and replaces the page, where these
- * failures belong inline with the dialog still usable.
+ * the transition settles, whatever the outcome, so no exit path can leak a stuck
+ * spinner. One transition per action so they stay independent, and each callback
+ * keeps its own try/catch — a throw escaping a transition reaches the error
+ * boundary and replaces the page, where these failures belong inline with the
+ * dialog still usable.
  */
 export default function SiteSettingsDialog({
   site,
@@ -87,6 +87,20 @@ export default function SiteSettingsDialog({
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const isNameDirty = editSiteName.trim() !== site.siteName;
+
+  /**
+   * While a request is in flight this dialog is the only thing that will report
+   * its outcome, so it must not be dismissable. Closing unmounts it, and a
+   * failure landing afterwards sets state on a dead component: the error is
+   * dropped, and for a delete the user is left believing a site was removed
+   * that is still there.
+   *
+   * Radix routes the close button, Escape and outside-click all through
+   * `onOpenChange`, so guarding it covers every dismissal at once; the footer's
+   * own button is disabled separately. The close button is hidden rather than
+   * disabled — a visible control that ignores clicks reads as a broken dialog.
+   */
+  const isBusy = isVerifying || isSavingName || isTogglingStatus || isDeleting;
 
   const handleVerifyDomain = () => {
     setDomainError(null);
@@ -177,7 +191,11 @@ export default function SiteSettingsDialog({
   };
 
   return (
-    <>
+    <Dialog open onOpenChange={(next) => { if (!next && !isBusy) onClose(); }}>
+      <DialogContent
+        className="max-h-[90vh] gap-0 overflow-y-auto sm:max-w-2xl"
+        showCloseButton={!isBusy}
+      >
       <DialogHeader>
         <DialogTitle>{t.projects.configuration}</DialogTitle>
         <DialogDescription>{site.siteName}</DialogDescription>
@@ -193,6 +211,7 @@ export default function SiteSettingsDialog({
               id="site-name"
               type="text"
               value={editSiteName}
+              disabled={isBusy}
               onChange={(e) => {
                 setEditSiteName(e.target.value);
                 setSaveNameError(null);
@@ -214,6 +233,7 @@ export default function SiteSettingsDialog({
                 id="site-domain"
                 type="text"
                 value={editDomain}
+                disabled={isBusy}
                 onChange={(e) => {
                   setEditDomain(e.target.value);
                   setDomainVerified(false);
@@ -225,7 +245,7 @@ export default function SiteSettingsDialog({
               <Button
                 variant="outline"
                 onClick={handleVerifyDomain}
-                disabled={isVerifying || !editDomain}
+                disabled={isBusy || !editDomain}
               >
                 {isVerifying ? t.projects.verifying : t.projects.verify}
               </Button>
@@ -251,7 +271,7 @@ export default function SiteSettingsDialog({
               </p>
               {statusError && <p className="text-caption mt-1 text-destructive">{statusError}</p>}
             </div>
-            <Button variant="outline" onClick={handleToggleStatus} disabled={isTogglingStatus}>
+            <Button variant="outline" onClick={handleToggleStatus} disabled={isBusy}>
               {isTogglingStatus ? t.projects.processing : site.status === 'active' ? t.projects.suspend : t.projects.publish}
             </Button>
           </div>
@@ -270,16 +290,16 @@ export default function SiteSettingsDialog({
               <div className="flex flex-col items-end gap-2">
                 <span className="text-caption font-medium text-destructive">{t.projects.confirmPrompt}</span>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(false)}>
+                  <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(false)} disabled={isBusy}>
                     {t.projects.cancel}
                   </Button>
-                  <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isDeleting}>
+                  <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isBusy}>
                     {isDeleting ? t.projects.deleting : t.projects.confirmDelete}
                   </Button>
                 </div>
               </div>
             ) : (
-              <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+              <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)} disabled={isBusy}>
                 {t.projects.deleteSite}
               </Button>
             )}
@@ -288,13 +308,14 @@ export default function SiteSettingsDialog({
       </div>
 
       <DialogFooter className="mt-8">
-        <Button variant="ghost" onClick={onClose}>
+        <Button variant="ghost" onClick={onClose} disabled={isBusy}>
           {t.projects.close}
         </Button>
-        <Button onClick={handleCommitName} disabled={!isNameDirty || isSavingName}>
+        <Button onClick={handleCommitName} disabled={!isNameDirty || isBusy}>
           {isSavingName ? t.projects.saving : t.projects.commit}
         </Button>
       </DialogFooter>
-    </>
+      </DialogContent>
+    </Dialog>
   );
 }

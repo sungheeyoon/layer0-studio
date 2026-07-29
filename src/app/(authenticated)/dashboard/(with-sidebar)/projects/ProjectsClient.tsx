@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function ProjectsClient() {
   const { sites, patchSite, removeSite } = useDashboardData();
@@ -189,22 +188,23 @@ export default function ProjectsClient() {
         </Card>
       )}
 
-      {/* Settings dialog */}
-      <Dialog open={!!settingsSite} onOpenChange={(open) => !open && setSettingsSite(null)}>
-        <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto sm:max-w-2xl">
-          {settingsSite && (
-            // What actually clears the dialog's state is this conditional: closing
-            // sets `settingsSite` to null, which unmounts the component and takes
-            // its drafts, errors and in-flight flags with it. That is the whole
-            // fix — the old code kept that state in this parent, where it outlived
-            // the dialog and had to be cleared by hand.
-            //
-            // `key` is insurance on top, for the day the dialog can be re-pointed
-            // at another site without closing first (a "next site" control, or a
-            // `forceMount`): then only the key would force the rebuild. Keyed on
-            // `id` and nothing else on purpose — `onPatch` below replaces the
-            // object on every save, and keying on identity or `updatedAt` would
-            // wipe the success message it just set.
+      {/* Settings dialog. The `Dialog` shell lives inside the component: while a
+          request is in flight the dialog must refuse to close, and that guard
+          belongs next to the flags that know a request is running.
+
+          Rendering it conditionally is what clears its state — closing sets
+          `settingsSite` to null, which unmounts the component and takes its
+          drafts, errors and in-flight flags with it. That is the whole fix; the
+          old code kept that state up here, where it outlived the dialog and had
+          to be cleared by hand.
+
+          `key` is insurance on top, for the day the dialog can be re-pointed at
+          another site without closing first (a "next site" control, or a
+          `forceMount`): then only the key would force the rebuild. Keyed on `id`
+          and nothing else on purpose — `onPatch` below replaces the object on
+          every save, and keying on identity or `updatedAt` would wipe the
+          success message it just set. */}
+      {settingsSite && (
             <SiteSettingsDialog
               key={settingsSite.id}
               site={settingsSite}
@@ -220,9 +220,7 @@ export default function ProjectsClient() {
               }}
               onClose={() => setSettingsSite(null)}
             />
-          )}
-        </DialogContent>
-      </Dialog>
+      )}
     </div>
   );
 }

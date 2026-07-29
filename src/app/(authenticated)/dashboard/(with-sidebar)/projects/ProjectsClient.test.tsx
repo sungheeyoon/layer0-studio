@@ -209,3 +209,53 @@ describe('ProjectsClient — deleting a site twice', () => {
     expect(within(dialog).getByRole('button', { name: '삭제 확인' })).toBeEnabled();
   });
 });
+
+// While a request is in flight the dialog is the only surface that will report
+// its outcome, and every action in it writes the same site row under the same
+// `expectedUpdatedAt`. So it goes fully inert: dismissing it would drop the
+// result on the floor (a failed delete would leave the user believing the site
+// was gone), and a second concurrent write would collide with the first.
+describe('ProjectsClient — the dialog is inert while a request is in flight', () => {
+  /** Start a delete that never settles, leaving the dialog mid-flight. */
+  async function beginHangingDelete(user: ReturnType<typeof userEvent.setup>) {
+    deleteSiteAction.mockReturnValue(new Promise(() => {}));
+    renderProjects();
+    const dialog = await openDeleteConfirm(user, 'First Site');
+    await user.click(within(dialog).getByRole('button', { name: ko.dashboard.projects.confirmDelete }));
+    await waitFor(() =>
+      expect(within(dialog).getByRole('button', { name: ko.dashboard.projects.deleting })).toBeInTheDocument(),
+    );
+    return dialog;
+  }
+
+  it('cannot be dismissed — no close button, and Escape is ignored', async () => {
+    const user = userEvent.setup();
+    const dialog = await beginHangingDelete(user);
+
+    // The close button is removed rather than disabled: a visible control that
+    // silently ignores clicks reads as a broken dialog.
+    expect(within(dialog).queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: ko.dashboard.projects.close })).toBeDisabled();
+
+    await user.keyboard('{Escape}');
+    await new Promise((r) => setTimeout(r, 50));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('disables every other action, so nothing else can be sent for the same site', async () => {
+    const user = userEvent.setup();
+    const dialog = await beginHangingDelete(user);
+    const p = ko.dashboard.projects;
+
+    expect(within(dialog).getByLabelText(p.siteName)).toBeDisabled();
+    expect(within(dialog).getByLabelText(p.primaryDomain)).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: p.verify })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: p.publish })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: p.cancel })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: p.commit })).toBeDisabled();
+
+    // The action that is actually running still names itself, so the user can
+    // tell which one is holding the dialog.
+    expect(within(dialog).getByRole('button', { name: p.deleting })).toBeDisabled();
+  });
+});
