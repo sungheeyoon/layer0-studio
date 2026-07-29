@@ -8,8 +8,15 @@ export default defineConfig({
       'src/data/**/*.test.ts',
       'src/lib/**/*.test.ts',
       'src/templates/**/*.test.tsx',
+      'src/app/**/*.test.tsx',
+      'src/components/**/*.test.tsx',
       'scripts/lib/**/*.test.ts',
     ],
+    // The default `node` environment stays the default: only the handful of
+    // component tests need a DOM, and they opt in per file with
+    // `// @vitest-environment jsdom`. Setup files run in both, so the jsdom
+    // polyfills guard on `window` being present.
+    setupFiles: ['./vitest.setup.ts'],
   },
   resolve: {
     alias: {

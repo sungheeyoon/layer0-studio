@@ -1,7 +1,7 @@
 "use client";
 
 import { UserSite } from "@/domain/entities/user-site.entity";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Clock, Search, X } from "lucide-react";
@@ -53,25 +53,39 @@ export default function ProjectsClient() {
       )
     : sites;
 
+  // In-flight flags are React's, not ours. A hand-rolled `isX` boolean has to be
+  // cleared on *every* exit — success, handled error, and throw — and the delete
+  // one was cleared on only one of the three. Because a successful delete closes
+  // the panel, the stale `true` stayed invisible until the next site's panel
+  // opened with its confirm button already disabled and reading "삭제 중…", so
+  // the second delete could never fire. `useTransition` ends its pending state
+  // when the transition settles, whatever the outcome, so there is no exit left
+  // to forget. One transition per action keeps them independent, matching the
+  // previous UX (saving a name does not disable publishing).
+  //
+  // Each callback keeps its own try/catch: a throw escaping a transition would
+  // reach the error boundary and replace this page with the error screen, where
+  // today it surfaces inline and the panel stays usable.
+
   // Domain state
   const [editDomain, setEditDomain] = useState('');
   const [domainError, setDomainError] = useState<string | null>(null);
   const [domainVerified, setDomainVerified] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerifying, startVerifying] = useTransition();
 
   // Site name state
   const [editSiteName, setEditSiteName] = useState('');
-  const [isSavingName, setIsSavingName] = useState(false);
+  const [isSavingName, startSavingName] = useTransition();
   const [saveNameError, setSaveNameError] = useState<string | null>(null);
   const [saveNameSuccess, setSaveNameSuccess] = useState(false);
 
   // Status toggle state
-  const [isTogglingStatus, setIsTogglingStatus] = useState(false);
+  const [isTogglingStatus, startTogglingStatus] = useTransition();
   const [statusError, setStatusError] = useState<string | null>(null);
 
   // Delete state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleting, startDeleting] = useTransition();
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -88,90 +102,101 @@ export default function ProjectsClient() {
     }
   }, [settingsSite]);
 
-  const handleVerifyDomain = async () => {
+  const handleVerifyDomain = () => {
     if (!settingsSite) return;
-    setIsVerifying(true);
     setDomainError(null);
     setDomainVerified(false);
 
-    try {
-      const result = await updateSiteDomainAction(settingsSite.id, editDomain, freshToken(settingsSite.id, settingsSite.updatedAt));
-      if ('error' in result) {
-        setDomainError(getDomainError(result.error, locale));
-        if (isStaleConflict(result)) router.refresh();
-      } else if (result.domain) {
-        setDomainVerified(true);
-        setSettingsSite({ ...settingsSite, domain: result.domain, updatedAt: result.updatedAt });
-        patchSite(settingsSite.id, { domain: result.domain, updatedAt: result.updatedAt });
+    startVerifying(async () => {
+      try {
+        const result = await updateSiteDomainAction(settingsSite.id, editDomain, freshToken(settingsSite.id, settingsSite.updatedAt));
+        if ('error' in result) {
+          setDomainError(getDomainError(result.error, locale));
+          if (isStaleConflict(result)) router.refresh();
+        } else if (result.domain) {
+          setDomainVerified(true);
+          setSettingsSite({ ...settingsSite, domain: result.domain, updatedAt: result.updatedAt });
+          patchSite(settingsSite.id, { domain: result.domain, updatedAt: result.updatedAt });
+        }
+      } catch {
+        setDomainError(t.common.unexpectedError);
       }
-    } catch {
-      setDomainError(t.common.unexpectedError);
-    } finally {
-      setIsVerifying(false);
-    }
+    });
   };
 
-  const handleCommitName = async () => {
+  const handleCommitName = () => {
     if (!settingsSite) return;
     if (editSiteName.trim() === settingsSite.siteName) return;
 
-    setIsSavingName(true);
     setSaveNameError(null);
     setSaveNameSuccess(false);
 
-    const result = await updateSiteNameAction(settingsSite.id, editSiteName, freshToken(settingsSite.id, settingsSite.updatedAt));
-    if ('error' in result) {
-      setSaveNameError(getSiteError(result.error, locale, t.projects.saveNameFailed));
-      if (isStaleConflict(result)) router.refresh();
-    } else {
-      setSaveNameSuccess(true);
-      const trimmed = editSiteName.trim();
-      setSettingsSite({ ...settingsSite, siteName: trimmed, updatedAt: result.updatedAt });
-      patchSite(settingsSite.id, { siteName: trimmed, updatedAt: result.updatedAt });
-      router.refresh();
-    }
-    setIsSavingName(false);
+    startSavingName(async () => {
+      try {
+        const result = await updateSiteNameAction(settingsSite.id, editSiteName, freshToken(settingsSite.id, settingsSite.updatedAt));
+        if ('error' in result) {
+          setSaveNameError(getSiteError(result.error, locale, t.projects.saveNameFailed));
+          if (isStaleConflict(result)) router.refresh();
+        } else {
+          setSaveNameSuccess(true);
+          const trimmed = editSiteName.trim();
+          setSettingsSite({ ...settingsSite, siteName: trimmed, updatedAt: result.updatedAt });
+          patchSite(settingsSite.id, { siteName: trimmed, updatedAt: result.updatedAt });
+          router.refresh();
+        }
+      } catch {
+        setSaveNameError(t.common.unexpectedError);
+      }
+    });
   };
 
-  const handleToggleStatus = async () => {
+  const handleToggleStatus = () => {
     if (!settingsSite) return;
-    setIsTogglingStatus(true);
     setStatusError(null);
 
-    const isActive = settingsSite.status === 'active';
-    const token = freshToken(settingsSite.id, settingsSite.updatedAt);
-    const result = isActive
-      ? await unpublishSiteAction(settingsSite.id, token)
-      : await publishSiteAction(settingsSite.id, token);
+    startTogglingStatus(async () => {
+      try {
+        const isActive = settingsSite.status === 'active';
+        const token = freshToken(settingsSite.id, settingsSite.updatedAt);
+        const result = isActive
+          ? await unpublishSiteAction(settingsSite.id, token)
+          : await publishSiteAction(settingsSite.id, token);
 
-    if ('error' in result) {
-      setStatusError(getSiteError(result.error, locale, t.projects.statusFailed));
-      if (isStaleConflict(result)) router.refresh();
-    } else {
-      const newStatus = (isActive ? 'draft' : 'active') as UserSite['status'];
-      setSettingsSite({ ...settingsSite, status: newStatus, updatedAt: result.updatedAt });
-      patchSite(settingsSite.id, { status: newStatus, updatedAt: result.updatedAt });
-      router.refresh();
-    }
-    setIsTogglingStatus(false);
+        if ('error' in result) {
+          setStatusError(getSiteError(result.error, locale, t.projects.statusFailed));
+          if (isStaleConflict(result)) router.refresh();
+        } else {
+          const newStatus = (isActive ? 'draft' : 'active') as UserSite['status'];
+          setSettingsSite({ ...settingsSite, status: newStatus, updatedAt: result.updatedAt });
+          patchSite(settingsSite.id, { status: newStatus, updatedAt: result.updatedAt });
+          router.refresh();
+        }
+      } catch {
+        setStatusError(t.common.unexpectedError);
+      }
+    });
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!settingsSite) return;
-    setIsDeleting(true);
     setDeleteError(null);
 
     const deletedId = settingsSite.id;
-    const result = await deleteSiteAction(deletedId);
-    if ('error' in result) {
-      setDeleteError(t.projects.deleteFailed);
-      setIsDeleting(false);
-    } else {
-      removeSite(deletedId);
-      setSettingsSite(null);
-      if (selectedSite?.id === deletedId) setSelectedSite(null);
-      router.refresh();
-    }
+    startDeleting(async () => {
+      try {
+        const result = await deleteSiteAction(deletedId);
+        if ('error' in result) {
+          setDeleteError(t.projects.deleteFailed);
+        } else {
+          removeSite(deletedId);
+          setSettingsSite(null);
+          if (selectedSite?.id === deletedId) setSelectedSite(null);
+          router.refresh();
+        }
+      } catch {
+        setDeleteError(t.projects.deleteFailed);
+      }
+    });
   };
 
   const formatDate = (dateString: string) => {
