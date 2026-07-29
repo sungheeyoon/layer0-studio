@@ -834,6 +834,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 globalStyles={content.globalStyles}
                 onChange={handleGlobalStyleChange}
                 issues={issueIndex.globalStyles}
+                templateDefaults={templateModule?.defaultContent.globalStyles}
               />
             </div>
           )}

@@ -119,9 +119,12 @@ export function validateContent(
       warn('NON_HEX_COLOR', `globalStyles.secondaryColor "${gs.secondaryColor}" is not a hex color`, 'globalStyles.secondaryColor');
     }
 
-    if (!gs.backgroundColor) {
-      warn('INVALID_COLOR', 'globalStyles.backgroundColor is required', 'globalStyles.backgroundColor');
-    } else if (!HEX_RE.test(gs.backgroundColor)) {
+    // Deliberately no "required" warning here, unlike primary/secondary above.
+    // `backgroundColor` was added after Sites already existed, and those rows
+    // legitimately carry no value — every render path falls back to the
+    // Template default. Flagging that would put a permanent warning on every
+    // pre-existing Site for something the owner did not do and need not fix.
+    if (gs.backgroundColor && !HEX_RE.test(gs.backgroundColor)) {
       warn('NON_HEX_COLOR', `globalStyles.backgroundColor "${gs.backgroundColor}" is not a hex color`, 'globalStyles.backgroundColor');
     }
 

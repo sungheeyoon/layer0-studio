@@ -182,15 +182,29 @@ describe('validateContent — globalStyles', () => {
     expect(validateContent(json).errors).toHaveLength(0);
   });
 
-  it('warns when backgroundColor is missing or not a hex colour', () => {
+  it('warns when backgroundColor is set but not a hex colour', () => {
+    const json = minimalJson();
+    json.globalStyles.backgroundColor = 'papayawhip';
+    const result = validateContent(json);
+    expect(result.warnings.some((w) => w.code === 'NON_HEX_COLOR' && w.path === 'globalStyles.backgroundColor')).toBe(true);
+  });
+
+  // `backgroundColor` was added after Sites existed. Those rows carry no value
+  // and every render path falls back to the Template default, so an absent
+  // value is a correct state — not something to nag a Site owner about. This
+  // differs deliberately from primaryColor/secondaryColor, which predate any
+  // Site and are genuinely empty only if the user cleared them.
+  it('stays silent when backgroundColor is absent (pre-existing Sites)', () => {
     const json = minimalJson();
     json.globalStyles.backgroundColor = '';
-    const missing = validateContent(json);
-    expect(missing.warnings.some((w) => w.code === 'INVALID_COLOR' && w.path === 'globalStyles.backgroundColor')).toBe(true);
+    const empty = validateContent(json);
+    expect(empty.warnings.some((w) => w.path === 'globalStyles.backgroundColor')).toBe(false);
 
-    json.globalStyles.backgroundColor = 'papayawhip';
-    const nonHex = validateContent(json);
-    expect(nonHex.warnings.some((w) => w.code === 'NON_HEX_COLOR' && w.path === 'globalStyles.backgroundColor')).toBe(true);
+    // @ts-expect-error — a row written before the axis existed has no key at all
+    delete json.globalStyles.backgroundColor;
+    const absent = validateContent(json);
+    expect(absent.warnings.some((w) => w.path === 'globalStyles.backgroundColor')).toBe(false);
+    expect(absent.errors).toHaveLength(0);
   });
 });
 

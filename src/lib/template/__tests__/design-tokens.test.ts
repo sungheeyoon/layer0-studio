@@ -65,6 +65,22 @@ describe('tokensToCssVars', () => {
     expect(vars['--color-surface']).toBe('#F5F0E8');
   });
 
+  // The shape a Site row written before this axis existed actually has: the
+  // key is absent, not empty. Such a Site must keep rendering at its Template's
+  // background rather than losing the variable.
+  it('keeps the template background for a Site whose content predates backgroundColor', () => {
+    const legacyGlobalStyles = {
+      primaryColor: '#C96A3A',
+      secondaryColor: '#231509',
+      fontFamily: "'Pretendard', sans-serif",
+      fontSize: '16px',
+      layout: 'wide',
+    };
+    const vars = tokensToCssVars(sample, legacyGlobalStyles);
+    expect(vars['--color-surface']).toBe('#F5F0E8');
+    expect(vars['--color-primary']).toBe('#C96A3A');
+  });
+
   it('applies fontFamily override to --font-base', () => {
     const vars = tokensToCssVars(sample, { fontFamily: "'Inter', sans-serif" });
     expect(vars['--font-base']).toBe("'Inter', sans-serif");

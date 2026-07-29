@@ -21,11 +21,21 @@ interface GlobalStylesEditorProps {
    * on the published Site; none of them stops a save (ADR-0015 §5).
    */
   issues: Record<string, string[]>;
+  /**
+   * The Template's own defaults, used only to *display* an axis this Site's
+   * content predates. A Site created before an axis existed has no value for
+   * it, and every render path falls back to the Template default — so the
+   * control must show that same default rather than the empty-string reading
+   * of `<input type="color">`, which is black and would misreport the Site.
+   * Nothing is written until the user actually picks a value.
+   */
+  templateDefaults?: GlobalStyles;
 }
 
-export default function GlobalStylesEditor({ globalStyles, onChange, issues }: GlobalStylesEditorProps) {
+export default function GlobalStylesEditor({ globalStyles, onChange, issues, templateDefaults }: GlobalStylesEditorProps) {
   const t = useDictionary().editor.design;
   const fontOptions = ['Inter', 'Playfair Display', 'Roboto', 'Noto Sans KR', 'Montserrat'];
+  const backgroundColor = globalStyles.backgroundColor || templateDefaults?.backgroundColor || '#ffffff';
 
   return (
     <div className="space-y-6">
@@ -76,13 +86,13 @@ export default function GlobalStylesEditor({ globalStyles, onChange, issues }: G
           <input
             id="backgroundColor"
             type="color"
-            value={globalStyles.backgroundColor}
+            value={backgroundColor}
             onChange={(e) => onChange('backgroundColor', e.target.value)}
             className="size-9 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
           />
           <Input
             className="font-mono"
-            value={globalStyles.backgroundColor}
+            value={backgroundColor}
             onChange={(e) => onChange('backgroundColor', e.target.value)}
           />
         </div>
