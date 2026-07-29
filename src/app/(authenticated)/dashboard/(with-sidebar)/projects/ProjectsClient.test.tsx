@@ -150,6 +150,53 @@ describe('ProjectsClient — deleting a site twice', () => {
     await waitFor(() => expect(deleteSiteAction).toHaveBeenCalledTimes(2));
   });
 
+  // The dialog's state used to be cleared by a hand-maintained list in an effect
+  // on the parent; it now simply dies with the dialog, which the parent unmounts
+  // on close. These two pin the behaviour that list existed to provide, so it
+  // cannot quietly grow back — and they fail if the state ever moves back up to
+  // a scope that outlives the dialog.
+  //
+  // Note they do *not* exercise the `key={site.id}` prop: with the dialog behind
+  // a `{settingsSite && …}` guard there is always an unmount between two sites,
+  // so these still pass with the key removed. The key covers a case the UI does
+  // not currently offer (switching sites without closing) and is documented as
+  // insurance, not as what fixes this.
+  it('does not carry one site\'s draft edits into the next site\'s dialog', async () => {
+    const user = userEvent.setup();
+    renderProjects();
+
+    const gears = screen.getAllByRole('button', { name: ko.dashboard.projects.configuration });
+    await user.click(gears[0]);
+    let dialog = await screen.findByRole('dialog');
+
+    const nameInput = within(dialog).getByLabelText(ko.dashboard.projects.siteName);
+    await user.clear(nameInput);
+    await user.type(nameInput, 'Half-typed rename');
+    await user.click(within(dialog).getByRole('button', { name: ko.dashboard.projects.close }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
+    await user.click(screen.getAllByRole('button', { name: ko.dashboard.projects.configuration })[1]);
+    dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByLabelText(ko.dashboard.projects.siteName)).toHaveValue('Second Site');
+  });
+
+  it('does not carry one site\'s delete confirmation into the next site\'s dialog', async () => {
+    const user = userEvent.setup();
+    renderProjects();
+
+    // Step site 1 into its confirmation state, then leave without deleting.
+    const dialog = await openDeleteConfirm(user, 'First Site');
+    expect(within(dialog).getByRole('button', { name: ko.dashboard.projects.confirmDelete })).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: ko.dashboard.projects.close }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
+    // Site 2 must open on the safe step, not armed to delete.
+    await user.click(screen.getAllByRole('button', { name: ko.dashboard.projects.configuration })[1]);
+    const next = await screen.findByRole('dialog');
+    expect(within(next).getByRole('button', { name: ko.dashboard.projects.deleteSite })).toBeInTheDocument();
+    expect(within(next).queryByRole('button', { name: ko.dashboard.projects.confirmDelete })).not.toBeInTheDocument();
+  });
+
   it('re-enables the confirm button when the action returns a handled error', async () => {
     const user = userEvent.setup();
     deleteSiteAction.mockResolvedValueOnce({ error: 'SITE_NOT_FOUND' });

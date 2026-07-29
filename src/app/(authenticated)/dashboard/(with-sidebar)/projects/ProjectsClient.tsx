@@ -1,39 +1,21 @@
 "use client";
 
 import { UserSite } from "@/domain/entities/user-site.entity";
-import { useState, useEffect, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Clock, Search, X } from "lucide-react";
-import {
-  updateSiteDomainAction,
-  publishSiteAction,
-  deleteSiteAction,
-  updateSiteNameAction,
-  unpublishSiteAction,
-} from "@/app/(authenticated)/dashboard/editor/actions";
-import { getDomainError, getSiteError, isStaleConflict } from "@/lib/errors/messages";
 import { useDashboardData } from "../DashboardDataProvider";
-import { useDictionary, useLocale } from "@/lib/i18n/provider";
+import { useDictionary } from "@/lib/i18n/provider";
 import SiteListTable from "@/components/dashboard/SiteListTable";
+import SiteSettingsDialog from "./SiteSettingsDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function ProjectsClient() {
-  const router = useRouter();
   const { sites, patchSite, removeSite } = useDashboardData();
-  const locale = useLocale();
   const t = useDictionary().dashboard;
 
   // The optimistic-concurrency token must come from the freshest copy of the
@@ -53,152 +35,6 @@ export default function ProjectsClient() {
       )
     : sites;
 
-  // In-flight flags are React's, not ours. A hand-rolled `isX` boolean has to be
-  // cleared on *every* exit — success, handled error, and throw — and the delete
-  // one was cleared on only one of the three. Because a successful delete closes
-  // the panel, the stale `true` stayed invisible until the next site's panel
-  // opened with its confirm button already disabled and reading "삭제 중…", so
-  // the second delete could never fire. `useTransition` ends its pending state
-  // when the transition settles, whatever the outcome, so there is no exit left
-  // to forget. One transition per action keeps them independent, matching the
-  // previous UX (saving a name does not disable publishing).
-  //
-  // Each callback keeps its own try/catch: a throw escaping a transition would
-  // reach the error boundary and replace this page with the error screen, where
-  // today it surfaces inline and the panel stays usable.
-
-  // Domain state
-  const [editDomain, setEditDomain] = useState('');
-  const [domainError, setDomainError] = useState<string | null>(null);
-  const [domainVerified, setDomainVerified] = useState(false);
-  const [isVerifying, startVerifying] = useTransition();
-
-  // Site name state
-  const [editSiteName, setEditSiteName] = useState('');
-  const [isSavingName, startSavingName] = useTransition();
-  const [saveNameError, setSaveNameError] = useState<string | null>(null);
-  const [saveNameSuccess, setSaveNameSuccess] = useState(false);
-
-  // Status toggle state
-  const [isTogglingStatus, startTogglingStatus] = useTransition();
-  const [statusError, setStatusError] = useState<string | null>(null);
-
-  // Delete state
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, startDeleting] = useTransition();
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (settingsSite) {
-      setEditDomain(settingsSite.domain || '');
-      setEditSiteName(settingsSite.siteName);
-      setDomainError(null);
-      setDomainVerified(false);
-      setSaveNameError(null);
-      setSaveNameSuccess(false);
-      setStatusError(null);
-      setShowDeleteConfirm(false);
-      setDeleteError(null);
-    }
-  }, [settingsSite]);
-
-  const handleVerifyDomain = () => {
-    if (!settingsSite) return;
-    setDomainError(null);
-    setDomainVerified(false);
-
-    startVerifying(async () => {
-      try {
-        const result = await updateSiteDomainAction(settingsSite.id, editDomain, freshToken(settingsSite.id, settingsSite.updatedAt));
-        if ('error' in result) {
-          setDomainError(getDomainError(result.error, locale));
-          if (isStaleConflict(result)) router.refresh();
-        } else if (result.domain) {
-          setDomainVerified(true);
-          setSettingsSite({ ...settingsSite, domain: result.domain, updatedAt: result.updatedAt });
-          patchSite(settingsSite.id, { domain: result.domain, updatedAt: result.updatedAt });
-        }
-      } catch {
-        setDomainError(t.common.unexpectedError);
-      }
-    });
-  };
-
-  const handleCommitName = () => {
-    if (!settingsSite) return;
-    if (editSiteName.trim() === settingsSite.siteName) return;
-
-    setSaveNameError(null);
-    setSaveNameSuccess(false);
-
-    startSavingName(async () => {
-      try {
-        const result = await updateSiteNameAction(settingsSite.id, editSiteName, freshToken(settingsSite.id, settingsSite.updatedAt));
-        if ('error' in result) {
-          setSaveNameError(getSiteError(result.error, locale, t.projects.saveNameFailed));
-          if (isStaleConflict(result)) router.refresh();
-        } else {
-          setSaveNameSuccess(true);
-          const trimmed = editSiteName.trim();
-          setSettingsSite({ ...settingsSite, siteName: trimmed, updatedAt: result.updatedAt });
-          patchSite(settingsSite.id, { siteName: trimmed, updatedAt: result.updatedAt });
-          router.refresh();
-        }
-      } catch {
-        setSaveNameError(t.common.unexpectedError);
-      }
-    });
-  };
-
-  const handleToggleStatus = () => {
-    if (!settingsSite) return;
-    setStatusError(null);
-
-    startTogglingStatus(async () => {
-      try {
-        const isActive = settingsSite.status === 'active';
-        const token = freshToken(settingsSite.id, settingsSite.updatedAt);
-        const result = isActive
-          ? await unpublishSiteAction(settingsSite.id, token)
-          : await publishSiteAction(settingsSite.id, token);
-
-        if ('error' in result) {
-          setStatusError(getSiteError(result.error, locale, t.projects.statusFailed));
-          if (isStaleConflict(result)) router.refresh();
-        } else {
-          const newStatus = (isActive ? 'draft' : 'active') as UserSite['status'];
-          setSettingsSite({ ...settingsSite, status: newStatus, updatedAt: result.updatedAt });
-          patchSite(settingsSite.id, { status: newStatus, updatedAt: result.updatedAt });
-          router.refresh();
-        }
-      } catch {
-        setStatusError(t.common.unexpectedError);
-      }
-    });
-  };
-
-  const handleDelete = () => {
-    if (!settingsSite) return;
-    setDeleteError(null);
-
-    const deletedId = settingsSite.id;
-    startDeleting(async () => {
-      try {
-        const result = await deleteSiteAction(deletedId);
-        if ('error' in result) {
-          setDeleteError(t.projects.deleteFailed);
-        } else {
-          removeSite(deletedId);
-          setSettingsSite(null);
-          if (selectedSite?.id === deletedId) setSelectedSite(null);
-          router.refresh();
-        }
-      } catch {
-        setDeleteError(t.projects.deleteFailed);
-      }
-    });
-  };
-
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -208,7 +44,6 @@ export default function ProjectsClient() {
     }
   };
 
-  const isNameDirty = settingsSite && editSiteName.trim() !== settingsSite.siteName;
 
   const activeNodes = sites.filter((site) => site.status === 'active').length;
   const draftStates = sites.filter((site) => site.status !== 'active').length;
@@ -358,125 +193,33 @@ export default function ProjectsClient() {
       <Dialog open={!!settingsSite} onOpenChange={(open) => !open && setSettingsSite(null)}>
         <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto sm:max-w-2xl">
           {settingsSite && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{t.projects.configuration}</DialogTitle>
-                <DialogDescription>{settingsSite.siteName}</DialogDescription>
-              </DialogHeader>
-
-              <div className="mt-6 space-y-8">
-                {/* Basic info */}
-                <section className="space-y-3">
-                  <h3 className="text-title">{t.projects.basicInfo}</h3>
-                  <div className="space-y-2">
-                    <Label htmlFor="site-name">{t.projects.siteName}</Label>
-                    <Input
-                      id="site-name"
-                      type="text"
-                      value={editSiteName}
-                      onChange={(e) => {
-                        setEditSiteName(e.target.value);
-                        setSaveNameError(null);
-                        setSaveNameSuccess(false);
-                      }}
-                    />
-                    {saveNameError && <p className="text-caption text-destructive">{saveNameError}</p>}
-                    {saveNameSuccess && <p className="text-caption text-primary">{t.projects.nameSaved}</p>}
-                  </div>
-                </section>
-
-                {/* Domain */}
-                <section className="space-y-3">
-                  <h3 className="text-title">{t.projects.domainUrl}</h3>
-                  <div className="space-y-2">
-                    <Label htmlFor="site-domain">{t.projects.primaryDomain}</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="site-domain"
-                        type="text"
-                        value={editDomain}
-                        onChange={(e) => {
-                          setEditDomain(e.target.value);
-                          setDomainVerified(false);
-                          setDomainError(null);
-                        }}
-                        placeholder={t.projects.domainPlaceholder}
-                        aria-invalid={!!domainError}
-                      />
-                      <Button
-                        variant="outline"
-                        onClick={handleVerifyDomain}
-                        disabled={isVerifying || !editDomain}
-                      >
-                        {isVerifying ? t.projects.verifying : t.projects.verify}
-                      </Button>
-                    </div>
-                    {domainError && <p className="text-caption text-destructive">{domainError}</p>}
-                    {domainVerified && <p className="text-caption text-primary">{t.projects.domainSet}</p>}
-                    {!domainError && !domainVerified && (
-                      <p className="text-caption text-muted-foreground">
-                        {t.projects.domainHintPrefix}internal.id/{settingsSite.id.substring(0, 8)}
-                      </p>
-                    )}
-                  </div>
-                </section>
-
-                {/* Status */}
-                <section className="space-y-3">
-                  <h3 className="text-title">{t.projects.executionStatus}</h3>
-                  <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-                    <div>
-                      <p className="text-body font-medium">{t.projects.productionState}</p>
-                      <p className="text-caption text-muted-foreground">
-                        {settingsSite.status === 'active' ? t.projects.statusPublishedDesc : t.projects.statusDraftDesc}
-                      </p>
-                      {statusError && <p className="text-caption mt-1 text-destructive">{statusError}</p>}
-                    </div>
-                    <Button variant="outline" onClick={handleToggleStatus} disabled={isTogglingStatus}>
-                      {isTogglingStatus ? t.projects.processing : settingsSite.status === 'active' ? t.projects.suspend : t.projects.publish}
-                    </Button>
-                  </div>
-                </section>
-
-                {/* Danger zone */}
-                <section className="space-y-3">
-                  <h3 className="text-title text-destructive">{t.projects.dangerZone}</h3>
-                  <div className="flex items-center justify-between gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-                    <div>
-                      <p className="text-body font-medium text-destructive">{t.projects.deleteProject}</p>
-                      <p className="text-caption max-w-sm text-muted-foreground">{t.projects.deleteWarn}</p>
-                      {deleteError && <p className="text-caption mt-1 text-destructive">{deleteError}</p>}
-                    </div>
-                    {showDeleteConfirm ? (
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="text-caption font-medium text-destructive">{t.projects.confirmPrompt}</span>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(false)}>
-                            {t.projects.cancel}
-                          </Button>
-                          <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isDeleting}>
-                            {isDeleting ? t.projects.deleting : t.projects.confirmDelete}
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
-                        {t.projects.deleteSite}
-                      </Button>
-                    )}
-                  </div>
-                </section>
-              </div>
-
-              <DialogFooter className="mt-8">
-                <Button variant="ghost" onClick={() => setSettingsSite(null)}>
-                  {t.projects.close}
-                </Button>
-                <Button onClick={handleCommitName} disabled={!isNameDirty || isSavingName}>
-                  {isSavingName ? t.projects.saving : t.projects.commit}
-                </Button>
-              </DialogFooter>
-            </>
+            // What actually clears the dialog's state is this conditional: closing
+            // sets `settingsSite` to null, which unmounts the component and takes
+            // its drafts, errors and in-flight flags with it. That is the whole
+            // fix — the old code kept that state in this parent, where it outlived
+            // the dialog and had to be cleared by hand.
+            //
+            // `key` is insurance on top, for the day the dialog can be re-pointed
+            // at another site without closing first (a "next site" control, or a
+            // `forceMount`): then only the key would force the rebuild. Keyed on
+            // `id` and nothing else on purpose — `onPatch` below replaces the
+            // object on every save, and keying on identity or `updatedAt` would
+            // wipe the success message it just set.
+            <SiteSettingsDialog
+              key={settingsSite.id}
+              site={settingsSite}
+              freshToken={freshToken}
+              onPatch={(id, partial) => {
+                patchSite(id, partial);
+                setSettingsSite((current) => (current && current.id === id ? { ...current, ...partial } : current));
+              }}
+              onDeleted={(id) => {
+                removeSite(id);
+                setSettingsSite(null);
+                if (selectedSite?.id === id) setSelectedSite(null);
+              }}
+              onClose={() => setSettingsSite(null)}
+            />
           )}
         </DialogContent>
       </Dialog>
