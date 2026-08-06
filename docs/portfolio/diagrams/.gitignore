@@ -1,3 +1,0 @@
-# Renderer dependency only — the repo's root .gitignore is anchored (`/node_modules`)
-# and does not cover this nested one. 82MB of mermaid bundle; never commit it.
-node_modules/
