@@ -11,6 +11,8 @@
 
   /* User-editable page background (globalStyles.backgroundColor). */
   --corp-bg: var(--theme-bg, #ffffff);
+  /* User-editable accent (globalStyles.secondaryColor). */
+  --corp-accent: var(--theme-secondary, #e94560);
 
   color: #333;
   line-height: 1.5;
@@ -59,6 +61,7 @@
   letter-spacing: 0.1em;
   opacity: 0.8;
   margin-bottom: 2.5rem;
+  color: var(--corp-accent);
 }
 
 .ctaButton {
@@ -88,7 +91,7 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 2rem;
-  color: var(--theme-primary, #000);
+  color: var(--corp-accent);
 }
 
 .sectionBody {

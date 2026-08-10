@@ -7,10 +7,11 @@
   --i-gold-light: #E8D5B0;
   --i-cream: #F2EBE0;
   --i-muted: #7A6E60;
-  --i-surface: color-mix(in srgb, var(--i-dark) 94%, #fff);
+  /* User-editable secondary surface (globalStyles.secondaryColor). */
+  --i-surface: var(--theme-secondary, #0C0A08);
 
   /* One-off solid bgs (extracted from inline literals) */
-  --i-dark-deepest: #080704;   /* Footer */
+  --i-dark-deepest: color-mix(in srgb, var(--i-surface) 90%, #000);   /* Footer */
   --i-stat-bg:      #111009;   /* Stats section */
   --i-blue-accent:  #8BB4D8;   /* Portfolio cool accent */
 
@@ -75,7 +76,7 @@
 
 /* ── Glass Nav ── */
 .glassNav {
-  background: rgba(12,10,8,.75);
+  background: color-mix(in srgb, var(--i-surface) 75%, transparent);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(201,169,110,.1);
@@ -97,7 +98,7 @@
   padding: 2px;
 }
 .bezelInner {
-  background: rgba(255,255,255,.02);
+  background: color-mix(in srgb, var(--i-surface) 96%, #fff);
   border: 1px solid rgba(255,255,255,.05);
   border-radius: 16px;
   padding: 28px 28px 32px;
@@ -174,7 +175,7 @@
 
 /* ── Testimonial card ── */
 .testiCard {
-  background: #161210;
+  background: var(--i-surface);
   border: 1px solid rgba(201,169,110,.1);
   border-radius: 16px;
   padding: 32px;
