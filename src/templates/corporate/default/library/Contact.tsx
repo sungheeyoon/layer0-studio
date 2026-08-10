@@ -2,14 +2,17 @@
 
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../corporate.module.css';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { contactSchema } from './Contact.meta';
+
+type ContactContent = ValuesOf<typeof contactSchema>;
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || 'Get in Touch';
-  const email = getFieldValue(fields, 'email') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const address = getFieldValue(fields, 'address') || '';
+  const content = section.fields as ContactContent;
+  const title = content.title || 'Get in Touch';
+  const email = content.email || '';
+  const phone = content.phone || '';
+  const address = content.address || '';
 
   return (
     <div className={`${styles.section} ${styles.genericSection}`}>

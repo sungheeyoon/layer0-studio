@@ -1,17 +1,35 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../corporate.module.css';
-import { Field, getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const featuresSchema = {
+  title: { type: 'text', label: 'Section Title', required: true },
+  subtitle: { type: 'text', label: 'Subtitle' },
+  strategy: { type: 'text', label: 'Strategy' },
+  design: { type: 'text', label: 'Design' },
+  development: { type: 'text', label: 'Development' },
+  analytics: { type: 'text', label: 'Analytics' },
+} as const satisfies FieldsSchema;
+
+type FeaturesContent = ValuesOf<typeof featuresSchema>;
+
+/**
+ * The cards, in render order — every schema key except the section's own header
+ * copy. This used to be `Object.entries(fields)` minus a deny-list, with each
+ * card's heading read from the stored Field's `label`. A Value carries no label
+ * (ADR-0016 §4), and reading one out of content was exactly the drift the ADR
+ * removes: the heading is schema-owned, so it is read from the schema.
+ */
+const FEATURE_KEYS = ['strategy', 'design', 'development', 'analytics'] as const;
 
 const Features: SectionComponent = function Features({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || 'Core Features';
-  const subtitle = getFieldValue(fields, 'subtitle') || '';
+  const content = section.fields as FeaturesContent;
+  const title = content.title || 'Core Features';
+  const subtitle = content.subtitle || '';
 
-  // Filter out non-feature items
-  // Reads each Field's own `label` as copy — the schema/content drift ADR-0016
-  // §4 removes. Cast until this component is converted to a Value schema.
-  const features = (Object.entries(fields) as [string, Field][])
-    .filter(([key]) => !['title', 'subtitle', 'heading'].includes(key));
+  const features = FEATURE_KEYS
+    .map((key) => ({ key, label: featuresSchema[key].label, body: content[key] ?? '' }))
+    .filter((f) => f.body);
 
   return (
     <div className={styles.section}>
@@ -21,18 +39,18 @@ const Features: SectionComponent = function Features({ section }: TemplateSectio
           <h2 className={styles.sectionTitle}>{title}</h2>
           {subtitle && <p className="text-sm font-light opacity-60 max-w-lg mx-auto leading-relaxed">{subtitle}</p>}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-outline-variant border border-outline-variant">
-          {features.map(([key, field]) => (
+          {features.map(({ key, label, body }) => (
             <div key={key} className="bg-surface p-10 group hover:bg-primary transition-colors duration-500">
               <span className="text-[0.625rem] font-medium tracking-[0.2em] text-primary group-hover:text-on-primary opacity-40 block mb-6 uppercase">
                 {key.padStart(2, '0')}
               </span>
               <h3 className="text-xs font-medium tracking-widest uppercase mb-4 group-hover:text-on-primary transition-colors">
-                {field.label}
+                {label}
               </h3>
               <p className="text-xs font-light leading-relaxed opacity-60 group-hover:text-on-primary group-hover:opacity-80 transition-all">
-                {getFieldValue(fields, key)}
+                {body}
               </p>
             </div>
           ))}
@@ -46,14 +64,7 @@ Features.meta = {
   componentKey: 'features',
   category: 'features',
   label: 'Corporate Features',
-  fieldsSchema: {
-    title: { type: 'text', label: 'Section Title', required: true },
-    subtitle: { type: 'text', label: 'Subtitle' },
-    strategy: { type: 'text', label: 'Strategy' },
-    design: { type: 'text', label: 'Design' },
-    development: { type: 'text', label: 'Development' },
-    analytics: { type: 'text', label: 'Analytics' }
-  },
+  fieldsSchema: featuresSchema,
   previewImage: '/component-previews/corporate/features.webp',
 };
 

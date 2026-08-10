@@ -1,10 +1,17 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const footerSchema = {
+  companyName: { type: 'text', label: 'Company Name' },
+  copyright: { type: 'text', label: 'Copyright Text' },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const copyright = getFieldValue(fields, 'copyright') || `© ${new Date().getFullYear()} Layer0 Studio`;
-  const companyName = getFieldValue(fields, 'companyName') || 'LAYER0';
+  const content = section.fields as FooterContent;
+  const copyright = content.copyright || `© ${new Date().getFullYear()} Layer0 Studio`;
+  const companyName = content.companyName || 'LAYER0';
 
   return (
     <footer className="py-20 px-8 border-t border-outline-variant bg-surface">
@@ -59,10 +66,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Corporate Footer',
-  fieldsSchema: {
-    companyName: { type: 'text', label: 'Company Name' },
-    copyright: { type: 'text', label: 'Copyright Text' }
-  },
+  fieldsSchema: footerSchema,
   previewImage: '/component-previews/corporate/footer.webp',
 };
 

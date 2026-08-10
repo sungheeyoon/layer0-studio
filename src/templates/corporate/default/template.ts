@@ -23,36 +23,11 @@ const preset: TemplatePreset = {
           "label": "히어로"
         },
         "fields": {
-          "title": {
-            "value": "We Build Digital Experiences",
-            "type": "text",
-            "label": "Main Title",
-            "editable": true
-          },
-          "subtitle": {
-            "value": "Strategy · Design · Technology",
-            "type": "text",
-            "label": "Subtitle",
-            "editable": true
-          },
-          "backgroundImage": {
-            "value": "https://images.unsplash.com/photo-1497366216548-37526070297c",
-            "type": "image",
-            "label": "Background Image",
-            "editable": true
-          },
-          "ctaText": {
-            "value": "Explore Our Work",
-            "type": "text",
-            "label": "CTA Button Text",
-            "editable": true
-          },
-          "ctaUrl": {
-            "value": "#contact",
-            "type": "url",
-            "label": "CTA Button Link",
-            "editable": true
-          }
+          "title": "We Build Digital Experiences",
+          "subtitle": "Strategy · Design · Technology",
+          "backgroundImage": { "url": "https://images.unsplash.com/photo-1497366216548-37526070297c" },
+          "ctaText": "Explore Our Work",
+          "ctaUrl": "#contact"
         }
       },
       {
@@ -64,30 +39,10 @@ const preset: TemplatePreset = {
           "label": "about"
         },
         "fields": {
-          "title": {
-            "value": "Our Philosophy",
-            "type": "text",
-            "label": "Section Title",
-            "editable": true
-          },
-          "subtitle": {
-            "value": "Crafting the future",
-            "type": "text",
-            "label": "Subtitle",
-            "editable": true
-          },
-          "body": {
-            "value": "We believe in the power of design to transform businesses...",
-            "type": "textarea",
-            "label": "Description",
-            "editable": true
-          },
-          "image": {
-            "value": "https://images.unsplash.com/photo-1522071820081-009f0129c71c",
-            "type": "image",
-            "label": "Section Image",
-            "editable": true
-          }
+          "title": "Our Philosophy",
+          "subtitle": "Crafting the future",
+          "body": "We believe in the power of design to transform businesses...",
+          "image": { "url": "https://images.unsplash.com/photo-1522071820081-009f0129c71c" }
         }
       },
       {
@@ -99,42 +54,12 @@ const preset: TemplatePreset = {
           "label": "features"
         },
         "fields": {
-          "title": {
-            "value": "Core Capabilities",
-            "type": "text",
-            "label": "Section Title",
-            "editable": true
-          },
-          "subtitle": {
-            "value": "What we do best",
-            "type": "text",
-            "label": "Subtitle",
-            "editable": true
-          },
-          "strategy": {
-            "value": "Data-driven approach to digital transformation",
-            "type": "text",
-            "label": "Strategy",
-            "editable": true
-          },
-          "design": {
-            "value": "Human-centered design that drives engagement",
-            "type": "text",
-            "label": "Design",
-            "editable": true
-          },
-          "development": {
-            "value": "Scalable solutions built on modern architecture",
-            "type": "text",
-            "label": "Development",
-            "editable": true
-          },
-          "analytics": {
-            "value": "Continuous optimization through real-time insights",
-            "type": "text",
-            "label": "Analytics",
-            "editable": true
-          }
+          "title": "Core Capabilities",
+          "subtitle": "What we do best",
+          "strategy": "Data-driven approach to digital transformation",
+          "design": "Human-centered design that drives engagement",
+          "development": "Scalable solutions built on modern architecture",
+          "analytics": "Continuous optimization through real-time insights"
         }
       },
       {
@@ -146,30 +71,10 @@ const preset: TemplatePreset = {
           "label": "contact"
         },
         "fields": {
-          "title": {
-            "value": "Get in Touch",
-            "type": "text",
-            "label": "Section Title",
-            "editable": true
-          },
-          "email": {
-            "value": "hello@company.com",
-            "type": "text",
-            "label": "Email",
-            "editable": true
-          },
-          "phone": {
-            "value": "+82 02-1234-5678",
-            "type": "text",
-            "label": "Phone",
-            "editable": true
-          },
-          "address": {
-            "value": "Seoul, South Korea",
-            "type": "text",
-            "label": "Address",
-            "editable": true
-          }
+          "title": "Get in Touch",
+          "email": "hello@company.com",
+          "phone": "+82 02-1234-5678",
+          "address": "Seoul, South Korea"
         }
       },
       {
@@ -181,18 +86,8 @@ const preset: TemplatePreset = {
           "label": "푸터"
         },
         "fields": {
-          "companyName": {
-            "value": "ACME Corp",
-            "type": "text",
-            "label": "Company Name",
-            "editable": true
-          },
-          "copyright": {
-            "value": "© 2026 ACME Corp. All rights reserved.",
-            "type": "text",
-            "label": "Copyright Text",
-            "editable": true
-          }
+          "companyName": "ACME Corp",
+          "copyright": "© 2026 ACME Corp. All rights reserved."
         }
       }
     ]

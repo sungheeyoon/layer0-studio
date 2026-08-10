@@ -14,6 +14,7 @@ import weddingPreset from '@/templates/wedding/default/template';
 import cafeCozyPreset from '@/templates/cafe/cozy/template';
 
 import { templateMap, getAvailableTemplateKeys } from '@/templates/_generated';
+import { MIGRATED_TEMPLATE_KEYS } from '@/templates/__tests__/migrated-templates';
 
 const ALL_TEMPLATE_KEYS = getAvailableTemplateKeys();
 
@@ -658,16 +659,6 @@ describe('validateContent — no user-reachable field value blocks a save', () =
 
 // ─── Migration gauge (ADR-0016 §8-2) ───────────────────────────────
 
-/**
- * Templates already converted to Values. Every other shipping Template still
- * stores pre-ADR-0016 `Field` objects, and the new rules *must* reject those —
- * that rejection is the only progress signal the bulk conversion has
- * (`template:verify:ci` goes red for exactly the un-migrated set).
- *
- * Move a key here as its preset converts. When the list holds every key, delete
- * it and assert zero errors for all — that is the end of ADR-0016 §8 step 3.
- */
-const MIGRATED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([]);
 
 describe('all presets — Value migration gauge', () => {
   const cases = [
