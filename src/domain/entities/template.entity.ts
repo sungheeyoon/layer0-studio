@@ -8,6 +8,84 @@ export type FieldType =
   | 'select'
   | 'array';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ADR-0016 — schema-first Field/Value split.
+//
+// The schema is the single source of truth. A `FieldDescriptor` says how a
+// field is edited; the *type* of the data it holds (its Value) is derived from
+// it via `ValuesOf`, never written by hand. That is what makes schema/content
+// drift structurally impossible rather than merely validated.
+//
+// These types are additive for now — the legacy `Field` union below still
+// backs the un-migrated Templates. See ADR-0016 §8-2 for the rollout order.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * An uploaded image. `url` is what the renderer puts in `src`; `assetId` is
+ * the reference-counting handle ADR-0003's orphan sweep reads. Two different
+ * jobs, deliberately not merged into one string.
+ */
+export interface ImageValue {
+  url: string;
+  assetId?: string | null;
+}
+
+/** Schema-side descriptor for one editable field. */
+export type FieldDescriptor =
+  | { type: 'text' | 'textarea' | 'url' | 'color'; label: string; required?: boolean; editable?: boolean }
+  | { type: 'select'; label: string; required?: boolean; editable?: boolean; options: readonly string[] }
+  /** `default` is required: it is what the editor resets an emptied input to. */
+  | { type: 'number'; label: string; required?: boolean; editable?: boolean; default: number }
+  | { type: 'image'; label: string; required?: boolean; editable?: boolean }
+  | {
+      type: 'array';
+      label: string;
+      required?: boolean;
+      editable?: boolean;
+      itemSchema: FieldsSchema;
+      minItems?: number;
+      maxItems?: number;
+    };
+
+/** A Block component's full field schema. Declare it with `as const satisfies FieldsSchema`. */
+export type FieldsSchema = Readonly<Record<string, FieldDescriptor>>;
+
+/** The Value type one descriptor implies. */
+type ValueOfDescriptor<D> =
+  D extends { type: 'image' } ? ImageValue
+  : D extends { type: 'number' } ? number
+  : D extends { type: 'select'; options: readonly (infer O)[] } ? O
+  : D extends { type: 'array'; itemSchema: infer S } ? Array<ArrayItem<S>>
+  : string;
+
+/**
+ * One repeating item. `id` is a sibling of `fields`, exactly as a Block carries
+ * its own `id` beside its `fields` — so `itemSchema` only ever describes keys a
+ * user actually edits, and no "system key" exclusion is needed (ADR-0016 §4-3).
+ */
+export interface ArrayItem<S> {
+  id: string;
+  fields: ValuesOf<S>;
+}
+
+type RequiredFieldKeys<S> = {
+  [K in keyof S]-?: S[K] extends { required: true } ? K : never;
+}[keyof S];
+
+type OptionalFieldKeys<S> = Exclude<keyof S, RequiredFieldKeys<S>>;
+
+/** Flattens the required/optional intersection so hovers stay readable. */
+type Prettify<T> = { [K in keyof T]: T[K] } & {};
+
+/**
+ * The Content type a schema implies — `required: true` becomes a mandatory
+ * key, everything else optional. Use as `type XContent = ValuesOf<typeof xSchema>`.
+ */
+export type ValuesOf<S> = Prettify<
+  { [K in RequiredFieldKeys<S>]: ValueOfDescriptor<S[K]> } &
+  { [K in OptionalFieldKeys<S>]?: ValueOfDescriptor<S[K]> }
+>;
+
 interface BaseField {
   label: string;
   editable?: boolean; // Basic true, hidden in editor if false
