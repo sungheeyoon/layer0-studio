@@ -1,6 +1,6 @@
 # 편집 손실은 동시성 문제가 아니라 경로의 집합이다 — 전수 열거와 방어
 
-> **Status: Accepted — 구현 완료.** 언마운트 flush + 전송 실패 한정 유한 재시도 (`src/lib/editor/flush-retry.ts`) · `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`) · 단일 write queue (`src/lib/editor/write-queue.ts`) · blocking→warning 강등 · `layout` 에디터 컨트롤 제거.
+> **Status: Accepted — 구현 완료.** 언마운트 flush + 전송 실패 한정 유한 재시도 (`src/lib/editor/flush-retry.ts`) · `visibilitychange(hidden)` flush (`src/lib/editor/use-flush-on-hidden.ts`) · `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`) · 단일 write queue (`src/lib/editor/write-queue.ts`) · blocking→warning 강등 · `layout` 에디터 컨트롤 제거.
 
 [ADR-0004](./0004-optimistic-concurrency-via-rpc.md) 는 편집 손실을 **동시성 문제**로 모델링하고 그 한 갈래(탭 간 silent overwrite)를 RPC 로 정확히 막았다. 그 결정은 지금도 옳다. 문제는 그것이 손실의 **유일한** 갈래인 것처럼 취급됐다는 점이다. 같은 데이터가 사라지는 경로는 그 뒤로도 열려 있었고, 각각 전혀 다른 메커니즘을 갖고 있었다.
 
@@ -31,6 +31,14 @@
 `<Link onNavigate>` 게이트(Next 16 지원)는 **쓰지 않는다.** 그것으로 살 수 있는 건 뒤로가기 *버튼* 에서의 실패 가시성뿐인데, 정작 같은 실패가 브라우저 뒤로가기에서는 여전히 조용하다. 일관되지 않은 부분해를 위해 `editor/layout.tsx` 를 Client Component 로 내리고 레이아웃 경계를 가로지르는 dirty-state Context 를 신설할 값어치가 없다.
 
 **탭 닫기 / 새로고침은 범위 밖이다.** unload 중에는 Server Action 의 fetch 가 취소되고 `keepalive` 를 붙일 방법이 없다. `navigator.sendBeacon` + 전용 Route Handler 로 저장할 수는 있지만, 그건 ADR-0004 가 "우회하지 말라"고 못 박은 종류의 **새 저장 경로를 `withUser` 인증 레이어 밖에** 하나 더 만드는 일이다. 얻는 것은 "경고창을 보고도 나가기를 누른 사용자"의 마지막 몇 초다. 교환비가 맞지 않는다. 이 경로는 `beforeunload` 경고 + 아래 `maxWait` 으로 손실 창을 **상한 있는 값으로 고정**하는 것으로 갈음한다.
+
+**`visibilitychange(hidden)` 에서도 flush 한다** (`src/lib/editor/use-flush-on-hidden.ts`). 처음 열거에서 빠졌던 이벤트인데, 위의 기각 근거가 **여기엔 적용되지 않는다** — `hidden` 은 페이지가 *살아 있는 채로* 발화하므로 보낸 요청이 완주하고, 따라서 인증 밖 새 경로가 필요 없다. 언마운트 flush 와 같은 "페이지가 살아남는 이탈" 범주다.
+
+건지는 것은 주로 **모바일 홈 버튼**이다. 탭이 백그라운드로 가도 언마운트는 일어나지 않아 위의 cleanup 은 돌지 않고, 백그라운드 탭은 `setTimeout` 이 스로틀되므로 아래 `maxWait` 이 **상한 구실을 못 하는 바로 그 순간에** OS 가 탭을 회수할 수 있다.
+
+가드는 언마운트 flush 와 같은 신호(살아 있는 디바운스 타이머)를 쓴다 — 탭 전환마다 저장하는 게 아니라 **집어가지 않은 편집이 있을 때만** 나가고, 첫 flush 가 타이머를 비우므로 전환을 반복해도 저장이 쌓이지 않는다. 언마운트 flush 와 달리 여기서는 컴포넌트가 **마운트된 상태**라 실패를 보고할 화면이 있다 — 그래서 `runAutoSave` 로 디스패치해서 배너와 Conflict 모달이 탭 복귀 시 그대로 뜬다.
+
+**이것이 탭 닫기 기각을 뒤집지는 않는다.** 데스크톱에서 탭을 닫아도 `hidden` 은 발화하지만 직후 페이지가 죽어 in-flight 요청 완주가 보장되지 않는다. 확률을 올릴 뿐이므로 `beforeunload` 경고는 그대로 유지한다.
 
 flush 실패 3종 중 `STALE_VERSION` 은 ADR-0004 상 **버리는 게 정답**이고(다른 탭의 쓰기를 덮으면 안 된다), 검증 실패는 아래 4번이 없애며, **남은 전송 실패만 재시도로 건질 수 있다.**
 
@@ -88,5 +96,5 @@ flush 를 추가하는 것만으로 동시 쓰기 지점이 셋이 되므로 이
 
 ## 남겨둔 것
 
-- **탭 닫기 / 크래시 시 최대 `maxWait` 분량 손실.** 2번에서 명시적으로 범위 밖으로 뒀다. 무한이던 창을 상한 있는 값으로 바꾼 것이 이번 이득이다.
+- **탭 닫기 / 크래시 시 최대 `maxWait` 분량 손실.** 2번에서 명시적으로 범위 밖으로 뒀다. 무한이던 창을 상한 있는 값으로 바꾼 것이 이번 이득이다. `visibilitychange` flush 가 이 중 **백그라운드 전환**(모바일 홈 버튼·앱 전환)은 걷어냈지만, 탭을 닫는 경우는 `hidden` 이후 페이지가 죽으므로 여전히 확률 문제로 남는다.
 - **재시도를 다 쓴 flush 의 조용한 실패.** 전송 실패는 2번의 유한 재시도가 건지지만, 2회 모두 실패하면 유저는 이미 떠났으므로 알릴 화면이 없다. 손실 조건이 "네트워크가 순간 끊기면"에서 "약 2초 동안 계속 끊겨 있으면"으로 좁아진 것이지, 불변식의 완전 달성은 아니다.
