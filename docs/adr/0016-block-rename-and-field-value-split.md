@@ -2,13 +2,13 @@
 
 > **Status: Accepted and implemented** (2026-08-10). Field/Value 전환은 migration 026, Block/Menu 전환은 migration 027로 완료했다.
 >
-> **이력:** `docs/architecture/` Part 1–4 초안을 그릴링으로 확정한 결과다. 2026-08-10 세 차례 개정을 거쳤다 — (1) §4 를 **스키마/Value 분리**로 확장, (2) 초안이 물려준 `→ SiteContent` 리네임을 **취소**(§2 하단), (3) 리뷰 반영: §4-1 의 `BlockFieldsSchema<T>` 방향을 **폐기하고 schema-first 로 교체**(아래 §4-1), nav 마이그레이션 매핑표 확정(§3), 롤아웃을 사전 검증 후 원자적 기록으로 교체(§8), asset 항목 정정(§7).
+> **이력:** 데이터 모델 재설계 초안을 그릴링으로 확정한 결과다. 2026-08-10 세 차례 개정을 거쳤다 — (1) §4 를 **스키마/Value 분리**로 확장, (2) 초안이 물려준 `→ SiteContent` 리네임을 **취소**(§2 하단), (3) 리뷰 반영: §4-1 의 `BlockFieldsSchema<T>` 방향을 **폐기하고 schema-first 로 교체**(아래 §4-1), nav 마이그레이션 매핑표 확정(§3), 롤아웃을 사전 검증 후 원자적 기록으로 교체(§8), asset 항목 정정(§7).
 >
 > **읽는 법:** 이 문서의 AS-IS는 결정 당시의 이전 모델, TO-BE는 현재 모델이다. 현행 용어의 짧은 정본은 `CONTEXT.md`, 저작·운영 절차는 `docs/TEMPLATE_SYSTEM.md`다.
 
 ## Context
 
-`docs/architecture/` Part 1–4 는 현재 데이터 모델의 재설계를 제안했다. 초안은 두 종류의 변경을 한 봉투에 섞었다: (A) **순수 리네임/정직화** 와 (B) **구조 통일**(Single 을 `pages:[Page]` 로, Chrome 을 양쪽 공통으로, 단일 mode-blind 렌더러). 초안 (B) 는 [ADR-0007](./0007-single-multi-site-type-structural-union.md) + migration 018 이 *의도적으로 반대 방향으로* 이미 확정한 결정을 자각 없이 되돌리는 것이었다.
+데이터 모델 재설계 초안은 두 종류의 변경을 한 봉투에 섞었다: (A) **순수 리네임/정직화** 와 (B) **구조 통일**(Single 을 `pages:[Page]` 로, Chrome 을 양쪽 공통으로, 단일 mode-blind 렌더러). 초안 (B) 는 [ADR-0007](./0007-single-multi-site-type-structural-union.md) + migration 018 이 *의도적으로 반대 방향으로* 이미 확정한 결정을 자각 없이 되돌리는 것이었다.
 
 이 재설계의 **1순위 목표는 데이터 모델의 정직성/명명 정리**이며, 렌더러 통일이 아니다. 따라서 (B) 는 기각하고 (A) 만 채택한다.
 
@@ -142,7 +142,7 @@ type MenuContent = ValuesOf<typeof menuSchema>;
 
 #### 4-2. 타입 배치
 
-- **도메인(`ContentModel`/`Block.fields`)은 계속 loose**: `Record<string, unknown>`. Block 은 dispatcher 패턴(문자열 `type` → `library[type]`)이라 도메인은 어떤 Block 이 어떤 Value 모양인지 정적으로 알 수 없다(Data-driven 시스템의 본질, Part 1 §3). **추론된 타입은 컴포넌트 경계에서만** 쓴다.
+- **도메인(`ContentModel`/`Block.fields`)은 계속 loose**: `Record<string, unknown>`. Block 은 dispatcher 패턴(문자열 `type` → `library[type]`)이라 도메인은 어떤 Block 이 어떤 Value 모양인지 정적으로 알 수 없다. **추론된 타입은 컴포넌트 경계에서만** 쓴다.
 - **런타임 validator 는 유지한다.** 컴파일 타임은 코드-내 정합만 보므로, 저장된 DB JSON 검증은 여전히 `validateContent` 의 몫이다.
 
 #### 4-3. Value 모양
@@ -185,7 +185,7 @@ SiteWriteUseCase
 
 ### 6. 렌더 경계는 unsafe cast — 그 전제가 되는 호환성 규칙
 
-렌더러는 `block.fields` 를 추론된 Content 타입으로 **검증 없이 캐스팅**한다. 저장 경로가 이미 막았으므로 도달한 Value 는 유효하다고 신뢰한다 — "파싱은 경계에서 한 번"(Part 1 §2.5).
+렌더러는 `block.fields` 를 추론된 Content 타입으로 **검증 없이 캐스팅**한다. 저장 경로가 이미 막았으므로 도달한 Value 는 유효하다고 신뢰한다 — "파싱은 경계에서 한 번".
 
 **이 신뢰는 공짜가 아니다.** 컴파일 타임은 코드-내 정합만 본다. 또 `getFieldValue` 가 `if (!field) return ''` 로 메워주던 누락 필드 방어막이 사라진다. 따라서:
 
@@ -249,7 +249,7 @@ Registry의 모든 Template과 저장 JSON을 한 번에 전환했고 백워드 
 - **렌더 경계에서 safe parse(매 렌더 재검증)** — 저장 시점에 이미 도는 스키마 워크를 렌더마다 반복. §6 의 호환성 규칙으로 전제를 보장한다.
 - **`schemaVersion` + 하위 호환 레이어** — 유저 0 이라 변형 비용이 0 인 지금이 가장 싸다. 호환 레이어는 영구 부채.
 - **호환성 규칙을 문서로만 유지** — 지켜지지 않는다. §6-1 의 CI manifest 게이트로 강제.
-- **Collection(Part 5) 번들** — **연기.** (1) Collection 은 nav 에 Page/Block 이 아닌 항목을 넣어 projected nav 로 표현 불가 → 저장된 `navigation` SSOT 강제 → §3 과 충돌. (2) 순수 추가 인프라라 "유저 0" 타이밍 이득 없음. (3) 쓰는 템플릿 0 개. **미래 여지만 남긴다**: `ContentModel` 이 후일 top-level `collections`/`navigation` 을 받을 수 있게, Block dispatcher 가 Data Block 을 수용할 수 있게.
+- **Collection 번들** — **연기.** (1) Collection 은 nav 에 Page/Block 이 아닌 항목을 넣어 projected nav 로 표현 불가 → 저장된 `navigation` SSOT 강제 → §3 과 충돌. (2) 순수 추가 인프라라 "유저 0" 타이밍 이득 없음. (3) 쓰는 템플릿 0 개. **미래 여지만 남긴다**: `ContentModel` 이 후일 top-level `collections`/`navigation` 을 받을 수 있게, Block dispatcher 가 Data Block 을 수용할 수 있게.
 
 ## Consequences
 
@@ -267,6 +267,5 @@ Registry의 모든 Template과 저장 JSON을 한 번에 전환했고 백워드 
 - [ADR-0015](./0015-edit-loss-paths-exhaustive-defense.md) — 저장 시점 검증(§6 의 전제), 블로킹/경고 기준.
 - [ADR-0008](./0008-keep-explicit-di-factories.md) — 읽기 경로의 registry 격리(§5 계층 배치의 근거).
 - [ADR-0003](./0003-asset-upload-two-phase-cleanup.md) — asset slot_key / 참조 카운팅(§5, §7).
-- 설계 초안: `docs/architecture/` Part 1–4 (본 ADR 이 확정형).
-- Collection 연기: `docs/architecture/appendix-open-questions.md`, `docs/plans/PLAN_crud_array_field.md`.
+- Collection 연기: [`docs/plans/PLAN_crud_array_field.md`](../plans/PLAN_crud_array_field.md).
 - [migration 026](../migrations/026_field_to_value.md) / [migration 027](../migrations/027_block_menu.md) — 구현·데이터 전환 기록.

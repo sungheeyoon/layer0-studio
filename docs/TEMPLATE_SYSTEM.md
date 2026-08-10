@@ -1,9 +1,9 @@
 # Template System — Layer0 Studio
 
 _대상: Template / Block component 를 추가·수정하거나 저작 · sync 파이프라인을 손볼 개발자_
-_최종 갱신: 2026-08-10 (ADR-0016 §2–§5 통합 구현, #130)_
+_최종 갱신: 2026-08-11 (ADR-0016 전체 구현과 문서 정리)_
 
-> 본 문서는 `CONTEXT.md` 의 도메인 어휘 (Template / Category / Block / Preset / Sync / Design Tokens / Global Styles) 와 `docs/adr/` 를 기반으로 한다. 특히 [ADR-0001](./adr/0001-beta-model-template-isolation.md)(isolation) · [ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)(코드가 진실) · [ADR-0005](./adr/0005-design-tokens-gradual-migration.md)(토큰 점진 전환) · [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)(Single/Multi) · [ADR-0012](./adr/0012-template-publishing-pipeline.md)(등록·공개 파이프라인) · [ADR-0016](./adr/0016-block-rename-and-field-value-split.md)(schema-first Field/Value 분리 — **§4·§5 만 구현됨**, §2.1 참고) 를 먼저 일별하면 본 문서가 자연스럽게 읽힌다.
+> 본 문서는 `CONTEXT.md` 의 도메인 어휘 (Template / Category / Block / Preset / Sync / Design Tokens / Global Styles) 와 `docs/adr/` 를 기반으로 한다. 특히 [ADR-0001](./adr/0001-beta-model-template-isolation.md)(isolation) · [ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)(코드가 진실) · [ADR-0005](./adr/0005-design-tokens-gradual-migration.md)(토큰 점진 전환) · [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)(Single/Multi) · [ADR-0012](./adr/0012-template-publishing-pipeline.md)(등록·공개 파이프라인) · [ADR-0016](./adr/0016-block-rename-and-field-value-split.md)(schema-first Field/Value와 Block/Menu 모델) 를 먼저 읽으면 본 문서가 자연스럽게 읽힌다.
 
 이 문서 한 장만 읽으면 **(1) 시스템이 어떻게 굴러가는지**, **(2) 새 Template / Block 을 어떻게 추가하는지**, **(3) 어디를 만지면 무엇이 깨지는지** 모두 파악할 수 있도록 만든다. 추가 컨텍스트는 모두 코드에 있다 — 이 문서가 가리키는 위치만 따라가면 된다.
 
@@ -922,16 +922,14 @@ Multi Template은 `pages[]`에 `{ id, slug, visible, name, menu?, blocks:[...] }
 - **시각적 WYSIWYG preset 빌더** — 코드-PR 워크플로우가 의도된 게이트 (ADR-0002).
 - **사용자별 커스텀 Template 업로드** — 보안·격리 비용 큼.
 - **크로스-Template Block 공유** (`src/blocks/` 공용 풀) — ADR-0001 위배. 별도 RFC 없이는 X.
-- **사용자 에디터에서 섹션 추가 / 삭제·순서 변경** — 데이터 모델은 가능하지만 UX·검증 추가 비용. 현재 1 차는 preset 구조 고정.
+- **사용자 에디터에서 Block 추가 / 삭제·순서 변경** — 데이터 모델은 가능하지만 UX·검증 추가 비용. 현재 1 차는 preset 구조 고정.
 - **Multi 저작 편의 + 디렉터리 재편** — Multi 사이트는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). Single/Multi 모두 `preset.content` 의 `ContentModel` 유니온을 손으로 작성한다 (§2.2, §9-H; 예전 `composition` 축약형은 제거됨). 남은 미래 작업은 (1) 저작 보일러플레이트를 줄이는 헬퍼와 (2) ADR-0001 footnote 의 `pages/<page>/blocks/` **디렉터리** 재편(렌더러 코드 구조)이다.
 
 ---
 
 ## 13. Migration 히스토리
 
-`docs/migrations/` 의 001–025 가 **전부 프로덕션 적용됨.** 각 파일 헤더 주석이 무엇을 왜 했는지 설명하므로 요약본이 아니라 파일을 읽는다 — 여기 표를 두면 세 번째 사본이 되고, 실제로 그렇게 낡았다(2026-07-26 감사 시점에 이 절은 015–017 을 "진행" 으로 표시하고 018 이후를 통째로 누락하고 있었다).
-
-전체 시스템 이력 (Phase 1 ~ 6d, β 마이그) 은 git log 를 본다 — 커밋 메시지에 phase 번호와 의도가 적혀 있다. 본 문서는 **현재 동작하는 상태**만 기술한다.
+실행·검증·복구 절차가 필요한 migration만 `docs/migrations/`에 runbook을 둔다. 적용 개수나 상태 표는 금방 낡으므로 이 문서에 복제하지 않는다. 전체 이력은 migration 파일과 git log를 보고, 본 문서는 **현재 동작하는 상태**만 기술한다.
 
 ---
 

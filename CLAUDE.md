@@ -220,7 +220,7 @@ Production builds **hard-fail** if `NEXT_PUBLIC_SITE_URL` is missing (`next.conf
 
 ### Database migrations
 
-`docs/migrations/` holds 001–025 (`.sql`, plus `.md` runbooks for the 018/019 data backfills). **All 25 are applied to production.** Apply new ones manually via the Supabase SQL editor or `supabase db push`; each file's header comment explains what it does and why — read the file rather than a summary.
+`docs/migrations/` holds the numbered SQL migrations and the runbooks needed for coordinated data transforms (currently 018, 019, 026, and 027). Do not copy migration counts or production-application status into overview docs; inspect the directory and the target environment. Apply new migrations manually via the Supabase SQL editor or `supabase db push`, and follow a paired runbook when present.
 
 When adding one: number sequentially, and if it renames a column, remember that function bodies reference columns by text and need a `CREATE OR REPLACE` in the same migration (this is what migration 021 had to do for `save_site_template_with_lock`).
 
