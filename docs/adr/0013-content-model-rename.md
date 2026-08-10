@@ -58,4 +58,4 @@ interface UserSite { content: ContentModel; snapshot: ContentModel; /* … */ } 
 - [ADR-0001](./0001-beta-model-template-isolation.md) — axis A(Template 코드 격리). 본 ADR 이 "Renderer/편집기/template_assets 를 Site 로 바꾸지 않는" 근거.
 - [ADR-0007](./0007-single-multi-site-type-structural-union.md) — Single/Multi 구조 유니온. 본 ADR 은 그 유니온의 *이름*만 바꾸며 구조·`mode` 판별·nav projection 은 불변.
 - [ADR-0004](./0004-optimistic-concurrency-via-rpc.md) — 저장 RPC. migration 021 이 이 RPC 를 `content` 컬럼 기준으로 재작성.
-- CONTEXT.md Flagged ambiguities — 코드 식별자 주석(`TemplateJson → ContentModel` 등) 갱신 대상. glossary 용어(Section/Field/Page/nav/Shared sections)는 **불변** — ~~이 결정은 ADR-0016 이 뒤집었다(위 배너 참고)~~.
+- CONTEXT.md Flagged ambiguities — 코드 식별자 주석(`TemplateJson → ContentModel` 등) 갱신 대상. glossary 용어(Section/Field/Page/nav/Shared sections)는 **불변** (이 항목은 이후 ADR-0016 이 뒤집었다 — 위 배너 참고).
