@@ -1,0 +1,4369 @@
+{
+  "version": 1,
+  "templates": {
+    "academy-default": {
+      "contact": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "kakaoText": {
+          "type": "text",
+          "label": "카카오톡 안내"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 제목",
+          "required": true
+        }
+      },
+      "curriculum": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "items": {
+          "type": "array",
+          "label": "커리큘럼 항목",
+          "itemSchema": {
+            "desc": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "name": {
+              "type": "text",
+              "label": "반/과정 이름",
+              "required": true
+            },
+            "target": {
+              "type": "text",
+              "label": "대상 (학년/수준)"
+            }
+          },
+          "minItems": 1,
+          "maxItems": 8
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 제목",
+          "required": true
+        }
+      },
+      "features": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "items": {
+          "type": "array",
+          "label": "특장점 항목",
+          "itemSchema": {
+            "desc": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            }
+          },
+          "minItems": 1,
+          "maxItems": 6
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 제목",
+          "required": true
+        }
+      },
+      "footer": {
+        "academyName": {
+          "type": "text",
+          "label": "학원 이름"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권 문구"
+        },
+        "phone": {
+          "type": "text",
+          "label": "대표전화"
+        },
+        "tagline": {
+          "type": "text",
+          "label": "슬로건"
+        }
+      },
+      "hero": {
+        "backgroundImage": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "상담 버튼 문구"
+        },
+        "ctaUrl": {
+          "type": "url",
+          "label": "상담 버튼 링크"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "phoneText": {
+          "type": "text",
+          "label": "전화 안내 문구"
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "보조 설명"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "메인 슬로건",
+          "required": true
+        }
+      },
+      "location": {
+        "address": {
+          "type": "text",
+          "label": "주소"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "hours": {
+          "type": "textarea",
+          "label": "운영 시간"
+        },
+        "mapImage": {
+          "type": "image",
+          "label": "지도 이미지"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 제목",
+          "required": true
+        },
+        "transit": {
+          "type": "textarea",
+          "label": "교통편 안내"
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "학원 이름",
+          "required": true
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "보조 텍스트"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 문구"
+        },
+        "ctaUrl": {
+          "type": "url",
+          "label": "CTA 링크"
+        }
+      },
+      "results": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "items": {
+          "type": "array",
+          "label": "실적 항목",
+          "itemSchema": {
+            "label": {
+              "type": "text",
+              "label": "라벨",
+              "required": true
+            },
+            "value": {
+              "type": "text",
+              "label": "수치",
+              "required": true
+            }
+          },
+          "minItems": 1,
+          "maxItems": 8
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 제목",
+          "required": true
+        }
+      },
+      "teachers": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "items": {
+          "type": "array",
+          "label": "강사 항목",
+          "itemSchema": {
+            "bio": {
+              "type": "textarea",
+              "label": "소개/경력"
+            },
+            "image": {
+              "type": "image",
+              "label": "사진"
+            },
+            "name": {
+              "type": "text",
+              "label": "이름",
+              "required": true
+            },
+            "subject": {
+              "type": "text",
+              "label": "담당 과목"
+            }
+          },
+          "minItems": 1,
+          "maxItems": 9
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 제목",
+          "required": true
+        }
+      },
+      "tuition": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "items": {
+          "type": "array",
+          "label": "과정 항목",
+          "itemSchema": {
+            "name": {
+              "type": "text",
+              "label": "과정명",
+              "required": true
+            },
+            "price": {
+              "type": "text",
+              "label": "수강료"
+            },
+            "schedule": {
+              "type": "text",
+              "label": "시간표"
+            }
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "note": {
+          "type": "textarea",
+          "label": "하단 안내 문구"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 제목",
+          "required": true
+        }
+      }
+    },
+    "cafe-cozy": {
+      "footer": {
+        "address": {
+          "type": "textarea",
+          "label": "주소"
+        },
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름",
+          "required": true
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "브랜드 보조텍스트"
+        },
+        "businessInfo": {
+          "type": "text",
+          "label": "사업자 정보"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "브랜드 설명"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "weekdayHours": {
+          "type": "text",
+          "label": "평일 영업시간"
+        },
+        "weekendHours": {
+          "type": "text",
+          "label": "주말 영업시간"
+        }
+      },
+      "hero-split": {
+        "ctaPrimary": {
+          "type": "text",
+          "label": "기본 CTA"
+        },
+        "ctaSecondary": {
+          "type": "text",
+          "label": "보조 CTA"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지",
+          "required": true
+        },
+        "seasonTag": {
+          "type": "text",
+          "label": "시즌 태그"
+        },
+        "stat1Label": {
+          "type": "text",
+          "label": "통계 1 라벨"
+        },
+        "stat1Value": {
+          "type": "text",
+          "label": "통계 1 수치"
+        },
+        "stat2Label": {
+          "type": "text",
+          "label": "통계 2 라벨"
+        },
+        "stat2Value": {
+          "type": "text",
+          "label": "통계 2 수치"
+        },
+        "stat3Label": {
+          "type": "text",
+          "label": "통계 3 라벨"
+        },
+        "stat3Value": {
+          "type": "text",
+          "label": "통계 3 수치"
+        },
+        "subtitle": {
+          "type": "text",
+          "label": "서브타이틀"
+        },
+        "title1": {
+          "type": "text",
+          "label": "타이틀 1행"
+        },
+        "titleAccent": {
+          "type": "text",
+          "label": "강조 타이틀"
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름",
+          "required": true
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "보조 텍스트"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 텍스트"
+        }
+      },
+      "story": {
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "f1Desc": {
+          "type": "textarea",
+          "label": "특징 1 설명"
+        },
+        "f1Title": {
+          "type": "text",
+          "label": "특징 1 제목"
+        },
+        "f2Desc": {
+          "type": "textarea",
+          "label": "특징 2 설명"
+        },
+        "f2Title": {
+          "type": "text",
+          "label": "특징 2 제목"
+        },
+        "f3Desc": {
+          "type": "textarea",
+          "label": "특징 3 설명"
+        },
+        "f3Title": {
+          "type": "text",
+          "label": "특징 3 제목"
+        },
+        "image": {
+          "type": "image",
+          "label": "섹션 이미지"
+        },
+        "quote": {
+          "type": "textarea",
+          "label": "인용구"
+        },
+        "title1": {
+          "type": "text",
+          "label": "타이틀 1행"
+        },
+        "title2": {
+          "type": "text",
+          "label": "타이틀 2행"
+        },
+        "titleAccent": {
+          "type": "text",
+          "label": "강조 타이틀"
+        }
+      },
+      "visit": {
+        "address": {
+          "type": "text",
+          "label": "주소"
+        },
+        "addressDetail": {
+          "type": "textarea",
+          "label": "상세 주소/주차"
+        },
+        "backgroundImage": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "h1Label": {
+          "type": "text",
+          "label": "시간 1 라벨"
+        },
+        "h1Value": {
+          "type": "text",
+          "label": "시간 1 수치"
+        },
+        "h2Label": {
+          "type": "text",
+          "label": "시간 2 라벨"
+        },
+        "h2Value": {
+          "type": "text",
+          "label": "시간 2 수치"
+        },
+        "h3Label": {
+          "type": "text",
+          "label": "시간 3 라벨"
+        },
+        "h3Value": {
+          "type": "text",
+          "label": "시간 3 수치"
+        },
+        "h4Label": {
+          "type": "text",
+          "label": "시간 4 라벨"
+        },
+        "h4Value": {
+          "type": "text",
+          "label": "시간 4 수치"
+        },
+        "instagram": {
+          "type": "url",
+          "label": "인스타그램 링크"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀"
+        }
+      }
+    },
+    "cafe-default": {
+      "footer": {
+        "address": {
+          "type": "textarea",
+          "label": "주소"
+        },
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름",
+          "required": true
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "브랜드 보조텍스트"
+        },
+        "businessInfo": {
+          "type": "text",
+          "label": "사업자 정보"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "브랜드 설명"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "weekdayHours": {
+          "type": "text",
+          "label": "평일 영업시간"
+        },
+        "weekendHours": {
+          "type": "text",
+          "label": "주말 영업시간"
+        }
+      },
+      "hero": {
+        "badgeSubtext": {
+          "type": "text",
+          "label": "플로팅 배지 보조텍스트"
+        },
+        "badgeText": {
+          "type": "text",
+          "label": "플로팅 배지 텍스트"
+        },
+        "ctaPrimary": {
+          "type": "text",
+          "label": "기본 CTA"
+        },
+        "ctaSecondary": {
+          "type": "text",
+          "label": "보조 CTA"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지",
+          "required": true
+        },
+        "seasonTag": {
+          "type": "text",
+          "label": "시즌 태그"
+        },
+        "stat1Label": {
+          "type": "text",
+          "label": "통계 1 라벨"
+        },
+        "stat1Value": {
+          "type": "text",
+          "label": "통계 1 수치"
+        },
+        "stat2Label": {
+          "type": "text",
+          "label": "통계 2 라벨"
+        },
+        "stat2Value": {
+          "type": "text",
+          "label": "통계 2 수치"
+        },
+        "stat3Label": {
+          "type": "text",
+          "label": "통계 3 라벨"
+        },
+        "stat3Value": {
+          "type": "text",
+          "label": "통계 3 수치"
+        },
+        "subtitle": {
+          "type": "text",
+          "label": "서브타이틀"
+        },
+        "title1": {
+          "type": "text",
+          "label": "타이틀 1행"
+        },
+        "titleAccent": {
+          "type": "text",
+          "label": "강조 타이틀"
+        }
+      },
+      "marquee": {
+        "item1": {
+          "type": "text",
+          "label": "항목 1"
+        },
+        "item2": {
+          "type": "text",
+          "label": "항목 2"
+        },
+        "item3": {
+          "type": "text",
+          "label": "항목 3"
+        },
+        "item4": {
+          "type": "text",
+          "label": "항목 4"
+        },
+        "item5": {
+          "type": "text",
+          "label": "항목 5"
+        },
+        "item6": {
+          "type": "text",
+          "label": "항목 6"
+        },
+        "item7": {
+          "type": "text",
+          "label": "항목 7"
+        },
+        "item8": {
+          "type": "text",
+          "label": "항목 8"
+        }
+      },
+      "menu": {
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "items": {
+          "type": "array",
+          "label": "메뉴 항목",
+          "itemSchema": {
+            "badge": {
+              "type": "text",
+              "label": "배지"
+            },
+            "desc": {
+              "type": "text",
+              "label": "설명"
+            },
+            "image": {
+              "type": "image",
+              "label": "이미지"
+            },
+            "price": {
+              "type": "text",
+              "label": "가격"
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            }
+          },
+          "minItems": 1,
+          "maxItems": 6
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀"
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름",
+          "required": true
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "보조 텍스트"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 텍스트"
+        }
+      },
+      "space": {
+        "cardDesc": {
+          "type": "textarea",
+          "label": "카드 설명"
+        },
+        "cardTitle": {
+          "type": "text",
+          "label": "카드 제목"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "f1Desc": {
+          "type": "text",
+          "label": "특징 1 설명"
+        },
+        "f1Title": {
+          "type": "text",
+          "label": "특징 1 제목"
+        },
+        "f2Desc": {
+          "type": "text",
+          "label": "특징 2 설명"
+        },
+        "f2Title": {
+          "type": "text",
+          "label": "특징 2 제목"
+        },
+        "f3Desc": {
+          "type": "text",
+          "label": "특징 3 설명"
+        },
+        "f3Title": {
+          "type": "text",
+          "label": "특징 3 제목"
+        },
+        "f4Desc": {
+          "type": "text",
+          "label": "특징 4 설명"
+        },
+        "f4Title": {
+          "type": "text",
+          "label": "특징 4 제목"
+        },
+        "imageLarge": {
+          "type": "image",
+          "label": "큰 이미지"
+        },
+        "imageSmall": {
+          "type": "image",
+          "label": "작은 이미지"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀"
+        }
+      },
+      "story": {
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "f1Desc": {
+          "type": "textarea",
+          "label": "특징 1 설명"
+        },
+        "f1Title": {
+          "type": "text",
+          "label": "특징 1 제목"
+        },
+        "f2Desc": {
+          "type": "textarea",
+          "label": "특징 2 설명"
+        },
+        "f2Title": {
+          "type": "text",
+          "label": "특징 2 제목"
+        },
+        "f3Desc": {
+          "type": "textarea",
+          "label": "특징 3 설명"
+        },
+        "f3Title": {
+          "type": "text",
+          "label": "특징 3 제목"
+        },
+        "image": {
+          "type": "image",
+          "label": "섹션 이미지"
+        },
+        "quote": {
+          "type": "textarea",
+          "label": "인용구"
+        },
+        "title1": {
+          "type": "text",
+          "label": "타이틀 1행"
+        },
+        "title2": {
+          "type": "text",
+          "label": "타이틀 2행"
+        },
+        "titleAccent": {
+          "type": "text",
+          "label": "강조 타이틀"
+        }
+      },
+      "testimonials": {
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "r1Author": {
+          "type": "text",
+          "label": "후기 1 작성자"
+        },
+        "r1Body": {
+          "type": "textarea",
+          "label": "후기 1 본문",
+          "required": true
+        },
+        "r1Meta": {
+          "type": "text",
+          "label": "후기 1 메타"
+        },
+        "r2Author": {
+          "type": "text",
+          "label": "후기 2 작성자"
+        },
+        "r2Body": {
+          "type": "textarea",
+          "label": "후기 2 본문"
+        },
+        "r2Meta": {
+          "type": "text",
+          "label": "후기 2 메타"
+        },
+        "r3Author": {
+          "type": "text",
+          "label": "후기 3 작성자"
+        },
+        "r3Body": {
+          "type": "textarea",
+          "label": "후기 3 본문"
+        },
+        "r3Meta": {
+          "type": "text",
+          "label": "후기 3 메타"
+        },
+        "r4Author": {
+          "type": "text",
+          "label": "후기 4 작성자"
+        },
+        "r4Body": {
+          "type": "textarea",
+          "label": "후기 4 본문"
+        },
+        "r4Meta": {
+          "type": "text",
+          "label": "후기 4 메타"
+        },
+        "r5Author": {
+          "type": "text",
+          "label": "후기 5 작성자"
+        },
+        "r5Body": {
+          "type": "textarea",
+          "label": "후기 5 본문"
+        },
+        "r5Meta": {
+          "type": "text",
+          "label": "후기 5 메타"
+        },
+        "r6Author": {
+          "type": "text",
+          "label": "후기 6 작성자"
+        },
+        "r6Body": {
+          "type": "textarea",
+          "label": "후기 6 본문"
+        },
+        "r6Meta": {
+          "type": "text",
+          "label": "후기 6 메타"
+        },
+        "ratingValue": {
+          "type": "text",
+          "label": "별점 수치"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀"
+        }
+      },
+      "visit": {
+        "address": {
+          "type": "text",
+          "label": "주소"
+        },
+        "addressDetail": {
+          "type": "textarea",
+          "label": "상세 주소/주차"
+        },
+        "backgroundImage": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "h1Label": {
+          "type": "text",
+          "label": "시간 1 라벨"
+        },
+        "h1Value": {
+          "type": "text",
+          "label": "시간 1 수치"
+        },
+        "h2Label": {
+          "type": "text",
+          "label": "시간 2 라벨"
+        },
+        "h2Value": {
+          "type": "text",
+          "label": "시간 2 수치"
+        },
+        "h3Label": {
+          "type": "text",
+          "label": "시간 3 라벨"
+        },
+        "h3Value": {
+          "type": "text",
+          "label": "시간 3 수치"
+        },
+        "h4Label": {
+          "type": "text",
+          "label": "시간 4 라벨"
+        },
+        "h4Value": {
+          "type": "text",
+          "label": "시간 4 수치"
+        },
+        "instagram": {
+          "type": "url",
+          "label": "인스타그램 링크"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀"
+        }
+      }
+    },
+    "corporate-default": {
+      "about": {
+        "body": {
+          "type": "textarea",
+          "label": "Description"
+        },
+        "image": {
+          "type": "image",
+          "label": "Section Image"
+        },
+        "subtitle": {
+          "type": "text",
+          "label": "Subtitle"
+        },
+        "title": {
+          "type": "text",
+          "label": "Section Title",
+          "required": true
+        }
+      },
+      "contact": {
+        "address": {
+          "type": "text",
+          "label": "Address"
+        },
+        "email": {
+          "type": "text",
+          "label": "Email"
+        },
+        "phone": {
+          "type": "text",
+          "label": "Phone"
+        },
+        "title": {
+          "type": "text",
+          "label": "Section Title",
+          "required": true
+        }
+      },
+      "features": {
+        "analytics": {
+          "type": "text",
+          "label": "Analytics"
+        },
+        "design": {
+          "type": "text",
+          "label": "Design"
+        },
+        "development": {
+          "type": "text",
+          "label": "Development"
+        },
+        "strategy": {
+          "type": "text",
+          "label": "Strategy"
+        },
+        "subtitle": {
+          "type": "text",
+          "label": "Subtitle"
+        },
+        "title": {
+          "type": "text",
+          "label": "Section Title",
+          "required": true
+        }
+      },
+      "footer": {
+        "companyName": {
+          "type": "text",
+          "label": "Company Name"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "Copyright Text"
+        }
+      },
+      "hero": {
+        "backgroundImage": {
+          "type": "image",
+          "label": "Background Image"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA Button Text"
+        },
+        "ctaUrl": {
+          "type": "url",
+          "label": "CTA Button Link"
+        },
+        "subtitle": {
+          "type": "text",
+          "label": "Subtitle"
+        },
+        "title": {
+          "type": "text",
+          "label": "Main Title",
+          "required": true
+        }
+      }
+    },
+    "fitness-default": {
+      "facility": {
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "f1Label": {
+          "type": "text",
+          "label": "특징 1 라벨"
+        },
+        "f1Title": {
+          "type": "text",
+          "label": "특징 1 제목"
+        },
+        "f2Label": {
+          "type": "text",
+          "label": "특징 2 라벨"
+        },
+        "f2Title": {
+          "type": "text",
+          "label": "특징 2 제목"
+        },
+        "f3Label": {
+          "type": "text",
+          "label": "특징 3 라벨"
+        },
+        "f3Title": {
+          "type": "text",
+          "label": "특징 3 제목"
+        },
+        "f4Label": {
+          "type": "text",
+          "label": "특징 4 라벨"
+        },
+        "f4Title": {
+          "type": "text",
+          "label": "특징 4 제목"
+        },
+        "f5Label": {
+          "type": "text",
+          "label": "특징 5 라벨"
+        },
+        "f5Title": {
+          "type": "text",
+          "label": "특징 5 제목"
+        },
+        "image1": {
+          "type": "image",
+          "label": "이미지 1"
+        },
+        "image2": {
+          "type": "image",
+          "label": "이미지 2"
+        },
+        "image3": {
+          "type": "image",
+          "label": "이미지 3"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        },
+        "trustLabel": {
+          "type": "textarea",
+          "label": "신뢰 지수 라벨"
+        },
+        "trustValue": {
+          "type": "text",
+          "label": "신뢰 지수 수치"
+        }
+      },
+      "footer": {
+        "address": {
+          "type": "textarea",
+          "label": "주소"
+        },
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름"
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "보조 텍스트"
+        },
+        "businessInfo": {
+          "type": "text",
+          "label": "사업자 정보"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "브랜드 설명"
+        },
+        "hours": {
+          "type": "textarea",
+          "label": "운영 시간"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        }
+      },
+      "hero": {
+        "backgroundImage": {
+          "type": "image",
+          "label": "배경 이미지",
+          "required": true
+        },
+        "ctaPrimary": {
+          "type": "text",
+          "label": "기본 CTA"
+        },
+        "ctaSecondary": {
+          "type": "text",
+          "label": "보조 CTA"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "stat1Label": {
+          "type": "text",
+          "label": "통계 1 라벨"
+        },
+        "stat1Suffix": {
+          "type": "text",
+          "label": "통계 1 접미사"
+        },
+        "stat1Value": {
+          "type": "text",
+          "label": "통계 1 수치"
+        },
+        "stat2Label": {
+          "type": "text",
+          "label": "통계 2 라벨"
+        },
+        "stat2Suffix": {
+          "type": "text",
+          "label": "통계 2 접미사"
+        },
+        "stat2Value": {
+          "type": "text",
+          "label": "통계 2 수치"
+        },
+        "stat3Label": {
+          "type": "text",
+          "label": "통계 3 라벨"
+        },
+        "stat3Suffix": {
+          "type": "text",
+          "label": "통계 3 접미사"
+        },
+        "stat3Value": {
+          "type": "text",
+          "label": "통계 3 수치"
+        },
+        "stat4Label": {
+          "type": "text",
+          "label": "통계 4 라벨"
+        },
+        "stat4Suffix": {
+          "type": "text",
+          "label": "통계 4 접미사"
+        },
+        "stat4Value": {
+          "type": "text",
+          "label": "통계 4 수치"
+        },
+        "title1": {
+          "type": "text",
+          "label": "타이틀 1행",
+          "required": true
+        },
+        "title2": {
+          "type": "text",
+          "label": "타이틀 2행 (강조)",
+          "required": true
+        },
+        "title3": {
+          "type": "text",
+          "label": "타이틀 3행",
+          "required": true
+        }
+      },
+      "join": {
+        "address": {
+          "type": "text",
+          "label": "위치"
+        },
+        "backgroundImage": {
+          "type": "image",
+          "label": "배경 이미지",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "hours": {
+          "type": "text",
+          "label": "운영 시간"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "title1": {
+          "type": "text",
+          "label": "타이틀 1행",
+          "required": true
+        },
+        "title2": {
+          "type": "text",
+          "label": "타이틀 2행 (강조)",
+          "required": true
+        }
+      },
+      "marquee": {
+        "item1": {
+          "type": "text",
+          "label": "항목 1"
+        },
+        "item2": {
+          "type": "text",
+          "label": "항목 2"
+        },
+        "item3": {
+          "type": "text",
+          "label": "항목 3"
+        },
+        "item4": {
+          "type": "text",
+          "label": "항목 4"
+        },
+        "item5": {
+          "type": "text",
+          "label": "항목 5"
+        },
+        "item6": {
+          "type": "text",
+          "label": "항목 6"
+        },
+        "item7": {
+          "type": "text",
+          "label": "항목 7"
+        },
+        "item8": {
+          "type": "text",
+          "label": "항목 8"
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 텍스트"
+        }
+      },
+      "programs": {
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "p1Desc": {
+          "type": "text",
+          "label": "P1 설명"
+        },
+        "p1Image": {
+          "type": "image",
+          "label": "P1 이미지"
+        },
+        "p1Title": {
+          "type": "text",
+          "label": "P1 제목"
+        },
+        "p2Desc": {
+          "type": "text",
+          "label": "P2 설명"
+        },
+        "p2Image": {
+          "type": "image",
+          "label": "P2 이미지"
+        },
+        "p2Title": {
+          "type": "text",
+          "label": "P2 제목"
+        },
+        "p3Desc": {
+          "type": "text",
+          "label": "P3 설명"
+        },
+        "p3Title": {
+          "type": "text",
+          "label": "P3 제목"
+        },
+        "p4Desc": {
+          "type": "text",
+          "label": "P4 설명"
+        },
+        "p4Title": {
+          "type": "text",
+          "label": "P4 제목"
+        },
+        "p5Desc": {
+          "type": "text",
+          "label": "P5 설명"
+        },
+        "p5Image": {
+          "type": "image",
+          "label": "P5 이미지"
+        },
+        "p5Title": {
+          "type": "text",
+          "label": "P5 제목"
+        },
+        "p6Desc": {
+          "type": "text",
+          "label": "P6 설명"
+        },
+        "p6Title": {
+          "type": "text",
+          "label": "P6 제목"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "testimonials": {
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "r1Author": {
+          "type": "text",
+          "label": "후기 1 작성자"
+        },
+        "r1Body": {
+          "type": "textarea",
+          "label": "후기 1 본문"
+        },
+        "r1Meta": {
+          "type": "text",
+          "label": "후기 1 메타"
+        },
+        "r2Author": {
+          "type": "text",
+          "label": "후기 2 작성자"
+        },
+        "r2Body": {
+          "type": "textarea",
+          "label": "후기 2 본문"
+        },
+        "r2Meta": {
+          "type": "text",
+          "label": "후기 2 메타"
+        },
+        "r3Author": {
+          "type": "text",
+          "label": "후기 3 작성자"
+        },
+        "r3Body": {
+          "type": "textarea",
+          "label": "후기 3 본문"
+        },
+        "r3Meta": {
+          "type": "text",
+          "label": "후기 3 메타"
+        },
+        "ratingLabel": {
+          "type": "text",
+          "label": "별점 라벨"
+        },
+        "ratingValue": {
+          "type": "text",
+          "label": "별점 수치"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "trainers": {
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "m1Badge": {
+          "type": "text",
+          "label": "M1 배지"
+        },
+        "m1Image": {
+          "type": "image",
+          "label": "M1 사진"
+        },
+        "m1Info1": {
+          "type": "text",
+          "label": "M1 정보 1"
+        },
+        "m1Info2": {
+          "type": "text",
+          "label": "M1 정보 2"
+        },
+        "m1Info3": {
+          "type": "text",
+          "label": "M1 정보 3"
+        },
+        "m1Name": {
+          "type": "text",
+          "label": "M1 이름"
+        },
+        "m1Role": {
+          "type": "text",
+          "label": "M1 직함"
+        },
+        "m2Badge": {
+          "type": "text",
+          "label": "M2 배지"
+        },
+        "m2Image": {
+          "type": "image",
+          "label": "M2 사진"
+        },
+        "m2Info1": {
+          "type": "text",
+          "label": "M2 정보 1"
+        },
+        "m2Info2": {
+          "type": "text",
+          "label": "M2 정보 2"
+        },
+        "m2Info3": {
+          "type": "text",
+          "label": "M2 정보 3"
+        },
+        "m2Name": {
+          "type": "text",
+          "label": "M2 이름"
+        },
+        "m2Role": {
+          "type": "text",
+          "label": "M2 직함"
+        },
+        "m3Badge": {
+          "type": "text",
+          "label": "M3 배지"
+        },
+        "m3Image": {
+          "type": "image",
+          "label": "M3 사진"
+        },
+        "m3Info1": {
+          "type": "text",
+          "label": "M3 정보 1"
+        },
+        "m3Info2": {
+          "type": "text",
+          "label": "M3 정보 2"
+        },
+        "m3Info3": {
+          "type": "text",
+          "label": "M3 정보 3"
+        },
+        "m3Name": {
+          "type": "text",
+          "label": "M3 이름"
+        },
+        "m3Role": {
+          "type": "text",
+          "label": "M3 직함"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      }
+    },
+    "interior-default": {
+      "about": {
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "projectTitle": {
+          "type": "text",
+          "label": "이미지 프로젝트명"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        },
+        "v1Desc": {
+          "type": "text",
+          "label": "가치 1 설명"
+        },
+        "v1Title": {
+          "type": "text",
+          "label": "가치 1 제목"
+        },
+        "v2Desc": {
+          "type": "text",
+          "label": "가치 2 설명"
+        },
+        "v2Title": {
+          "type": "text",
+          "label": "가치 2 제목"
+        },
+        "v3Desc": {
+          "type": "text",
+          "label": "가치 3 설명"
+        },
+        "v3Title": {
+          "type": "text",
+          "label": "가치 3 제목"
+        }
+      },
+      "contact": {
+        "address": {
+          "type": "text",
+          "label": "주소"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "email": {
+          "type": "text",
+          "label": "이메일"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "footer": {
+        "address": {
+          "type": "text",
+          "label": "주소"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "브랜드 설명"
+        },
+        "email": {
+          "type": "text",
+          "label": "이메일"
+        },
+        "hours": {
+          "type": "textarea",
+          "label": "운영 시간"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        }
+      },
+      "hero": {
+        "ctaPrimary": {
+          "type": "text",
+          "label": "기본 CTA"
+        },
+        "ctaSecondary": {
+          "type": "text",
+          "label": "보조 CTA"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "estLabel": {
+          "type": "text",
+          "label": "설립 연도 라벨"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "projectTitle": {
+          "type": "text",
+          "label": "대표 프로젝트명"
+        },
+        "statLabel": {
+          "type": "text",
+          "label": "플로팅 라벨"
+        },
+        "statValue": {
+          "type": "text",
+          "label": "플로팅 수치"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "메인 타이틀",
+          "required": true
+        },
+        "trust1": {
+          "type": "text",
+          "label": "신뢰 문구 1"
+        },
+        "trust2": {
+          "type": "text",
+          "label": "신뢰 문구 2"
+        },
+        "trust3": {
+          "type": "text",
+          "label": "신뢰 문구 3"
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 텍스트"
+        }
+      },
+      "portfolio": {
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "p1Desc": {
+          "type": "text",
+          "label": "P1 설명"
+        },
+        "p1Meta": {
+          "type": "text",
+          "label": "P1 메타"
+        },
+        "p1Title": {
+          "type": "text",
+          "label": "P1 제목"
+        },
+        "p2Meta": {
+          "type": "text",
+          "label": "P2 메타"
+        },
+        "p2Title": {
+          "type": "text",
+          "label": "P2 제목"
+        },
+        "p3Meta": {
+          "type": "text",
+          "label": "P3 메타"
+        },
+        "p3Title": {
+          "type": "text",
+          "label": "P3 제목"
+        },
+        "p4Meta": {
+          "type": "text",
+          "label": "P4 메타"
+        },
+        "p4Title": {
+          "type": "text",
+          "label": "P4 제목"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "process": {
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "step1Desc": {
+          "type": "text",
+          "label": "1단계 설명"
+        },
+        "step1Title": {
+          "type": "text",
+          "label": "1단계 제목"
+        },
+        "step2Desc": {
+          "type": "text",
+          "label": "2단계 설명"
+        },
+        "step2Title": {
+          "type": "text",
+          "label": "2단계 제목"
+        },
+        "step3Desc": {
+          "type": "text",
+          "label": "3단계 설명"
+        },
+        "step3Title": {
+          "type": "text",
+          "label": "3단계 제목"
+        },
+        "step4Desc": {
+          "type": "text",
+          "label": "4단계 설명"
+        },
+        "step4Title": {
+          "type": "text",
+          "label": "4단계 제목"
+        },
+        "step5Desc": {
+          "type": "text",
+          "label": "5단계 설명"
+        },
+        "step5Title": {
+          "type": "text",
+          "label": "5단계 제목"
+        },
+        "step6Desc": {
+          "type": "text",
+          "label": "6단계 설명"
+        },
+        "step6Title": {
+          "type": "text",
+          "label": "6단계 제목"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "services": {
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "s1Badge": {
+          "type": "text",
+          "label": "S1 배지"
+        },
+        "s1Desc": {
+          "type": "textarea",
+          "label": "S1 설명"
+        },
+        "s1Price": {
+          "type": "text",
+          "label": "S1 시작 가격"
+        },
+        "s1Title": {
+          "type": "text",
+          "label": "S1 제목"
+        },
+        "s2Desc": {
+          "type": "textarea",
+          "label": "S2 설명"
+        },
+        "s2Title": {
+          "type": "text",
+          "label": "S2 제목"
+        },
+        "s3Desc": {
+          "type": "textarea",
+          "label": "S3 설명"
+        },
+        "s3Title": {
+          "type": "text",
+          "label": "S3 제목"
+        },
+        "s4Desc": {
+          "type": "textarea",
+          "label": "S4 설명"
+        },
+        "s4Title": {
+          "type": "text",
+          "label": "S4 제목"
+        },
+        "s5Desc": {
+          "type": "textarea",
+          "label": "S5 설명"
+        },
+        "s5Title": {
+          "type": "text",
+          "label": "S5 제목"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "stats": {
+        "s1Label": {
+          "type": "text",
+          "label": "통계 1 라벨"
+        },
+        "s1Value": {
+          "type": "text",
+          "label": "통계 1 수치"
+        },
+        "s2Label": {
+          "type": "text",
+          "label": "통계 2 라벨"
+        },
+        "s2Value": {
+          "type": "text",
+          "label": "통계 2 수치"
+        },
+        "s3Label": {
+          "type": "text",
+          "label": "통계 3 라벨"
+        },
+        "s3Value": {
+          "type": "text",
+          "label": "통계 3 수치"
+        },
+        "s4Label": {
+          "type": "text",
+          "label": "통계 4 라벨"
+        },
+        "s4Value": {
+          "type": "text",
+          "label": "통계 4 수치"
+        }
+      },
+      "testimonials": {
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "r1Author": {
+          "type": "text",
+          "label": "후기 1 작성자"
+        },
+        "r1Body": {
+          "type": "textarea",
+          "label": "후기 1 본문"
+        },
+        "r1Meta": {
+          "type": "text",
+          "label": "후기 1 메타"
+        },
+        "r2Author": {
+          "type": "text",
+          "label": "후기 2 작성자"
+        },
+        "r2Body": {
+          "type": "textarea",
+          "label": "후기 2 본문"
+        },
+        "r2Meta": {
+          "type": "text",
+          "label": "후기 2 메타"
+        },
+        "r3Author": {
+          "type": "text",
+          "label": "후기 3 작성자"
+        },
+        "r3Body": {
+          "type": "textarea",
+          "label": "후기 3 본문"
+        },
+        "r3Meta": {
+          "type": "text",
+          "label": "후기 3 메타"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      }
+    },
+    "legal-default": {
+      "about": {
+        "body": {
+          "type": "textarea",
+          "label": "본문"
+        },
+        "reason1Body": {
+          "type": "textarea",
+          "label": "이유 1 설명"
+        },
+        "reason1Title": {
+          "type": "text",
+          "label": "이유 1 제목"
+        },
+        "reason2Body": {
+          "type": "textarea",
+          "label": "이유 2 설명"
+        },
+        "reason2Title": {
+          "type": "text",
+          "label": "이유 2 제목"
+        },
+        "reason3Body": {
+          "type": "textarea",
+          "label": "이유 3 설명"
+        },
+        "reason3Title": {
+          "type": "text",
+          "label": "이유 3 제목"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "contact": {
+        "body": {
+          "type": "textarea",
+          "label": "본문"
+        },
+        "hours": {
+          "type": "text",
+          "label": "운영 시간"
+        },
+        "location": {
+          "type": "text",
+          "label": "위치"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "타이틀",
+          "required": true
+        }
+      },
+      "faq": {
+        "a1": {
+          "type": "textarea",
+          "label": "답변 1"
+        },
+        "a2": {
+          "type": "textarea",
+          "label": "답변 2"
+        },
+        "a3": {
+          "type": "textarea",
+          "label": "답변 3"
+        },
+        "q1": {
+          "type": "text",
+          "label": "질문 1"
+        },
+        "q2": {
+          "type": "text",
+          "label": "질문 2"
+        },
+        "q3": {
+          "type": "text",
+          "label": "질문 3"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "footer": {
+        "address": {
+          "type": "textarea",
+          "label": "주소"
+        },
+        "brandName": {
+          "type": "text",
+          "label": "사무소 이름"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권"
+        }
+      },
+      "hero": {
+        "ctaPrimaryText": {
+          "type": "text",
+          "label": "기본 CTA"
+        },
+        "ctaSecondaryText": {
+          "type": "text",
+          "label": "보조 CTA"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 배지"
+        },
+        "stat1Label": {
+          "type": "text",
+          "label": "통계 1 라벨"
+        },
+        "stat1Value": {
+          "type": "text",
+          "label": "통계 1 값"
+        },
+        "stat2Label": {
+          "type": "text",
+          "label": "통계 2 라벨"
+        },
+        "stat2Value": {
+          "type": "text",
+          "label": "통계 2 값"
+        },
+        "stat3Label": {
+          "type": "text",
+          "label": "통계 3 라벨"
+        },
+        "stat3Value": {
+          "type": "text",
+          "label": "통계 3 값"
+        },
+        "stat4Label": {
+          "type": "text",
+          "label": "통계 4 라벨"
+        },
+        "stat4Value": {
+          "type": "text",
+          "label": "통계 4 값"
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "서브 타이틀"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "메인 타이틀",
+          "required": true
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "사무소 이름"
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "보조 텍스트"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 버튼 텍스트"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        }
+      },
+      "process": {
+        "step1Body": {
+          "type": "textarea",
+          "label": "단계 1 설명"
+        },
+        "step1Title": {
+          "type": "text",
+          "label": "단계 1 제목"
+        },
+        "step2Body": {
+          "type": "textarea",
+          "label": "단계 2 설명"
+        },
+        "step2Title": {
+          "type": "text",
+          "label": "단계 2 제목"
+        },
+        "step3Body": {
+          "type": "textarea",
+          "label": "단계 3 설명"
+        },
+        "step3Title": {
+          "type": "text",
+          "label": "단계 3 제목"
+        },
+        "step4Body": {
+          "type": "textarea",
+          "label": "단계 4 설명"
+        },
+        "step4Title": {
+          "type": "text",
+          "label": "단계 4 제목"
+        },
+        "step5Body": {
+          "type": "textarea",
+          "label": "단계 5 설명"
+        },
+        "step5Title": {
+          "type": "text",
+          "label": "단계 5 제목"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "services": {
+        "service1Body": {
+          "type": "textarea",
+          "label": "서비스 1 설명"
+        },
+        "service1Title": {
+          "type": "text",
+          "label": "서비스 1 제목"
+        },
+        "service2Body": {
+          "type": "textarea",
+          "label": "서비스 2 설명"
+        },
+        "service2Title": {
+          "type": "text",
+          "label": "서비스 2 제목"
+        },
+        "service3Body": {
+          "type": "textarea",
+          "label": "서비스 3 설명"
+        },
+        "service3Title": {
+          "type": "text",
+          "label": "서비스 3 제목"
+        },
+        "service4Body": {
+          "type": "textarea",
+          "label": "서비스 4 설명"
+        },
+        "service4Title": {
+          "type": "text",
+          "label": "서비스 4 제목"
+        },
+        "service5Body": {
+          "type": "textarea",
+          "label": "서비스 5 설명"
+        },
+        "service5Title": {
+          "type": "text",
+          "label": "서비스 5 제목"
+        },
+        "service6Body": {
+          "type": "textarea",
+          "label": "서비스 6 설명"
+        },
+        "service6Title": {
+          "type": "text",
+          "label": "서비스 6 제목"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "team": {
+        "member1Body": {
+          "type": "textarea",
+          "label": "멤버 1 설명"
+        },
+        "member1Image": {
+          "type": "image",
+          "label": "멤버 1 사진"
+        },
+        "member1Name": {
+          "type": "text",
+          "label": "멤버 1 이름"
+        },
+        "member1Role": {
+          "type": "text",
+          "label": "멤버 1 직함"
+        },
+        "member2Body": {
+          "type": "textarea",
+          "label": "멤버 2 설명"
+        },
+        "member2Image": {
+          "type": "image",
+          "label": "멤버 2 사진"
+        },
+        "member2Name": {
+          "type": "text",
+          "label": "멤버 2 이름"
+        },
+        "member2Role": {
+          "type": "text",
+          "label": "멤버 2 직함"
+        },
+        "member3Body": {
+          "type": "textarea",
+          "label": "멤버 3 설명"
+        },
+        "member3Image": {
+          "type": "image",
+          "label": "멤버 3 사진"
+        },
+        "member3Name": {
+          "type": "text",
+          "label": "멤버 3 이름"
+        },
+        "member3Role": {
+          "type": "text",
+          "label": "멤버 3 직함"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "testimonials": {
+        "review1Author": {
+          "type": "text",
+          "label": "후기 1 작성자"
+        },
+        "review1Body": {
+          "type": "textarea",
+          "label": "후기 1 본문"
+        },
+        "review1Meta": {
+          "type": "text",
+          "label": "후기 1 메타"
+        },
+        "review2Author": {
+          "type": "text",
+          "label": "후기 2 작성자"
+        },
+        "review2Body": {
+          "type": "textarea",
+          "label": "후기 2 본문"
+        },
+        "review2Meta": {
+          "type": "text",
+          "label": "후기 2 메타"
+        },
+        "review3Author": {
+          "type": "text",
+          "label": "후기 3 작성자"
+        },
+        "review3Body": {
+          "type": "textarea",
+          "label": "후기 3 본문"
+        },
+        "review3Meta": {
+          "type": "text",
+          "label": "후기 3 메타"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "trust-strip": {
+        "stat1Label": {
+          "type": "text",
+          "label": "통계 1 라벨"
+        },
+        "stat1Value": {
+          "type": "text",
+          "label": "통계 1 값"
+        },
+        "stat2Label": {
+          "type": "text",
+          "label": "통계 2 라벨"
+        },
+        "stat2Value": {
+          "type": "text",
+          "label": "통계 2 값"
+        },
+        "stat3Label": {
+          "type": "text",
+          "label": "통계 3 라벨"
+        },
+        "stat3Value": {
+          "type": "text",
+          "label": "통계 3 값"
+        },
+        "stat4Label": {
+          "type": "text",
+          "label": "통계 4 라벨"
+        },
+        "stat4Value": {
+          "type": "text",
+          "label": "통계 4 값"
+        }
+      }
+    },
+    "medical-clinic": {
+      "appointmentForm": {
+        "description": {
+          "type": "textarea",
+          "label": "안내 문구"
+        },
+        "fields": {
+          "type": "array",
+          "label": "입력 항목",
+          "itemSchema": {
+            "label": {
+              "type": "text",
+              "label": "항목명",
+              "required": true
+            },
+            "placeholder": {
+              "type": "text",
+              "label": "안내 문구"
+            },
+            "type": {
+              "type": "select",
+              "label": "입력 유형",
+              "options": [
+                "text",
+                "tel",
+                "date",
+                "select",
+                "textarea"
+              ]
+            }
+          },
+          "minItems": 1
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        },
+        "note": {
+          "type": "textarea",
+          "label": "하단 안내"
+        },
+        "submitLabel": {
+          "type": "text",
+          "label": "버튼 텍스트"
+        }
+      },
+      "contact": {
+        "address": {
+          "type": "text",
+          "label": "주소"
+        },
+        "directions": {
+          "type": "textarea",
+          "label": "교통/주차 안내"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        },
+        "hours": {
+          "type": "textarea",
+          "label": "진료시간"
+        },
+        "intro": {
+          "type": "textarea",
+          "label": "안내 문구"
+        },
+        "items": {
+          "type": "array",
+          "label": "연락처 항목",
+          "itemSchema": {
+            "label": {
+              "type": "text",
+              "label": "항목명",
+              "required": true
+            },
+            "value": {
+              "type": "text",
+              "label": "내용",
+              "required": true
+            }
+          },
+          "minItems": 1
+        },
+        "mapImage": {
+          "type": "image",
+          "label": "지도 이미지"
+        }
+      },
+      "ctaBanner": {
+        "body": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "ctaLabel": {
+          "type": "text",
+          "label": "버튼 텍스트"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        }
+      },
+      "departments": {
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "진료과목 항목",
+          "itemSchema": {
+            "description": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "icon": {
+              "type": "select",
+              "label": "아이콘",
+              "options": [
+                "stethoscope",
+                "heart",
+                "tooth",
+                "eye",
+                "bone",
+                "brain",
+                "child",
+                "skin",
+                "plus"
+              ]
+            },
+            "name": {
+              "type": "text",
+              "label": "과목명",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "doctors": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "의료진 항목",
+          "itemSchema": {
+            "bio": {
+              "type": "textarea",
+              "label": "소개"
+            },
+            "image": {
+              "type": "image",
+              "label": "사진",
+              "required": true
+            },
+            "name": {
+              "type": "text",
+              "label": "이름",
+              "required": true
+            },
+            "role": {
+              "type": "text",
+              "label": "직함/전문과목"
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "faq": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "FAQ 항목",
+          "itemSchema": {
+            "answer": {
+              "type": "textarea",
+              "label": "답변",
+              "required": true
+            },
+            "question": {
+              "type": "text",
+              "label": "질문",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "featureSplit": {
+        "body": {
+          "type": "textarea",
+          "label": "본문"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        },
+        "image": {
+          "type": "image",
+          "label": "이미지"
+        },
+        "imageSide": {
+          "type": "select",
+          "label": "이미지 위치",
+          "options": [
+            "left",
+            "right"
+          ]
+        },
+        "note": {
+          "type": "text",
+          "label": "강조 문구"
+        }
+      },
+      "footer": {
+        "address": {
+          "type": "text",
+          "label": "주소"
+        },
+        "brandName": {
+          "type": "text",
+          "label": "병원명",
+          "required": true
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권 문구",
+          "required": true
+        },
+        "phone": {
+          "type": "text",
+          "label": "대표전화"
+        },
+        "tagline": {
+          "type": "textarea",
+          "label": "태그라인"
+        }
+      },
+      "gallery": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "사진 항목",
+          "itemSchema": {
+            "caption": {
+              "type": "text",
+              "label": "설명"
+            },
+            "category": {
+              "type": "text",
+              "label": "분류"
+            },
+            "image": {
+              "type": "image",
+              "label": "사진",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "hero": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지",
+          "required": true
+        },
+        "primaryCtaLabel": {
+          "type": "text",
+          "label": "주 버튼 텍스트"
+        },
+        "secondaryCtaLabel": {
+          "type": "text",
+          "label": "보조 버튼 텍스트"
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "title": {
+          "type": "text",
+          "label": "대제목",
+          "required": true
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "병원명",
+          "required": true
+        },
+        "ctaHref": {
+          "type": "text",
+          "label": "CTA 링크"
+        },
+        "ctaLabel": {
+          "type": "text",
+          "label": "CTA 버튼 텍스트"
+        }
+      },
+      "pageHeader": {
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "title": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        }
+      },
+      "pillars": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "장점 항목",
+          "itemSchema": {
+            "body": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "process": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "단계 항목",
+          "itemSchema": {
+            "body": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "stats": {
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "지표 항목",
+          "itemSchema": {
+            "label": {
+              "type": "text",
+              "label": "라벨",
+              "required": true
+            },
+            "value": {
+              "type": "text",
+              "label": "수치",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "testimonials": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "후기 항목",
+          "itemSchema": {
+            "author": {
+              "type": "text",
+              "label": "작성자",
+              "required": true
+            },
+            "meta": {
+              "type": "text",
+              "label": "방문 정보"
+            },
+            "quote": {
+              "type": "textarea",
+              "label": "후기 내용",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "timeline": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "연혁 항목",
+          "itemSchema": {
+            "body": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            },
+            "year": {
+              "type": "text",
+              "label": "연도",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "medical-default": {
+      "booking": {
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "hours": {
+          "type": "text",
+          "label": "운영 시간"
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "footer": {
+        "address": {
+          "type": "text",
+          "label": "주소"
+        },
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름"
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "보조 텍스트"
+        },
+        "businessNum": {
+          "type": "text",
+          "label": "사업자 번호"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권"
+        },
+        "description": {
+          "type": "text",
+          "label": "설명"
+        },
+        "hours": {
+          "type": "textarea",
+          "label": "운영 시간"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "representative": {
+          "type": "text",
+          "label": "대표자"
+        }
+      },
+      "hero": {
+        "ctaPrimary": {
+          "type": "text",
+          "label": "기본 CTA"
+        },
+        "ctaSecondary": {
+          "type": "text",
+          "label": "보조 CTA"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "image": {
+          "type": "image",
+          "label": "히어로 이미지"
+        },
+        "sinceLabel": {
+          "type": "text",
+          "label": "설립 연도 라벨"
+        },
+        "stat1Label": {
+          "type": "text",
+          "label": "통계 1 라벨"
+        },
+        "stat1Value": {
+          "type": "text",
+          "label": "통계 1 값"
+        },
+        "stat2Label": {
+          "type": "text",
+          "label": "통계 2 라벨"
+        },
+        "stat2Value": {
+          "type": "text",
+          "label": "통계 2 값"
+        },
+        "stat3Label": {
+          "type": "text",
+          "label": "통계 3 라벨"
+        },
+        "stat3Value": {
+          "type": "text",
+          "label": "통계 3 값"
+        },
+        "statLabel": {
+          "type": "text",
+          "label": "플로팅 통계 라벨"
+        },
+        "statValue": {
+          "type": "text",
+          "label": "플로팅 통계 값"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "메인 타이틀",
+          "required": true
+        }
+      },
+      "marquee": {
+        "item1": {
+          "type": "text",
+          "label": "항목 1"
+        },
+        "item2": {
+          "type": "text",
+          "label": "항목 2"
+        },
+        "item3": {
+          "type": "text",
+          "label": "항목 3"
+        },
+        "item4": {
+          "type": "text",
+          "label": "항목 4"
+        },
+        "item5": {
+          "type": "text",
+          "label": "항목 5"
+        },
+        "item6": {
+          "type": "text",
+          "label": "항목 6"
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "브랜드 이름"
+        },
+        "brandSubtext": {
+          "type": "text",
+          "label": "보조 텍스트"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 텍스트"
+        }
+      },
+      "services": {
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "service1Desc": {
+          "type": "text",
+          "label": "서비스 1 설명"
+        },
+        "service1Image": {
+          "type": "image",
+          "label": "서비스 1 이미지"
+        },
+        "service1Title": {
+          "type": "text",
+          "label": "서비스 1 제목"
+        },
+        "service2Desc": {
+          "type": "text",
+          "label": "서비스 2 설명"
+        },
+        "service2Image": {
+          "type": "image",
+          "label": "서비스 2 이미지"
+        },
+        "service2Title": {
+          "type": "text",
+          "label": "서비스 2 제목"
+        },
+        "service3Desc": {
+          "type": "text",
+          "label": "서비스 3 설명"
+        },
+        "service3Title": {
+          "type": "text",
+          "label": "서비스 3 제목"
+        },
+        "service4Desc": {
+          "type": "text",
+          "label": "서비스 4 설명"
+        },
+        "service4Title": {
+          "type": "text",
+          "label": "서비스 4 제목"
+        },
+        "service5Desc": {
+          "type": "text",
+          "label": "서비스 5 설명"
+        },
+        "service5Image": {
+          "type": "image",
+          "label": "서비스 5 이미지"
+        },
+        "service5Title": {
+          "type": "text",
+          "label": "서비스 5 제목"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "space": {
+        "description": {
+          "type": "textarea",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "feature1Desc": {
+          "type": "text",
+          "label": "특징 1 설명"
+        },
+        "feature1Title": {
+          "type": "text",
+          "label": "특징 1 제목"
+        },
+        "feature2Desc": {
+          "type": "text",
+          "label": "특징 2 설명"
+        },
+        "feature2Title": {
+          "type": "text",
+          "label": "특징 2 제목"
+        },
+        "feature3Desc": {
+          "type": "text",
+          "label": "특징 3 설명"
+        },
+        "feature3Title": {
+          "type": "text",
+          "label": "특징 3 제목"
+        },
+        "feature4Desc": {
+          "type": "text",
+          "label": "특징 4 설명"
+        },
+        "feature4Title": {
+          "type": "text",
+          "label": "특징 4 제목"
+        },
+        "mainImage": {
+          "type": "image",
+          "label": "메인 이미지"
+        },
+        "subImage": {
+          "type": "image",
+          "label": "보조 이미지"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "team": {
+        "description": {
+          "type": "text",
+          "label": "섹션 설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "member1Image": {
+          "type": "image",
+          "label": "M1 이미지"
+        },
+        "member1Info1": {
+          "type": "text",
+          "label": "M1 정보 1"
+        },
+        "member1Info2": {
+          "type": "text",
+          "label": "M1 정보 2"
+        },
+        "member1Info3": {
+          "type": "text",
+          "label": "M1 정보 3"
+        },
+        "member1Name": {
+          "type": "text",
+          "label": "M1 이름"
+        },
+        "member1Role": {
+          "type": "text",
+          "label": "M1 역할"
+        },
+        "member2Image": {
+          "type": "image",
+          "label": "M2 이미지"
+        },
+        "member2Info1": {
+          "type": "text",
+          "label": "M2 정보 1"
+        },
+        "member2Info2": {
+          "type": "text",
+          "label": "M2 정보 2"
+        },
+        "member2Info3": {
+          "type": "text",
+          "label": "M2 정보 3"
+        },
+        "member2Name": {
+          "type": "text",
+          "label": "M2 이름"
+        },
+        "member2Role": {
+          "type": "text",
+          "label": "M2 역할"
+        },
+        "member3Image": {
+          "type": "image",
+          "label": "M3 이미지"
+        },
+        "member3Info1": {
+          "type": "text",
+          "label": "M3 정보 1"
+        },
+        "member3Info2": {
+          "type": "text",
+          "label": "M3 정보 2"
+        },
+        "member3Info3": {
+          "type": "text",
+          "label": "M3 정보 3"
+        },
+        "member3Name": {
+          "type": "text",
+          "label": "M3 이름"
+        },
+        "member3Role": {
+          "type": "text",
+          "label": "M3 역할"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "testimonials": {
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "rating": {
+          "type": "text",
+          "label": "별점"
+        },
+        "review1Author": {
+          "type": "text",
+          "label": "후기 1 작성자"
+        },
+        "review1Body": {
+          "type": "textarea",
+          "label": "후기 1 본문"
+        },
+        "review1Meta": {
+          "type": "text",
+          "label": "후기 1 메타"
+        },
+        "review2Author": {
+          "type": "text",
+          "label": "후기 2 작성자"
+        },
+        "review2Body": {
+          "type": "textarea",
+          "label": "후기 2 본문"
+        },
+        "review2Meta": {
+          "type": "text",
+          "label": "후기 2 메타"
+        },
+        "review3Author": {
+          "type": "text",
+          "label": "후기 3 작성자"
+        },
+        "review3Body": {
+          "type": "textarea",
+          "label": "후기 3 본문"
+        },
+        "review3Meta": {
+          "type": "text",
+          "label": "후기 3 메타"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      },
+      "why": {
+        "eyebrow": {
+          "type": "text",
+          "label": "섹션 라벨"
+        },
+        "f1Desc": {
+          "type": "textarea",
+          "label": "특징 1 설명"
+        },
+        "f1Image": {
+          "type": "image",
+          "label": "특징 1 이미지"
+        },
+        "f1Title": {
+          "type": "textarea",
+          "label": "특징 1 제목"
+        },
+        "f2Desc": {
+          "type": "textarea",
+          "label": "특징 2 설명"
+        },
+        "f2Image": {
+          "type": "image",
+          "label": "특징 2 이미지"
+        },
+        "f2Title": {
+          "type": "textarea",
+          "label": "특징 2 제목"
+        },
+        "f3Desc": {
+          "type": "textarea",
+          "label": "특징 3 설명"
+        },
+        "f3Image": {
+          "type": "image",
+          "label": "특징 3 이미지"
+        },
+        "f3Title": {
+          "type": "textarea",
+          "label": "특징 3 제목"
+        },
+        "title": {
+          "type": "text",
+          "label": "섹션 타이틀",
+          "required": true
+        }
+      }
+    },
+    "outdoor-default": {
+      "activityGrid": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "액티비티 항목",
+          "itemSchema": {
+            "description": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "image": {
+              "type": "image",
+              "label": "이미지",
+              "required": true
+            },
+            "level": {
+              "type": "text",
+              "label": "난이도"
+            },
+            "meta": {
+              "type": "text",
+              "label": "소요/거리"
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "collectionGrid": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "컬렉션 항목",
+          "itemSchema": {
+            "description": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "image": {
+              "type": "image",
+              "label": "이미지",
+              "required": true
+            },
+            "season": {
+              "type": "text",
+              "label": "시즌/태그"
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "contact": {
+        "heading": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        },
+        "hours": {
+          "type": "textarea",
+          "label": "운영 시간"
+        },
+        "intro": {
+          "type": "textarea",
+          "label": "안내 문구"
+        },
+        "items": {
+          "type": "array",
+          "label": "연락처 항목",
+          "itemSchema": {
+            "label": {
+              "type": "text",
+              "label": "항목명",
+              "required": true
+            },
+            "value": {
+              "type": "text",
+              "label": "내용",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "ctaBanner": {
+        "body": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "ctaLabel": {
+          "type": "text",
+          "label": "버튼 텍스트"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지"
+        }
+      },
+      "featureSplit": {
+        "body": {
+          "type": "textarea",
+          "label": "본문"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        },
+        "image": {
+          "type": "image",
+          "label": "이미지"
+        },
+        "imageSide": {
+          "type": "select",
+          "label": "이미지 위치",
+          "options": [
+            "left",
+            "right"
+          ]
+        },
+        "note": {
+          "type": "text",
+          "label": "강조 문구"
+        }
+      },
+      "footer": {
+        "brandName": {
+          "type": "text",
+          "label": "브랜드명",
+          "required": true
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권 문구",
+          "required": true
+        },
+        "tagline": {
+          "type": "textarea",
+          "label": "태그라인"
+        }
+      },
+      "hero": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지",
+          "required": true
+        },
+        "primaryCtaLabel": {
+          "type": "text",
+          "label": "주 버튼 텍스트"
+        },
+        "secondaryCtaLabel": {
+          "type": "text",
+          "label": "보조 버튼 텍스트"
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "title": {
+          "type": "text",
+          "label": "대제목",
+          "required": true
+        }
+      },
+      "journalGrid": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "저널 항목",
+          "itemSchema": {
+            "category": {
+              "type": "text",
+              "label": "분류"
+            },
+            "date": {
+              "type": "text",
+              "label": "날짜"
+            },
+            "excerpt": {
+              "type": "textarea",
+              "label": "요약"
+            },
+            "image": {
+              "type": "image",
+              "label": "커버 이미지",
+              "required": true
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "nav": {
+        "brandName": {
+          "type": "text",
+          "label": "브랜드명",
+          "required": true
+        },
+        "ctaHref": {
+          "type": "text",
+          "label": "CTA 링크"
+        },
+        "ctaLabel": {
+          "type": "text",
+          "label": "CTA 버튼 텍스트"
+        }
+      },
+      "pageHeader": {
+        "description": {
+          "type": "textarea",
+          "label": "설명"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "image": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "title": {
+          "type": "text",
+          "label": "제목",
+          "required": true
+        }
+      },
+      "pillars": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "가치 항목",
+          "itemSchema": {
+            "body": {
+              "type": "textarea",
+              "label": "설명"
+            },
+            "title": {
+              "type": "text",
+              "label": "제목",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "productGrid": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "제품 항목",
+          "itemSchema": {
+            "category": {
+              "type": "text",
+              "label": "분류"
+            },
+            "image": {
+              "type": "image",
+              "label": "이미지",
+              "required": true
+            },
+            "name": {
+              "type": "text",
+              "label": "제품명",
+              "required": true
+            },
+            "price": {
+              "type": "text",
+              "label": "가격"
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "stats": {
+        "heading": {
+          "type": "text",
+          "label": "제목"
+        },
+        "items": {
+          "type": "array",
+          "label": "지표 항목",
+          "itemSchema": {
+            "label": {
+              "type": "text",
+              "label": "라벨",
+              "required": true
+            },
+            "value": {
+              "type": "text",
+              "label": "수치",
+              "required": true
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "wedding-default": {
+      "contact": {
+        "backgroundImage": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "body": {
+          "type": "textarea",
+          "label": "본문"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "formNote": {
+          "type": "text",
+          "label": "폼 안내 문구"
+        },
+        "formTitle": {
+          "type": "text",
+          "label": "폼 제목"
+        },
+        "hours": {
+          "type": "text",
+          "label": "운영 시간"
+        },
+        "location": {
+          "type": "text",
+          "label": "쇼룸 위치"
+        },
+        "phone": {
+          "type": "text",
+          "label": "전화번호"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "타이틀",
+          "required": true
+        }
+      },
+      "faq": {
+        "a1": {
+          "type": "textarea",
+          "label": "답변 1"
+        },
+        "a2": {
+          "type": "textarea",
+          "label": "답변 2"
+        },
+        "a3": {
+          "type": "textarea",
+          "label": "답변 3"
+        },
+        "a4": {
+          "type": "textarea",
+          "label": "답변 4"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "q1": {
+          "type": "text",
+          "label": "질문 1"
+        },
+        "q2": {
+          "type": "text",
+          "label": "질문 2"
+        },
+        "q3": {
+          "type": "text",
+          "label": "질문 3"
+        },
+        "q4": {
+          "type": "text",
+          "label": "질문 4"
+        },
+        "title": {
+          "type": "text",
+          "label": "타이틀",
+          "required": true
+        }
+      },
+      "footer": {
+        "address": {
+          "type": "textarea",
+          "label": "주소·연락처"
+        },
+        "brand": {
+          "type": "text",
+          "label": "브랜드 로고"
+        },
+        "copyright": {
+          "type": "text",
+          "label": "저작권 표기"
+        },
+        "description": {
+          "type": "textarea",
+          "label": "브랜드 설명"
+        },
+        "tagline": {
+          "type": "text",
+          "label": "태그라인"
+        }
+      },
+      "gallery": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "image1": {
+          "type": "image",
+          "label": "갤러리 이미지 1"
+        },
+        "image2": {
+          "type": "image",
+          "label": "갤러리 이미지 2"
+        },
+        "image3": {
+          "type": "image",
+          "label": "갤러리 이미지 3"
+        },
+        "image4": {
+          "type": "image",
+          "label": "갤러리 이미지 4"
+        },
+        "image5": {
+          "type": "image",
+          "label": "갤러리 이미지 5"
+        },
+        "image6": {
+          "type": "image",
+          "label": "갤러리 이미지 6"
+        },
+        "title": {
+          "type": "text",
+          "label": "타이틀",
+          "required": true
+        }
+      },
+      "hero": {
+        "backgroundImage": {
+          "type": "image",
+          "label": "배경 이미지"
+        },
+        "ctaPrimaryText": {
+          "type": "text",
+          "label": "주요 CTA 버튼"
+        },
+        "ctaPrimaryUrl": {
+          "type": "url",
+          "label": "주요 CTA 링크"
+        },
+        "ctaSecondaryText": {
+          "type": "text",
+          "label": "보조 CTA 버튼"
+        },
+        "ctaSecondaryUrl": {
+          "type": "url",
+          "label": "보조 CTA 링크"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "stat1Label": {
+          "type": "text",
+          "label": "통계 1 라벨"
+        },
+        "stat1Value": {
+          "type": "text",
+          "label": "통계 1 수치"
+        },
+        "stat2Label": {
+          "type": "text",
+          "label": "통계 2 라벨"
+        },
+        "stat2Value": {
+          "type": "text",
+          "label": "통계 2 수치"
+        },
+        "stat3Label": {
+          "type": "text",
+          "label": "통계 3 라벨"
+        },
+        "stat3Value": {
+          "type": "text",
+          "label": "통계 3 수치"
+        },
+        "subtitle": {
+          "type": "textarea",
+          "label": "서브 타이틀"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "메인 타이틀",
+          "required": true
+        }
+      },
+      "nav": {
+        "brand": {
+          "type": "text",
+          "label": "브랜드 로고"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 버튼"
+        },
+        "ctaUrl": {
+          "type": "url",
+          "label": "CTA 링크"
+        },
+        "tagline": {
+          "type": "text",
+          "label": "브랜드 태그라인"
+        }
+      },
+      "philosophy": {
+        "body": {
+          "type": "textarea",
+          "label": "본문"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 버튼"
+        },
+        "ctaUrl": {
+          "type": "url",
+          "label": "CTA 링크"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "title": {
+          "type": "textarea",
+          "label": "타이틀",
+          "required": true
+        }
+      },
+      "pricing": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "pkg1CtaText": {
+          "type": "text",
+          "label": "패키지 1 버튼"
+        },
+        "pkg1Feature1": {
+          "type": "text",
+          "label": "패키지 1 항목 1"
+        },
+        "pkg1Feature2": {
+          "type": "text",
+          "label": "패키지 1 항목 2"
+        },
+        "pkg1Feature3": {
+          "type": "text",
+          "label": "패키지 1 항목 3"
+        },
+        "pkg1Feature4": {
+          "type": "text",
+          "label": "패키지 1 항목 4"
+        },
+        "pkg1Name": {
+          "type": "text",
+          "label": "패키지 1 이름"
+        },
+        "pkg1Note": {
+          "type": "text",
+          "label": "패키지 1 안내"
+        },
+        "pkg1Price": {
+          "type": "text",
+          "label": "패키지 1 가격"
+        },
+        "pkg1PriceSuffix": {
+          "type": "text",
+          "label": "패키지 1 가격 단위"
+        },
+        "pkg1Tier": {
+          "type": "text",
+          "label": "패키지 1 등급"
+        },
+        "pkg2Badge": {
+          "type": "text",
+          "label": "패키지 2 배지"
+        },
+        "pkg2CtaText": {
+          "type": "text",
+          "label": "패키지 2 버튼"
+        },
+        "pkg2Feature1": {
+          "type": "text",
+          "label": "패키지 2 항목 1"
+        },
+        "pkg2Feature2": {
+          "type": "text",
+          "label": "패키지 2 항목 2"
+        },
+        "pkg2Feature3": {
+          "type": "text",
+          "label": "패키지 2 항목 3"
+        },
+        "pkg2Feature4": {
+          "type": "text",
+          "label": "패키지 2 항목 4"
+        },
+        "pkg2Feature5": {
+          "type": "text",
+          "label": "패키지 2 항목 5"
+        },
+        "pkg2Name": {
+          "type": "text",
+          "label": "패키지 2 이름"
+        },
+        "pkg2Note": {
+          "type": "text",
+          "label": "패키지 2 안내"
+        },
+        "pkg2Price": {
+          "type": "text",
+          "label": "패키지 2 가격"
+        },
+        "pkg2PriceSuffix": {
+          "type": "text",
+          "label": "패키지 2 가격 단위"
+        },
+        "pkg2Tier": {
+          "type": "text",
+          "label": "패키지 2 등급"
+        },
+        "pkg3CtaText": {
+          "type": "text",
+          "label": "패키지 3 버튼"
+        },
+        "pkg3Feature1": {
+          "type": "text",
+          "label": "패키지 3 항목 1"
+        },
+        "pkg3Feature2": {
+          "type": "text",
+          "label": "패키지 3 항목 2"
+        },
+        "pkg3Feature3": {
+          "type": "text",
+          "label": "패키지 3 항목 3"
+        },
+        "pkg3Feature4": {
+          "type": "text",
+          "label": "패키지 3 항목 4"
+        },
+        "pkg3Feature5": {
+          "type": "text",
+          "label": "패키지 3 항목 5"
+        },
+        "pkg3Name": {
+          "type": "text",
+          "label": "패키지 3 이름"
+        },
+        "pkg3Note": {
+          "type": "text",
+          "label": "패키지 3 안내"
+        },
+        "pkg3Price": {
+          "type": "text",
+          "label": "패키지 3 가격"
+        },
+        "pkg3PriceSuffix": {
+          "type": "text",
+          "label": "패키지 3 가격 단위"
+        },
+        "pkg3Tier": {
+          "type": "text",
+          "label": "패키지 3 등급"
+        },
+        "subtitle": {
+          "type": "text",
+          "label": "서브 타이틀"
+        },
+        "title": {
+          "type": "text",
+          "label": "타이틀",
+          "required": true
+        }
+      },
+      "process": {
+        "ctaNote": {
+          "type": "text",
+          "label": "CTA 안내 문구"
+        },
+        "ctaText": {
+          "type": "text",
+          "label": "CTA 버튼"
+        },
+        "ctaUrl": {
+          "type": "url",
+          "label": "CTA 링크"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "step1Body": {
+          "type": "textarea",
+          "label": "스텝 1 설명"
+        },
+        "step1Title": {
+          "type": "text",
+          "label": "스텝 1 제목"
+        },
+        "step2Body": {
+          "type": "textarea",
+          "label": "스텝 2 설명"
+        },
+        "step2Title": {
+          "type": "text",
+          "label": "스텝 2 제목"
+        },
+        "step3Body": {
+          "type": "textarea",
+          "label": "스텝 3 설명"
+        },
+        "step3Title": {
+          "type": "text",
+          "label": "스텝 3 제목"
+        },
+        "step4Body": {
+          "type": "textarea",
+          "label": "스텝 4 설명"
+        },
+        "step4Title": {
+          "type": "text",
+          "label": "스텝 4 제목"
+        },
+        "title": {
+          "type": "text",
+          "label": "타이틀",
+          "required": true
+        }
+      },
+      "services": {
+        "ctaCardBody": {
+          "type": "textarea",
+          "label": "CTA 카드 본문"
+        },
+        "ctaCardButton": {
+          "type": "text",
+          "label": "CTA 카드 버튼"
+        },
+        "ctaCardTitle": {
+          "type": "textarea",
+          "label": "CTA 카드 타이틀"
+        },
+        "ctaCardUrl": {
+          "type": "url",
+          "label": "CTA 카드 링크"
+        },
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "service1Badge": {
+          "type": "text",
+          "label": "서비스 1 배지"
+        },
+        "service1Body": {
+          "type": "textarea",
+          "label": "서비스 1 설명"
+        },
+        "service1Image": {
+          "type": "image",
+          "label": "서비스 1 이미지"
+        },
+        "service1Title": {
+          "type": "text",
+          "label": "서비스 1 제목"
+        },
+        "service2Body": {
+          "type": "textarea",
+          "label": "서비스 2 설명"
+        },
+        "service2Image": {
+          "type": "image",
+          "label": "서비스 2 이미지"
+        },
+        "service2Title": {
+          "type": "text",
+          "label": "서비스 2 제목"
+        },
+        "service3Body": {
+          "type": "textarea",
+          "label": "서비스 3 설명"
+        },
+        "service3Title": {
+          "type": "text",
+          "label": "서비스 3 제목"
+        },
+        "service4Body": {
+          "type": "textarea",
+          "label": "서비스 4 설명"
+        },
+        "service4Title": {
+          "type": "text",
+          "label": "서비스 4 제목"
+        },
+        "title": {
+          "type": "text",
+          "label": "타이틀",
+          "required": true
+        }
+      },
+      "testimonials": {
+        "eyebrow": {
+          "type": "text",
+          "label": "상단 라벨"
+        },
+        "ratingNote": {
+          "type": "textarea",
+          "label": "평균 만족도 설명"
+        },
+        "ratingScore": {
+          "type": "text",
+          "label": "평균 만족도 점수"
+        },
+        "review1Author": {
+          "type": "text",
+          "label": "후기 1 작성자"
+        },
+        "review1Avatar": {
+          "type": "image",
+          "label": "후기 1 아바타"
+        },
+        "review1Body": {
+          "type": "textarea",
+          "label": "후기 1 본문"
+        },
+        "review1Meta": {
+          "type": "text",
+          "label": "후기 1 메타"
+        },
+        "review2Author": {
+          "type": "text",
+          "label": "후기 2 작성자"
+        },
+        "review2Avatar": {
+          "type": "image",
+          "label": "후기 2 아바타"
+        },
+        "review2Body": {
+          "type": "textarea",
+          "label": "후기 2 본문"
+        },
+        "review2Meta": {
+          "type": "text",
+          "label": "후기 2 메타"
+        },
+        "review3Author": {
+          "type": "text",
+          "label": "후기 3 작성자"
+        },
+        "review3Avatar": {
+          "type": "image",
+          "label": "후기 3 아바타"
+        },
+        "review3Body": {
+          "type": "textarea",
+          "label": "후기 3 본문"
+        },
+        "review3Meta": {
+          "type": "text",
+          "label": "후기 3 메타"
+        },
+        "title": {
+          "type": "text",
+          "label": "타이틀",
+          "required": true
+        }
+      }
+    }
+  }
+}

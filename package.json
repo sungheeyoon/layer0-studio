@@ -17,6 +17,8 @@
     "template:scaffold": "tsx scripts/scaffold-template.ts",
     "template:verify": "tsx scripts/verify-template.ts",
     "template:verify:ci": "tsx scripts/verify-templates-ci.ts",
+    "schema:manifest": "tsx scripts/schema-manifest.ts",
+    "schema:manifest:check": "tsx scripts/schema-manifest.ts --check",
     "performance:verify": "tsx scripts/verify-initial-assets.ts",
     "template:image": "tsx --env-file=.env.local scripts/host-image.ts",
     "reconcile:orphaned-assets": "tsx --env-file=.env.local scripts/reconcile-orphaned-assets.ts",
