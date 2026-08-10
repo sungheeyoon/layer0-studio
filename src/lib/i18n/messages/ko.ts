@@ -414,6 +414,8 @@ export const ko = {
       noItems: '항목이 없습니다',
       addFirstItem: '+ 첫 항목 추가',
       addItem: '항목 추가',
+      moveUp: '항목 위로 이동',
+      moveDown: '항목 아래로 이동',
       delete: '삭제',
       maxReachedPrefix: '최대 ',
       maxReachedSuffix: '개 도달',

@@ -411,6 +411,8 @@ export const en: Messages = {
       noItems: 'No items yet',
       addFirstItem: '+ Add first item',
       addItem: 'Add Item',
+      moveUp: 'Move item up',
+      moveDown: 'Move item down',
       delete: 'Delete',
       maxReachedPrefix: 'Max ',
       maxReachedSuffix: ' reached',
