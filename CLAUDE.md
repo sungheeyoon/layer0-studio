@@ -11,7 +11,7 @@ Rules live here; the reasoning lives in the ADRs. When a rule below surprises yo
 | Before you touch… | Read |
 |---|---|
 | Domain vocabulary, naming, "what do we call this" | `CONTEXT.md` |
-| Any architectural decision's rationale | `docs/adr/` (0001–0016; **0016 is TO-BE / not yet implemented**) |
+| Any architectural decision's rationale | `docs/adr/` (0001–0016; all implemented — 0016 shipped via migrations 026/027) |
 | Studio chrome UI — page, component, color, icon, font, `globals.css` | `docs/DESIGN_SYSTEM.md` |
 | Templates, presets, sync, validate, thumbnail capture | `docs/TEMPLATE_SYSTEM.md` |
 

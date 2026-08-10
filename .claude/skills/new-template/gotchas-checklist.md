@@ -36,9 +36,10 @@ The §10 traps from `docs/TEMPLATE_SYSTEM.md`, condensed for authoring. Re-read 
 
 ## Site type
 
-- [ ] **Single vs Multi changes how `template.ts` is authored.** `ContentModel` is a discriminated union (`mode` / `SiteMode`) — narrow with `isSingleContent` / `isMultiContent`, iterate with `allSections()`. (ADR-0007 / ADR-0013)
-  - **Single** (`mode:'single'`, `sections[]`): preset's `content` is the `{ mode:'single', ... }` union, written directly (the legacy `composition: PresetSection[]` short-hand was removed — ADR-0007).
-  - **Multi** (`mode:'multi'`, `shared:{header,footer}` + `pages[]`): write `template.ts`'s `content` `{ mode:'multi', ... }` union by hand; clone `src/templates/outdoor/default` (능선) as the template. Each page carries `slug` + `nav:{visible,label}`; `visible` and `nav.visible` are independent axes; nav is **projected** by `deriveNav` / `deriveFooterNav`, never stored as a section. `index.tsx` uses `RenderMultiSite`.
+- [ ] **Single vs Multi changes how `template.ts` is authored.** `ContentModel` is a discriminated union (`mode` / `SiteMode`) — narrow with `isSingleContent` / `isMultiContent`, iterate with `allBlocks()`. (ADR-0007 / ADR-0013 / ADR-0016)
+  - **Single** (`mode:'single'`, `blocks: SingleBlock[]`): preset's `content` is the `{ mode:'single', ... }` union, written directly (the legacy `composition: PresetSection[]` short-hand was removed — ADR-0007). A Block opts into the anchor menu with `menu:{label}`; omitting `menu` leaves a visible Block unlisted.
+  - **Multi** (`mode:'multi'`, `chrome:{header,footer}` + `pages[]`): write `template.ts`'s `content` `{ mode:'multi', ... }` union by hand; clone `src/templates/outdoor/default` (능선) as the template. Each page carries `slug` + required `name` + optional `menu:{label, placement?}` (omitted `placement` = header); `visible` and menu presence are independent axes; the menu is **projected** by `deriveNav` / `deriveFooterNav` (footer links only from `placement:'footer'`), never stored as a Block. `index.tsx` uses `RenderMultiSite`.
+  - **Don't write `sections` / `shared` / `nav`** — those names were retired by ADR-0016 + migration 027 and will fail `validateContent`.
 
 ## Verify loop & environment (learned the hard way)
 

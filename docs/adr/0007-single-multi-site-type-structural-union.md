@@ -3,6 +3,8 @@
 > **Status: Accepted — 구현 완료** (PR #45–#54). `TemplateJson` 유니온·`renderSingleSite`/`renderMultiSite`·`[[...slug]]` 라우팅·양쪽 에디터·nav/footer projection·PageSeo·sitemap·asset slot_key 까지 전부 반영됨. (설계 원문이던 `docs/plans/PLAN_multipage.md` 는 구현 완료 후 삭제 — 본 ADR 이 그 결정을 승계한다. 당시 단계별 계획이 필요하면 git 이력의 PR #45–#54 를 본다.)
 >
 > **용어 note (ADR-0013 이후):** 아래 본문·코드블록의 타입 이름은 *설계 당시* 이름이다. [ADR-0013](./0013-content-model-rename.md) 이 구조는 그대로 둔 채 이름만 개명했다 — `TemplateJson→ContentModel`, `TemplateSection→Section`, `TemplateField→Field`, `TemplatePage→Page`, `TemplateGlobalStyles→GlobalStyles`, `isSingle/MultiTemplate→isSingle/MultiContent`, section 의 `data`→`fields`(migration 022), 신설 `SiteMode='single'|'multi'`. 현재 이름 기준 정식 설명은 CONTEXT.md / TEMPLATE_SYSTEM.md 를 본다.
+>
+> **부분 대체 note (ADR-0016 이후):** **구조 결정(Single/Multi 구조적 유니온, mode 고정, 진화 없음)은 그대로 유효하다.** 다만 어휘와 **nav 설계는 [ADR-0016](./0016-block-rename-and-field-value-split.md) §2–§3 으로 대체됐다** — `Section→Block`, `sections→blocks`, `shared→chrome`, `nav→menu`, Multi `Page.name` 필수, footer 링크는 `menu.placement:'footer'` 로만 선택(migration 027). 아래 본문의 `nav` 서술은 대체 전 모양이므로 현재 모델은 ADR-0016 §3 을 본다.
 
 Site 는 **Single** 과 **Multi** 두 개의 독립적인 Site Type 으로 나뉘며, 어느 쪽인지는 **생성(프리셋) 시점에 `mode` 로 고정**된다. Single → Multi 로 *진화* 하는 개념은 존재하지 않는다. `TemplateJson` 은 `mode` 를 판별자로 하는 **구조적 유니온**이다.
 
