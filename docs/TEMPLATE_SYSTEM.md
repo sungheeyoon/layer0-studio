@@ -570,7 +570,7 @@ brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 content `Conten
 
 > **프리뷰 렌더 검증은 capture 로만 가능하다 — `curl` 로는 안 된다.** `TemplateClientWrapper` 가 `loadTemplate()` 를 `useEffect` 안에서 동적 import 하므로 SSR HTML 에는 직렬화된 props JSON 만 들어가고 섹션 DOM 은 없다. `curl /preview/preset/<key>` 결과에 섹션이 안 보이는 건 렌더 실패가 아니라 **의도된 동작**이다. 실제 렌더/레이아웃 확인은 Playwright capture 또는 브라우저로 한다.
 
-**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateContent` — `preset.content`(ContentModel) 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 모든 declared 필드가 `getFieldValue` 참조됨 + 모든 참조 필드가 declared 됨 cross-check (브레이스 밸런스 파서); (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
+**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateContent` — `preset.content`(ContentModel) 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 스키마가 선언한 모든 필드를 컴포넌트가 실제로 읽는지 확인 (`content.key` / `item.fields.key` / 계산 키; 브레이스 밸런스 파서). 반대 방향(선언 안 된 키를 읽음)은 `ValuesOf<typeof schema>` 덕분에 **컴파일 에러**라 게이트가 필요 없다; (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
 > `template:verify` 는 템플릿 모듈을 동적 import 하므로 첫 줄에서 `./lib/register-css-stub` 를 로드해 `.module.css` import 가 tsx 에서 깨지지 않게 한다 (sync 와 동일).
 
 **New-category 규칙**: 새 category slug 은 `^[a-z][a-z0-9-]{0,39}$` 를 만족해야 하고, 기존 디렉터리에 없는 새 top-level category 는 구조 변경이므로 사람의 명시적 승인 후 만든다. 판정은 정확 일치만 — `cafe-studio` 는 `cafe` 의 변형이 아니라 새 category 다.
@@ -727,7 +727,7 @@ preset 의 `content` section 에서 사용 — `{ id: 'hero-1', type: 'hero-para
    }
    ```
 2. **Preset 데이터**: `items` 배열 안에 각 item 객체 배치.
-3. **컴포넌트 렌더**: `(fields.items as ArrayField).items.map(...)` 으로 렌더. `item.title.value` 대신 `getFieldValue(item.title)` 사용 권장.
+3. **컴포넌트 렌더**: `(content.items ?? []).map(item => …)`. 각 item 은 `{ id, fields }` 이므로 값은 `item.fields.title`, React key 는 `item.id`(인덱스 금지 — ADR-0016 §4-4).
 
 ### H. 새 페이지 추가 (Multi)
 

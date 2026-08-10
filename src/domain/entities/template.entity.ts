@@ -1,13 +1,3 @@
-export type FieldType =
-  | 'text'
-  | 'textarea'
-  | 'image'
-  | 'url'
-  | 'color'
-  | 'number'
-  | 'select'
-  | 'array';
-
 // ─────────────────────────────────────────────────────────────────────────────
 // ADR-0016 — schema-first Field/Value split.
 //
@@ -16,8 +6,10 @@ export type FieldType =
 // it via `ValuesOf`, never written by hand. That is what makes schema/content
 // drift structurally impossible rather than merely validated.
 //
-// These types are additive for now — the legacy `Field` union below still
-// backs the un-migrated Templates. See ADR-0016 §8-2 for the rollout order.
+// The legacy `Field` union (`{ type, label, value }` objects stored *beside*
+// the data) and its `getFieldValue` accessor are gone as of #136. The only
+// place that shape still appears is `scripts/lib/migrate-single-site.ts`, which
+// describes it locally because it transforms rows written before this split.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -85,67 +77,6 @@ export type ValuesOf<S> = Prettify<
   { [K in RequiredFieldKeys<S>]: ValueOfDescriptor<S[K]> } &
   { [K in OptionalFieldKeys<S>]?: ValueOfDescriptor<S[K]> }
 >;
-
-interface BaseField {
-  label: string;
-  editable?: boolean; // Basic true, hidden in editor if false
-}
-
-export interface TextField extends BaseField {
-  type: 'text' | 'textarea' | 'url' | 'color' | 'number';
-  value: string;
-}
-
-export interface SelectField extends BaseField {
-  type: 'select';
-  value: string;
-  options: string[]; // for 'select' type
-}
-
-export interface ImageField extends BaseField {
-  type: 'image';
-  value: string; // CDN URL
-  assetId?: string | null; // UUID of physical asset for reference counting
-}
-
-export interface ArrayField extends BaseField {
-  type: 'array';
-  items: Array<Record<string, Field>>;
-}
-
-export type Field =
-  | TextField
-  | SelectField
-  | ImageField
-  | ArrayField;
-
-/**
- * Safely get the string value of a field.
- * Returns empty string for 'array' type or missing value.
- *
- * Usage:
- * 1. getFieldValue(field)
- * 2. getFieldValue(data, 'key')
- *
- * @deprecated ADR-0016 §2 deletes this. It takes `unknown` because `Block.fields`
- * is now loose (§4-2) and the un-migrated Templates still calling it are reading
- * legacy `Field` objects out of it — the cast has simply moved inside. Migrated
- * components read the Value directly off a `ValuesOf<typeof schema>`.
- */
-export function getFieldValue(fieldOrData: unknown, key?: string): string {
-  if (!fieldOrData) return '';
-
-  if (key !== undefined) {
-    const data = fieldOrData as Record<string, Field>;
-    const field = data[key];
-    if (!field || field.type === 'array') return '';
-    return field.value ?? '';
-  }
-
-  const field = fieldOrData as Field;
-  if (field.type === 'array') return '';
-  return field.value ?? '';
-}
 
 /**
  * Navigation projection source — carried by the unit that drives the nav.

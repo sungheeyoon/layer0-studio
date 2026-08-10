@@ -3,7 +3,6 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import { templateMap, presetMap, getAvailableTemplateKeys } from '@/templates/_generated';
 import { isMultiContent } from '@/domain/entities/template.entity';
-import { MIGRATED_TEMPLATE_KEYS } from './migrated-templates';
 
 // @testing-library's auto-cleanup only self-registers under `globals: true`,
 // which this repo does not use.
@@ -18,14 +17,17 @@ afterEach(cleanup);
  * real renderer catches it, and it catches it as a thrown `.map is not a
  * function` rather than a subtle diff.
  *
- * Runs over {@link MIGRATED_TEMPLATE_KEYS} while the conversion is in flight;
- * issue #136 widens it to the whole registry and deletes the list.
+ * Runs over the whole registry, driven by `getAvailableTemplateKeys()` — a new
+ * Template is covered the day its directory appears. While the ADR-0016
+ * conversion was in flight this walked a hand-kept list of converted Templates;
+ * #136 converted the last of them and deleted the list.
  */
 describe('registry render smoke — a preset must render through its own renderer', () => {
-  const keys = getAvailableTemplateKeys().filter((k) => MIGRATED_TEMPLATE_KEYS.has(k));
+  const keys = getAvailableTemplateKeys();
 
-  it('covers every migrated Template', () => {
-    expect(keys.length).toBe(MIGRATED_TEMPLATE_KEYS.size);
+  it('covers every Template in the registry', () => {
+    expect(keys.length).toBeGreaterThan(0);
+    expect(keys.every((k) => templateMap[k] && presetMap[k])).toBe(true);
   });
 
   for (const templateKey of keys) {

@@ -31,7 +31,8 @@ export function makeContent(overrides: Partial<SingleContent> = {}): ContentMode
         visible: true,
         nav: { visible: false, label: 'Hero' },
         fields: {
-          title: { type: 'text', label: 'Title', value: 'Hello', editable: true },
+          // A Value, not a `{ type, label, value }` wrapper (ADR-0016 §4-2).
+          title: 'Hello',
         },
       },
     ],

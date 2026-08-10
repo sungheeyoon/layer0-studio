@@ -10,10 +10,10 @@ The §10 traps from `docs/TEMPLATE_SYSTEM.md`, condensed for authoring. Re-read 
 
 ## Fields & data
 
-- [ ] **Every field `value` is a string** — numbers too (`value: '42'`; component does `Number(...)`). (§10.3)
+- [ ] **Preset data is a Value, not a `{ type, label, value }` wrapper** (ADR-0016). A `text` field stores `'42'`, a `number` field stores `42`, an `image` stores `{ url, assetId? }`, an `array` stores `{ id, fields }[]`. The schema — never the data — says which. (§10.3)
 - [ ] **`required: true` must be declared in `fieldsSchema`** or it's silently optional → empty at runtime. (§10.6)
-- [ ] **`array` fields need `itemSchema`**; the component must guard `data.x?.items ?? []` (lazy migration — old Sites lack the array). Don't style by index (`idx === 0`) — order changes in the editor leave design stuck to the slot; put per-item style in `itemSchema` as a `select`. (§10.4, §10.5, §10.14)
-- [ ] **`fieldsSchema` ↔ JSX must match both ways**: every declared field is read via `getFieldValue`, and every referenced field is declared. `pnpm template:verify` enforces this. (#16 / schema-jsx-consistency)
+- [ ] **`array` fields need `itemSchema`**; the component must guard `content.x ?? []` (an optional Value can be absent — old Sites lack the array). Every item carries its own `id` beside `fields`; key React off `item.id`, never the index (ADR-0016 §4-4). Don't style by index (`idx === 0`) — order changes in the editor leave design stuck to the slot; put per-item style in `itemSchema` as a `select`. (§10.4, §10.5, §10.14)
+- [ ] **Every declared field must be read by the component** — a field the schema declares but the JSX ignores is an editor input that changes nothing. `pnpm template:verify` enforces this (schema-jsx-consistency). The reverse direction needs no gate: the Content type is `ValuesOf<typeof schema>`, so reading an undeclared key is a compile error.
 
 ## Tokens & styling
 

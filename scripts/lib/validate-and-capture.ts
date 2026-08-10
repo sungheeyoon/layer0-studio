@@ -205,10 +205,6 @@ function extractObjectBlock(source: string, key: string): string | null {
   return source.slice(headerRe.lastIndex, i);
 }
 
-function extractDataSchemaBlock(source: string): string | null {
-  return extractObjectBlock(source, 'fieldsSchema');
-}
-
 /**
  * Given the inside of `fieldsSchema: { … }`, return the top-level property
  * keys only. Brace-tracks so nested keys (`type`, `label`, etc.) are skipped.
@@ -236,12 +232,11 @@ function extractTopLevelKeys(block: string): Set<string> {
 }
 
 /**
- * Classify the top-level fields of a `fieldsSchema` block into:
- *   - `scalarKeys` — ordinary fields (read via `getFieldValue(fields, 'key')`)
- *   - `arrayKeys`  — `type: 'array'` fields (iterated via `fields['key'].items`,
- *                    NOT read as a scalar)
- *   - `itemKeys`   — the union of every array field's `itemSchema` keys (each
- *                    read via `getFieldValue(item.subkey)` inside a `.map`)
+ * Classify the top-level fields of a schema block into:
+ *   - `scalarKeys` — ordinary fields, read as `<content>.key`
+ *   - `arrayKeys`  — `type: 'array'` fields, mapped over as `<content>.key`
+ *   - `itemKeys`   — the union of every array field's `itemSchema` keys, read as
+ *                    `item.fields.subkey` inside the `.map`
  *
  * Brace-tracks at depth 0 so nested `type`/`label`/`itemSchema` entries are not
  * mistaken for top-level fields. See `checkFieldsSchemaJsxConsistency`.
@@ -300,18 +295,65 @@ function parseSchemaFields(block: string): {
   return { scalarKeys, arrayKeys, itemKeys };
 }
 
+/**
+ * Every `{ start, end }` span of a schema literal in `source` — the block
+ * `as const satisfies FieldsSchema` is attached to (the ADR-0016 form), plus a
+ * legacy inline `fieldsSchema: { … }` literal if one is still written that way.
+ *
+ * Found by scanning *backwards* from `satisfies FieldsSchema` to the `}` that
+ * precedes it and brace-balancing to its `{`, which is robust to however the
+ * declaration is spelled (`const x =`, `export const x =`, a direct property).
+ */
+function findSchemaBlocks(source: string): Array<{ start: number; end: number }> {
+  const spans: Array<{ start: number; end: number }> = [];
+
+  for (const m of source.matchAll(/satisfies\s+(?:FieldsSchema|SectionFieldsSchema)\b/g)) {
+    const close = source.lastIndexOf('}', m.index!);
+    if (close < 0) continue;
+    let depth = 1;
+    let i = close - 1;
+    while (i >= 0 && depth > 0) {
+      if (source[i] === '}') depth++;
+      else if (source[i] === '{') depth--;
+      if (depth === 0) break;
+      i--;
+    }
+    if (depth === 0) spans.push({ start: i + 1, end: close });
+  }
+
+  const inlineHeader = /fieldsSchema\s*:\s*\{/g;
+  const header = inlineHeader.exec(source);
+  if (header) {
+    const inline = extractObjectBlock(source, 'fieldsSchema');
+    if (inline) spans.push({ start: inlineHeader.lastIndex, end: inlineHeader.lastIndex + inline.length });
+  }
+
+  return spans;
+}
+
 // ─── Step 5: fieldsSchema ↔ JSX consistency ────────────────────────────────────
 
 /**
- * For each `library/<Section>.tsx`, find:
- *   - Declared field keys in the inline `<Component>.meta.fieldsSchema` literal
- *   - Referenced field keys in `getFieldValue(fields, 'key')` calls
- * Cross-check both directions. Catches typos / forgotten field migrations.
+ * Every field a component's schema declares must be read somewhere in that
+ * component — a declared-but-unread field is a live editor input whose edits
+ * change nothing on screen.
  *
- * Regex-based — not an AST walk. Good enough since fieldsSchema is always a
- * literal in our codegen and `getFieldValue(fields, '...')` is the only
- * canonical accessor. Components that use `.meta.ts` siblings (client
- * components) are handled too.
+ * **Only this direction is checked, and only since ADR-0016.** The other one —
+ * a renderer reading a key the schema never declared — used to be the more
+ * valuable half, and it is now a *compile* error: the Content type is derived
+ * from the schema (`ValuesOf<typeof schema>`), so `content.mystery` does not
+ * type-check. `tsc` does it structurally, for every key, with no regex.
+ *
+ * That rewrite is also why this step needed one. It matched
+ * `getFieldValue(fields, 'key')` calls, of which there are now zero, against a
+ * `fieldsSchema: { … }` literal, of which there are also now zero (schemas are
+ * declared as a const and referenced by name). It reported every template green
+ * while skipping every file — a gate that had quietly stopped being one.
+ *
+ * Regex-based, not an AST walk, and deliberately permissive about what counts
+ * as a read: a false positive blocks an author on a correct template, while a
+ * false negative only means a dead field survives to the next reviewer.
+ * Issue #129's schema manifest is the strict, AST-level successor.
  */
 export function checkFieldsSchemaJsxConsistency(templateRoot: string): StepResult {
   const libraryDir = path.join(templateRoot, 'library');
@@ -325,110 +367,76 @@ export function checkFieldsSchemaJsxConsistency(templateRoot: string): StepResul
     .map(f => path.join(libraryDir, f));
 
   const violations: string[] = [];
+  let checked = 0;
 
   for (const file of tsxFiles) {
     const src = fs.readFileSync(file, 'utf-8');
     const base = path.basename(file, '.tsx');
 
-    // Find the fieldsSchema literal — either inline `<C>.meta = { fieldsSchema: { … } }`
-    // or sibling `<C>.meta.ts` exporting `fieldsSchema: { … }`.
-    let schemaSource = src;
+    // A client component ('use client') cannot expose static meta to the server,
+    // so its schema lives in a `<C>.meta.ts` sibling — declared once there and
+    // imported back by the .tsx for its `ValuesOf`. Either way the *reads* are
+    // in the .tsx.
     const metaSibling = path.join(libraryDir, `${base}.meta.ts`);
-    if (fs.existsSync(metaSibling)) {
-      schemaSource = fs.readFileSync(metaSibling, 'utf-8');
-    }
+    const schemaSource = fs.existsSync(metaSibling) ? fs.readFileSync(metaSibling, 'utf-8') : src;
 
-    const schemaBlock = extractDataSchemaBlock(schemaSource);
-    if (!schemaBlock) {
-      // No declared schema — skip this file (e.g. helper module).
+    const spans = findSchemaBlocks(schemaSource);
+    if (spans.length === 0) {
+      // No declared schema — a helper module, not a Block component.
       continue;
     }
+    checked++;
 
-    // Classify declared fields: scalars, `type:'array'` fields, and the item
-    // sub-keys nested in each array's `itemSchema`. Arrays and their items are
-    // accessed differently than scalars, so they need separate checks (a single
-    // flat key-set produced false positives on every array field — #array-gate).
-    const { scalarKeys, arrayKeys, itemKeys } = parseSchemaFields(schemaBlock);
-    const topLevelDeclared = new Set([...scalarKeys, ...arrayKeys]);
+    const { scalarKeys, arrayKeys, itemKeys } = parseSchemaFields(
+      spans.map(sp => schemaSource.slice(sp.start, sp.end)).join('\n'),
+    );
 
-    // Scalars: `getFieldValue(<accessor>, 'key')` (two-arg). Any accessor — both
-    // `fields` (destructured) and `section.fields` are common.
-    const refScalar = new Set<string>();
-    for (const m of src.matchAll(/getFieldValue\s*\(\s*[\w$.[\]]+\s*,\s*['"]([\w$]+)['"]\s*\)/g)) {
-      refScalar.add(m[1]);
+    // Search the reads in the .tsx with the schema declaration cut out of it —
+    // otherwise every key "references" itself and nothing is ever flagged.
+    let body = src;
+    if (schemaSource === src) {
+      for (const sp of [...spans].sort((a, b) => b.start - a.start)) {
+        body = body.slice(0, sp.start) + body.slice(sp.end);
+      }
     }
 
-    // Computed-key reads — `getFieldValue(fields, `stat${n}Value`)` inside a
-    // `[1,2,3].map(...)`. The numbered fields (`stat1Value`, `stat2Value`, …)
-    // are referenced dynamically, so a literal-key match never sees them. Turn
-    // each template literal into a pattern (`${…}` → `[\w$]+`) and treat any
-    // declared key it matches as referenced. Permissive on purpose — we can't
-    // statically enumerate which indices exist.
-    const refScalarPatterns: RegExp[] = [];
-    for (const m of src.matchAll(/getFieldValue\s*\(\s*[\w$.[\]]+\s*,\s*`([^`]*)`\s*\)/g)) {
+    // Numbered fields (`stat1Value`, `q1`, …) are read through a template literal
+    // inside a `.map` — `content[`stat${n}Value`]` — so no literal key ever
+    // appears. Turn each such read into a pattern (`${…}` → `[\w$]+`) and count
+    // any declared key it matches as read. Permissive on purpose: which indices
+    // exist is not statically knowable.
+    const computedPatterns: RegExp[] = [];
+    for (const m of body.matchAll(/\[\s*`([^`]*)`\s*\]/g)) {
       const literalParts = m[1].split(/\$\{[^}]*\}/).map(escapeRegExp);
-      refScalarPatterns.push(new RegExp(`^${literalParts.join('[\\w$]+')}$`));
-    }
-    const isReferencedScalar = (k: string) =>
-      refScalar.has(k) || refScalarPatterns.some(re => re.test(k));
-
-    // Dynamic-key components read fields by enumeration — `Object.entries(fields)`
-    // or `getFieldValue(fields, key)` with a bare variable. We can't statically
-    // know which declared keys are read, so for these files we back off the
-    // "declared but unused" direction rather than false-flag every field. The
-    // "referenced but undeclared" direction stays valid.
-    const hasDynamicScalarKeys =
-      /getFieldValue\s*\(\s*[\w$.[\]]+\s*,\s*[\w$]+\s*\)/.test(src) ||
-      /Object\.(?:entries|keys|values)\s*\(\s*(?:section\s*\.\s*)?fields\b/.test(src);
-
-    // Array fields: member/bracket access on the fields object — `fields.items`,
-    // `fields['items']`, `section.fields.items`, `section.fields['items']`. (`\bfields`
-    // also matches the `fields` inside `section.fields`.)
-    const refArray = new Set<string>();
-    for (const m of src.matchAll(/\bfields\s*(?:\.\s*([\w$]+)|\[\s*['"]([\w$]+)['"]\s*\])/g)) {
-      const k = m[1] ?? m[2];
-      if (k) refArray.add(k);
+      computedPatterns.push(new RegExp(`^${literalParts.join('[\\w$]+')}$`));
     }
 
-    // Array item sub-fields: `getFieldValue(item.subkey)` (one-arg member form).
-    const refItem = new Set<string>();
-    for (const m of src.matchAll(/getFieldValue\s*\(\s*[\w$]+\s*\.\s*([\w$]+)\s*\)/g)) {
-      refItem.add(m[1]);
-    }
+    // A component that reads its fields by enumeration (`content[key]`,
+    // `Object.entries(content)`) tells us nothing statically about which keys it
+    // touches. Back off on the whole file rather than flag every field on it.
+    const readsFieldsDynamically =
+      /\b(?:content|fields)\s*\[\s*[\w$]+\s*\]/.test(body) ||
+      /Object\.(?:entries|keys|values)\s*\(\s*(?:section\s*\.\s*)?(?:content|fields)\b/.test(body);
+
+    // What a read looks like after ADR-0016: `content.key`, `item.fields.key`,
+    // `content['key']`, or a destructure (`const { key } = content`). The last
+    // one is why a bare `key` between braces/commas counts too.
+    const isRead = (key: string) =>
+      readsFieldsDynamically ||
+      new RegExp(`\\.\\s*${key}\\b`).test(body) ||
+      new RegExp(`\\[\\s*['"\`]${key}['"\`]\\s*\\]`).test(body) ||
+      new RegExp(`[{,]\\s*${key}\\s*[,}:]`).test(body) ||
+      computedPatterns.some(re => re.test(key));
 
     const rel = path.relative(templateRoot, file);
-
-    // Scalar fields ↔ two-arg getFieldValue (both directions).
-    if (!hasDynamicScalarKeys) {
-      for (const k of scalarKeys) {
-        if (!isReferencedScalar(k)) {
-          violations.push(`${rel}: field "${k}" declared in fieldsSchema but never read via getFieldValue`);
-        }
+    for (const k of [...scalarKeys, ...arrayKeys]) {
+      if (!isRead(k)) {
+        violations.push(`${rel}: field "${k}" declared in fieldsSchema but never read (no \`.${k}\` in the component)`);
       }
     }
-    for (const k of refScalar) {
-      // An array read via `getFieldValue(fields,'items')` is also legitimate.
-      if (!topLevelDeclared.has(k)) {
-        violations.push(`${rel}: field "${k}" read via getFieldValue but not declared in fieldsSchema`);
-      }
-    }
-
-    // Array fields: must be iterated somewhere (member access) or read scalar.
-    for (const k of arrayKeys) {
-      if (!refArray.has(k) && !refScalar.has(k)) {
-        violations.push(`${rel}: array field "${k}" declared in fieldsSchema but never read (no fields.${k} / fields['${k}'] access)`);
-      }
-    }
-
-    // Array item sub-fields ↔ getFieldValue(item.subkey) (both directions).
     for (const k of itemKeys) {
-      if (!refItem.has(k)) {
-        violations.push(`${rel}: item field "${k}" declared in itemSchema but never read via getFieldValue(item.${k})`);
-      }
-    }
-    for (const k of refItem) {
-      if (!itemKeys.has(k)) {
-        violations.push(`${rel}: item field "${k}" read via getFieldValue(item.${k}) but not declared in any itemSchema`);
+      if (!isRead(k)) {
+        violations.push(`${rel}: item field "${k}" declared in itemSchema but never read (no \`.${k}\` in the component)`);
       }
     }
   }
@@ -436,7 +444,11 @@ export function checkFieldsSchemaJsxConsistency(templateRoot: string): StepResul
   if (violations.length > 0) {
     return { name: 'schema-jsx-consistency', ok: false, messages: violations };
   }
-  return { name: 'schema-jsx-consistency', ok: true, messages: [`schema-JSX consistent across ${tsxFiles.length} files`] };
+  return {
+    name: 'schema-jsx-consistency',
+    ok: true,
+    messages: [`every declared field is read across ${checked} component(s)`],
+  };
 }
 
 // ─── Step 5.5: thumbnailPath ↔ config output ↔ file on disk ──────────────────

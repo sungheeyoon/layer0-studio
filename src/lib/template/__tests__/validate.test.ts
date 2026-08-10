@@ -4,7 +4,6 @@ import { SingleContent, FieldsSchema } from '@/domain/entities/template.entity';
 import type { TemplateLibrary } from '@/templates/types';
 
 import { templateMap, presetMap, getAvailableTemplateKeys } from '@/templates/_generated';
-import { MIGRATED_TEMPLATE_KEYS } from '@/templates/__tests__/migrated-templates';
 
 const ALL_TEMPLATE_KEYS = getAvailableTemplateKeys();
 
@@ -679,23 +678,20 @@ describe('validateContent — no user-reachable field value blocks a save', () =
   });
 });
 
-// ─── Migration gauge (ADR-0016 §8-2) ───────────────────────────────
+// ─── Registry-wide preset gate ──────────────────────────────────────────────
 
-
-describe('all presets — Value migration gauge', () => {
-  it('only names templates that exist', () => {
-    for (const key of MIGRATED_TEMPLATE_KEYS) {
-      expect(ALL_TEMPLATE_KEYS).toContain(key);
-    }
-  });
-
-  // Driven by the registry, never a hand-kept list: ADR-0016 §8 is explicit that
-  // the conversion covers "every Template in the registry" and that no count is
-  // written down, because a written count goes stale the next time one is added.
+/**
+ * Every preset in the registry must validate clean against its own library.
+ *
+ * This was a "migration gauge" while ADR-0016 was in flight — a hand-kept list
+ * of converted Templates, with the un-converted ones asserted to *fail*. #136
+ * emptied that list by converting the last of them, so the gate is now simply
+ * the registry: a new Template is covered the day its directory appears, and
+ * nobody has to remember to add it here.
+ */
+describe('all presets validate against their own library', () => {
   for (const templateKey of ALL_TEMPLATE_KEYS) {
-    const migrated = MIGRATED_TEMPLATE_KEYS.has(templateKey);
-
-    it(`${templateKey} ${migrated ? 'validates with no errors' : 'is still on Field objects and is rejected'}`, async () => {
+    it(`${templateKey}`, async () => {
       const [{ default: preset }, templateModule] = await Promise.all([
         presetMap[templateKey](),
         templateMap[templateKey](),
@@ -707,12 +703,8 @@ describe('all presets — Value migration gauge', () => {
         templateLibrary: templateModule.library,
       });
 
-      if (migrated) {
-        if (result.errors.length > 0) console.error(`Errors in ${templateKey}:`, result.errors);
-        expect(result.errors).toHaveLength(0);
-      } else {
-        expect(result.errors.length).toBeGreaterThan(0);
-      }
+      if (result.errors.length > 0) console.error(`Errors in ${templateKey}:`, result.errors);
+      expect(result.errors).toHaveLength(0);
     });
   }
 });

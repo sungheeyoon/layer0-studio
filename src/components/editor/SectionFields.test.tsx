@@ -5,7 +5,7 @@ import { render, screen, cleanup, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Section } from '@/domain/entities/template.entity';
 import type { FieldValue } from '@/domain/entities/field-edit';
-import type { SectionFieldsSchema } from '@/templates/types';
+import type { FieldsSchema } from '@/domain/entities/template.entity';
 
 // ---------------------------------------------------------------------------
 // ADR-0016 §4 — the editor edits Values.
@@ -44,7 +44,7 @@ function block(fields: Record<string, unknown>): Section {
   return { id: 'blk-1', type: 'hero', visible: true, fields };
 }
 
-function renderFields(schema: SectionFieldsSchema, fields: Record<string, unknown>) {
+function renderFields(schema: FieldsSchema, fields: Record<string, unknown>) {
   return render(
     <I18nProvider locale="ko" dictionary={ko}>
       <SectionFields
@@ -152,7 +152,7 @@ describe('SectionFields — the input kind comes from the schema, not the data',
 });
 
 describe('SectionFields — number resets to the schema default', () => {
-  const schema: SectionFieldsSchema = {
+  const schema: FieldsSchema = {
     columns: { type: 'number', label: '열 수', default: 3 },
   };
 
@@ -219,7 +219,7 @@ describe('SectionFields — image Values', () => {
 });
 
 describe('SectionFields — array items keyed by their own id', () => {
-  const schema: SectionFieldsSchema = {
+  const schema: FieldsSchema = {
     items: {
       type: 'array',
       label: '항목',

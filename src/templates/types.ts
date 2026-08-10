@@ -13,19 +13,6 @@ export interface SectionComponentMeta {
 }
 
 /**
- * The schema shape now lives in the domain as {@link FieldsSchema} — a
- * discriminated union of `FieldDescriptor`s, so `options`/`itemSchema`/`default`
- * are demanded exactly where the `type` calls for them instead of being
- * everywhere-optional. Declare a schema with
- * `as const satisfies FieldsSchema` and derive its Content type with
- * `ValuesOf<typeof schema>` (ADR-0016 §4-1).
- *
- * This alias only keeps the old name resolving; ADR-0016 §2 renames it to
- * `BlockFieldsSchema` with the rest of the Section → Block vocabulary.
- */
-export type SectionFieldsSchema = FieldsSchema;
-
-/**
  * A section component. Meta is optional here because client components
  * (`'use client'`) cannot expose static metadata to the server — server-side
  * imports of client modules are wrapped as client references and the module

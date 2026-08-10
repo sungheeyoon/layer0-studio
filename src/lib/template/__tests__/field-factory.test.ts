@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { emptyValue, makeEmptyItem } from '../field-factory';
-import { SectionFieldsSchema } from '@/templates/types';
-import { ImageValue } from '@/domain/entities/template.entity';
+import { FieldsSchema, ImageValue } from '@/domain/entities/template.entity';
 
 /** ADR-0016 §4-4 invariant 1: ids are `crypto.randomUUID()`. */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -22,7 +21,7 @@ describe('makeEmptyItem', () => {
   });
 
   it('builds empty string Values for text/textarea/url/color', () => {
-    const schema: SectionFieldsSchema = {
+    const schema: FieldsSchema = {
       a: { type: 'text', label: 'A' },
       b: { type: 'textarea', label: 'B' },
       c: { type: 'url', label: 'C' },

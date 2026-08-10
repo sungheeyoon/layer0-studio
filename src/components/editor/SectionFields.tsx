@@ -3,6 +3,7 @@
 import { useId, useState } from 'react';
 import {
   FieldDescriptor,
+  FieldsSchema,
   ImageValue,
   Section,
 } from '@/domain/entities/template.entity';
@@ -18,7 +19,6 @@ import {
   setItemFieldAt,
 } from '@/domain/entities/field-edit';
 import { emptyValue, makeEmptyItem } from '@/lib/template/field-factory';
-import { SectionFieldsSchema } from '@/templates/types';
 import { createClient } from '@/utils/supabase/client';
 import { initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import { FieldIssues } from './FieldIssues';
@@ -66,7 +66,7 @@ export function SectionFields({
   issues,
 }: {
   section: Section;
-  schema?: SectionFieldsSchema;
+  schema?: FieldsSchema;
   onFieldChange: (sectionId: string, fieldKey: string, value: FieldValue) => void;
   onError: (msg: string) => void;
   /** Warning codes keyed by {@link fieldIssueKey} — see `content-issues.ts`. */
