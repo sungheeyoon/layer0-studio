@@ -107,7 +107,7 @@ export default function DynamicTemplateGrid({ templates: initialTemplates, mySit
       <div className={`grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 ${isPending ? 'pointer-events-none opacity-50' : ''} transition-opacity duration-300`}>
         {currentTemplates.map((template) => (
           <Card key={template.id} className="group gap-0 overflow-hidden p-0">
-            <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+            <div className="relative aspect-video overflow-hidden bg-muted">
               {template.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
