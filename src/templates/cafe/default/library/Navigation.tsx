@@ -4,15 +4,18 @@ import { useState, useEffect } from 'react';
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../cafe.module.css';
 import { MapPointIcon, HamburgerIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { navigationSchema } from './Navigation.meta';
+
+type NavigationContent = ValuesOf<typeof navigationSchema>;
 
 const Navigation: SectionComponent = function Navigation(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || 'MONO';
-  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Specialty Coffee';
-  const ctaText = getFieldValue(fields, 'ctaText') || '오시는 길';
+  const content = section.fields as NavigationContent;
+  const brandName = content.brandName || 'MONO';
+  const brandSubtext = content.brandSubtext || 'Specialty Coffee';
+  const ctaText = content.ctaText || '오시는 길';
 
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen] = useState(false);

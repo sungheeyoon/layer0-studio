@@ -1,22 +1,40 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { LeafIcon, FireIcon, HandHeartIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const storySchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title1: { type: 'text', label: '타이틀 1행' },
+  titleAccent: { type: 'text', label: '강조 타이틀' },
+  title2: { type: 'text', label: '타이틀 2행' },
+  quote: { type: 'textarea', label: '인용구' },
+  description: { type: 'textarea', label: '설명' },
+  image: { type: 'image', label: '섹션 이미지' },
+  f1Title: { type: 'text', label: '특징 1 제목' },
+  f1Desc: { type: 'textarea', label: '특징 1 설명' },
+  f2Title: { type: 'text', label: '특징 2 제목' },
+  f2Desc: { type: 'textarea', label: '특징 2 설명' },
+  f3Title: { type: 'text', label: '특징 3 제목' },
+  f3Desc: { type: 'textarea', label: '특징 3 설명' },
+} as const satisfies FieldsSchema;
+
+type StoryContent = ValuesOf<typeof storySchema>;
 
 const Story: SectionComponent = function Story({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '카페 소개';
-  const title1 = getFieldValue(fields, 'title1') || '커피 한 잔에는';
-  const titleAccent = getFieldValue(fields, 'titleAccent') || '이야기가';
-  const title2 = getFieldValue(fields, 'title2') || '담겨 있습니다';
-  const quote = getFieldValue(fields, 'quote') || '';
-  const description = getFieldValue(fields, 'description') || '';
-  const image = getFieldValue(fields, 'image') || '';
+  const content = section.fields as StoryContent;
+  const label = content.eyebrow || '카페 소개';
+  const title1 = content.title1 || '커피 한 잔에는';
+  const titleAccent = content.titleAccent || '이야기가';
+  const title2 = content.title2 || '담겨 있습니다';
+  const quote = content.quote || '';
+  const description = content.description || '';
+  const image = content.image?.url || '';
 
   const pillars = [
-    { title: getFieldValue(fields, 'f1Title'), desc: getFieldValue(fields, 'f1Desc'), icon: <LeafIcon size={22} className="text-[var(--color-primary)] fill-current" /> },
-    { title: getFieldValue(fields, 'f2Title'), desc: getFieldValue(fields, 'f2Desc'), icon: <FireIcon size={22} className="text-[var(--color-primary)] fill-current" /> },
-    { title: getFieldValue(fields, 'f3Title'), desc: getFieldValue(fields, 'f3Desc'), icon: <HandHeartIcon size={22} className="text-[var(--color-primary)] fill-current" /> },
+    { title: content.f1Title, desc: content.f1Desc, icon: <LeafIcon size={22} className="text-[var(--color-primary)] fill-current" /> },
+    { title: content.f2Title, desc: content.f2Desc, icon: <FireIcon size={22} className="text-[var(--color-primary)] fill-current" /> },
+    { title: content.f3Title, desc: content.f3Desc, icon: <HandHeartIcon size={22} className="text-[var(--color-primary)] fill-current" /> },
   ].filter(p => p.title);
 
   return (
@@ -83,21 +101,7 @@ Story.meta = {
   componentKey: 'story',
   category: 'about',
   label: 'Our Story',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title1: { type: 'text', label: '타이틀 1행' },
-    titleAccent: { type: 'text', label: '강조 타이틀' },
-    title2: { type: 'text', label: '타이틀 2행' },
-    quote: { type: 'textarea', label: '인용구' },
-    description: { type: 'textarea', label: '설명' },
-    image: { type: 'image', label: '섹션 이미지' },
-    f1Title: { type: 'text', label: '특징 1 제목' },
-    f1Desc: { type: 'textarea', label: '특징 1 설명' },
-    f2Title: { type: 'text', label: '특징 2 제목' },
-    f2Desc: { type: 'textarea', label: '특징 2 설명' },
-    f3Title: { type: 'text', label: '특징 3 제목' },
-    f3Desc: { type: 'textarea', label: '특징 3 설명' },
-  },
+  fieldsSchema: storySchema,
   previewImage: '/component-previews/cafe/story.webp',
 };
 

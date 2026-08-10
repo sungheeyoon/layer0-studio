@@ -1,18 +1,44 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { StarIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const testimonialsSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀' },
+  ratingValue: { type: 'text', label: '별점 수치' },
+  r1Body: { type: 'textarea', label: '후기 1 본문', required: true },
+  r1Author: { type: 'text', label: '후기 1 작성자' },
+  r1Meta: { type: 'text', label: '후기 1 메타' },
+  r2Body: { type: 'textarea', label: '후기 2 본문' },
+  r2Author: { type: 'text', label: '후기 2 작성자' },
+  r2Meta: { type: 'text', label: '후기 2 메타' },
+  r3Body: { type: 'textarea', label: '후기 3 본문' },
+  r3Author: { type: 'text', label: '후기 3 작성자' },
+  r3Meta: { type: 'text', label: '후기 3 메타' },
+  r4Body: { type: 'textarea', label: '후기 4 본문' },
+  r4Author: { type: 'text', label: '후기 4 작성자' },
+  r4Meta: { type: 'text', label: '후기 4 메타' },
+  r5Body: { type: 'textarea', label: '후기 5 본문' },
+  r5Author: { type: 'text', label: '후기 5 작성자' },
+  r5Meta: { type: 'text', label: '후기 5 메타' },
+  r6Body: { type: 'textarea', label: '후기 6 본문' },
+  r6Author: { type: 'text', label: '후기 6 작성자' },
+  r6Meta: { type: 'text', label: '후기 6 메타' },
+} as const satisfies FieldsSchema;
+
+type TestimonialsContent = ValuesOf<typeof testimonialsSchema>;
 
 const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '손님 후기';
-  const title = getFieldValue(fields, 'title') || '이 공간에서\n느낀 것들';
-  const ratingValue = getFieldValue(fields, 'ratingValue') || '4.9';
+  const content = section.fields as TestimonialsContent;
+  const label = content.eyebrow || '손님 후기';
+  const title = content.title || '이 공간에서\n느낀 것들';
+  const ratingValue = content.ratingValue || '4.9';
 
-  const reviews = [1, 2, 3, 4, 5, 6].map(n => ({
-    body: getFieldValue(fields, `r${n}Body`),
-    author: getFieldValue(fields, `r${n}Author`),
-    meta: getFieldValue(fields, `r${n}Meta`),
+  const reviews = ([1, 2, 3, 4, 5, 6] as const).map(n => ({
+    body: content[`r${n}Body`],
+    author: content[`r${n}Author`],
+    meta: content[`r${n}Meta`],
     mt: n % 2 === 0 ? 'md:mt-8' : '',
   })).filter(r => r.body);
 
@@ -76,29 +102,7 @@ Testimonials.meta = {
   componentKey: 'testimonials',
   category: 'social',
   label: 'Guest Reviews',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀' },
-    ratingValue: { type: 'text', label: '별점 수치' },
-    r1Body: { type: 'textarea', label: '후기 1 본문', required: true },
-    r1Author: { type: 'text', label: '후기 1 작성자' },
-    r1Meta: { type: 'text', label: '후기 1 메타' },
-    r2Body: { type: 'textarea', label: '후기 2 본문' },
-    r2Author: { type: 'text', label: '후기 2 작성자' },
-    r2Meta: { type: 'text', label: '후기 2 메타' },
-    r3Body: { type: 'textarea', label: '후기 3 본문' },
-    r3Author: { type: 'text', label: '후기 3 작성자' },
-    r3Meta: { type: 'text', label: '후기 3 메타' },
-    r4Body: { type: 'textarea', label: '후기 4 본문' },
-    r4Author: { type: 'text', label: '후기 4 작성자' },
-    r4Meta: { type: 'text', label: '후기 4 메타' },
-    r5Body: { type: 'textarea', label: '후기 5 본문' },
-    r5Author: { type: 'text', label: '후기 5 작성자' },
-    r5Meta: { type: 'text', label: '후기 5 메타' },
-    r6Body: { type: 'textarea', label: '후기 6 본문' },
-    r6Author: { type: 'text', label: '후기 6 작성자' },
-    r6Meta: { type: 'text', label: '후기 6 메타' },
-  },
+  fieldsSchema: testimonialsSchema,
   previewImage: '/component-previews/cafe/testimonials.webp',
 };
 

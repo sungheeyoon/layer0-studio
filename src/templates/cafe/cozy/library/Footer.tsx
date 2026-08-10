@@ -1,19 +1,33 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const footerSchema = {
+  brandName: { type: 'text', label: '브랜드 이름', required: true },
+  brandSubtext: { type: 'text', label: '브랜드 보조텍스트' },
+  description: { type: 'textarea', label: '브랜드 설명' },
+  phone: { type: 'text', label: '전화번호' },
+  address: { type: 'textarea', label: '주소' },
+  weekdayHours: { type: 'text', label: '평일 영업시간' },
+  weekendHours: { type: 'text', label: '주말 영업시간' },
+  copyright: { type: 'text', label: '저작권' },
+  businessInfo: { type: 'text', label: '사업자 정보' },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || 'MONO';
-  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Specialty Coffee & Bakery';
-  const description = getFieldValue(fields, 'description') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const address = getFieldValue(fields, 'address') || '';
-  const weekdayHours = getFieldValue(fields, 'weekdayHours') || '';
-  const weekendHours = getFieldValue(fields, 'weekendHours') || '';
-  const copyright = getFieldValue(fields, 'copyright') || '';
-  const businessInfo = getFieldValue(fields, 'businessInfo') || '';
+  const content = section.fields as FooterContent;
+  const brandName = content.brandName || 'MONO';
+  const brandSubtext = content.brandSubtext || 'Specialty Coffee & Bakery';
+  const description = content.description || '';
+  const phone = content.phone || '';
+  const address = content.address || '';
+  const weekdayHours = content.weekdayHours || '';
+  const weekendHours = content.weekendHours || '';
+  const copyright = content.copyright || '';
+  const businessInfo = content.businessInfo || '';
 
   return (
     <footer className="bg-[var(--c-espresso)] border-t border-[var(--c-linen)] border-opacity-5 pt-16 pb-10 px-6 lg:px-10">
@@ -112,17 +126,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Footer',
-  fieldsSchema: {
-    brandName: { type: 'text', label: '브랜드 이름', required: true },
-    brandSubtext: { type: 'text', label: '브랜드 보조텍스트' },
-    description: { type: 'textarea', label: '브랜드 설명' },
-    phone: { type: 'text', label: '전화번호' },
-    address: { type: 'textarea', label: '주소' },
-    weekdayHours: { type: 'text', label: '평일 영업시간' },
-    weekendHours: { type: 'text', label: '주말 영업시간' },
-    copyright: { type: 'text', label: '저작권' },
-    businessInfo: { type: 'text', label: '사업자 정보' },
-  },
+  fieldsSchema: footerSchema,
   previewImage: '/component-previews/cafe/footer.webp',
 };
 

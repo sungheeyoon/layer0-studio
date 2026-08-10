@@ -23,16 +23,8 @@ const preset: TemplatePreset = {
           "label": "네비게이션"
         },
         "fields": {
-          "brandName": {
-            "value": "COZY CORNER",
-            "type": "text",
-            "label": "브랜드 이름"
-          },
-          "brandSubtext": {
-            "value": "Warmth in a Cup",
-            "type": "text",
-            "label": "보조 텍스트"
-          }
+          "brandName": "COZY CORNER",
+          "brandSubtext": "Warmth in a Cup"
         }
       },
       {
@@ -44,31 +36,11 @@ const preset: TemplatePreset = {
           "label": "Homemade & Fresh"
         },
         "fields": {
-          "eyebrow": {
-            "value": "Homemade & Fresh",
-            "type": "text",
-            "label": "상단 라벨"
-          },
-          "title1": {
-            "value": "Find Your",
-            "type": "text",
-            "label": "타이틀 1행"
-          },
-          "titleAccent": {
-            "value": "Cozy Spot",
-            "type": "text",
-            "label": "강조 타이틀"
-          },
-          "description": {
-            "value": "Relax and enjoy our hand-picked beans and freshly baked pastries.",
-            "type": "textarea",
-            "label": "설명"
-          },
-          "image": {
-            "value": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1100&q=80",
-            "type": "image",
-            "label": "이미지"
-          }
+          "eyebrow": "Homemade & Fresh",
+          "title1": "Find Your",
+          "titleAccent": "Cozy Spot",
+          "description": "Relax and enjoy our hand-picked beans and freshly baked pastries.",
+          "image": { "url": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1100&q=80" }
         }
       },
       {
@@ -80,21 +52,9 @@ const preset: TemplatePreset = {
           "label": "story"
         },
         "fields": {
-          "title1": {
-            "value": "Our Humble",
-            "type": "text",
-            "label": "타이틀 1행"
-          },
-          "titleAccent": {
-            "value": "Beginnings",
-            "type": "text",
-            "label": "강조 타이틀"
-          },
-          "quote": {
-            "value": "Started in a small kitchen, now sharing the warmth with everyone.",
-            "type": "textarea",
-            "label": "인용구"
-          }
+          "title1": "Our Humble",
+          "titleAccent": "Beginnings",
+          "quote": "Started in a small kitchen, now sharing the warmth with everyone."
         }
       },
       {
@@ -106,16 +66,8 @@ const preset: TemplatePreset = {
           "label": "visit"
         },
         "fields": {
-          "title": {
-            "value": "Come Visit",
-            "type": "textarea",
-            "label": "섹션 타이틀"
-          },
-          "address": {
-            "value": "123 Cozy Lane, Seoul",
-            "type": "text",
-            "label": "주소"
-          }
+          "title": "Come Visit",
+          "address": "123 Cozy Lane, Seoul"
         }
       },
       {
@@ -127,11 +79,7 @@ const preset: TemplatePreset = {
           "label": "푸터"
         },
         "fields": {
-          "brandName": {
-            "value": "COZY CORNER",
-            "type": "text",
-            "label": "브랜드 이름"
-          }
+          "brandName": "COZY CORNER"
         }
       }
     ]
