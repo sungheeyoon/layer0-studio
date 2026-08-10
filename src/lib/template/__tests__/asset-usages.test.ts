@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { collectAssetUsages } from '../asset-usages';
+import { collectAssetUsages, ContentAssetUsageCollector } from '../asset-usages';
 import {
   SingleContent,
   MultiContent,
@@ -29,7 +29,7 @@ function imageSection(id: string, key: string, assetId: string): SingleSection {
   };
 }
 
-describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
+describe('collectAssetUsages — slotKey namespaces (ADR-0007 §F)', () => {
   it('Single: `${section.id}.${key}`', () => {
     const single: SingleContent = {
       mode: 'single',
@@ -38,7 +38,7 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
       sections: [imageSection('hero-1', 'bg', 'asset-a')],
     };
     expect(collectAssetUsages(single)).toEqual([
-      { asset_id: 'asset-a', slot_key: 'hero-1.bg' },
+      { assetId: 'asset-a', slotKey: 'hero-1.bg' },
     ]);
   });
 
@@ -65,10 +65,10 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
     const usages = collectAssetUsages(multi);
 
     // Shared header/footer are traversed (belong to no page) — not mis-swept.
-    expect(usages).toContainEqual({ asset_id: 'asset-h', slot_key: 'shared.header.nav-1.logo' });
-    expect(usages).toContainEqual({ asset_id: 'asset-f', slot_key: 'shared.footer.foot-1.badge' });
+    expect(usages).toContainEqual({ assetId: 'asset-h', slotKey: 'shared.header.nav-1.logo' });
+    expect(usages).toContainEqual({ assetId: 'asset-f', slotKey: 'shared.footer.foot-1.badge' });
     // Page sections keyed by page id.
-    expect(usages).toContainEqual({ asset_id: 'asset-p', slot_key: 'page-home.hero-1.bg' });
+    expect(usages).toContainEqual({ assetId: 'asset-p', slotKey: 'page-home.hero-1.bg' });
     expect(usages).toHaveLength(3);
   });
 
@@ -105,8 +105,8 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
     };
 
     expect(collectAssetUsages(single)).toEqual([
-      { asset_id: 'asset-1', slot_key: 'menu-1.items[0].image' },
-      { asset_id: 'asset-2', slot_key: 'menu-1.items[1].image' },
+      { assetId: 'asset-1', slotKey: 'menu-1.items[0].image' },
+      { assetId: 'asset-2', slotKey: 'menu-1.items[1].image' },
     ]);
   });
 
@@ -147,8 +147,8 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
     };
 
     const usages = collectAssetUsages(multi);
-    expect(usages).toContainEqual({ asset_id: 'asset-h', slot_key: 'shared.header.head-1.photos[0].image' });
-    expect(usages).toContainEqual({ asset_id: 'asset-p', slot_key: 'page-home.gal-1.photos[0].image' });
+    expect(usages).toContainEqual({ assetId: 'asset-h', slotKey: 'shared.header.head-1.photos[0].image' });
+    expect(usages).toContainEqual({ assetId: 'asset-p', slotKey: 'page-home.gal-1.photos[0].image' });
     expect(usages).toHaveLength(2);
   });
 
@@ -185,7 +185,7 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
     };
 
     expect(collectAssetUsages(single)).toEqual([
-      { asset_id: 'asset-n', slot_key: 's1.groups[0].rows[0].pic' },
+      { assetId: 'asset-n', slotKey: 's1.groups[0].rows[0].pic' },
     ]);
   });
 
@@ -235,5 +235,22 @@ describe('collectAssetUsages — slot_key namespaces (ADR-0007 §F)', () => {
       ],
     };
     expect(collectAssetUsages(single)).toEqual([]);
+  });
+});
+
+// The port adapter (#128). It is a one-line delegation today, but it is the seam
+// that keeps `loadTemplate()` out of the data layer once ADR-0016 §5 makes the
+// walk schema-driven — so it is worth one test that it actually delegates.
+describe('ContentAssetUsageCollector', () => {
+  it('returns what the walker returns', async () => {
+    const single: SingleContent = {
+      mode: 'single',
+      templateKey: 'cafe-default',
+      globalStyles,
+      sections: [imageSection('hero-1', 'bg', 'asset-a')],
+    };
+    await expect(new ContentAssetUsageCollector().collect(single)).resolves.toEqual(
+      collectAssetUsages(single),
+    );
   });
 });

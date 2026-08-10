@@ -6,6 +6,10 @@ import {
   SiteContentValidator,
   SiteContentValidationIssue,
 } from '../usecases/ports/site-content-validator.port';
+import {
+  AssetUsage,
+  AssetUsageCollector,
+} from '../usecases/ports/asset-usage-collector.port';
 import { IAccountErasureRepository } from '../repositories/account-erasure.repository';
 
 export function makeContent(overrides: Partial<SingleContent> = {}): ContentModel {
@@ -69,8 +73,27 @@ export class FakeSiteContentValidator implements SiteContentValidator {
   }
 }
 
+/**
+ * Fake asset-usage collector. Returns whatever it is seeded with and records
+ * each content it was asked about, so a test can assert that the write path
+ * collects usages and hands them to the repository (rather than the repository
+ * deriving them itself — the layering ADR-0008 restores).
+ */
+export class FakeAssetUsageCollector implements AssetUsageCollector {
+  collected: ContentModel[] = [];
+
+  constructor(private usages: AssetUsage[] = []) {}
+
+  async collect(content: ContentModel): Promise<AssetUsage[]> {
+    this.collected.push(content);
+    return this.usages;
+  }
+}
+
 export class FakeUserSiteRepo implements IUserSiteRepository {
   sites: UserSite[];
+  /** Usages handed to the last `updateContent` call, for write-path assertions. */
+  lastUsages: AssetUsage[] | null = null;
 
   constructor(initial: UserSite[] = []) {
     this.sites = [...initial];
@@ -113,8 +136,14 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return this.sites[idx];
   }
 
-  async updateContent(id: string, content: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
+  async updateContent(
+    id: string,
+    content: ContentModel,
+    usages: AssetUsage[],
+    expectedUpdatedAt: string,
+  ): Promise<UserSite> {
     const idx = this.guardVersion(id, expectedUpdatedAt);
+    this.lastUsages = usages;
     this.sites[idx] = { ...this.sites[idx], content, updatedAt: this.nextUpdatedAt() };
     return this.sites[idx];
   }

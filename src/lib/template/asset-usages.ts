@@ -1,15 +1,25 @@
 import { ContentModel } from '@/domain/entities/template.entity';
+import {
+  AssetUsage,
+  AssetUsageCollector,
+} from '@/domain/usecases/ports/asset-usage-collector.port';
 
-export interface AssetUsage {
-  asset_id: string;
-  slot_key: string;
+/**
+ * The concrete {@link AssetUsageCollector}. Thin today — the walk below needs no
+ * Template library — but it is the seam ADR-0016 §5 turns schema-driven, and the
+ * seam is what keeps `loadTemplate()` out of the data layer (ADR-0008).
+ */
+export class ContentAssetUsageCollector implements AssetUsageCollector {
+  async collect(content: ContentModel): Promise<AssetUsage[]> {
+    return collectAssetUsages(content);
+  }
 }
 
 /**
- * Collect the image-asset usages of a Site, each keyed by a stable `slot_key`
+ * Collect the image-asset usages of a Site, each keyed by a stable `slotKey`
  * so the save RPC can diff old vs new usages and sweep only true orphans.
  *
- * slot_key namespace (ADR-0007 Consequences):
+ * slotKey namespace (ADR-0007 Consequences):
  *   Single:        `${section.id}.${key}`
  *   Multi page:    `${page.id}.${section.id}.${key}`
  *   Multi shared:  `shared.${slot}.${section.id}.${key}`   (slot = header | footer)
@@ -27,9 +37,9 @@ export interface AssetUsage {
  * MenuBento, medical-clinic Doctors + Gallery, outdoor CollectionGrid), so
  * skipping arrays destroyed real user uploads roughly a day after upload.
  *
- * The `[index]` in an array slot_key is positional and therefore changes when
+ * The `[index]` in an array slotKey is positional and therefore changes when
  * items are reordered. That is safe: the RPC diffs old vs new usages by
- * `asset_id`, never by `slot_key`, so a moved item is not mistaken for a
+ * asset id, never by slot key, so a moved item is not mistaken for a
  * removed one. ADR-0016 replaces the index with a permanent `item.id`.
  */
 export function collectAssetUsages(content: ContentModel): AssetUsage[] {
@@ -49,7 +59,7 @@ export function collectAssetUsages(content: ContentModel): AssetUsage[] {
       };
 
       if (f.type === 'image' && f.assetId) {
-        usages.push({ asset_id: f.assetId, slot_key: `${prefix}${key}` });
+        usages.push({ assetId: f.assetId, slotKey: `${prefix}${key}` });
       } else if (f.type === 'array' && Array.isArray(f.items)) {
         f.items.forEach((item, index) => {
           collectFromFields(item, `${prefix}${key}[${index}].`);
