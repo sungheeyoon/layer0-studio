@@ -1,12 +1,21 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const footerSchema = {
+  academyName: { type: 'text', label: '학원 이름' },
+  tagline: { type: 'text', label: '슬로건' },
+  phone: { type: 'text', label: '대표전화' },
+  copyright: { type: 'text', label: '저작권 문구' },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const academyName = getFieldValue(fields, 'academyName') || '';
-  const tagline = getFieldValue(fields, 'tagline') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const copyright = getFieldValue(fields, 'copyright') || `© ${new Date().getFullYear()} ${academyName}`;
+  const content = section.fields as FooterContent;
+  const academyName = content.academyName || '';
+  const tagline = content.tagline || '';
+  const phone = content.phone || '';
+  const copyright = content.copyright || `© ${new Date().getFullYear()} ${academyName}`;
 
   return (
     <footer className="bg-[var(--color-surface-dark)]">
@@ -45,12 +54,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: '학원 푸터',
-  fieldsSchema: {
-    academyName: { type: 'text', label: '학원 이름' },
-    tagline: { type: 'text', label: '슬로건' },
-    phone: { type: 'text', label: '대표전화' },
-    copyright: { type: 'text', label: '저작권 문구' },
-  },
+  fieldsSchema: footerSchema,
   previewImage: '/component-previews/academy/footer.webp',
 };
 

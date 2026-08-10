@@ -1,36 +1,58 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon, HeartIcon, GiftIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const servicesSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '타이틀', required: true },
+  service1Badge: { type: 'text', label: '서비스 1 배지' },
+  service1Title: { type: 'text', label: '서비스 1 제목' },
+  service1Body: { type: 'textarea', label: '서비스 1 설명' },
+  service1Image: { type: 'image', label: '서비스 1 이미지' },
+  service2Title: { type: 'text', label: '서비스 2 제목' },
+  service2Body: { type: 'textarea', label: '서비스 2 설명' },
+  service2Image: { type: 'image', label: '서비스 2 이미지' },
+  service3Title: { type: 'text', label: '서비스 3 제목' },
+  service3Body: { type: 'textarea', label: '서비스 3 설명' },
+  service4Title: { type: 'text', label: '서비스 4 제목' },
+  service4Body: { type: 'textarea', label: '서비스 4 설명' },
+  ctaCardTitle: { type: 'textarea', label: 'CTA 카드 타이틀' },
+  ctaCardBody: { type: 'textarea', label: 'CTA 카드 본문' },
+  ctaCardButton: { type: 'text', label: 'CTA 카드 버튼' },
+  ctaCardUrl: { type: 'url', label: 'CTA 카드 링크' },
+} as const satisfies FieldsSchema;
+
+type ServicesContent = ValuesOf<typeof servicesSchema>;
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as ServicesContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
 
   const service1 = {
-    badge: getFieldValue(fields, 'service1Badge') || '',
-    title: getFieldValue(fields, 'service1Title') || '',
-    body: getFieldValue(fields, 'service1Body') || '',
-    image: getFieldValue(fields, 'service1Image') || '',
+    badge: content.service1Badge || '',
+    title: content.service1Title || '',
+    body: content.service1Body || '',
+    image: content.service1Image?.url || '',
   };
   const service2 = {
-    title: getFieldValue(fields, 'service2Title') || '',
-    body: getFieldValue(fields, 'service2Body') || '',
-    image: getFieldValue(fields, 'service2Image') || '',
+    title: content.service2Title || '',
+    body: content.service2Body || '',
+    image: content.service2Image?.url || '',
   };
   const service3 = {
-    title: getFieldValue(fields, 'service3Title') || '',
-    body: getFieldValue(fields, 'service3Body') || '',
+    title: content.service3Title || '',
+    body: content.service3Body || '',
   };
   const service4 = {
-    title: getFieldValue(fields, 'service4Title') || '',
-    body: getFieldValue(fields, 'service4Body') || '',
+    title: content.service4Title || '',
+    body: content.service4Body || '',
   };
-  const ctaCardTitle = getFieldValue(fields, 'ctaCardTitle') || '';
-  const ctaCardBody = getFieldValue(fields, 'ctaCardBody') || '';
-  const ctaCardButton = getFieldValue(fields, 'ctaCardButton') || '';
-  const ctaCardUrl = getFieldValue(fields, 'ctaCardUrl') || '#';
+  const ctaCardTitle = content.ctaCardTitle || '';
+  const ctaCardBody = content.ctaCardBody || '';
+  const ctaCardButton = content.ctaCardButton || '';
+  const ctaCardUrl = content.ctaCardUrl || '#';
 
   return (
     <section className={`${styles.section} ${styles.bgDark900} ${styles.dottedBg}`}>
@@ -181,25 +203,7 @@ Services.meta = {
   componentKey: 'services',
   category: 'features',
   label: 'Wedding Services',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '타이틀', required: true },
-    service1Badge: { type: 'text', label: '서비스 1 배지' },
-    service1Title: { type: 'text', label: '서비스 1 제목' },
-    service1Body: { type: 'textarea', label: '서비스 1 설명' },
-    service1Image: { type: 'image', label: '서비스 1 이미지' },
-    service2Title: { type: 'text', label: '서비스 2 제목' },
-    service2Body: { type: 'textarea', label: '서비스 2 설명' },
-    service2Image: { type: 'image', label: '서비스 2 이미지' },
-    service3Title: { type: 'text', label: '서비스 3 제목' },
-    service3Body: { type: 'textarea', label: '서비스 3 설명' },
-    service4Title: { type: 'text', label: '서비스 4 제목' },
-    service4Body: { type: 'textarea', label: '서비스 4 설명' },
-    ctaCardTitle: { type: 'textarea', label: 'CTA 카드 타이틀' },
-    ctaCardBody: { type: 'textarea', label: 'CTA 카드 본문' },
-    ctaCardButton: { type: 'text', label: 'CTA 카드 버튼' },
-    ctaCardUrl: { type: 'url', label: 'CTA 카드 링크' },
-  },
+  fieldsSchema: servicesSchema,
   previewImage: '/component-previews/wedding/services.webp',
 };
 

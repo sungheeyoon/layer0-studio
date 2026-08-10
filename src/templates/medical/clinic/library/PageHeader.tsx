@@ -1,17 +1,27 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Compact page intro used at the top of every non-home page — an eyebrow,
  * a title and a lead paragraph over an optional banner image.
  */
+const pageHeaderSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '제목', required: true },
+  description: { type: 'textarea', label: '설명' },
+  image: { type: 'image', label: '배경 이미지' },
+} as const satisfies FieldsSchema;
+
+type PageHeaderContent = ValuesOf<typeof pageHeaderSchema>;
+
 const PageHeader: SectionComponent = function PageHeader(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const title = getFieldValue(section.fields, 'title') || '페이지';
-  const description = getFieldValue(section.fields, 'description');
-  const image = getFieldValue(section.fields, 'image');
+  const content = section.fields as PageHeaderContent;
+  const eyebrow = content.eyebrow;
+  const title = content.title || '페이지';
+  const description = content.description;
+  const image = content.image?.url;
 
   return (
     <section className="relative isolate overflow-hidden border-b border-[var(--color-line)] bg-[var(--color-surface-dark)]">
@@ -48,12 +58,7 @@ PageHeader.meta = {
   componentKey: 'pageHeader',
   category: 'hero',
   label: '페이지 헤더',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '제목', required: true },
-    description: { type: 'textarea', label: '설명' },
-    image: { type: 'image', label: '배경 이미지' },
-  },
+  fieldsSchema: pageHeaderSchema,
 };
 
 export default PageHeader;

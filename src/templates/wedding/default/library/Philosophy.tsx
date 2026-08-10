@@ -2,15 +2,25 @@ import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const philosophySchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'textarea', label: '타이틀', required: true },
+  body: { type: 'textarea', label: '본문' },
+  ctaText: { type: 'text', label: 'CTA 버튼' },
+  ctaUrl: { type: 'url', label: 'CTA 링크' },
+} as const satisfies FieldsSchema;
+
+type PhilosophyContent = ValuesOf<typeof philosophySchema>;
 
 const Philosophy: SectionComponent = function Philosophy({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const body = getFieldValue(fields, 'body') || '';
-  const ctaText = getFieldValue(fields, 'ctaText') || '';
-  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#';
+  const content = section.fields as PhilosophyContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const body = content.body || '';
+  const ctaText = content.ctaText || '';
+  const ctaUrl = content.ctaUrl || '#';
 
   return (
     <section className={`${styles.section} ${styles.bgDark800}`}>
@@ -48,13 +58,7 @@ Philosophy.meta = {
   componentKey: 'philosophy',
   category: 'content',
   label: 'Wedding Philosophy',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'textarea', label: '타이틀', required: true },
-    body: { type: 'textarea', label: '본문' },
-    ctaText: { type: 'text', label: 'CTA 버튼' },
-    ctaUrl: { type: 'url', label: 'CTA 링크' },
-  },
+  fieldsSchema: philosophySchema,
   previewImage: '/component-previews/wedding/philosophy.webp',
 };
 

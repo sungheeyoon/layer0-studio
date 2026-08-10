@@ -1,18 +1,27 @@
 import React from 'react';
 import Link from 'next/link';
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Shared footer on every page. `navItems` are the footer page links
  * (reachable pages kept out of the top nav), injected by `RenderMultiSite`.
  */
+const footerSchema = {
+  brandName: { type: 'text', label: '브랜드명', required: true },
+  tagline: { type: 'textarea', label: '태그라인' },
+  copyright: { type: 'text', label: '저작권 문구', required: true },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
+
 const Footer: SectionComponent = function Footer(props: TemplateSectionProps) {
   const { section } = props;
+  const content = section.fields as FooterContent;
   const { navItems } = props as NavSectionProps;
-  const brandName = getFieldValue(section.fields, 'brandName') || '능선';
-  const tagline = getFieldValue(section.fields, 'tagline');
-  const copyright = getFieldValue(section.fields, 'copyright') || '© 능선';
+  const brandName = content.brandName || '능선';
+  const tagline = content.tagline;
+  const copyright = content.copyright || '© 능선';
 
   return (
     <footer className="border-t border-[var(--color-line)] bg-[var(--color-surface-dark)]">
@@ -54,11 +63,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: '푸터',
-  fieldsSchema: {
-    brandName: { type: 'text', label: '브랜드명', required: true },
-    tagline: { type: 'textarea', label: '태그라인' },
-    copyright: { type: 'text', label: '저작권 문구', required: true },
-  },
+  fieldsSchema: footerSchema,
 };
 
 export default Footer;

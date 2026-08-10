@@ -1,14 +1,27 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../wedding.module.css';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const gallerySchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '타이틀', required: true },
+  image1: { type: 'image', label: '갤러리 이미지 1' },
+  image2: { type: 'image', label: '갤러리 이미지 2' },
+  image3: { type: 'image', label: '갤러리 이미지 3' },
+  image4: { type: 'image', label: '갤러리 이미지 4' },
+  image5: { type: 'image', label: '갤러리 이미지 5' },
+  image6: { type: 'image', label: '갤러리 이미지 6' },
+} as const satisfies FieldsSchema;
+
+type GalleryContent = ValuesOf<typeof gallerySchema>;
 
 const Gallery: SectionComponent = function Gallery({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as GalleryContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
 
-  const images = [1, 2, 3, 4, 5, 6]
-    .map((n) => getFieldValue(fields, `image${n}`) || '')
+  const images = ([1, 2, 3, 4, 5, 6] as const)
+    .map((n) => content[`image${n}`]?.url || '')
     .filter((src) => src);
 
   // Spans for masonry effect: 1st & 4th are tall (row-span-2)
@@ -62,16 +75,7 @@ Gallery.meta = {
   componentKey: 'gallery',
   category: 'content',
   label: 'Wedding Gallery',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '타이틀', required: true },
-    image1: { type: 'image', label: '갤러리 이미지 1' },
-    image2: { type: 'image', label: '갤러리 이미지 2' },
-    image3: { type: 'image', label: '갤러리 이미지 3' },
-    image4: { type: 'image', label: '갤러리 이미지 4' },
-    image5: { type: 'image', label: '갤러리 이미지 5' },
-    image6: { type: 'image', label: '갤러리 이미지 6' },
-  },
+  fieldsSchema: gallerySchema,
   previewImage: '/component-previews/wedding/gallery.webp',
 };
 

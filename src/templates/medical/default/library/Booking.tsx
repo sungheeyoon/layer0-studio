@@ -1,16 +1,27 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { PhoneIcon, ChatIcon, ClockIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const bookingSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'textarea', label: '섹션 설명' },
+  phone: { type: 'text', label: '전화번호' },
+  hours: { type: 'text', label: '운영 시간' },
+  image: { type: 'image', label: '배경 이미지' },
+} as const satisfies FieldsSchema;
+
+type BookingContent = ValuesOf<typeof bookingSchema>;
 
 const Booking: SectionComponent = function Booking({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const description = getFieldValue(fields, 'description') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const hours = getFieldValue(fields, 'hours') || '';
-  const image = getFieldValue(fields, 'image') || '';
+  const content = section.fields as BookingContent;
+  const label = content.eyebrow || '';
+  const title = content.title || '';
+  const description = content.description || '';
+  const phone = content.phone || '';
+  const hours = content.hours || '';
+  const image = content.image?.url || '';
 
   return (
     <section className="relative overflow-hidden py-28 lg:py-44" id="booking">
@@ -71,14 +82,7 @@ Booking.meta = {
   componentKey: 'booking',
   category: 'contact',
   label: 'Medical Booking CTA',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'textarea', label: '섹션 설명' },
-    phone: { type: 'text', label: '전화번호' },
-    hours: { type: 'text', label: '운영 시간' },
-    image: { type: 'image', label: '배경 이미지' },
-  },
+  fieldsSchema: bookingSchema,
   previewImage: '/component-previews/medical/booking.webp',
 };
 

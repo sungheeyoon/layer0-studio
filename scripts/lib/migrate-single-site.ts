@@ -23,10 +23,33 @@ import {
   ContentModel,
   NavMeta,
   SingleSection,
-  Field,
   GlobalStyles,
-  getFieldValue,
 } from '@/domain/entities/template.entity';
+
+/**
+ * The pre-ADR-0016 `Field` object: schema metadata (`type`/`label`) stored
+ * *beside* every value, in the data. The domain no longer knows this shape —
+ * #136 deleted the union and its `getFieldValue` accessor — but this migration
+ * reads rows written while it was still the storage format, so it carries its
+ * own description of it. Nothing else should: a new reader of this shape would
+ * be a regression, not a dependency.
+ *
+ * 018 moves these objects across verbatim (only *which* key holds them changes);
+ * converting them to Values is ADR-0016 §8-1's own migration.
+ */
+interface LegacyField {
+  type?: string;
+  label?: string;
+  value?: string;
+}
+
+type LegacyFields = Record<string, LegacyField>;
+
+/** The one read 018 needs: a legacy field's string value, blank when absent. */
+function legacyValue(field: LegacyField | undefined): string {
+  if (!field || field.type === 'array') return '';
+  return field.value ?? '';
+}
 
 /** Legacy section shape stored in the DB before #37. */
 interface LegacySection {
@@ -35,7 +58,7 @@ interface LegacySection {
   visible?: boolean;
   editable?: boolean;
   title?: string;
-  data: Record<string, Field>;
+  data: LegacyFields;
 }
 
 interface LegacyPage {
@@ -72,28 +95,23 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 }
 
 /** Old nav `menuN` values, ordered by N, with blanks dropped. */
-function orderedMenuValues(navData: Record<string, Field>): string[] {
+function orderedMenuValues(navData: LegacyFields): string[] {
   return Object.keys(navData)
     .filter((k) => MENU_KEY_RE.test(k))
     .sort((a, b) => Number(a.slice(4)) - Number(b.slice(4)))
-    .map((k) => getFieldValue(navData[k]))
+    .map((k) => legacyValue(navData[k]))
     .filter((v) => v.length > 0);
 }
 
 /** Rename the `label` field key → `eyebrow`, preserving its value. */
-function renameLabelToEyebrow(
-  data: Record<string, Field>,
-): Record<string, Field> {
+function renameLabelToEyebrow(data: LegacyFields): LegacyFields {
   if (!('label' in data) || 'eyebrow' in data) return data;
   const { label, ...rest } = data;
   return { eyebrow: label, ...rest };
 }
 
 /** Strip section-level `editable`/`title` and (for nav) `menuN`/`menuNUrl`. */
-function cleanData(
-  type: string,
-  data: Record<string, Field>,
-): Record<string, Field> {
+function cleanData(type: string, data: LegacyFields): LegacyFields {
   const renamed = renameLabelToEyebrow(data);
   if (type !== 'nav') return renamed;
   return Object.fromEntries(
@@ -145,7 +163,7 @@ export function migrateSingleSiteJson(
     const seeded = seedSections?.get(s.id);
     const nav: NavMeta = seeded
       ? { visible: seeded.visible, label: seeded.label }
-      : { visible: false, label: getFieldValue(data, 'eyebrow') || s.type };
+      : { visible: false, label: legacyValue(data.eyebrow) || s.type };
     return {
       id: s.id,
       type: s.type,

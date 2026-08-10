@@ -1,8 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { migrateSingleSiteJson, type SeedNavMap } from '../migrate-single-site';
-import { isSingleContent, getFieldValue, type Field } from '../../../src/domain/entities/template.entity';
+import { isSingleContent } from '../../../src/domain/entities/template.entity';
 
-const txt = (value: string): Field => ({ type: 'text', label: 'x', value, editable: true });
+/**
+ * The pre-ADR-0016 storage shape 018 reads. The domain no longer describes it
+ * (#136), and it is not re-derivable from a Value — the whole point of the
+ * fixture is the `{ type, label, value }` wrapper the migration carries across.
+ */
+interface LegacyField { type: string; label: string; value: string; editable?: boolean }
+const txt = (value: string): LegacyField => ({ type: 'text', label: 'x', value, editable: true });
+const valueOf = (fields: Record<string, unknown>, key: string) =>
+  (fields[key] as LegacyField | undefined)?.value ?? '';
 
 // Authoritative seed: nav hidden, hero hidden, menu+story visible (nav targets).
 const seedNav: SeedNavMap = new Map([
@@ -64,7 +72,7 @@ describe('migrateSingleSiteJson', () => {
     if (!isSingleContent(json)) throw new Error('unreachable');
     const hero = json.sections.find((s) => s.id === 'hero-001')!;
     expect('label' in hero.fields).toBe(false);
-    expect(getFieldValue(hero.fields, 'eyebrow')).toBe('Hero kicker');
+    expect(valueOf(hero.fields, 'eyebrow')).toBe('Hero kicker');
     expect('editable' in hero).toBe(false);
   });
 

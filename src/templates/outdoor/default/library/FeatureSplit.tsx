@@ -1,19 +1,31 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Editorial image + text split. `imageSide` ('left' | 'right') flips the
  * layout so it can be reused as a story teaser, a brand block, etc.
  */
+const featureSplitSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목', required: true },
+  body: { type: 'textarea', label: '본문' },
+  note: { type: 'text', label: '강조 문구' },
+  image: { type: 'image', label: '이미지' },
+  imageSide: { type: 'select', label: '이미지 위치', options: ['left', 'right'] },
+} as const satisfies FieldsSchema;
+
+type FeatureSplitContent = ValuesOf<typeof featureSplitSchema>;
+
 const FeatureSplit: SectionComponent = function FeatureSplit(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading') || '제목';
-  const body = getFieldValue(section.fields, 'body');
-  const note = getFieldValue(section.fields, 'note');
-  const image = getFieldValue(section.fields, 'image');
-  const imageSide = getFieldValue(section.fields, 'imageSide') || 'right';
+  const content = section.fields as FeatureSplitContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading || '제목';
+  const body = content.body;
+  const note = content.note;
+  const image = content.image?.url;
+  const imageSide = content.imageSide || 'right';
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -58,14 +70,7 @@ FeatureSplit.meta = {
   componentKey: 'featureSplit',
   category: 'content',
   label: '이미지 + 텍스트 분할',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목', required: true },
-    body: { type: 'textarea', label: '본문' },
-    note: { type: 'text', label: '강조 문구' },
-    image: { type: 'image', label: '이미지' },
-    imageSide: { type: 'select', label: '이미지 위치', options: ['left', 'right'] },
-  },
+  fieldsSchema: featureSplitSchema,
 };
 
 export default FeatureSplit;

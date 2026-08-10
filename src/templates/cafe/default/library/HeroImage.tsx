@@ -1,27 +1,49 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { ArrowRightIcon, LeafIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const heroImageSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title1: { type: 'text', label: '타이틀 1행' },
+  titleAccent: { type: 'text', label: '강조 타이틀' },
+  subtitle: { type: 'text', label: '서브타이틀' },
+  description: { type: 'textarea', label: '설명' },
+  image: { type: 'image', label: '배경 이미지', required: true },
+  ctaPrimary: { type: 'text', label: '기본 CTA' },
+  ctaSecondary: { type: 'text', label: '보조 CTA' },
+  stat1Value: { type: 'text', label: '통계 1 수치' },
+  stat1Label: { type: 'text', label: '통계 1 라벨' },
+  stat2Value: { type: 'text', label: '통계 2 수치' },
+  stat2Label: { type: 'text', label: '통계 2 라벨' },
+  stat3Value: { type: 'text', label: '통계 3 수치' },
+  stat3Label: { type: 'text', label: '통계 3 라벨' },
+  badgeText: { type: 'text', label: '플로팅 배지 텍스트' },
+  badgeSubtext: { type: 'text', label: '플로팅 배지 보조텍스트' },
+  seasonTag: { type: 'text', label: '시즌 태그' },
+} as const satisfies FieldsSchema;
+
+type HeroImageContent = ValuesOf<typeof heroImageSchema>;
 
 const HeroImage: SectionComponent = function HeroImage({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || 'Seoul Seongsu — Specialty Coffee';
-  const title1 = getFieldValue(fields, 'title1') || '천천히,';
-  const titleAccent = getFieldValue(fields, 'titleAccent') || '제대로';
-  const subtitle = getFieldValue(fields, 'subtitle') || '— 한 잔의 완성';
-  const description = getFieldValue(fields, 'description') || '';
-  const image = getFieldValue(fields, 'image') || '';
-  const ctaPrimary = getFieldValue(fields, 'ctaPrimary') || '메뉴 보기';
-  const ctaSecondary = getFieldValue(fields, 'ctaSecondary') || '카페 소개';
+  const content = section.fields as HeroImageContent;
+  const label = content.eyebrow || 'Seoul Seongsu — Specialty Coffee';
+  const title1 = content.title1 || '천천히,';
+  const titleAccent = content.titleAccent || '제대로';
+  const subtitle = content.subtitle || '— 한 잔의 완성';
+  const description = content.description || '';
+  const image = content.image?.url || '';
+  const ctaPrimary = content.ctaPrimary || '메뉴 보기';
+  const ctaSecondary = content.ctaSecondary || '카페 소개';
 
-  const stats = [1, 2, 3].map(n => ({
-    value: getFieldValue(fields, `stat${n}Value`),
-    label: getFieldValue(fields, `stat${n}Label`),
+  const stats = ([1, 2, 3] as const).map(n => ({
+    value: content[`stat${n}Value`],
+    label: content[`stat${n}Label`],
   })).filter(s => s.value);
 
-  const badgeText = getFieldValue(fields, 'badgeText') || '"Roasted in-house"';
-  const badgeSubtext = getFieldValue(fields, 'badgeSubtext') || '직접 로스팅한 원두';
-  const seasonTag = getFieldValue(fields, 'seasonTag') || 'Spring Menu';
+  const badgeText = content.badgeText || '"Roasted in-house"';
+  const badgeSubtext = content.badgeSubtext || '직접 로스팅한 원두';
+  const seasonTag = content.seasonTag || 'Spring Menu';
 
   return (
     <section className="min-h-[100dvh] flex items-stretch pt-[68px]" id="hero">
@@ -112,25 +134,7 @@ HeroImage.meta = {
   componentKey: 'hero-image',
   category: 'hero',
   label: 'Hero (Image Background)',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title1: { type: 'text', label: '타이틀 1행' },
-    titleAccent: { type: 'text', label: '강조 타이틀' },
-    subtitle: { type: 'text', label: '서브타이틀' },
-    description: { type: 'textarea', label: '설명' },
-    image: { type: 'image', label: '배경 이미지', required: true },
-    ctaPrimary: { type: 'text', label: '기본 CTA' },
-    ctaSecondary: { type: 'text', label: '보조 CTA' },
-    stat1Value: { type: 'text', label: '통계 1 수치' },
-    stat1Label: { type: 'text', label: '통계 1 라벨' },
-    stat2Value: { type: 'text', label: '통계 2 수치' },
-    stat2Label: { type: 'text', label: '통계 2 라벨' },
-    stat3Value: { type: 'text', label: '통계 3 수치' },
-    stat3Label: { type: 'text', label: '통계 3 라벨' },
-    badgeText: { type: 'text', label: '플로팅 배지 텍스트' },
-    badgeSubtext: { type: 'text', label: '플로팅 배지 보조텍스트' },
-    seasonTag: { type: 'text', label: '시즌 태그' },
-  },
+  fieldsSchema: heroImageSchema,
   previewImage: '/component-previews/cafe/hero-image.webp',
 };
 

@@ -1,54 +1,77 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { ArrowUpRightIcon, BoxingIcon, YogaIcon, ChefHatIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const programsSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'textarea', label: '섹션 설명' },
+  p1Title: { type: 'text', label: 'P1 제목' },
+  p1Desc: { type: 'text', label: 'P1 설명' },
+  p1Image: { type: 'image', label: 'P1 이미지' },
+  p2Title: { type: 'text', label: 'P2 제목' },
+  p2Desc: { type: 'text', label: 'P2 설명' },
+  p2Image: { type: 'image', label: 'P2 이미지' },
+  p3Title: { type: 'text', label: 'P3 제목' },
+  p3Desc: { type: 'text', label: 'P3 설명' },
+  p4Title: { type: 'text', label: 'P4 제목' },
+  p4Desc: { type: 'text', label: 'P4 설명' },
+  p5Title: { type: 'text', label: 'P5 제목' },
+  p5Desc: { type: 'text', label: 'P5 설명' },
+  p5Image: { type: 'image', label: 'P5 이미지' },
+  p6Title: { type: 'text', label: 'P6 제목' },
+  p6Desc: { type: 'text', label: 'P6 설명' },
+} as const satisfies FieldsSchema;
+
+type ProgramsContent = ValuesOf<typeof programsSchema>;
 
 const Programs: SectionComponent = function Programs({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '프로그램';
-  const title = getFieldValue(fields, 'title') || '당신의 목표에 맞는 프로그램';
-  const description = getFieldValue(fields, 'description') || '';
+  const content = section.fields as ProgramsContent;
+  const label = content.eyebrow || '프로그램';
+  const title = content.title || '당신의 목표에 맞는 프로그램';
+  const description = content.description || '';
 
   const programs = [
     {
       id: 'p1',
-      title: getFieldValue(fields, 'p1Title'),
-      desc: getFieldValue(fields, 'p1Desc'),
-      image: getFieldValue(fields, 'p1Image'),
+      title: content.p1Title,
+      desc: content.p1Desc,
+      image: content.p1Image?.url,
       badge: 'Most Popular',
       colSpan: 'md:col-span-2',
       showArrow: true,
     },
     {
       id: 'p2',
-      title: getFieldValue(fields, 'p2Title'),
-      desc: getFieldValue(fields, 'p2Desc'),
-      image: getFieldValue(fields, 'p2Image'),
+      title: content.p2Title,
+      desc: content.p2Desc,
+      image: content.p2Image?.url,
     },
     {
       id: 'p3',
-      title: getFieldValue(fields, 'p3Title'),
-      desc: getFieldValue(fields, 'p3Desc'),
+      title: content.p3Title,
+      desc: content.p3Desc,
       icon: <BoxingIcon size={22} className="text-[var(--f-lime)]" />,
       bg: styles.bgSurface,
     },
     {
       id: 'p4',
-      title: getFieldValue(fields, 'p4Title'),
-      desc: getFieldValue(fields, 'p4Desc'),
+      title: content.p4Title,
+      desc: content.p4Desc,
       icon: <YogaIcon size={22} className="text-[var(--f-lime)]" />,
       bg: styles.bgSurface,
     },
     {
       id: 'p5',
-      title: getFieldValue(fields, 'p5Title'),
-      desc: getFieldValue(fields, 'p5Desc'),
-      image: getFieldValue(fields, 'p5Image'),
+      title: content.p5Title,
+      desc: content.p5Desc,
+      image: content.p5Image?.url,
     },
     {
       id: 'p6',
-      title: getFieldValue(fields, 'p6Title'),
-      desc: getFieldValue(fields, 'p6Desc'),
+      title: content.p6Title,
+      desc: content.p6Desc,
       icon: <ChefHatIcon size={22} className="text-[var(--f-lime)]" />,
       bg: 'color-mix(in srgb, var(--f-lime) 7%, transparent)',
       borderColor: 'color-mix(in srgb, var(--f-lime) 15%, transparent)',
@@ -133,26 +156,7 @@ Programs.meta = {
   componentKey: 'programs',
   category: 'features',
   label: 'Fitness Programs',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'textarea', label: '섹션 설명' },
-    p1Title: { type: 'text', label: 'P1 제목' },
-    p1Desc: { type: 'text', label: 'P1 설명' },
-    p1Image: { type: 'image', label: 'P1 이미지' },
-    p2Title: { type: 'text', label: 'P2 제목' },
-    p2Desc: { type: 'text', label: 'P2 설명' },
-    p2Image: { type: 'image', label: 'P2 이미지' },
-    p3Title: { type: 'text', label: 'P3 제목' },
-    p3Desc: { type: 'text', label: 'P3 설명' },
-    p4Title: { type: 'text', label: 'P4 제목' },
-    p4Desc: { type: 'text', label: 'P4 설명' },
-    p5Title: { type: 'text', label: 'P5 제목' },
-    p5Desc: { type: 'text', label: 'P5 설명' },
-    p5Image: { type: 'image', label: 'P5 이미지' },
-    p6Title: { type: 'text', label: 'P6 제목' },
-    p6Desc: { type: 'text', label: 'P6 설명' },
-  },
+  fieldsSchema: programsSchema,
   previewImage: '/component-previews/fitness/programs.webp',
 };
 

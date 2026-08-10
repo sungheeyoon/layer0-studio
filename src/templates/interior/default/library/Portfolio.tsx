@@ -1,19 +1,35 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const portfolioSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  p1Meta: { type: 'text', label: 'P1 메타' },
+  p1Title: { type: 'text', label: 'P1 제목' },
+  p1Desc: { type: 'text', label: 'P1 설명' },
+  p2Meta: { type: 'text', label: 'P2 메타' },
+  p2Title: { type: 'text', label: 'P2 제목' },
+  p3Meta: { type: 'text', label: 'P3 메타' },
+  p3Title: { type: 'text', label: 'P3 제목' },
+  p4Meta: { type: 'text', label: 'P4 메타' },
+  p4Title: { type: 'text', label: 'P4 제목' },
+} as const satisfies FieldsSchema;
+
+type PortfolioContent = ValuesOf<typeof portfolioSchema>;
 
 const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || 'Portfolio';
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as PortfolioContent;
+  const label = content.eyebrow || 'Portfolio';
+  const title = content.title || '';
 
   const projects = [
     {
       id: 'p1',
-      meta: getFieldValue(fields, 'p1Meta'),
-      title: getFieldValue(fields, 'p1Title'),
-      desc: getFieldValue(fields, 'p1Desc'),
+      meta: content.p1Meta,
+      title: content.p1Title,
+      desc: content.p1Desc,
       height: '520px',
       rowSpan: 'md:row-span-2',
       bg: 'var(--i-grad-portfolio-1)',
@@ -35,8 +51,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
     },
     {
       id: 'p2',
-      meta: getFieldValue(fields, 'p2Meta'),
-      title: getFieldValue(fields, 'p2Title'),
+      meta: content.p2Meta,
+      title: content.p2Title,
       height: '250px',
       colSpan: 'md:col-span-2',
       bg: 'var(--i-grad-portfolio-2)',
@@ -56,8 +72,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
     },
     {
       id: 'p3',
-      meta: getFieldValue(fields, 'p3Meta'),
-      title: getFieldValue(fields, 'p3Title'),
+      meta: content.p3Meta,
+      title: content.p3Title,
       height: '255px',
       bg: 'var(--i-grad-portfolio-3)',
       svg: (
@@ -76,8 +92,8 @@ const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSect
     },
     {
       id: 'p4',
-      meta: getFieldValue(fields, 'p4Meta'),
-      title: getFieldValue(fields, 'p4Title'),
+      meta: content.p4Meta,
+      title: content.p4Title,
       height: '255px',
       bg: 'var(--i-grad-portfolio-4)',
       svg: (
@@ -146,19 +162,7 @@ Portfolio.meta = {
   componentKey: 'portfolio',
   category: 'content',
   label: 'Interior Portfolio',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    p1Meta: { type: 'text', label: 'P1 메타' },
-    p1Title: { type: 'text', label: 'P1 제목' },
-    p1Desc: { type: 'text', label: 'P1 설명' },
-    p2Meta: { type: 'text', label: 'P2 메타' },
-    p2Title: { type: 'text', label: 'P2 제목' },
-    p3Meta: { type: 'text', label: 'P3 메타' },
-    p3Title: { type: 'text', label: 'P3 제목' },
-    p4Meta: { type: 'text', label: 'P4 메타' },
-    p4Title: { type: 'text', label: 'P4 제목' },
-  },
+  fieldsSchema: portfolioSchema,
   previewImage: '/component-previews/interior/portfolio.webp',
 };
 

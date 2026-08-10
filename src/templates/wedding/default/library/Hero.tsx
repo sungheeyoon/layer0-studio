@@ -2,23 +2,42 @@ import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { ArrowDownIcon, HeartIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const heroSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'textarea', label: '메인 타이틀', required: true },
+  subtitle: { type: 'textarea', label: '서브 타이틀' },
+  ctaPrimaryText: { type: 'text', label: '주요 CTA 버튼' },
+  ctaPrimaryUrl: { type: 'url', label: '주요 CTA 링크' },
+  ctaSecondaryText: { type: 'text', label: '보조 CTA 버튼' },
+  ctaSecondaryUrl: { type: 'url', label: '보조 CTA 링크' },
+  backgroundImage: { type: 'image', label: '배경 이미지' },
+  stat1Value: { type: 'text', label: '통계 1 수치' },
+  stat1Label: { type: 'text', label: '통계 1 라벨' },
+  stat2Value: { type: 'text', label: '통계 2 수치' },
+  stat2Label: { type: 'text', label: '통계 2 라벨' },
+  stat3Value: { type: 'text', label: '통계 3 수치' },
+  stat3Label: { type: 'text', label: '통계 3 라벨' },
+} as const satisfies FieldsSchema;
+
+type HeroContent = ValuesOf<typeof heroSchema>;
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const subtitle = getFieldValue(fields, 'subtitle') || '';
-  const ctaPrimaryText = getFieldValue(fields, 'ctaPrimaryText') || '';
-  const ctaPrimaryUrl = getFieldValue(fields, 'ctaPrimaryUrl') || '#';
-  const ctaSecondaryText = getFieldValue(fields, 'ctaSecondaryText') || '';
-  const ctaSecondaryUrl = getFieldValue(fields, 'ctaSecondaryUrl') || '#';
-  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
+  const content = section.fields as HeroContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const subtitle = content.subtitle || '';
+  const ctaPrimaryText = content.ctaPrimaryText || '';
+  const ctaPrimaryUrl = content.ctaPrimaryUrl || '#';
+  const ctaSecondaryText = content.ctaSecondaryText || '';
+  const ctaSecondaryUrl = content.ctaSecondaryUrl || '#';
+  const bgImage = content.backgroundImage?.url || '';
 
-  const stats = [1, 2, 3]
+  const stats = ([1, 2, 3] as const)
     .map((n) => ({
-      value: getFieldValue(fields, `stat${n}Value`) || '',
-      label: getFieldValue(fields, `stat${n}Label`) || '',
+      value: content[`stat${n}Value`] || '',
+      label: content[`stat${n}Label`] || '',
     }))
     .filter((s) => s.value || s.label);
 
@@ -77,22 +96,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Wedding Hero',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'textarea', label: '메인 타이틀', required: true },
-    subtitle: { type: 'textarea', label: '서브 타이틀' },
-    ctaPrimaryText: { type: 'text', label: '주요 CTA 버튼' },
-    ctaPrimaryUrl: { type: 'url', label: '주요 CTA 링크' },
-    ctaSecondaryText: { type: 'text', label: '보조 CTA 버튼' },
-    ctaSecondaryUrl: { type: 'url', label: '보조 CTA 링크' },
-    backgroundImage: { type: 'image', label: '배경 이미지' },
-    stat1Value: { type: 'text', label: '통계 1 수치' },
-    stat1Label: { type: 'text', label: '통계 1 라벨' },
-    stat2Value: { type: 'text', label: '통계 2 수치' },
-    stat2Label: { type: 'text', label: '통계 2 라벨' },
-    stat3Value: { type: 'text', label: '통계 3 수치' },
-    stat3Label: { type: 'text', label: '통계 3 라벨' },
-  },
+  fieldsSchema: heroSchema,
   previewImage: '/component-previews/wedding/hero.webp',
 };
 

@@ -5,9 +5,7 @@ import { UserSite } from '@/domain/entities/user-site.entity';
 import {
   ContentModel,
   GlobalStyles,
-  Field,
   Section,
-  ArrayField,
   isSingleContent,
   isMultiContent,
   allSections,
@@ -19,16 +17,7 @@ import {
   toggleNavItemNavVisible,
   relabelNavItem,
 } from '@/domain/entities/ordered-nav-list';
-import {
-  setFieldValue,
-  setItemFieldAt,
-  addItem,
-  removeItemAt,
-  moveItemAt,
-  canAddItem,
-  canRemoveItem,
-} from '@/domain/entities/field-edit';
-import { makeEmptyItem } from '@/lib/template/field-factory';
+import { setFieldValue, type FieldValue } from '@/domain/entities/field-edit';
 import {
   DndContext,
   closestCenter,
@@ -45,20 +34,17 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { saveContentAction, publishSiteAction, initUploadAction, confirmUploadAction } from '@/app/(authenticated)/dashboard/editor/actions';
+import { saveContentAction, publishSiteAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
 import EditorPreviewFrame from './EditorPreviewFrame';
-import { FieldIssues } from './FieldIssues';
+import { SectionFields } from './SectionFields';
 import { loadTemplate } from '@/templates/registry';
-import { SectionFieldsSchema, TemplateModule } from '@/templates/types';
-import { createClient } from '@/utils/supabase/client';
+import { TemplateModule } from '@/templates/types';
 import { getSiteError } from '@/lib/errors/messages';
-import { injectKeys, stripKeys } from '@/lib/template/keys';
 import { nextSaveDelay } from '@/lib/editor/autosave-schedule';
 import { createWriteQueue } from '@/lib/editor/write-queue';
 import {
   indexIssues,
-  fieldIssueKey,
   EMPTY_ISSUE_INDEX,
   type IssueIndex,
 } from '@/lib/editor/content-issues';
@@ -66,8 +52,6 @@ import { validateContent } from '@/lib/template/validate';
 import { globalStylesToThemeVars } from '@/lib/template/design-tokens';
 import { useLocale, useDictionary } from '@/lib/i18n/provider';
 import {
-  ChevronUp,
-  ChevronDown,
   GripVertical,
   Eye,
   EyeOff,
@@ -76,22 +60,11 @@ import {
   ToggleLeft,
   ToggleRight,
   Pin,
-  PlusCircle,
-  Trash2,
   ExternalLink,
   CircleAlert,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   AlertDialog,
@@ -114,7 +87,10 @@ type SaveOutcome = { ok: true; updatedAt: string } | { ok: false; code: string }
 export default function DynamicEditor({ site }: DynamicEditorProps) {
   const locale = useLocale();
   const t = useDictionary().editor;
-  const [content, setContent] = useState<ContentModel>(() => injectKeys(site.content));
+  // No `injectKeys` any more: array items carry a real, persisted `id`
+  // (ADR-0016 §4-4), so there is nothing to stamp on at load or strip off at
+  // save. The clone keeps the server-rendered prop out of reach of any edit.
+  const [content, setContent] = useState<ContentModel>(() => structuredClone(site.content));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
 
   const isMulti = isMultiContent(content);
@@ -203,7 +179,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     try {
       const result = await saveContentAction(
         site.id,
-        stripKeys(contentRef.current),
+        contentRef.current,
         knownUpdatedAtRef.current,
       );
       if ('error' in result) return { ok: false, code: result.error };
@@ -334,10 +310,6 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // Site (ADR-0015 §5). `validateContent` is pure and imports nothing but types,
   // so this is the identical function — not a second copy of the rules that could
   // drift out of step. Only `warnings` is read: this reports, it never blocks.
-  //
-  // Runs against the rendered `content` rather than `stripKeys(content)` to avoid
-  // cloning tens of KB on every keystroke. The editor-only `_key` lives on array
-  // items, which can only produce codes `indexIssues` drops anyway.
   const issueIndex = useMemo<IssueIndex>(() => {
     if (!templateModule) return EMPTY_ISSUE_INDEX;
     const { warnings } = validateContent(content, {
@@ -359,8 +331,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   }, [scheduleAutoSave]);
 
   const handleFieldChange = useCallback(
-    (sectionId: string, fieldKey: string, value: string | ArrayField['items'], assetId?: string) => {
-      updateContent((json) => setFieldValue(json, sectionId, fieldKey, value, assetId));
+    (sectionId: string, fieldKey: string, value: FieldValue) => {
+      updateContent((json) => setFieldValue(json, sectionId, fieldKey, value));
     },
     [updateContent]
   );
@@ -931,33 +903,6 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   );
 }
 
-// ─── Dynamic Field Input ──────────────────────────────────────────────────
-
-/**
- * Render fields in their authored `fieldsSchema` order (= visual / reading order),
- * not the data object's key order — the seed/DB key order can differ from how the
- * renderer lays them out. Keys present in data but absent from the schema are
- * appended so nothing silently disappears.
- */
-function orderedBySchema<T>(
-  data: Record<string, T>,
-  schema?: SectionFieldsSchema,
-): [string, T][] {
-  if (!schema) return Object.entries(data);
-  const ordered: [string, T][] = [];
-  const seen = new Set<string>();
-  for (const key of Object.keys(schema)) {
-    if (key in data) {
-      ordered.push([key, data[key]]);
-      seen.add(key);
-    }
-  }
-  for (const [key, value] of Object.entries(data)) {
-    if (!seen.has(key)) ordered.push([key, value]);
-  }
-  return ordered;
-}
-
 /**
  * A sortable `<li>` for the hierarchy / pages lists. Owns the @dnd-kit wiring
  * (transform/transition + drag state) and exposes the drag-handle props via a
@@ -999,313 +944,3 @@ function SortableRow({
   );
 }
 
-/**
- * The editable fields of one section, rendered in schema order. Used inline
- * inside each hierarchy item (accordion) so the edit controls appear right where
- * the user clicked — no scrolling down to a separate Parameters panel.
- */
-function SectionFields({
-  section,
-  schema,
-  onFieldChange,
-  onError,
-  issues,
-}: {
-  section: Section;
-  schema?: SectionFieldsSchema;
-  onFieldChange: (
-    sectionId: string,
-    fieldKey: string,
-    value: string | ArrayField['items'],
-    assetId?: string,
-  ) => void;
-  onError: (msg: string) => void;
-  /** Warning codes keyed by {@link fieldIssueKey} — see `content-issues.ts`. */
-  issues: Record<string, string[]>;
-}) {
-  return (
-    <div className="space-y-6">
-      {orderedBySchema(section.fields, schema)
-        .filter(([, field]) => field.editable !== false)
-        .map(([fieldKey, field]) => (
-          <DynamicField
-            key={`${section.id}-${fieldKey}`}
-            field={field}
-            itemSchema={schema?.[fieldKey]?.itemSchema}
-            minItems={schema?.[fieldKey]?.minItems}
-            maxItems={schema?.[fieldKey]?.maxItems}
-            onChange={(val, aid) => onFieldChange(section.id, fieldKey, val, aid)}
-            onError={onError}
-            issueCodes={issues[fieldIssueKey(section.id, fieldKey)]}
-          />
-        ))}
-    </div>
-  );
-}
-
-
-interface DynamicFieldProps {
-  field: Field;
-  itemSchema?: SectionFieldsSchema;
-  minItems?: number;
-  maxItems?: number;
-  onChange: (value: string | ArrayField['items'], assetId?: string) => void;
-  onError: (msg: string) => void;
-  /** Warning codes for this field, rendered inline. Never blocks the save. */
-  issueCodes?: string[];
-}
-
-function DynamicField({ field, itemSchema, minItems, maxItems, onChange, onError, issueCodes }: DynamicFieldProps) {
-  const t = useDictionary().editor;
-  const [isUploading, setIsUploading] = useState(false);
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    try {
-      const initRes = await initUploadAction(file.name, file.type, file.size);
-      if ('error' in initRes) throw new Error(initRes.error || 'Failed to initialize upload');
-
-      const supabase = createClient();
-      const { error: uploadError } = await supabase.storage
-        .from('user_assets')
-        .upload(initRes.uploadPath, file);
-
-      if (uploadError) throw new Error(uploadError.message);
-
-      const confirmRes = await confirmUploadAction(initRes.assetId, initRes.uploadPath);
-      if ('error' in confirmRes) throw new Error(confirmRes.error || 'Failed to confirm upload');
-
-      onChange(confirmRes.publicUrl, initRes.assetId);
-    } catch (err: unknown) {
-      onError(`${t.field.uploadFailedPrefix}${err instanceof Error ? err.message : 'Unknown error'}`);
-      console.error('[ASSET_UPLOAD_ERROR]', err);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  if (field.type === 'array') {
-    return (
-      <ArrayFieldEditor
-        field={field}
-        itemSchema={itemSchema}
-        minItems={minItems}
-        maxItems={maxItems}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-  }
-
-  const value = field.value || '';
-
-  return (
-    <div className="space-y-2">
-      <Label>{field.label}</Label>
-
-      {field.type === 'textarea' ? (
-        <Textarea
-          rows={3}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : field.type === 'color' ? (
-        <div className="flex items-center gap-2">
-          <input
-            type="color"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="size-9 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
-          />
-          <Input
-            className="font-mono"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          />
-        </div>
-      ) : field.type === 'select' ? (
-        <Select value={value} onValueChange={(v) => onChange(v)}>
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {field.options.map((opt: string) => (
-              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : field.type === 'image' ? (
-        <div className="space-y-2">
-          <Input
-            value={value}
-            onChange={(e) => onChange(e.target.value, undefined)}
-            placeholder="https://images.unsplash.com/..."
-            disabled={isUploading}
-          />
-          <Input
-            type="file"
-            accept="image/jpeg, image/png, image/webp, image/gif"
-            className="cursor-pointer text-xs file:mr-2 file:cursor-pointer"
-            onChange={handleUpload}
-            disabled={isUploading}
-          />
-          {isUploading && (
-            <p className="animate-pulse text-xs text-primary">{t.field.uploading}</p>
-          )}
-          {value && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={value}
-              alt={field.label}
-              className="mt-1 h-24 w-full rounded-md border border-border object-cover"
-            />
-          )}
-        </div>
-      ) : (
-        <Input
-          type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      )}
-
-      <FieldIssues codes={issueCodes} />
-    </div>
-  );
-}
-
-function ArrayFieldEditor({
-  field,
-  itemSchema,
-  minItems,
-  maxItems,
-  onChange,
-  onError,
-}: {
-  field: ArrayField;
-  itemSchema?: SectionFieldsSchema;
-  minItems?: number;
-  maxItems?: number;
-  onChange: (value: ArrayField['items']) => void;
-  onError: (msg: string) => void;
-}) {
-  const t = useDictionary().editor;
-  const items = field.items || [];
-
-  const handleAddItem = () => {
-    if (!itemSchema) return;
-    if (!canAddItem(items, maxItems)) {
-      onError(`${t.field.maxItemsErrorPrefix}${maxItems}${t.field.maxItemsErrorSuffix}`);
-      return;
-    }
-    onChange(addItem(items, makeEmptyItem(itemSchema)));
-  };
-
-  const handleRemoveItem = (index: number) => {
-    if (!canRemoveItem(items, minItems)) {
-      onError(`${t.field.minItemsErrorPrefix}${minItems}${t.field.minItemsErrorSuffix}`);
-      return;
-    }
-    onChange(removeItemAt(items, index));
-  };
-
-  const handleMoveItem = (index: number, direction: 'up' | 'down') => {
-    onChange(moveItemAt(items, index, direction));
-  };
-
-  const handleItemFieldChange = (index: number, fieldKey: string, value: string | ArrayField['items'], assetId?: string) => {
-    onChange(setItemFieldAt(items, index, fieldKey, value, assetId));
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-primary">
-          {field.label} ({items.length}{maxItems !== undefined ? ` / ${maxItems}` : ''})
-        </Label>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          onClick={handleAddItem}
-          disabled={!canAddItem(items, maxItems)}
-          className="text-primary hover:text-primary"
-          title={!canAddItem(items, maxItems) ? `${t.field.maxReachedPrefix}${maxItems}${t.field.maxReachedSuffix}` : t.field.addItem}
-        >
-          <PlusCircle className="size-5" />
-        </Button>
-      </div>
-
-      <div className="space-y-4">
-        {items.map((item, index) => (
-          <div
-            key={item._key.type !== 'array' ? item._key.value : index}
-            className="group/item relative rounded-md border border-border bg-muted/40 p-4"
-          >
-            <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover/item:opacity-100">
-              <button
-                type="button"
-                disabled={index === 0}
-                onClick={() => handleMoveItem(index, 'up')}
-                className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
-              >
-                <ChevronUp className="size-4" />
-              </button>
-              <button
-                type="button"
-                disabled={index === items.length - 1}
-                onClick={() => handleMoveItem(index, 'down')}
-                className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
-              >
-                <ChevronDown className="size-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleRemoveItem(index)}
-                disabled={!canRemoveItem(items, minItems)}
-                className="text-muted-foreground transition-colors hover:text-destructive disabled:cursor-not-allowed disabled:opacity-30"
-                title={!canRemoveItem(items, minItems) ? `${t.field.minRequiredPrefix}${minItems}${t.field.minRequiredSuffix}` : t.field.delete}
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </div>
-
-            <div className="space-y-6 pt-2">
-              {orderedBySchema(item, itemSchema)
-                .filter(([key, f]) => key !== '_key' && f.editable !== false)
-                .map(([fKey, f]) => (
-                  <DynamicField
-                    key={fKey}
-                    field={f}
-                    itemSchema={itemSchema?.[fKey]?.itemSchema}
-                    minItems={itemSchema?.[fKey]?.minItems}
-                    maxItems={itemSchema?.[fKey]?.maxItems}
-                    onChange={(val, aid) => handleItemFieldChange(index, fKey, val, aid)}
-                    onError={onError}
-                  />
-                ))}
-            </div>
-          </div>
-        ))}
-
-        {items.length === 0 && (
-          <div className="rounded-md border border-dashed border-border py-8 text-center">
-            <p className="text-sm text-muted-foreground">{t.field.noItems}</p>
-            <Button
-              type="button"
-              variant="link"
-              size="sm"
-              onClick={handleAddItem}
-              className="mt-1 h-auto text-primary"
-            >
-              {t.field.addFirstItem}
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}

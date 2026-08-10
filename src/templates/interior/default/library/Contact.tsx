@@ -3,16 +3,19 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon, PhoneIcon, LetterIcon, MapPinIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { contactSchema } from './Contact.meta';
+
+type ContactContent = ValuesOf<typeof contactSchema>;
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || 'Get Started';
-  const title = getFieldValue(fields, 'title') || '';
-  const description = getFieldValue(fields, 'description') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const email = getFieldValue(fields, 'email') || '';
-  const address = getFieldValue(fields, 'address') || '';
+  const content = section.fields as ContactContent;
+  const label = content.eyebrow || 'Get Started';
+  const title = content.title || '';
+  const description = content.description || '';
+  const phone = content.phone || '';
+  const email = content.email || '';
+  const address = content.address || '';
 
   return (
     <section id="contact" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: 'var(--i-grad-contact)' }}>

@@ -1,17 +1,33 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { StarIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const testimonialsSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  r1Body: { type: 'textarea', label: '후기 1 본문' },
+  r1Author: { type: 'text', label: '후기 1 작성자' },
+  r1Meta: { type: 'text', label: '후기 1 메타' },
+  r2Body: { type: 'textarea', label: '후기 2 본문' },
+  r2Author: { type: 'text', label: '후기 2 작성자' },
+  r2Meta: { type: 'text', label: '후기 2 메타' },
+  r3Body: { type: 'textarea', label: '후기 3 본문' },
+  r3Author: { type: 'text', label: '후기 3 작성자' },
+  r3Meta: { type: 'text', label: '후기 3 메타' },
+} as const satisfies FieldsSchema;
+
+type TestimonialsContent = ValuesOf<typeof testimonialsSchema>;
 
 const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || 'Client Reviews';
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as TestimonialsContent;
+  const label = content.eyebrow || 'Client Reviews';
+  const title = content.title || '';
 
-  const reviews = [1, 2, 3].map(n => ({
-    body: getFieldValue(fields, `r${n}Body`),
-    author: getFieldValue(fields, `r${n}Author`),
-    meta: getFieldValue(fields, `r${n}Meta`),
+  const reviews = ([1, 2, 3] as const).map(n => ({
+    body: content[`r${n}Body`],
+    author: content[`r${n}Author`],
+    meta: content[`r${n}Meta`],
   })).filter(r => r.body);
 
   return (
@@ -65,19 +81,7 @@ Testimonials.meta = {
   componentKey: 'testimonials',
   category: 'content',
   label: 'Interior Testimonials',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    r1Body: { type: 'textarea', label: '후기 1 본문' },
-    r1Author: { type: 'text', label: '후기 1 작성자' },
-    r1Meta: { type: 'text', label: '후기 1 메타' },
-    r2Body: { type: 'textarea', label: '후기 2 본문' },
-    r2Author: { type: 'text', label: '후기 2 작성자' },
-    r2Meta: { type: 'text', label: '후기 2 메타' },
-    r3Body: { type: 'textarea', label: '후기 3 본문' },
-    r3Author: { type: 'text', label: '후기 3 작성자' },
-    r3Meta: { type: 'text', label: '후기 3 메타' },
-  },
+  fieldsSchema: testimonialsSchema,
   previewImage: '/component-previews/interior/testimonials.webp',
 };
 

@@ -1,17 +1,34 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * 자주 묻는 질문 — a simple question/answer list. Rendered as static
  * open rows (server component, no client JS). `items` falls back to an
  * empty array for older Sites.
  */
+const faqSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: 'FAQ 항목',
+    minItems: 1,
+    itemSchema: {
+      question: { type: 'text', label: '질문', required: true },
+      answer: { type: 'textarea', label: '답변', required: true },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type FaqContent = ValuesOf<typeof faqSchema>;
+
 const Faq: SectionComponent = function Faq(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as FaqContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -32,11 +49,11 @@ const Faq: SectionComponent = function Faq(props: TemplateSectionProps) {
         )}
 
         <dl className="divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
-          {items.map((item, idx) => {
-            const question = getFieldValue(item.question);
-            const answer = getFieldValue(item.answer);
+          {items.map((item) => {
+            const question = item.fields.question;
+            const answer = item.fields.answer;
             return (
-              <div key={question || idx} className="py-7">
+              <div key={item.id} className="py-7">
                 <dt className="flex gap-3 text-lg font-semibold text-[var(--color-ink)]">
                   <span className="text-[var(--color-primary)]">Q.</span>
                   <span>{question}</span>
@@ -59,19 +76,7 @@ Faq.meta = {
   componentKey: 'faq',
   category: 'content',
   label: '자주 묻는 질문',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: 'FAQ 항목',
-      minItems: 1,
-      itemSchema: {
-        question: { type: 'text', label: '질문', required: true },
-        answer: { type: 'textarea', label: '답변', required: true },
-      },
-    },
-  },
+  fieldsSchema: faqSchema,
 };
 
 export default Faq;

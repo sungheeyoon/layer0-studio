@@ -1,24 +1,42 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { VerifiedCheckIcon, ChatIcon, ArrowDownIcon, DiplomaIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const heroSchema = {
+  eyebrow: { type: 'text', label: '상단 배지' },
+  title: { type: 'textarea', label: '메인 타이틀', required: true },
+  subtitle: { type: 'textarea', label: '서브 타이틀' },
+  ctaPrimaryText: { type: 'text', label: '기본 CTA' },
+  ctaSecondaryText: { type: 'text', label: '보조 CTA' },
+  stat1Value: { type: 'text', label: '통계 1 값' },
+  stat1Label: { type: 'text', label: '통계 1 라벨' },
+  stat2Value: { type: 'text', label: '통계 2 값' },
+  stat2Label: { type: 'text', label: '통계 2 라벨' },
+  stat3Value: { type: 'text', label: '통계 3 값' },
+  stat3Label: { type: 'text', label: '통계 3 라벨' },
+  stat4Value: { type: 'text', label: '통계 4 값' },
+  stat4Label: { type: 'text', label: '통계 4 라벨' },
+} as const satisfies FieldsSchema;
+
+type HeroContent = ValuesOf<typeof heroSchema>;
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const subtitle = getFieldValue(fields, 'subtitle') || '';
-  const ctaPrimaryText = getFieldValue(fields, 'ctaPrimaryText') || '';
-  const ctaSecondaryText = getFieldValue(fields, 'ctaSecondaryText') || '';
+  const content = section.fields as HeroContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const subtitle = content.subtitle || '';
+  const ctaPrimaryText = content.ctaPrimaryText || '';
+  const ctaSecondaryText = content.ctaSecondaryText || '';
 
-  const stat1Value = getFieldValue(fields, 'stat1Value') || '';
-  const stat1Label = getFieldValue(fields, 'stat1Label') || '';
-  const stat2Value = getFieldValue(fields, 'stat2Value') || '';
-  const stat2Label = getFieldValue(fields, 'stat2Label') || '';
-  const stat3Value = getFieldValue(fields, 'stat3Value') || '';
-  const stat3Label = getFieldValue(fields, 'stat3Label') || '';
-  const stat4Value = getFieldValue(fields, 'stat4Value') || '';
-  const stat4Label = getFieldValue(fields, 'stat4Label') || '';
+  const stat1Value = content.stat1Value || '';
+  const stat1Label = content.stat1Label || '';
+  const stat2Value = content.stat2Value || '';
+  const stat2Label = content.stat2Label || '';
+  const stat3Value = content.stat3Value || '';
+  const stat3Label = content.stat3Label || '';
+  const stat4Value = content.stat4Value || '';
+  const stat4Label = content.stat4Label || '';
 
   return (
     <section className="bg-gradient-to-br from-[var(--l-surface)] via-[var(--l-surface-warm)] to-[var(--l-surface-warmer)] min-h-[100dvh] flex flex-col justify-center pt-28 pb-20 px-4 relative overflow-hidden">
@@ -107,21 +125,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Legal Hero',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 배지' },
-    title: { type: 'textarea', label: '메인 타이틀', required: true },
-    subtitle: { type: 'textarea', label: '서브 타이틀' },
-    ctaPrimaryText: { type: 'text', label: '기본 CTA' },
-    ctaSecondaryText: { type: 'text', label: '보조 CTA' },
-    stat1Value: { type: 'text', label: '통계 1 값' },
-    stat1Label: { type: 'text', label: '통계 1 라벨' },
-    stat2Value: { type: 'text', label: '통계 2 값' },
-    stat2Label: { type: 'text', label: '통계 2 라벨' },
-    stat3Value: { type: 'text', label: '통계 3 값' },
-    stat3Label: { type: 'text', label: '통계 3 라벨' },
-    stat4Value: { type: 'text', label: '통계 4 값' },
-    stat4Label: { type: 'text', label: '통계 4 라벨' },
-  },
+  fieldsSchema: heroSchema,
   previewImage: '/component-previews/legal/hero.webp',
 };
 

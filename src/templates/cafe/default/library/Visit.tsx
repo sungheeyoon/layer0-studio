@@ -1,24 +1,45 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { PhoneIcon, ArrowUpRightIcon, MapPointIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const visitSchema = {
+  backgroundImage: { type: 'image', label: '배경 이미지' },
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀' },
+  description: { type: 'textarea', label: '섹션 설명' },
+  phone: { type: 'text', label: '전화번호' },
+  instagram: { type: 'url', label: '인스타그램 링크' },
+  h1Label: { type: 'text', label: '시간 1 라벨' },
+  h1Value: { type: 'text', label: '시간 1 수치' },
+  h2Label: { type: 'text', label: '시간 2 라벨' },
+  h2Value: { type: 'text', label: '시간 2 수치' },
+  h3Label: { type: 'text', label: '시간 3 라벨' },
+  h3Value: { type: 'text', label: '시간 3 수치' },
+  h4Label: { type: 'text', label: '시간 4 라벨' },
+  h4Value: { type: 'text', label: '시간 4 수치' },
+  address: { type: 'text', label: '주소' },
+  addressDetail: { type: 'textarea', label: '상세 주소/주차' },
+} as const satisfies FieldsSchema;
+
+type VisitContent = ValuesOf<typeof visitSchema>;
 
 const Visit: SectionComponent = function Visit({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
-  const label = getFieldValue(fields, 'eyebrow') || '방문 안내';
-  const title = getFieldValue(fields, 'title') || '언제든\n환영합니다';
-  const description = getFieldValue(fields, 'description') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const instagram = getFieldValue(fields, 'instagram') || '#';
+  const content = section.fields as VisitContent;
+  const bgImage = content.backgroundImage?.url || '';
+  const label = content.eyebrow || '방문 안내';
+  const title = content.title || '언제든\n환영합니다';
+  const description = content.description || '';
+  const phone = content.phone || '';
+  const instagram = content.instagram || '#';
 
-  const hours = [1, 2, 3, 4].map(n => ({
-    label: getFieldValue(fields, `h${n}Label`),
-    value: getFieldValue(fields, `h${n}Value`),
+  const hours = ([1, 2, 3, 4] as const).map(n => ({
+    label: content[`h${n}Label`],
+    value: content[`h${n}Value`],
   })).filter(h => h.label);
 
-  const address = getFieldValue(fields, 'address') || '';
-  const addressDetail = getFieldValue(fields, 'addressDetail') || '';
+  const address = content.address || '';
+  const addressDetail = content.addressDetail || '';
 
   return (
     <section className="relative overflow-hidden" id="visit">
@@ -110,24 +131,7 @@ Visit.meta = {
   componentKey: 'visit',
   category: 'about',
   label: 'Visit Info',
-  fieldsSchema: {
-    backgroundImage: { type: 'image', label: '배경 이미지' },
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀' },
-    description: { type: 'textarea', label: '섹션 설명' },
-    phone: { type: 'text', label: '전화번호' },
-    instagram: { type: 'url', label: '인스타그램 링크' },
-    h1Label: { type: 'text', label: '시간 1 라벨' },
-    h1Value: { type: 'text', label: '시간 1 수치' },
-    h2Label: { type: 'text', label: '시간 2 라벨' },
-    h2Value: { type: 'text', label: '시간 2 수치' },
-    h3Label: { type: 'text', label: '시간 3 라벨' },
-    h3Value: { type: 'text', label: '시간 3 수치' },
-    h4Label: { type: 'text', label: '시간 4 라벨' },
-    h4Value: { type: 'text', label: '시간 4 수치' },
-    address: { type: 'text', label: '주소' },
-    addressDetail: { type: 'textarea', label: '상세 주소/주차' },
-  },
+  fieldsSchema: visitSchema,
   previewImage: '/component-previews/cafe/visit.webp',
 };
 

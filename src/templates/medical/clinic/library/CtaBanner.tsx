@@ -1,19 +1,31 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Full-width call-to-action band over a photograph — an eyebrow, heading,
  * body and a single button label. Used for the 예약 CTA sections.
  */
+const ctaBannerSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목', required: true },
+  body: { type: 'textarea', label: '설명' },
+  ctaLabel: { type: 'text', label: '버튼 텍스트' },
+  phone: { type: 'text', label: '전화번호' },
+  image: { type: 'image', label: '배경 이미지' },
+} as const satisfies FieldsSchema;
+
+type CtaBannerContent = ValuesOf<typeof ctaBannerSchema>;
+
 const CtaBanner: SectionComponent = function CtaBanner(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading') || '진료 예약';
-  const body = getFieldValue(section.fields, 'body');
-  const ctaLabel = getFieldValue(section.fields, 'ctaLabel');
-  const phone = getFieldValue(section.fields, 'phone');
-  const image = getFieldValue(section.fields, 'image');
+  const content = section.fields as CtaBannerContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading || '진료 예약';
+  const body = content.body;
+  const ctaLabel = content.ctaLabel;
+  const phone = content.phone;
+  const image = content.image?.url;
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-primary)]">
@@ -60,14 +72,7 @@ CtaBanner.meta = {
   componentKey: 'ctaBanner',
   category: 'cta',
   label: '예약 CTA 배너',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목', required: true },
-    body: { type: 'textarea', label: '설명' },
-    ctaLabel: { type: 'text', label: '버튼 텍스트' },
-    phone: { type: 'text', label: '전화번호' },
-    image: { type: 'image', label: '배경 이미지' },
-  },
+  fieldsSchema: ctaBannerSchema,
 };
 
 export default CtaBanner;

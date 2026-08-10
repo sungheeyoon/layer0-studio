@@ -1,19 +1,32 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { DumbbellIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, ClockIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const footerSchema = {
+  brandName: { type: 'text', label: '브랜드 이름' },
+  brandSubtext: { type: 'text', label: '보조 텍스트' },
+  description: { type: 'textarea', label: '브랜드 설명' },
+  copyright: { type: 'text', label: '저작권' },
+  businessInfo: { type: 'text', label: '사업자 정보' },
+  address: { type: 'textarea', label: '주소' },
+  phone: { type: 'text', label: '전화번호' },
+  hours: { type: 'textarea', label: '운영 시간' },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || 'APEX';
-  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Fitness';
-  const description = getFieldValue(fields, 'description') || '';
-  const copyright = getFieldValue(fields, 'copyright') || `© ${new Date().getFullYear()} APEX FITNESS. All rights reserved.`;
-  const businessInfo = getFieldValue(fields, 'businessInfo') || '';
+  const content = section.fields as FooterContent;
+  const brandName = content.brandName || 'APEX';
+  const brandSubtext = content.brandSubtext || 'Fitness';
+  const description = content.description || '';
+  const copyright = content.copyright || `© ${new Date().getFullYear()} APEX FITNESS. All rights reserved.`;
+  const businessInfo = content.businessInfo || '';
   
-  const address = getFieldValue(fields, 'address') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const hours = getFieldValue(fields, 'hours') || '';
+  const address = content.address || '';
+  const phone = content.phone || '';
+  const hours = content.hours || '';
 
   return (
     <footer className="bg-[var(--f-void)] border-t border-[var(--f-border)] pt-16 pb-10 px-6 lg:px-10">
@@ -124,16 +137,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Fitness Footer',
-  fieldsSchema: {
-    brandName: { type: 'text', label: '브랜드 이름' },
-    brandSubtext: { type: 'text', label: '보조 텍스트' },
-    description: { type: 'textarea', label: '브랜드 설명' },
-    copyright: { type: 'text', label: '저작권' },
-    businessInfo: { type: 'text', label: '사업자 정보' },
-    address: { type: 'textarea', label: '주소' },
-    phone: { type: 'text', label: '전화번호' },
-    hours: { type: 'textarea', label: '운영 시간' },
-  },
+  fieldsSchema: footerSchema,
   previewImage: '/component-previews/fitness/footer.webp',
 };
 

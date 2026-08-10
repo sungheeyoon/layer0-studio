@@ -1,14 +1,24 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../corporate.module.css';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const heroSchema = {
+  title: { type: 'text', label: 'Main Title', required: true },
+  subtitle: { type: 'text', label: 'Subtitle' },
+  backgroundImage: { type: 'image', label: 'Background Image' },
+  ctaText: { type: 'text', label: 'CTA Button Text' },
+  ctaUrl: { type: 'url', label: 'CTA Button Link' },
+} as const satisfies FieldsSchema;
+
+type HeroContent = ValuesOf<typeof heroSchema>;
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || '';
-  const subtitle = getFieldValue(fields, 'subtitle') || '';
-  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
-  const ctaText = getFieldValue(fields, 'ctaText') || '';
-  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#';
+  const content = section.fields as HeroContent;
+  const title = content.title || '';
+  const subtitle = content.subtitle || '';
+  const bgImage = content.backgroundImage?.url || '';
+  const ctaText = content.ctaText || '';
+  const ctaUrl = content.ctaUrl || '#';
 
   return (
     <div
@@ -41,13 +51,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Corporate Hero',
-  fieldsSchema: {
-    title: { type: 'text', label: 'Main Title', required: true },
-    subtitle: { type: 'text', label: 'Subtitle' },
-    backgroundImage: { type: 'image', label: 'Background Image' },
-    ctaText: { type: 'text', label: 'CTA Button Text' },
-    ctaUrl: { type: 'url', label: 'CTA Button Link' }
-  },
+  fieldsSchema: heroSchema,
   previewImage: '/component-previews/corporate/hero.webp',
 };
 

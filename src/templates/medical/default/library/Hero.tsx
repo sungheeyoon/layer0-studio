@@ -2,23 +2,43 @@ import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon, StarIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const heroSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'textarea', label: '메인 타이틀', required: true },
+  description: { type: 'textarea', label: '설명' },
+  image: { type: 'image', label: '히어로 이미지' },
+  statValue: { type: 'text', label: '플로팅 통계 값' },
+  statLabel: { type: 'text', label: '플로팅 통계 라벨' },
+  sinceLabel: { type: 'text', label: '설립 연도 라벨' },
+  ctaPrimary: { type: 'text', label: '기본 CTA' },
+  ctaSecondary: { type: 'text', label: '보조 CTA' },
+  stat1Value: { type: 'text', label: '통계 1 값' },
+  stat1Label: { type: 'text', label: '통계 1 라벨' },
+  stat2Value: { type: 'text', label: '통계 2 값' },
+  stat2Label: { type: 'text', label: '통계 2 라벨' },
+  stat3Value: { type: 'text', label: '통계 3 값' },
+  stat3Label: { type: 'text', label: '통계 3 라벨' },
+} as const satisfies FieldsSchema;
+
+type HeroContent = ValuesOf<typeof heroSchema>;
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const description = getFieldValue(fields, 'description') || '';
-  const image = getFieldValue(fields, 'image') || '';
-  const statValue = getFieldValue(fields, 'statValue') || '';
-  const statLabel = getFieldValue(fields, 'statLabel') || '';
-  const sinceLabel = getFieldValue(fields, 'sinceLabel') || '';
-  const ctaPrimary = getFieldValue(fields, 'ctaPrimary') || '';
-  const ctaSecondary = getFieldValue(fields, 'ctaSecondary') || '';
+  const content = section.fields as HeroContent;
+  const label = content.eyebrow || '';
+  const title = content.title || '';
+  const description = content.description || '';
+  const image = content.image?.url || '';
+  const statValue = content.statValue || '';
+  const statLabel = content.statLabel || '';
+  const sinceLabel = content.sinceLabel || '';
+  const ctaPrimary = content.ctaPrimary || '';
+  const ctaSecondary = content.ctaSecondary || '';
 
-  const stats = [1, 2, 3].map(n => ({
-    value: getFieldValue(fields, `stat${n}Value`),
-    label: getFieldValue(fields, `stat${n}Label`),
+  const stats = ([1, 2, 3] as const).map(n => ({
+    value: content[`stat${n}Value`],
+    label: content[`stat${n}Label`],
   })).filter(s => s.value);
 
   return (
@@ -118,23 +138,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Medical Hero',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'textarea', label: '메인 타이틀', required: true },
-    description: { type: 'textarea', label: '설명' },
-    image: { type: 'image', label: '히어로 이미지' },
-    statValue: { type: 'text', label: '플로팅 통계 값' },
-    statLabel: { type: 'text', label: '플로팅 통계 라벨' },
-    sinceLabel: { type: 'text', label: '설립 연도 라벨' },
-    ctaPrimary: { type: 'text', label: '기본 CTA' },
-    ctaSecondary: { type: 'text', label: '보조 CTA' },
-    stat1Value: { type: 'text', label: '통계 1 값' },
-    stat1Label: { type: 'text', label: '통계 1 라벨' },
-    stat2Value: { type: 'text', label: '통계 2 값' },
-    stat2Label: { type: 'text', label: '통계 2 라벨' },
-    stat3Value: { type: 'text', label: '통계 3 값' },
-    stat3Label: { type: 'text', label: '통계 3 라벨' },
-  },
+  fieldsSchema: heroSchema,
   previewImage: '/component-previews/medical/hero.webp',
 };
 

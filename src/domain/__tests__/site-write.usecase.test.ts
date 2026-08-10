@@ -8,9 +8,9 @@ import {
   makeContent,
 } from './fakes';
 import {
+  ArrayItem,
   ContentModel,
   SingleContent,
-  ArrayField,
 } from '../entities/template.entity';
 import { SiteContentValidationIssue } from '../usecases/ports/site-content-validator.port';
 import { AssetUsage } from '../usecases/ports/asset-usage-collector.port';
@@ -126,6 +126,9 @@ describe('SiteWriteUseCase.saveContent — validation gate', () => {
   });
 
   it('preserves array fields when valid', async () => {
+    // An array Value: a plain array of `{ id, fields }` items (ADR-0016 §4-3).
+    // The `id` is a sibling of `fields`, so nothing the use case does may fold
+    // it in — it is the asset slot key and React's reconciliation key.
     const json = makeContent({
       sections: [
         {
@@ -134,20 +137,18 @@ describe('SiteWriteUseCase.saveContent — validation gate', () => {
           visible: true,
           nav: { visible: false, label: 'Menu' },
           fields: {
-            items: {
-              type: 'array',
-              label: 'Items',
-              items: [{ title: { type: 'text', label: 'Title', value: 'Item 1' } }],
-            },
+            items: [{ id: 'item-1', fields: { title: 'Item 1' } }],
           },
         },
       ],
     });
     const { uc, token } = setup();
     const result = await uc.saveContent('site-1', 'user-1', json, token);
-    const items = asSingle(result.content).sections[0].fields.items as ArrayField;
-    expect(items.type).toBe('array');
-    expect(items.items).toHaveLength(1);
+    const items = asSingle(result.content).sections[0].fields.items as Array<
+      ArrayItem<{ title: { type: 'text'; label: string } }>
+    >;
+    expect(items).toHaveLength(1);
+    expect(items[0]).toEqual({ id: 'item-1', fields: { title: 'Item 1' } });
   });
 });
 
@@ -161,7 +162,7 @@ describe('SiteWriteUseCase.saveContent — validation gate', () => {
 describe('SiteWriteUseCase.saveContent — asset usages', () => {
   const usages = [
     { assetId: 'asset-a', slotKey: 'section-1.logo' },
-    { assetId: 'asset-b', slotKey: 'section-1.items[0].image' },
+    { assetId: 'asset-b', slotKey: 'section-1.items[item-1].image' },
   ];
 
   it('collects usages from the content being saved and hands them to the repository', async () => {

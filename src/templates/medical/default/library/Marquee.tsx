@@ -1,11 +1,22 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { VerifiedCheckIcon, StarIcon, ShieldCheckIcon, GraduationCapIcon, HospitalIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const marqueeSchema = {
+  item1: { type: 'text', label: '항목 1' },
+  item2: { type: 'text', label: '항목 2' },
+  item3: { type: 'text', label: '항목 3' },
+  item4: { type: 'text', label: '항목 4' },
+  item5: { type: 'text', label: '항목 5' },
+  item6: { type: 'text', label: '항목 6' },
+} as const satisfies FieldsSchema;
+
+type MarqueeContent = ValuesOf<typeof marqueeSchema>;
 
 const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const items = [1, 2, 3, 4, 5, 6].map(n => getFieldValue(fields, `item${n}`)).filter(Boolean);
+  const content = section.fields as MarqueeContent;
+  const items = ([1, 2, 3, 4, 5, 6] as const).map(n => content[`item${n}`]).filter(Boolean);
 
   const icons = [
     <VerifiedCheckIcon key="1" size={14} className="text-[var(--m-gold)]" />,
@@ -50,14 +61,7 @@ Marquee.meta = {
   componentKey: 'marquee',
   category: 'content',
   label: 'Medical Certifications',
-  fieldsSchema: {
-    item1: { type: 'text', label: '항목 1' },
-    item2: { type: 'text', label: '항목 2' },
-    item3: { type: 'text', label: '항목 3' },
-    item4: { type: 'text', label: '항목 4' },
-    item5: { type: 'text', label: '항목 5' },
-    item6: { type: 'text', label: '항목 6' },
-  },
+  fieldsSchema: marqueeSchema,
   previewImage: '/component-previews/medical/marquee.webp',
 };
 

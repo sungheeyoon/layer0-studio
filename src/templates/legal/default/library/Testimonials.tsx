@@ -1,18 +1,35 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { StarIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const testimonialsSchema = {
+  title: { type: 'text', label: '섹션 타이틀', required: true },
+  review1Body: { type: 'textarea', label: '후기 1 본문' },
+  review1Author: { type: 'text', label: '후기 1 작성자' },
+  review1Meta: { type: 'text', label: '후기 1 메타' },
+  review2Body: { type: 'textarea', label: '후기 2 본문' },
+  review2Author: { type: 'text', label: '후기 2 작성자' },
+  review2Meta: { type: 'text', label: '후기 2 메타' },
+  review3Body: { type: 'textarea', label: '후기 3 본문' },
+  review3Author: { type: 'text', label: '후기 3 작성자' },
+  review3Meta: { type: 'text', label: '후기 3 메타' },
+} as const satisfies FieldsSchema;
+
+type TestimonialsContent = ValuesOf<typeof testimonialsSchema>;
 
 const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as TestimonialsContent;
+  const title = content.title || '';
 
-  const reviews = [1, 2, 3].map(n => ({
-    body: getFieldValue(fields, `review${n}Body`) || '',
-    author: getFieldValue(fields, `review${n}Author`) || '',
-    meta: getFieldValue(fields, `review${n}Meta`) || '',
+  const reviews = ([1, 2, 3] as const).map(n => ({
+    body: content[`review${n}Body`] || '',
+    author: content[`review${n}Author`] || '',
+    meta: content[`review${n}Meta`] || '',
     featured: n === 2,
-    avatar: getFieldValue(fields, `review${n}Avatar`) || `https://i.pravatar.cc/150?u=legal_review_${n}`,
+    // No `reviewNAvatar` exists in the schema or any preset — the read always
+    // fell through to this placeholder. Kept as the placeholder it was.
+    avatar: `https://i.pravatar.cc/150?u=legal_review_${n}`,
   }));
 
   return (
@@ -58,18 +75,7 @@ Testimonials.meta = {
   componentKey: 'testimonials',
   category: 'content',
   label: 'Legal Testimonials',
-  fieldsSchema: {
-    title: { type: 'text', label: '섹션 타이틀', required: true },
-    review1Body: { type: 'textarea', label: '후기 1 본문' },
-    review1Author: { type: 'text', label: '후기 1 작성자' },
-    review1Meta: { type: 'text', label: '후기 1 메타' },
-    review2Body: { type: 'textarea', label: '후기 2 본문' },
-    review2Author: { type: 'text', label: '후기 2 작성자' },
-    review2Meta: { type: 'text', label: '후기 2 메타' },
-    review3Body: { type: 'textarea', label: '후기 3 본문' },
-    review3Author: { type: 'text', label: '후기 3 작성자' },
-    review3Meta: { type: 'text', label: '후기 3 메타' },
-  },
+  fieldsSchema: testimonialsSchema,
   previewImage: '/component-previews/legal/testimonials.webp',
 };
 

@@ -1,24 +1,44 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { SunIcon, BuildingsIcon, LaptopIcon, BookIcon, VinylIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const spaceSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀' },
+  description: { type: 'textarea', label: '섹션 설명' },
+  imageLarge: { type: 'image', label: '큰 이미지' },
+  imageSmall: { type: 'image', label: '작은 이미지' },
+  cardTitle: { type: 'text', label: '카드 제목' },
+  cardDesc: { type: 'textarea', label: '카드 설명' },
+  f1Title: { type: 'text', label: '특징 1 제목' },
+  f1Desc: { type: 'text', label: '특징 1 설명' },
+  f2Title: { type: 'text', label: '특징 2 제목' },
+  f2Desc: { type: 'text', label: '특징 2 설명' },
+  f3Title: { type: 'text', label: '특징 3 제목' },
+  f3Desc: { type: 'text', label: '특징 3 설명' },
+  f4Title: { type: 'text', label: '특징 4 제목' },
+  f4Desc: { type: 'text', label: '특징 4 설명' },
+} as const satisfies FieldsSchema;
+
+type SpaceContent = ValuesOf<typeof spaceSchema>;
 
 const Space: SectionComponent = function Space({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '공간';
-  const title = getFieldValue(fields, 'title') || '머물고 싶은\n공간을 만듭니다';
-  const description = getFieldValue(fields, 'description') || '';
+  const content = section.fields as SpaceContent;
+  const label = content.eyebrow || '공간';
+  const title = content.title || '머물고 싶은\n공간을 만듭니다';
+  const description = content.description || '';
 
-  const imageLarge = getFieldValue(fields, 'imageLarge') || '';
-  const imageSmall = getFieldValue(fields, 'imageSmall') || '';
-  const cardTitle = getFieldValue(fields, 'cardTitle') || '채광이 좋은 공간';
-  const cardDesc = getFieldValue(fields, 'cardDesc') || '';
+  const imageLarge = content.imageLarge?.url || '';
+  const imageSmall = content.imageSmall?.url || '';
+  const cardTitle = content.cardTitle || '채광이 좋은 공간';
+  const cardDesc = content.cardDesc || '';
 
   const features = [
-    { title: getFieldValue(fields, 'f1Title'), desc: getFieldValue(fields, 'f1Desc'), icon: <BuildingsIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
-    { title: getFieldValue(fields, 'f2Title'), desc: getFieldValue(fields, 'f2Desc'), icon: <LaptopIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
-    { title: getFieldValue(fields, 'f3Title'), desc: getFieldValue(fields, 'f3Desc'), icon: <BookIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
-    { title: getFieldValue(fields, 'f4Title'), desc: getFieldValue(fields, 'f4Desc'), icon: <VinylIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: content.f1Title, desc: content.f1Desc, icon: <BuildingsIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: content.f2Title, desc: content.f2Desc, icon: <LaptopIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: content.f3Title, desc: content.f3Desc, icon: <BookIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
+    { title: content.f4Title, desc: content.f4Desc, icon: <VinylIcon size={20} className="text-[var(--color-primary)] fill-current" /> },
   ].filter(f => f.title);
 
   return (
@@ -97,23 +117,7 @@ Space.meta = {
   componentKey: 'space',
   category: 'about',
   label: 'Space & Features',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀' },
-    description: { type: 'textarea', label: '섹션 설명' },
-    imageLarge: { type: 'image', label: '큰 이미지' },
-    imageSmall: { type: 'image', label: '작은 이미지' },
-    cardTitle: { type: 'text', label: '카드 제목' },
-    cardDesc: { type: 'textarea', label: '카드 설명' },
-    f1Title: { type: 'text', label: '특징 1 제목' },
-    f1Desc: { type: 'text', label: '특징 1 설명' },
-    f2Title: { type: 'text', label: '특징 2 제목' },
-    f2Desc: { type: 'text', label: '특징 2 설명' },
-    f3Title: { type: 'text', label: '특징 3 제목' },
-    f3Desc: { type: 'text', label: '특징 3 설명' },
-    f4Title: { type: 'text', label: '특징 4 제목' },
-    f4Desc: { type: 'text', label: '특징 4 설명' },
-  },
+  fieldsSchema: spaceSchema,
   previewImage: '/component-previews/cafe/space.webp',
 };
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Shared header for the Multi site. The page-link menu (`navItems`) is
@@ -9,12 +9,21 @@ import { getFieldValue } from '@/domain/entities/template.entity';
  * (ADR-0007) — each entry is a real page link, so a plain server component
  * with `<Link>` is enough.
  */
+const navigationSchema = {
+  brandName: { type: 'text', label: '병원명', required: true },
+  ctaLabel: { type: 'text', label: 'CTA 버튼 텍스트' },
+  ctaHref: { type: 'text', label: 'CTA 링크' },
+} as const satisfies FieldsSchema;
+
+type NavigationContent = ValuesOf<typeof navigationSchema>;
+
 const Navigation: SectionComponent = function Navigation(props: TemplateSectionProps) {
   const { section } = props;
+  const content = section.fields as NavigationContent;
   const { navItems } = props as NavSectionProps;
-  const brandName = getFieldValue(section.fields, 'brandName') || '온유의원';
-  const ctaLabel = getFieldValue(section.fields, 'ctaLabel');
-  const ctaHref = getFieldValue(section.fields, 'ctaHref') || navItems[navItems.length - 1]?.href || '/';
+  const brandName = content.brandName || '온유의원';
+  const ctaLabel = content.ctaLabel;
+  const ctaHref = content.ctaHref || navItems[navItems.length - 1]?.href || '/';
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--color-line)] bg-[var(--color-surface)]/90 backdrop-blur">
@@ -55,11 +64,7 @@ Navigation.meta = {
   componentKey: 'nav',
   category: 'nav',
   label: '헤더 내비게이션',
-  fieldsSchema: {
-    brandName: { type: 'text', label: '병원명', required: true },
-    ctaLabel: { type: 'text', label: 'CTA 버튼 텍스트' },
-    ctaHref: { type: 'text', label: 'CTA 링크' },
-  },
+  fieldsSchema: navigationSchema,
 };
 
 export default Navigation;

@@ -41,7 +41,7 @@ const GLOBAL_STYLES_PATH = /^globalStyles\.([A-Za-z]+)$/;
  * Site Type without knowing which one produced it.
  *
  * `[^.[]+$` deliberately fails to match a nested array-item path
- * (`….fields.menu.items[0].fields.name`): those fields render inside
+ * (`….fields.menu[<item.id>].name`, ADR-0016 §4-4): those fields render inside
  * `ArrayFieldEditor`, which has no anchor to hang a message on. No user-actionable
  * rule reaches inside array items today — Rule 11 walks only top-level Section
  * fields — so nothing is currently dropped by this.

@@ -1,21 +1,47 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { GraduationCapIcon, HospitalIcon, ClockIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const teamSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'text', label: '섹션 설명' },
+  member1Name: { type: 'text', label: 'M1 이름' },
+  member1Role: { type: 'text', label: 'M1 역할' },
+  member1Info1: { type: 'text', label: 'M1 정보 1' },
+  member1Info2: { type: 'text', label: 'M1 정보 2' },
+  member1Info3: { type: 'text', label: 'M1 정보 3' },
+  member1Image: { type: 'image', label: 'M1 이미지' },
+  member2Name: { type: 'text', label: 'M2 이름' },
+  member2Role: { type: 'text', label: 'M2 역할' },
+  member2Info1: { type: 'text', label: 'M2 정보 1' },
+  member2Info2: { type: 'text', label: 'M2 정보 2' },
+  member2Info3: { type: 'text', label: 'M2 정보 3' },
+  member2Image: { type: 'image', label: 'M2 이미지' },
+  member3Name: { type: 'text', label: 'M3 이름' },
+  member3Role: { type: 'text', label: 'M3 역할' },
+  member3Info1: { type: 'text', label: 'M3 정보 1' },
+  member3Info2: { type: 'text', label: 'M3 정보 2' },
+  member3Info3: { type: 'text', label: 'M3 정보 3' },
+  member3Image: { type: 'image', label: 'M3 이미지' },
+} as const satisfies FieldsSchema;
+
+type TeamContent = ValuesOf<typeof teamSchema>;
 
 const Team: SectionComponent = function Team({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const description = getFieldValue(fields, 'description') || '';
+  const content = section.fields as TeamContent;
+  const label = content.eyebrow || '';
+  const title = content.title || '';
+  const description = content.description || '';
 
-  const members = [1, 2, 3].map(n => ({
-    name: getFieldValue(fields, `member${n}Name`),
-    role: getFieldValue(fields, `member${n}Role`),
-    info1: getFieldValue(fields, `member${n}Info1`),
-    info2: getFieldValue(fields, `member${n}Info2`),
-    info3: getFieldValue(fields, `member${n}Info3`),
-    image: getFieldValue(fields, `member${n}Image`),
+  const members = ([1, 2, 3] as const).map(n => ({
+    name: content[`member${n}Name`],
+    role: content[`member${n}Role`],
+    info1: content[`member${n}Info1`],
+    info2: content[`member${n}Info2`],
+    info3: content[`member${n}Info3`],
+    image: content[`member${n}Image`]?.url,
     mt: n === 2 ? 'lg:mt-10' : '',
   })).filter(m => m.name);
 
@@ -71,29 +97,7 @@ Team.meta = {
   componentKey: 'team',
   category: 'content',
   label: 'Medical Team',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'text', label: '섹션 설명' },
-    member1Name: { type: 'text', label: 'M1 이름' },
-    member1Role: { type: 'text', label: 'M1 역할' },
-    member1Info1: { type: 'text', label: 'M1 정보 1' },
-    member1Info2: { type: 'text', label: 'M1 정보 2' },
-    member1Info3: { type: 'text', label: 'M1 정보 3' },
-    member1Image: { type: 'image', label: 'M1 이미지' },
-    member2Name: { type: 'text', label: 'M2 이름' },
-    member2Role: { type: 'text', label: 'M2 역할' },
-    member2Info1: { type: 'text', label: 'M2 정보 1' },
-    member2Info2: { type: 'text', label: 'M2 정보 2' },
-    member2Info3: { type: 'text', label: 'M2 정보 3' },
-    member2Image: { type: 'image', label: 'M2 이미지' },
-    member3Name: { type: 'text', label: 'M3 이름' },
-    member3Role: { type: 'text', label: 'M3 역할' },
-    member3Info1: { type: 'text', label: 'M3 정보 1' },
-    member3Info2: { type: 'text', label: 'M3 정보 2' },
-    member3Info3: { type: 'text', label: 'M3 정보 3' },
-    member3Image: { type: 'image', label: 'M3 이미지' },
-  },
+  fieldsSchema: teamSchema,
   previewImage: '/component-previews/medical/team.webp',
 };
 

@@ -4,17 +4,22 @@ import { useState } from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { PlusIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { faqSchema } from './Faq.meta';
+
+type FaqContent = ValuesOf<typeof faqSchema>;
 
 const Faq: SectionComponent = function Faq({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as FaqContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
 
-  const items = [1, 2, 3, 4, 5, 6]
+  // Four, not six: the schema declares q1–q4 and no preset carries q5/q6, so
+  // the last two iterations only ever produced rows the filter dropped.
+  const items = ([1, 2, 3, 4] as const)
     .map((n) => ({
-      q: getFieldValue(fields, `q${n}`) || '',
-      a: getFieldValue(fields, `a${n}`) || '',
+      q: content[`q${n}`] || '',
+      a: content[`a${n}`] || '',
     }))
     .filter((it) => it.q);
 

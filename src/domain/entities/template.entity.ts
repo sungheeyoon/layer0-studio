@@ -1,68 +1,82 @@
-export type FieldType =
-  | 'text'
-  | 'textarea'
-  | 'image'
-  | 'url'
-  | 'color'
-  | 'number'
-  | 'select'
-  | 'array';
-
-interface BaseField {
-  label: string;
-  editable?: boolean; // Basic true, hidden in editor if false
-}
-
-export interface TextField extends BaseField {
-  type: 'text' | 'textarea' | 'url' | 'color' | 'number';
-  value: string;
-}
-
-export interface SelectField extends BaseField {
-  type: 'select';
-  value: string;
-  options: string[]; // for 'select' type
-}
-
-export interface ImageField extends BaseField {
-  type: 'image';
-  value: string; // CDN URL
-  assetId?: string | null; // UUID of physical asset for reference counting
-}
-
-export interface ArrayField extends BaseField {
-  type: 'array';
-  items: Array<Record<string, Field>>;
-}
-
-export type Field =
-  | TextField
-  | SelectField
-  | ImageField
-  | ArrayField;
+// ─────────────────────────────────────────────────────────────────────────────
+// ADR-0016 — schema-first Field/Value split.
+//
+// The schema is the single source of truth. A `FieldDescriptor` says how a
+// field is edited; the *type* of the data it holds (its Value) is derived from
+// it via `ValuesOf`, never written by hand. That is what makes schema/content
+// drift structurally impossible rather than merely validated.
+//
+// The legacy `Field` union (`{ type, label, value }` objects stored *beside*
+// the data) and its `getFieldValue` accessor are gone as of #136. The only
+// place that shape still appears is `scripts/lib/migrate-single-site.ts`, which
+// describes it locally because it transforms rows written before this split.
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Safely get the string value of a field.
- * Returns empty string for 'array' type or missing value.
- * 
- * Usage:
- * 1. getFieldValue(field)
- * 2. getFieldValue(data, 'key')
+ * An uploaded image. `url` is what the renderer puts in `src`; `assetId` is
+ * the reference-counting handle ADR-0003's orphan sweep reads. Two different
+ * jobs, deliberately not merged into one string.
  */
-export function getFieldValue(fieldOrData: Field | Record<string, Field> | undefined, key?: string): string {
-  if (!fieldOrData) return '';
-
-  if (key !== undefined) {
-    const data = fieldOrData as Record<string, Field>;
-    const field = data[key];
-    if (!field || field.type === 'array') return '';
-    return field.value ?? '';
-  }
-
-  const field = fieldOrData as Field;
-  if (field.type === 'array') return '';
-  return field.value ?? '';
+export interface ImageValue {
+  url: string;
+  assetId?: string | null;
 }
+
+/** Schema-side descriptor for one editable field. */
+export type FieldDescriptor =
+  | { type: 'text' | 'textarea' | 'url' | 'color'; label: string; required?: boolean; editable?: boolean }
+  | { type: 'select'; label: string; required?: boolean; editable?: boolean; options: readonly string[] }
+  /** `default` is required: it is what the editor resets an emptied input to. */
+  | { type: 'number'; label: string; required?: boolean; editable?: boolean; default: number }
+  | { type: 'image'; label: string; required?: boolean; editable?: boolean }
+  | {
+      type: 'array';
+      label: string;
+      required?: boolean;
+      editable?: boolean;
+      itemSchema: FieldsSchema;
+      minItems?: number;
+      maxItems?: number;
+    };
+
+/** A Block component's full field schema. Declare it with `as const satisfies FieldsSchema`. */
+export type FieldsSchema = Readonly<Record<string, FieldDescriptor>>;
+
+/** The Value type one descriptor implies. */
+type ValueOfDescriptor<D> =
+  D extends { type: 'image' } ? ImageValue
+  : D extends { type: 'number' } ? number
+  : D extends { type: 'select'; options: readonly (infer O)[] } ? O
+  : D extends { type: 'array'; itemSchema: infer S } ? Array<ArrayItem<S>>
+  : string;
+
+/**
+ * One repeating item. `id` is a sibling of `fields`, exactly as a Block carries
+ * its own `id` beside its `fields` — so `itemSchema` only ever describes keys a
+ * user actually edits, and no "system key" exclusion is needed (ADR-0016 §4-3).
+ */
+export interface ArrayItem<S> {
+  id: string;
+  fields: ValuesOf<S>;
+}
+
+type RequiredFieldKeys<S> = {
+  [K in keyof S]-?: S[K] extends { required: true } ? K : never;
+}[keyof S];
+
+type OptionalFieldKeys<S> = Exclude<keyof S, RequiredFieldKeys<S>>;
+
+/** Flattens the required/optional intersection so hovers stay readable. */
+type Prettify<T> = { [K in keyof T]: T[K] } & {};
+
+/**
+ * The Content type a schema implies — `required: true` becomes a mandatory
+ * key, everything else optional. Use as `type XContent = ValuesOf<typeof xSchema>`.
+ */
+export type ValuesOf<S> = Prettify<
+  { [K in RequiredFieldKeys<S>]: ValueOfDescriptor<S[K]> } &
+  { [K in OptionalFieldKeys<S>]?: ValueOfDescriptor<S[K]> }
+>;
 
 /**
  * Navigation projection source — carried by the unit that drives the nav.
@@ -85,7 +99,14 @@ export interface Section {
   id: string;
   type: string;
   visible: boolean;
-  fields: Record<string, Field>;
+  /**
+   * The Block's data, as Values (ADR-0016 §4). Deliberately loose: a Block is
+   * dispatched by a string `type` into `library[type]`, so the domain cannot know
+   * statically which Value shape any given Block holds. The schema does, and the
+   * typed view is taken once at the component boundary
+   * (`section.fields as XContent`, §4-2) after the save path has validated it.
+   */
+  fields: Record<string, unknown>;
 }
 
 /**

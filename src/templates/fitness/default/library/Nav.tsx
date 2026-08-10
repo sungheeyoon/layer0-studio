@@ -4,14 +4,17 @@ import { useState, useEffect } from 'react';
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../fitness.module.css';
 import { DumbbellIcon, HamburgerIcon, ArrowRightIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { navSchema } from './Nav.meta';
+
+type NavContent = ValuesOf<typeof navSchema>;
 
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || 'APEX';
-  const ctaText = getFieldValue(fields, 'ctaText') || '무료 체험';
+  const content = section.fields as NavContent;
+  const brandName = content.brandName || 'APEX';
+  const ctaText = content.ctaText || '무료 체험';
 
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen] = useState(false);

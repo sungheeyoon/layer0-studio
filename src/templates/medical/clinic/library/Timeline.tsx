@@ -1,16 +1,34 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * 연혁 — a vertical timeline of year + milestone rows along a left rule.
  * Text-centred and calm. `items` falls back to an empty array.
  */
+const timelineSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: '연혁 항목',
+    minItems: 1,
+    itemSchema: {
+      year: { type: 'text', label: '연도', required: true },
+      title: { type: 'text', label: '제목', required: true },
+      body: { type: 'textarea', label: '설명' },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type TimelineContent = ValuesOf<typeof timelineSchema>;
+
 const Timeline: SectionComponent = function Timeline(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as TimelineContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -31,12 +49,12 @@ const Timeline: SectionComponent = function Timeline(props: TemplateSectionProps
         )}
 
         <ol className="relative border-l border-[var(--color-line)]">
-          {items.map((item, idx) => {
-            const year = getFieldValue(item.year);
-            const title = getFieldValue(item.title);
-            const body = getFieldValue(item.body);
+          {items.map((item) => {
+            const year = item.fields.year;
+            const title = item.fields.title;
+            const body = item.fields.body;
             return (
-              <li key={year + title || idx} className="ml-6 pb-10 last:pb-0">
+              <li key={item.id} className="ml-6 pb-10 last:pb-0">
                 <span className="absolute -left-[7px] mt-1.5 h-3.5 w-3.5 rounded-full border-2 border-[var(--color-surface)] bg-[var(--color-primary)]" />
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
                   <span className="w-16 shrink-0 text-sm font-bold text-[var(--color-primary)]">
@@ -62,20 +80,7 @@ Timeline.meta = {
   componentKey: 'timeline',
   category: 'content',
   label: '연혁 (타임라인)',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: '연혁 항목',
-      minItems: 1,
-      itemSchema: {
-        year: { type: 'text', label: '연도', required: true },
-        title: { type: 'text', label: '제목', required: true },
-        body: { type: 'textarea', label: '설명' },
-      },
-    },
-  },
+  fieldsSchema: timelineSchema,
 };
 
 export default Timeline;

@@ -1,13 +1,33 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 강사진 소개 — photo cards. The template's primary array showcase. */
+const teachersSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '섹션 제목', required: true },
+  subtitle: { type: 'textarea', label: '섹션 설명' },
+  items: {
+    type: 'array',
+    label: '강사 항목',
+    minItems: 1,
+    maxItems: 9,
+    itemSchema: {
+      name: { type: 'text', label: '이름', required: true },
+      subject: { type: 'text', label: '담당 과목' },
+      bio: { type: 'textarea', label: '소개/경력' },
+      image: { type: 'image', label: '사진' },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type TeachersContent = ValuesOf<typeof teachersSchema>;
+
 const Teachers: SectionComponent = function Teachers({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const subtitle = getFieldValue(fields, 'subtitle') || '';
-  const items = (fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as TeachersContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const subtitle = content.subtitle || '';
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-soft)]">
@@ -25,14 +45,14 @@ const Teachers: SectionComponent = function Teachers({ section }: TemplateSectio
         </div>
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, idx) => {
-            const name = getFieldValue(item.name);
-            const subject = getFieldValue(item.subject);
-            const bio = getFieldValue(item.bio);
-            const image = getFieldValue(item.image);
+          {items.map((item) => {
+            const name = item.fields.name;
+            const subject = item.fields.subject;
+            const bio = item.fields.bio;
+            const image = item.fields.image?.url;
             return (
               <div
-                key={getFieldValue(item.name) || idx}
+                key={item.id}
                 className="overflow-hidden border border-[var(--color-line)] bg-[var(--color-surface)]"
               >
                 <div className="aspect-[4/5] w-full overflow-hidden bg-[var(--color-primary)]/5">
@@ -65,23 +85,7 @@ Teachers.meta = {
   componentKey: 'teachers',
   category: 'content',
   label: '강사진 소개',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '섹션 제목', required: true },
-    subtitle: { type: 'textarea', label: '섹션 설명' },
-    items: {
-      type: 'array',
-      label: '강사 항목',
-      minItems: 1,
-      maxItems: 9,
-      itemSchema: {
-        name: { type: 'text', label: '이름', required: true },
-        subject: { type: 'text', label: '담당 과목' },
-        bio: { type: 'textarea', label: '소개/경력' },
-        image: { type: 'image', label: '사진' },
-      },
-    },
-  },
+  fieldsSchema: teachersSchema,
   previewImage: '/component-previews/academy/teachers.webp',
 };
 
