@@ -1,16 +1,19 @@
 'use client';
 
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { contactSchema } from './Contact.meta';
 
 /** 상담 신청 CTA — a navy band with a lead form (non-functional preview). */
+type ContactContent = ValuesOf<typeof contactSchema>;
+
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const subtitle = getFieldValue(fields, 'subtitle') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const kakaoText = getFieldValue(fields, 'kakaoText') || '';
+  const content = section.fields as ContactContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const subtitle = content.subtitle || '';
+  const phone = content.phone || '';
+  const kakaoText = content.kakaoText || '';
 
   return (
     <section className="bg-[var(--color-primary)]">

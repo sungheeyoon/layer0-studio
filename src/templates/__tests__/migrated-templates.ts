@@ -17,5 +17,6 @@
  * over the whole registry (ADR-0016 §8 step 3 / issue #136).
  */
 export const MIGRATED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
+  'academy-default',
   'corporate-default',
 ]);

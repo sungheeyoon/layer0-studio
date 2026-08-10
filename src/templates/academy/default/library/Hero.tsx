@@ -1,15 +1,27 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const heroSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'textarea', label: '메인 슬로건', required: true },
+  subtitle: { type: 'textarea', label: '보조 설명' },
+  ctaText: { type: 'text', label: '상담 버튼 문구' },
+  ctaUrl: { type: 'url', label: '상담 버튼 링크' },
+  phoneText: { type: 'text', label: '전화 안내 문구' },
+  backgroundImage: { type: 'image', label: '배경 이미지' },
+} as const satisfies FieldsSchema;
+
+type HeroContent = ValuesOf<typeof heroSchema>;
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const subtitle = getFieldValue(fields, 'subtitle') || '';
-  const ctaText = getFieldValue(fields, 'ctaText') || '';
-  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#';
-  const phoneText = getFieldValue(fields, 'phoneText') || '';
-  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
+  const content = section.fields as HeroContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const subtitle = content.subtitle || '';
+  const ctaText = content.ctaText || '';
+  const ctaUrl = content.ctaUrl || '#';
+  const phoneText = content.phoneText || '';
+  const bgImage = content.backgroundImage?.url || '';
 
   return (
     <section
@@ -62,15 +74,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: '학원 히어로',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'textarea', label: '메인 슬로건', required: true },
-    subtitle: { type: 'textarea', label: '보조 설명' },
-    ctaText: { type: 'text', label: '상담 버튼 문구' },
-    ctaUrl: { type: 'url', label: '상담 버튼 링크' },
-    phoneText: { type: 'text', label: '전화 안내 문구' },
-    backgroundImage: { type: 'image', label: '배경 이미지' },
-  },
+  fieldsSchema: heroSchema,
   previewImage: '/component-previews/academy/hero.webp',
 };
 

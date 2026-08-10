@@ -2,20 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { navigationSchema } from './Navigation.meta';
 
 /**
  * Sticky top nav. `navItems` is projected by the renderer (deriveNav) from the
  * sections whose `nav.visible` is true — this component just renders the anchors.
  */
+type NavigationContent = ValuesOf<typeof navigationSchema>;
+
 const Navigation: SectionComponent = function Navigation(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || '';
-  const brandSubtext = getFieldValue(fields, 'brandSubtext') || '';
-  const ctaText = getFieldValue(fields, 'ctaText') || '';
-  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#';
+  const content = section.fields as NavigationContent;
+  const brandName = content.brandName || '';
+  const brandSubtext = content.brandSubtext || '';
+  const ctaText = content.ctaText || '';
+  const ctaUrl = content.ctaUrl || '#';
 
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen] = useState(false);

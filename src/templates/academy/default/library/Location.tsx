@@ -1,15 +1,26 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 오시는 길 — address + transit info beside a static map image. */
+const locationSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '섹션 제목', required: true },
+  address: { type: 'text', label: '주소' },
+  transit: { type: 'textarea', label: '교통편 안내' },
+  hours: { type: 'textarea', label: '운영 시간' },
+  mapImage: { type: 'image', label: '지도 이미지' },
+} as const satisfies FieldsSchema;
+
+type LocationContent = ValuesOf<typeof locationSchema>;
+
 const Location: SectionComponent = function Location({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const address = getFieldValue(fields, 'address') || '';
-  const transit = getFieldValue(fields, 'transit') || '';
-  const hours = getFieldValue(fields, 'hours') || '';
-  const mapImage = getFieldValue(fields, 'mapImage') || '';
+  const content = section.fields as LocationContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const address = content.address || '';
+  const transit = content.transit || '';
+  const hours = content.hours || '';
+  const mapImage = content.mapImage?.url || '';
 
   return (
     <section className="bg-[var(--color-surface-soft)]">
@@ -62,14 +73,7 @@ Location.meta = {
   componentKey: 'location',
   category: 'contact',
   label: '오시는 길',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '섹션 제목', required: true },
-    address: { type: 'text', label: '주소' },
-    transit: { type: 'textarea', label: '교통편 안내' },
-    hours: { type: 'textarea', label: '운영 시간' },
-    mapImage: { type: 'image', label: '지도 이미지' },
-  },
+  fieldsSchema: locationSchema,
   previewImage: '/component-previews/academy/location.webp',
 };
 

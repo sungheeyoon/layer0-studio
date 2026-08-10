@@ -1,13 +1,32 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 시간표 · 수강료 — a simple pricing/schedule table. */
+const tuitionSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '섹션 제목', required: true },
+  note: { type: 'textarea', label: '하단 안내 문구' },
+  items: {
+    type: 'array',
+    label: '과정 항목',
+    minItems: 1,
+    maxItems: 10,
+    itemSchema: {
+      name: { type: 'text', label: '과정명', required: true },
+      schedule: { type: 'text', label: '시간표' },
+      price: { type: 'text', label: '수강료' },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type TuitionContent = ValuesOf<typeof tuitionSchema>;
+
 const Tuition: SectionComponent = function Tuition({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const note = getFieldValue(fields, 'note') || '';
-  const items = (fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as TuitionContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const note = content.note || '';
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -28,13 +47,13 @@ const Tuition: SectionComponent = function Tuition({ section }: TemplateSectionP
             <span className="text-right">수강료</span>
           </div>
           <div className="divide-y divide-[var(--color-line)]">
-            {items.map((item, idx) => {
-              const name = getFieldValue(item.name);
-              const schedule = getFieldValue(item.schedule);
-              const price = getFieldValue(item.price);
+            {items.map((item) => {
+              const name = item.fields.name;
+              const schedule = item.fields.schedule;
+              const price = item.fields.price;
               return (
                 <div
-                  key={getFieldValue(item.name) || idx}
+                  key={item.id}
                   className="grid grid-cols-1 gap-1 px-6 py-5 sm:grid-cols-[1fr_1fr_auto] sm:items-center sm:gap-6"
                 >
                   <span className="text-lg font-bold text-[var(--color-primary)]">{name}</span>
@@ -56,22 +75,7 @@ Tuition.meta = {
   componentKey: 'tuition',
   category: 'content',
   label: '시간표 · 수강료',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '섹션 제목', required: true },
-    note: { type: 'textarea', label: '하단 안내 문구' },
-    items: {
-      type: 'array',
-      label: '과정 항목',
-      minItems: 1,
-      maxItems: 10,
-      itemSchema: {
-        name: { type: 'text', label: '과정명', required: true },
-        schedule: { type: 'text', label: '시간표' },
-        price: { type: 'text', label: '수강료' },
-      },
-    },
-  },
+  fieldsSchema: tuitionSchema,
   previewImage: '/component-previews/academy/tuition.webp',
 };
 

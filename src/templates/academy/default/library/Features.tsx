@@ -1,13 +1,31 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 학원 특장점 — a light band of 3–4 strength cards. */
+const featuresSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '섹션 제목', required: true },
+  subtitle: { type: 'textarea', label: '섹션 설명' },
+  items: {
+    type: 'array',
+    label: '특장점 항목',
+    minItems: 1,
+    maxItems: 6,
+    itemSchema: {
+      title: { type: 'text', label: '제목', required: true },
+      desc: { type: 'textarea', label: '설명' },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type FeaturesContent = ValuesOf<typeof featuresSchema>;
+
 const Features: SectionComponent = function Features({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const subtitle = getFieldValue(fields, 'subtitle') || '';
-  const items = (fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as FeaturesContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const subtitle = content.subtitle || '';
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-soft)]">
@@ -26,11 +44,11 @@ const Features: SectionComponent = function Features({ section }: TemplateSectio
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, idx) => {
-            const itemTitle = getFieldValue(item.title);
-            const itemDesc = getFieldValue(item.desc);
+            const itemTitle = item.fields.title;
+            const itemDesc = item.fields.desc;
             return (
               <div
-                key={getFieldValue(item.title) || idx}
+                key={item.id}
                 className="group border border-[var(--color-line)] bg-[var(--color-surface)] p-8 transition-all hover:border-[var(--color-secondary)] hover:shadow-lg"
               >
                 <span className="mb-5 inline-flex h-11 w-11 items-center justify-center bg-[var(--color-primary)] text-lg font-bold text-[var(--color-on-primary)]">
@@ -51,21 +69,7 @@ Features.meta = {
   componentKey: 'features',
   category: 'features',
   label: '학원 특장점',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '섹션 제목', required: true },
-    subtitle: { type: 'textarea', label: '섹션 설명' },
-    items: {
-      type: 'array',
-      label: '특장점 항목',
-      minItems: 1,
-      maxItems: 6,
-      itemSchema: {
-        title: { type: 'text', label: '제목', required: true },
-        desc: { type: 'textarea', label: '설명' },
-      },
-    },
-  },
+  fieldsSchema: featuresSchema,
   previewImage: '/component-previews/academy/features.webp',
 };
 
