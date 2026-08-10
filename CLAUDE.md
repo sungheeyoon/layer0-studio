@@ -28,6 +28,8 @@ pnpm test:watch         # Vitest watch mode
 pnpm generate:templates # Regenerate src/templates/_generated.ts from template dirs
 pnpm template:verify    # Full authoring gate for one template (tsc/eslint/validate/consistency/capture)
 pnpm template:verify:ci # Blocking CI gate across every template (skips capture)
+pnpm schema:manifest    # Regenerate the committed fieldsSchema compatibility snapshot
+pnpm schema:manifest:check # Check snapshot freshness (CI also compares against the PR base)
 pnpm template:sync      # Reflect code presets → DB (dry-run by default; --apply to commit)
 pnpm template:capture   # Playwright thumbnail capture
 pnpm template:scaffold <category>/<leaf>  # Scaffold a Single template skeleton that already passes the gate

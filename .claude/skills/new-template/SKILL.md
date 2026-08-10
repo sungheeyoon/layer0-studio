@@ -75,6 +75,8 @@ Both types come from `@/domain/entities/template.entity` (`FieldsSchema`, `Value
 
 A renderer edit is a **fleet-wide** edit — every live Site on that `templateKey` loads the code at serve time. Schema changes must be **additive**: adding an optional field (with a renderer fallback), relaxing `required`, changing a `label`, *widening* `select options`. Renaming a field, adding a required one, changing a value type, narrowing `options`, or restructuring an `itemSchema` is **destructive** and needs a data migration in the same deploy. Full table: TEMPLATE_SYSTEM.md §6.4.
 
+After any schema change, run `pnpm schema:manifest` and commit the snapshot. CI checks both freshness and compatibility with the PR base. A destructive change only passes with a newly added matching `docs/migrations/<name>.sql` + `<name>.md` pair; the pair is review evidence, and still must migrate all three stored columns described in §6.4.
+
 ## Done criteria
 
 `pnpm template:verify <key>` green (all 7 steps) + the thumbnail looks right + `pnpm template:sync` dry-run shows the expected diff. Then it's ready to PR.

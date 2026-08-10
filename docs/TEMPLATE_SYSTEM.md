@@ -584,7 +584,7 @@ Section component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변�
 
 `componentKey` 는 이 표의 바깥에 있다 — **어떤 경우에도 변경 금지**다 (§10.2). 깨는 변경이 필요하면 새 leaf 디렉터리로 fork 한다.
 
-> **⚠️ 아직 게이트가 아니다.** ADR-0016 §6-1 은 이 표를 `pnpm schema:manifest` 스냅샷 + CI diff 로 강제하기로 했으나 **미구현이다** ([#129](https://github.com/sungheeyoon/layer0-studio/issues/129)). 지금은 리뷰어의 눈이 유일한 게이트다.
+> **CI 게이트로 강제된다.** `pnpm schema:manifest` 가 전 Template 의 `componentKey → fieldsSchema` 를 정규화해 `src/templates/_schema-manifest.json` 으로 기록한다. CI 는 (1) 현재 라이브러리와 커밋된 manifest 의 freshness, (2) PR base manifest 와 현재 manifest 의 하위 호환성을 각각 검사한다. 파괴적 변경은 실패하며, 의도적 변경은 같은 PR 에 새 `docs/migrations/<name>.sql` + `<name>.md` 쌍이 있어야 통과한다. 이 쌍은 리뷰 증거일 뿐 SQL 의 정확성을 증명하지 않으므로 세 컬럼 전수 변환·검증 책임은 그대로다.
 
 ---
 
@@ -597,6 +597,8 @@ Section component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변�
 pnpm template:verify <templateKey>                # 통합 게이트(tsc/eslint/validate/schema↔jsx/capture)
 pnpm template:verify <templateKey> --skip-capture # 느린 썸네일 단계만 생략
 pnpm template:image <templateKey> "<query>" [wide|square|portrait]  # 스톡 이미지 fetch+호스팅 → URL 출력
+pnpm schema:manifest                              # fieldsSchema 스냅샷 갱신(스키마 수정 PR에 커밋)
+pnpm schema:manifest:check                        # 현재 라이브러리와 snapshot freshness 검사
 
 # 썸네일 캡처 (Playwright + sharp + pixelmatch)
 pnpm template:capture             # 모든 Template 일괄
@@ -620,6 +622,7 @@ pnpm template:scaffold <category> <leaf>      # 같은 것 (공백 구분도 허
 
 # CI 게이트 (전 Template, capture 생략)
 pnpm template:verify:ci
+pnpm schema:manifest:check --base origin/main     # CI의 PR-base 호환성 검사와 동일
 ```
 
 ### 7.1 Template 저작 흐름 (`new-template` 스킬)
@@ -645,7 +648,7 @@ brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 content `Conten
 
 **검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): **7 단계.** (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateContent` — `preset.content`(ContentModel)를 **라이브러리와 함께** 검증(§6); (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 스키마가 선언한 모든 필드를 컴포넌트가 실제로 읽는지 확인 (`content.key` / `item.fields.key` / 계산 키; 브레이스 밸런스 파서). 반대 방향(선언 안 된 키를 읽음)은 `ValuesOf<typeof schema>` 덕분에 **컴파일 에러**라 게이트가 필요 없다; (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp; (7) `thumbnailPath` ↔ 실제 파일 존재·확장자 일치 확인(§10.1). (1)–(5), (7)은 실패 즉시 halt 한다. (6)의 실행 실패 자체는 soft-fail이지만 (7)이 실제 파일을 요구하므로 새 Template은 결국 캡처 산출물 없이는 통과하지 못한다. `--skip-capture` 로 (6) 만 건너뛰는 게 저작 중 빠른 루프다 — 단 (7) 이 아직 썸네일 없다고 실패하므로 마지막엔 캡처를 포함해 한 번 돌려야 green 이 된다. 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
 
-> (5) 는 **한 방향만** 본다: "선언했는데 아무도 안 읽는 필드" = 에디터에 뜨지만 아무것도 안 바꾸는 입력칸. 예전 검사는 `getFieldValue(...)` 호출 수를 `fieldsSchema: {` 리터럴과 대조했는데, ADR-0016 이후 **양쪽 다 0 건**이라 모든 파일을 skip 한 채 초록을 보고했다 — 죽은 게이트였다. #136 에서 재작성. 배포된 스키마의 **파괴적 변경** 검출은 여전히 미구현이다(§6.4, [#129](https://github.com/sungheeyoon/layer0-studio/issues/129)).
+> (5) 는 **한 방향만** 본다: "선언했는데 아무도 안 읽는 필드" = 에디터에 뜨지만 아무것도 안 바꾸는 입력칸. 예전 검사는 `getFieldValue(...)` 호출 수를 `fieldsSchema: {` 리터럴과 대조했는데, ADR-0016 이후 **양쪽 다 0 건**이라 모든 파일을 skip 한 채 초록을 보고했다 — 죽은 게이트였다. #136 에서 재작성. 배포된 스키마의 파괴적 변경은 이 게이트가 아니라 별도의 schema manifest base 비교가 막는다(§6.4).
 > `template:verify` 는 템플릿 모듈을 동적 import 하므로 첫 줄에서 `./lib/register-css-stub` 를 로드해 `.module.css` import 가 tsx 에서 깨지지 않게 한다 (sync 와 동일).
 
 **New-category 규칙**: 새 category slug 은 `^[a-z][a-z0-9-]{0,39}$` 를 만족해야 하고, 기존 디렉터리에 없는 새 top-level category 는 구조 변경이므로 사람의 명시적 승인 후 만든다. 판정은 정확 일치만 — `cafe-studio` 는 `cafe` 의 변형이 아니라 새 category 다.

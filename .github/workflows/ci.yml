@@ -20,6 +20,10 @@ jobs:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The schema compatibility gate compares the PR manifest with its
+          # base branch, so both histories must be available to `git show`.
+          fetch-depth: 0
 
       # Version comes from the package.json `packageManager` field (pnpm@11.9.0)
       # so CI matches local exactly — newer pnpm 11.x stopped reading the
@@ -51,3 +55,10 @@ jobs:
       # the precondition that lets registration auto-run after deploy.
       - name: Verify templates
         run: pnpm template:verify:ci
+
+      - name: Check schema manifest freshness
+        run: pnpm schema:manifest:check
+
+      - name: Check schema backward compatibility
+        if: github.event_name == 'pull_request'
+        run: pnpm schema:manifest:check --base "origin/${{ github.base_ref }}"
