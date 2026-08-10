@@ -39,6 +39,8 @@ export interface ValidateOptions {
 const KNOWN_LAYOUTS = ['wide', 'narrow', 'asymmetric', 'default', 'full'];
 const HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 const CSS_LENGTH_RE = /^[\d.]+(%|px|rem|em|vw|vh|ch)$/;
+/** `assets.id` is a Postgres uuid; `asset_usages.asset_id` references it. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * WCAG relative luminance, 0 (black) … 1 (white). Returns null for anything
@@ -274,14 +276,26 @@ export function validateContent(
           );
         }
         // Blocking, and safe to block: no editor input reaches `assetId` — it is
-        // written from `confirmUploadAction`'s response. A non-string here means
-        // the asset usage row would be written against garbage (ADR-0003).
-        if (value.assetId !== undefined && value.assetId !== null && typeof value.assetId !== 'string') {
-          err(
-            'INVALID_ASSET_ID',
-            `field "${fieldKey}" assetId must be a string or null (got ${describeValue(value.assetId)})`,
-            `${fieldRef}.assetId`,
-          );
+        // written from `confirmUploadAction`'s response. It must be a UUID, not
+        // merely a string: it is copied into `asset_usages.asset_id`, a `uuid`
+        // column referencing `assets.id` (ADR-0003), so any other string aborts
+        // the save inside the RPC. Checking it here turns an opaque Postgres
+        // error into a coded issue that names the field.
+        const { assetId } = value;
+        if (assetId !== undefined && assetId !== null) {
+          if (typeof assetId !== 'string') {
+            err(
+              'INVALID_ASSET_ID',
+              `field "${fieldKey}" assetId must be a UUID string or null (got ${describeValue(assetId)})`,
+              `${fieldRef}.assetId`,
+            );
+          } else if (!UUID_RE.test(assetId)) {
+            err(
+              'INVALID_ASSET_ID',
+              `field "${fieldKey}" assetId "${assetId}" is not a UUID`,
+              `${fieldRef}.assetId`,
+            );
+          }
         }
         if (value.url.startsWith('http://')) {
           warn(
@@ -393,9 +407,28 @@ export function validateContent(
       // An absent optional key is a correct state, not a hole: the schema is the
       // source of truth and the renderer falls back (`?? ''`, ADR-0016 §6). Only
       // a required key going missing can crash it.
-      if (value === undefined || value === null) {
+      if (value === undefined) {
         if (descriptor.required) {
           err('MISSING_REQUIRED_FIELD', `required field "${fieldKey}" is missing`, fieldRef);
+        }
+        continue;
+      }
+
+      // `null` is not the same as absent, and is not a Value at all — `ValuesOf`
+      // yields `T | undefined`, never `T | null` (the sole exception being
+      // `ImageValue.assetId`, checked below where it lives). Skipping it the way
+      // an absent key is skipped would let one stored shape past every rule.
+      //
+      // Required: blocking, same as missing — the renderer reads a required
+      // Value without a fallback. Optional: a warning, because every renderer is
+      // required to fall back on optional Values (ADR-0016 §6) and `?? ''` /
+      // `?.` both absorb null, so nothing breaks — it is a shape to clean up,
+      // not a save to hold (ADR-0015 rule 4).
+      if (value === null) {
+        if (descriptor.required) {
+          err('MISSING_REQUIRED_FIELD', `required field "${fieldKey}" is null`, fieldRef);
+        } else {
+          warn('NULL_FIELD_VALUE', `field "${fieldKey}" is null; omit the key instead`, fieldRef);
         }
         continue;
       }

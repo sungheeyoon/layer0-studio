@@ -79,6 +79,9 @@ function withBlock(type: string, fields: Record<string, unknown>): SingleContent
 
 const codes = (issues: readonly { code: string }[]) => issues.map((i) => i.code);
 
+/** A real `assets.id` shape — the column is a Postgres uuid. */
+const ASSET_ID = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
+
 // ─── Unit tests ────────────────────────────────────────────────────
 
 describe('validateContent — structure', () => {
@@ -310,6 +313,25 @@ describe('validateContent — required / optional', () => {
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
   });
 
+  // `null` is not "absent". `ValuesOf` yields `T | undefined` and never `T | null`,
+  // so a stored null is a shape no renderer was typed against — but every
+  // renderer must fall back on an optional Value (ADR-0016 §6) and both `?? ''`
+  // and `?.` absorb null, so it is reported and not blocked (ADR-0015 rule 4).
+  // Without this it was the one value that skipped every shape rule.
+  it('warns — but does not block — when an optional field is null', () => {
+    const result = validateContent(
+      withBlock('hero', { title: 'Hi', subtitle: null }),
+      { templateLibrary },
+    );
+    expect(result.warnings.some((w) => w.code === 'NULL_FIELD_VALUE')).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('stays silent on an absent optional key, unlike an explicit null', () => {
+    const result = validateContent(withBlock('hero', { title: 'Hi' }), { templateLibrary });
+    expect(codes(result.warnings)).not.toContain('NULL_FIELD_VALUE');
+  });
+
   // Presence, not non-emptiness. Clearing an input is an ordinary edit and the
   // renderer's `|| 'fallback'` covers it; blocking it would make a half-finished
   // page unsavable (ADR-0015 rule 4).
@@ -374,7 +396,7 @@ describe('validateContent — Value shape', () => {
     expect(bare.errors).toHaveLength(0);
 
     const withAsset = validateContent(
-      withBlock('hero', { photo: { url: 'https://a/b.jpg', assetId: 'uuid-1' } }),
+      withBlock('hero', { photo: { url: 'https://a/b.jpg', assetId: ASSET_ID } }),
       { templateLibrary },
     );
     expect(withAsset.errors).toHaveLength(0);
@@ -387,11 +409,21 @@ describe('validateContent — Value shape', () => {
   });
 
   // Blocking is safe here precisely because no editor input reaches `assetId` —
-  // it is written from `confirmUploadAction`'s response. A non-string would be
-  // written into an asset usage row (ADR-0003) as garbage.
+  // it is written from `confirmUploadAction`'s response.
   it('errors when assetId is neither a string nor null', () => {
     const result = validateContent(
       withBlock('hero', { photo: { url: 'https://a/b.jpg', assetId: 42 } }),
+      { templateLibrary },
+    );
+    expect(result.errors.some((e) => e.code === 'INVALID_ASSET_ID')).toBe(true);
+  });
+
+  // "A string" is not the bar: the value is copied into `asset_usages.asset_id`,
+  // a `uuid` column referencing `assets.id`. A non-UUID string aborts the save
+  // inside the RPC with a Postgres type error naming nothing useful.
+  it('errors when assetId is a string but not a UUID', () => {
+    const result = validateContent(
+      withBlock('hero', { photo: { url: 'https://a/b.jpg', assetId: 'asset-1' } }),
       { templateLibrary },
     );
     expect(result.errors.some((e) => e.code === 'INVALID_ASSET_ID')).toBe(true);

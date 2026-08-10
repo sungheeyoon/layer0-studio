@@ -54,10 +54,16 @@ describe('makeEmptyItem', () => {
     expect(f.options).toEqual(['x', 'y', 'z']);
   });
 
-  // Deleted with ADR-0016 §4-1: "a select field with no options" is no longer a
-  // state a schema can be in. `FieldDescriptor`'s select member requires
-  // `options`, so the case this guarded is now a compile error at the schema,
-  // which is strictly earlier than a runtime fallback to ''.
+  // ADR-0016 §4-1 made `options` mandatory on a select descriptor, so *omitting*
+  // it is now a compile error — but an empty array still satisfies
+  // `readonly string[]`, so "a select with no options to choose from" is still
+  // reachable and `makeEmptyItem`'s `?? ''` still has to hold it.
+  it('defaults a select field with empty options to an empty value', () => {
+    const out = makeEmptyItem({ pick: { type: 'select', label: 'Pick', options: [] } });
+    const f = out.pick as SelectField;
+    expect(f.value).toBe('');
+    expect(f.options).toEqual([]);
+  });
 
   it('builds a nested array field as an empty list', () => {
     const out = makeEmptyItem({
