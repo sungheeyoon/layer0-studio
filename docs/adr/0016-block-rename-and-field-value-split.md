@@ -1,10 +1,10 @@
 # Block 리네임 + Field/Value 분리 (schema-first) — ADR-0007 구조는 유지, nav 모델은 개정
 
-> **Status: Accepted — 구현 준비 완료.** 단일 파괴적 JSONB 마이그레이션 + codemod 로 일괄 적용.
+> **Status: Accepted and implemented** (2026-08-10). Field/Value 전환은 migration 026, Block/Menu 전환은 migration 027로 완료했다.
 >
 > **이력:** `docs/architecture/` Part 1–4 초안을 그릴링으로 확정한 결과다. 2026-08-10 세 차례 개정을 거쳤다 — (1) §4 를 **스키마/Value 분리**로 확장, (2) 초안이 물려준 `→ SiteContent` 리네임을 **취소**(§2 하단), (3) 리뷰 반영: §4-1 의 `BlockFieldsSchema<T>` 방향을 **폐기하고 schema-first 로 교체**(아래 §4-1), nav 마이그레이션 매핑표 확정(§3), 롤아웃을 사전 검증 후 원자적 기록으로 교체(§8), asset 항목 정정(§7).
 >
-> **읽는 법:** AS-IS 서술이 **현재 코드/DB 의 진실**, TO-BE 가 목표다. `CONTEXT.md` 는 예외적으로 구현 전에 TO-BE 어휘로 갱신되어 있다(Consequences 참고).
+> **읽는 법:** 이 문서의 AS-IS는 결정 당시의 이전 모델, TO-BE는 현재 모델이다. 현행 용어의 짧은 정본은 `CONTEXT.md`, 저작·운영 절차는 `docs/TEMPLATE_SYSTEM.md`다.
 
 ## Context
 
@@ -12,7 +12,7 @@
 
 이 재설계의 **1순위 목표는 데이터 모델의 정직성/명명 정리**이며, 렌더러 통일이 아니다. 따라서 (B) 는 기각하고 (A) 만 채택한다.
 
-**규모.** `getFieldValue` 는 현재 **114 개 파일에서 865 회**(그중 111 개가 `src/templates/`) 호출된다. 인스턴스마다 `{type,label,value}` 를 들고 다니는 구조에서 값 하나를 꺼내기 위한 순수 반복이다. 취향 문제가 아니라 구조적 중복이다.
+**결정 당시 규모.** `getFieldValue` 는 **114 개 파일에서 865 회**(그중 111 개가 `src/templates/`) 호출됐다. 인스턴스마다 `{type,label,value}` 를 들고 다니는 구조에서 값 하나를 꺼내기 위한 순수 반복이었다. 취향 문제가 아니라 구조적 중복이었다.
 
 **초안이 ADR 을 앞선다는 사실 자체가 이 ADR 의 반복된 함정이었다.** 초안은 ADR-0007 과 ADR-0013 이전에 쓰였고, 두 번 모두 "초안이 제안 → ADR 이 이미 반대로 결정" 이 발생했다: (B) 구조 통일(ADR-0007 이 기각)과 `→ SiteContent` 리네임(ADR-0013 이 기각, §2 하단). 초안에서 무언가를 물려올 때는 그 항목을 이미 다룬 ADR 이 있는지 먼저 확인할 것.
 
@@ -28,9 +28,9 @@
 
 ### 2. 어휘 리네임
 
-**AS-IS 열은 지금 코드에 실재하는 식별자다** — codemod 가 존재하지 않는 이름을 대상으로 삼지 않도록 검증했다(`src/domain/entities/template.entity.ts`, `src/templates/types.ts`, 2026-08-10).
+**AS-IS 열은 결정 당시 코드에 실재하던 식별자다** — codemod 가 존재하지 않는 이름을 대상으로 삼지 않도록 검증했다(`src/domain/entities/template.entity.ts`, `src/templates/types.ts`, 2026-08-10).
 
-| AS-IS (현재 코드) | TO-BE | 위치 |
+| AS-IS (이전 코드) | TO-BE (현재 코드) | 위치 |
 |---|---|---|
 | `Section` | `Block` | `template.entity.ts` |
 | `SingleSection` | `SingleBlock` | `template.entity.ts` |
@@ -201,7 +201,7 @@ SiteWriteUseCase
 | `select options` **축소** | ⛔ 파괴적 | 기존 Value 가 유니온 밖으로 나감 |
 | 배열 `itemSchema` 구조 변경 | ⛔ 파괴적 | |
 
-**파괴적 변경을 하려면** `templates.content` + `user_sites.content` + `user_sites.snapshot` 세 컬럼을 **함께** 마이그레이션하고, 전 행을 새 Library 로 검증해 통과한 뒤에만 배포한다(§8 절차).
+**파괴적 변경을 하려면** `templates.content` + `user_sites.content` + `user_sites.snapshot` 세 컬럼을 **함께** 마이그레이션하고, 전 행을 새 Library 로 검증해 통과한 뒤에만 배포한다. migration 026/027이 이 절차의 선례다.
 
 #### 6-1. 문서 규칙이 아니라 CI 게이트로 만든다
 
@@ -223,7 +223,7 @@ SiteWriteUseCase
 
 `scripts/reconcile-orphaned-assets.ts` 는 **Storage ↔ `auth.users` ↔ `assets`** 만 대조하고 `user_sites.content` 나 `asset_usages` 를 읽지 않는다. 게다가 cron 이 바이너리와 `assets` 행을 둘 다 지우므로 이 종류는 잔여물조차 남기지 않는다. 그 스크립트가 재는 것은 [ADR-0014](./0014-account-erasure-tombstone-pipeline.md) 계정 삭제 누수라는 **다른 문제**다.
 
-**별도 감사 스크립트가 필요하다** — `pnpm audit:asset-integrity`: 콘텐츠의 `assetId` ↔ `assets` ↔ `asset_usages` ↔ Storage 4 자 대조로 다음을 보고한다.
+**별도 감사 스크립트가 필요하다** — 향후 `audit:asset-integrity`를 만든다면 콘텐츠의 `assetId` ↔ `assets` ↔ `asset_usages` ↔ Storage 4 자 대조로 다음을 보고해야 한다.
 
 | 증상 | 의미 |
 |---|---|
@@ -232,41 +232,13 @@ SiteWriteUseCase
 | `asset_usages` 있는데 Storage 객체 없음 | 바이너리 유실 |
 | Storage 있는데 콘텐츠 참조 없음 | 진짜 고아 |
 
-### 8. 롤아웃 — 사전 검증 후 원자적 기록
+### 8. 구현 및 데이터 전환
 
-**Registry 의 모든 Template** 을 전환한다(개수를 문서에 박지 않는다 — 추가될 때마다 stale 해진다). **백워드 호환/`schemaVersion` 없음**(솔로·유저 0).
+Registry의 모든 Template과 저장 JSON을 한 번에 전환했고 백워드 호환 레이어나 `schemaVersion`은 두지 않았다.
 
-**영향 범위**: `template.entity.ts` · `templates/types.ts` · `src/templates/**`(preset + library + 렌더러, `getFieldValue` 865 회 제거) · 렌더러 2 개 · 에디터(`FieldFactory` — `field.type` 대신 스키마 조회) · `validate.ts`(재작성) · `keys.ts`(삭제) · `asset-usages.ts`(§5) · `site-write.usecase.ts`(§5 계층) · save RPC 호출부 · sitemap · 테스트.
-
-**DB 대상 (migration 021 이후의 실제 컬럼명)**: `templates.content` · `user_sites.content` · `user_sites.snapshot`
-
-#### 8-1. 실행 절차 — 검증을 **쓰기 앞**에 둔다
-
-개정 전 절차는 "변환 → 검증 → 오류면 중단" 이었는데, 이미 커밋된 뒤에는 중단해도 원복되지 않는다(자기모순). 다음 중 **하나로** 실행한다:
-
-- **(권장) 스테이징 후 단일 트랜잭션 기록** — 전 행을 읽어 **메모리에서 변환**하고, 새 Library 로 **전수 검증**한 뒤, 전부 통과했을 때만 한 트랜잭션으로 기록
-- **(대안) 트랜잭션 내부 검증** — 검증 실패가 실제 `ROLLBACK` 을 일으키는 도구로 실행
-
-```text
-1. 배포 중 write freeze (에디터 저장 차단)
-2. pg_dump 백업
-3. 전 행 읽기 → 메모리 변환 → 변환 전/후 row count 및 체크섬 대조
-4. 변환 결과 전수를 새 Library 스키마로 검증
-5. 단 한 건이라도 실패 → 아무것도 쓰지 않고 중단
-6. 전부 통과 → 단일 트랜잭션으로 세 컬럼 기록
-7. 코드와 DB 를 같은 배포 단위로 전환 (coordinated deploy)
-8. write freeze 해제
-```
-
-**롤백**: 코드만 `git revert` 해도 변환된 JSONB 는 돌아오지 않는다. 복구 경로는 2 번 백업 복원이다. 역변환 스크립트는 만들지 않는다 — 021/022 도 coordinated deploy + 백업으로 처리한 선례이고, 유저 0 에서 역변환을 유지보수할 이유가 없다.
-
-#### 8-2. 일괄 전환 전에 대표 템플릿 하나로 검증한다
-
-111 개 파일에 codemod 를 돌리기 전에:
-
-1. **기반 타입 + 컴파일 타임 계약 테스트** — `ValuesOf` 가 select 리터럴 좁힘 / `required` optionality / 배열 재귀 / `number default` 를 실제로 강제하는지 `@ts-expect-error` 로 고정
-2. **대표 템플릿 1 개를 end-to-end 전환** — 배열 + 이미지 + select 를 모두 쓰는 것으로 고른다. 스키마 선언 → `ValuesOf` 추론 → 렌더러 `getFieldValue` 제거 → preset 을 Value 형태로
-3. 통과하면 나머지 일괄 전환
+- migration 026: Field wrapper를 Value로 변환하고 배열 item ID를 채웠다. 자세한 검증·실행·복구 절차는 [`docs/migrations/026_field_to_value.md`](../migrations/026_field_to_value.md)에 있다.
+- migration 027: `sections`/`shared`/`nav`를 `blocks`/`chrome`/`menu`로 변환했다. 자세한 절차는 [`docs/migrations/027_block_menu.md`](../migrations/027_block_menu.md)에 있다.
+- 두 migration 모두 `templates.content`, `user_sites.content`, `user_sites.snapshot`을 메모리에서 먼저 변환·전수 검증한 뒤 원자적으로 기록한다. 실패 시 쓰지 않으며 롤백은 DB 복원과 코드 롤백을 함께 수행한다.
 
 ## Considered & Rejected
 
@@ -281,23 +253,12 @@ SiteWriteUseCase
 
 ## Consequences
 
-- **CONTEXT.md 는 구현 전에 갱신했다**(예외). 어휘 변화가 누적돼 따라가기 어려워졌다는 판단. 문서 최상단에 미구현 배너가 있고, 코드의 현재 진실은 §2 AS-IS 열이다.
-- **§6 의 호환성 규칙은 구현 이후 상시 규칙**이며 §6-1 의 CI 게이트가 강제한다. `new-template` 스킬과 `docs/TEMPLATE_SYSTEM.md` 에도 반영해야 한다.
+- `CONTEXT.md`의 Block/Chrome/Menu 및 Field/Value 어휘가 현재 코드와 저장 JSON의 진실이다.
+- **§6 의 호환성 규칙은 상시 규칙**이며 schema manifest CI 게이트, `new-template` 스킬, `docs/TEMPLATE_SYSTEM.md`가 함께 강제한다.
 - **`getFieldValue` 삭제로 누락 필드 방어막이 사라진다.** 각 렌더러의 fallback 이 대체재다(§6).
-- **저작 방식이 바뀐다** — 템플릿 작성자는 이제 **스키마만** 쓴다. Content 타입을 손으로 쓰지 않으므로 저작 부담은 오히려 준다. `new-template` 스킬 갱신 필요.
+- 템플릿 작성자는 **스키마만** 쓴다. Content 타입을 손으로 쓰지 않으므로 저작 부담은 오히려 줄었다.
 - **후일 Collection 착수 시 §3 의 projected-nav 를 재검토**해야 한다.
 - ADR-0007 의 **구조 결정은 유효**하나 **nav 설계는 §3 으로 대체**된다.
-
-## 구현 순서
-
-1. **기반 타입 + 컴파일 타임 계약 테스트** (§4-1, §8-2)
-2. **대표 템플릿 1 개 end-to-end 전환 + 검증** (§8-2) ← **게이트**
-3. 나머지 템플릿 일괄 codemod
-4. 에디터 (`FieldFactory` 스키마 조회, `_key` → `item.id`)
-5. validator 재작성 + asset usage 계층 이동 (§5) + `item.id` 규칙 (§4-4)
-6. schema manifest CI 게이트 (§6-1)
-7. DB migration (§8-1) — 변환 전/후 fixture 계약 테스트 선행
-8. `tsc --noEmit` · `pnpm test` · `template:verify:ci` · 전수 변환 검증 통과 후 coordinated deploy
 
 ## 관련
 
@@ -308,4 +269,4 @@ SiteWriteUseCase
 - [ADR-0003](./0003-asset-upload-two-phase-cleanup.md) — asset slot_key / 참조 카운팅(§5, §7).
 - 설계 초안: `docs/architecture/` Part 1–4 (본 ADR 이 확정형).
 - Collection 연기: `docs/architecture/appendix-open-questions.md`, `docs/plans/PLAN_crud_array_field.md`.
-- migration 008/018/019/021/022 — 선례.
+- [migration 026](../migrations/026_field_to_value.md) / [migration 027](../migrations/027_block_menu.md) — 구현·데이터 전환 기록.
