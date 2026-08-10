@@ -1,6 +1,8 @@
 # 공유 콘텐츠 형태 타입에서 엔티티 이름을 걷어낸다 — `TemplateJson` → `ContentModel`
 
 > **Status: Accepted — 구현 완료** (코드 리팩터 병합, migration **021**(컬럼 rename + RPC 재작성) + **022**(section `data`→`fields` 백필) 프로덕션 적용). 이 문서는 *어떤 이름으로, 왜* 를 고정하기 위한 결정 기록이다.
+>
+> **⚠️ 어휘 3건은 [ADR-0016](./0016-block-rename-and-field-value-split.md) 이 뒤집었다 (migration 027, 프로덕션 적용 완료).** 아래 기각 테이블의 `Section → Block` · `shared → chrome` · `nav → menu` 세 행과 맨 아래 "glossary 용어는 불변" 문장은 **더 이상 유효하지 않다** — 현재 코드와 저장 JSON 은 `Block` / `chrome` / `menu` 를 쓴다. 당시 기각 사유(“chrome 은 Studio 껍데기”, “menu 는 카페 메뉴 콘텐츠와 충돌”)는 ADR-0016 §2 가 재검토해 뒤집은 것이므로, 이 테이블을 근거로 현재 이름을 되돌리지 말 것. **핵심 결정인 `TemplateJson → ContentModel` 중립화와 `SiteContent` 기각은 그대로 유효하다.**
 
 `Template`(디자이너 청사진, `templates` 행)과 `Site`(사용자 인스턴스, `user_sites` 행)는 **두 축에서 별개 엔티티**다(axis A: 코드=Template, axis B: 데이터=Site — [ADR-0001](./0001-beta-model-template-isolation.md)). 그런데 둘이 **같은 콘텐츠 형태 타입 하나**를 공유한다: `TemplateJson` 은 `Template.templateJson`, `UserSite.siteJson`, `UserSite.templateSnapshot` 세 필드가 모두 들고 있다. 이 타입 이름에 `Template` 이 박혀 있어, 그것을 들고 있는 `Site` 쪽에서 읽으면 "왜 Site 가 TemplateJson 을?" 하는 인지 마찰이 생긴다.
 
@@ -56,4 +58,4 @@ interface UserSite { content: ContentModel; snapshot: ContentModel; /* … */ } 
 - [ADR-0001](./0001-beta-model-template-isolation.md) — axis A(Template 코드 격리). 본 ADR 이 "Renderer/편집기/template_assets 를 Site 로 바꾸지 않는" 근거.
 - [ADR-0007](./0007-single-multi-site-type-structural-union.md) — Single/Multi 구조 유니온. 본 ADR 은 그 유니온의 *이름*만 바꾸며 구조·`mode` 판별·nav projection 은 불변.
 - [ADR-0004](./0004-optimistic-concurrency-via-rpc.md) — 저장 RPC. migration 021 이 이 RPC 를 `content` 컬럼 기준으로 재작성.
-- CONTEXT.md Flagged ambiguities — 코드 식별자 주석(`TemplateJson → ContentModel` 등) 갱신 대상. glossary 용어(Section/Field/Page/nav/Shared sections)는 **불변**.
+- CONTEXT.md Flagged ambiguities — 코드 식별자 주석(`TemplateJson → ContentModel` 등) 갱신 대상. glossary 용어(Section/Field/Page/nav/Shared sections)는 **불변** — ~~이 결정은 ADR-0016 이 뒤집었다(위 배너 참고)~~.

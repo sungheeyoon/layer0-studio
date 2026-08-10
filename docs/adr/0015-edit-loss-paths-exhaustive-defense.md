@@ -77,4 +77,4 @@ flush 를 추가하는 것만으로 동시 쓰기 지점이 셋이 되므로 이
 
 - **탭 닫기 / 크래시 시 최대 `maxWait` 분량 손실.** 2번에서 명시적으로 범위 밖으로 뒀다. 무한이던 창을 상한 있는 값으로 바꾼 것이 이번 이득이다.
 - **flush 의 조용한 실패.** 네트워크 오류로 flush 가 실패하면 유저는 이미 떠났으므로 알릴 화면이 없다. "매번 손실"에서 "저장 요청이 실패할 때만 손실"로 떨어질 뿐, 불변식의 완전 달성은 아니다.
-- **`GlobalStyles` 가 전 Template 공통 계약인 척한다.** `corporate/default`, `fitness/default`, `interior/default` 는 `secondaryColor` 를 어디서도 소비하지 않아, 유저가 바꿔도 아무 일이 일어나지 않는다. `layout` 과 같은 뿌리(Template 마다 실제 지원 축이 다른데 에디터는 하나의 고정 폼을 보여준다)지만 **저장을 막지는 않으므로** 손실이 아니라 UX 결함이다. 별도로 다룬다.
+- ~~**`GlobalStyles` 가 전 Template 공통 계약인 척한다.**~~ **(해소됨, PR #144)** 당시 `corporate/default`·`fitness/default`·`interior/default` 는 `secondaryColor` 를 어디서도 소비하지 않아 유저가 바꿔도 아무 일이 일어나지 않았다 — `layout` 과 같은 뿌리(Template 마다 실제 지원 축이 다른데 에디터는 하나의 고정 폼을 보여준다)의 UX 결함이었다. 세 Template 모두 `var(--theme-secondary, …)` 로 연결했고, `src/templates/__tests__/global-styles-contract.test.tsx` 가 **모든** Template 에 대해 `secondaryColor` 소비를 강제한다. 남은 `GlobalStyles` 키 중 소비처가 없는 것은 `layout` 뿐이며, 그건 위 4번에서 에디터 컨트롤 자체를 제거해 처리했다.

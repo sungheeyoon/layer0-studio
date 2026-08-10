@@ -19,7 +19,7 @@ _관련: `docs/TEMPLATE_SYSTEM.md` (특히 §2 데이터 모델, §6 validate, `
 - 신규 테이블 `collections (id, site_id, slug, schema_jsonb, ...)` + RLS
 - 신규 테이블 `collection_items (id, collection_id, data_jsonb, slug, ordinal, ...)` + 인덱스
 - `FieldDescriptor` 에 collection 참조 descriptor 추가 — 구체적인 Value 모양과 참조 무결성은 착수 시 RFC 에서 결정
-- 다이나믹 라우트: `src/app/site/[domain]/[...path]/page.tsx` 가 path 마지막 segment 를 `collection_item.slug` 로 조회
+- 다이나믹 라우트: 기존 `src/app/site/[domain]/[[...slug]]/page.tsx` 가 slug 마지막 segment 를 `collection_item.slug` 로 조회 (Page 조회 실패 시의 폴백 분기 — 새 라우트 세그먼트를 추가하지 않는다)
 - 어드민 UI: collection schema 빌더
 - 사용자 UI: collection 콘텐츠 CRUD (현 블록 에디터와 분리된 화면)
 - 마이그레이션: array 필드로 운영 중인 사이트를 collections 로 옮기는 import 스크립트
