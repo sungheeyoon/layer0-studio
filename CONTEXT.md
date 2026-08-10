@@ -49,11 +49,11 @@ The React renderer that turns a Block's `fields` into UI. Lives inside its Templ
 _Avoid_: library component, section component.
 
 **Field**:
-A schema-side descriptor, declared once in a Block component's `fieldsSchema` (code, developer-authored, rarely changes) — its `type`, `label`, `required`, `options`, and (for `array`) `itemSchema`. A Field never holds an instance's actual data; that is a **Value**.
+A schema-side descriptor, declared once in a Block component's `fieldsSchema` (code, developer-authored, rarely changes) — its `type`, `label`, `required`, `options`, and (for `array`) `itemSchema`. The schema is the **single source of truth**: a Field never holds an instance's actual data (that is a **Value**), and the Value's *type* is derived from the Field rather than written separately.
 _Avoid_: input, property, attribute, prop — and don't call an instance's data a "Field" (see **Value**).
 
 **Value**:
-The actual data a Block instance holds for one of its Fields — user-authored, stored per Site, changes often (a user adding a menu item is a Value change, not a schema change). Shaped by its Field's `type`: a scalar for `text`/`number`/`select`, `{ url, assetId? }` for `image` (an **ImageValue**), an ordered list of items for `array` — each item being `{ id, fields }`, mirroring how a Block carries its own `id` beside its `fields`. Never duplicates its Field's `type`/`label` — those live only in the schema.
+The actual data a Block instance holds for one of its Fields — user-authored, stored per Site, changes often (a user adding a menu item is a Value change, not a schema change). Its shape is **derived from its Field**, never authored by hand: `string` for `text`/`textarea`/`url`/`color`, the `options` literal union for `select`, `number` for `number`, `{ url, assetId? }` for `image` (an **ImageValue**), and for `array` an ordered list of `{ id, fields }` items — mirroring how a Block carries its own `id` beside its `fields`. A Field's `required` decides whether its Value is mandatory. Never duplicates its Field's `type`/`label` — those live only in the schema.
 _Avoid_: field value (conflates the two), data, content (too generic — say "a Block's Values").
 
 **Chrome**:
@@ -61,11 +61,11 @@ A Multi Site's `chrome.header` and `chrome.footer` — Block lists rendered abov
 _Avoid_: shared (the old name — describes the mechanism, not the meaning: chrome = the site's fixed frame).
 
 **Menu** (formerly nav projection):
-The navigation menu is **not stored** — it is derived on each render from its source's `menu?: MenuEntry` (`{ label, placement? }`). A Single Block's **presence of `menu`** means "appears in nav" (no `placement` — Single nav is header-anchor only). A Multi Page's `menu` is independent of its `name`: `name` is the editor-tab/page name, `menu.label` is the nav text — a page can have a long `name` and a short nav `label`, and `placement` (`'header' | 'footer'`, default header) says which nav it lands in.
+The navigation menu is **not stored** — it is derived on each render from its source's optional `menu`. A Multi Page carries a **`MenuEntry`** (`{ label, placement? }`) where `placement` (`'header' | 'footer'`, default header) says which nav it lands in; a Single Block carries a **`SingleMenuEntry`** (`{ label }` only — Single nav is header-anchor, so it has no footer nav to choose). A Multi Page's `menu` is independent of its `name`: `name` is the editor-tab/page name, `menu.label` is the nav text, so a page can have a long `name` and a short nav `label`.
 _Avoid_: nav config, menu data, `nav.visible` (retired — see below).
 
 **`visible` vs `menu` (presence)**:
-Two **independent** axes. `visible` = whether the Block/Page is served at all (a Multi Page with `visible:false` 404s, data preserved). **Presence of `menu`** = whether it appears in *some* nav; its absence means "reachable (if `visible`) but not in any menu" — a privacy-policy Page linked only from a footer link authored elsewhere, for instance. Replaces the old `nav.visible` boolean, which conflated "in the footer" with "in no nav at all" (couldn't tell them apart without a negation).
+Two **independent** axes. `visible` = whether the Block/Page is served at all (a Multi Page with `visible:false` 404s, data preserved). **Presence of `menu`** = whether it appears in *some* nav; its absence means "reachable (if `visible`) but in no menu at all" — a Page reachable only by URL. Replaces the old `nav.visible` boolean, which conflated "in the footer" with "in no nav at all" (footer links were derived by negation, so the two were indistinguishable). Because the old model could not express "in no menu at all", migration never produces it — it is reachable only in newly authored content.
 
 ### Design
 
