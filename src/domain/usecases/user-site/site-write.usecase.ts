@@ -94,7 +94,7 @@ export class SiteWriteUseCase {
     return this.userSiteRepo.update(siteId, { status: 'draft' }, expectedUpdatedAt);
   }
 
-  /** Assign the Site's subdomain (validated + unique). */
+  /** Assign the Site's public path slug (validated + unique). */
   async setDomain(
     siteId: string,
     userId: string,

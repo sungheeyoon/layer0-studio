@@ -50,7 +50,7 @@ A regression test is only worth the line if you have watched it fail: revert the
 
 ## Architecture
 
-A no-code website builder on **Next.js 16** (App Router), **Supabase** (auth + DB + storage), **Tailwind CSS v4**. Users pick a Template, edit it visually, and publish it. Published Sites are served at the path-based `/site/<slug>` — Subdomain serving is designed but **not implemented** ([ADR-0009](./docs/adr/0009-subdomain-public-serving.md): blocked on domain setup, not code).
+A no-code website builder on **Next.js 16** (App Router), **Supabase** (auth + DB + storage), **Tailwind CSS v4**. Users pick a Template, edit it visually, and publish it. Published Sites are served at `/site/<slug>`.
 
 ### Layer structure
 
@@ -194,8 +194,6 @@ Audit-flavoured FKs (`templates.created_by`, `template_sync_audit.performed_by`)
 
 - `src/utils/supabase/server.ts` — `createClient()` (anon key, cookie session) and `createAdminClient()` (service role, no cookies)
 - `src/utils/supabase/client.ts` — browser client for client components
-
-**Session cookies stay host-only.** Never set `domain=.<root>` — that would leak the dashboard session into user Site origins ([ADR-0009](./docs/adr/0009-subdomain-public-serving.md) §1).
 
 ### Environment variables
 

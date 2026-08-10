@@ -43,12 +43,12 @@ export const AUTH_ERRORS: Record<string, Record<Locale, string>> = {
 
 export const DOMAIN_ERRORS: Record<string, Record<Locale, string>> = {
   DOMAIN_TAKEN: {
-    ko: '이미 사용 중인 도메인입니다.',
-    en: 'This domain is already in use.',
+    ko: '이미 사용 중인 사이트 주소입니다.',
+    en: 'This site address is already in use.',
   },
   INVALID_DOMAIN: {
-    ko: '도메인 형식이 올바르지 않거나 예약된 단어입니다 (최소 3자, 영문/숫자/하이픈).',
-    en: 'Invalid or reserved domain format (min 3 chars; letters, numbers, hyphens).',
+    ko: '사이트 주소 형식이 올바르지 않거나 예약된 단어입니다 (최소 3자, 영문/숫자/하이픈).',
+    en: 'Invalid or reserved site address (min 3 chars; letters, numbers, hyphens).',
   },
   NAME_TAKEN: {
     ko: '이미 사용 중인 사이트 이름입니다.',
