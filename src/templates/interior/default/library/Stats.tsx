@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../interior.module.css';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
@@ -15,8 +15,8 @@ const statsSchema = {
 
 type StatsContent = ValuesOf<typeof statsSchema>;
 
-const Stats: SectionComponent = function Stats({ section }: TemplateSectionProps) {
-  const content = section.fields as StatsContent;
+const Stats: BlockComponent = function Stats({ block }: TemplateBlockProps) {
+  const content = block.fields as StatsContent;
   const stats = ([1, 2, 3, 4] as const).map(n => ({
     value: content[`s${n}Value`],
     label: content[`s${n}Label`],

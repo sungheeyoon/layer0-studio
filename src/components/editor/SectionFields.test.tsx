@@ -3,7 +3,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { Section } from '@/domain/entities/template.entity';
+import type { Block } from '@/domain/entities/template.entity';
 import type { FieldValue } from '@/domain/entities/field-edit';
 import type { FieldsSchema } from '@/domain/entities/template.entity';
 
@@ -40,7 +40,7 @@ beforeEach(() => {
   onError.mockClear();
 });
 
-function block(fields: Record<string, unknown>): Section {
+function block(fields: Record<string, unknown>): Block {
   return { id: 'blk-1', type: 'hero', visible: true, fields };
 }
 

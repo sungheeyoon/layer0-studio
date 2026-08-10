@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { BuildingsIcon, DocumentTextIcon, HomeIcon, UserHandsIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -16,8 +16,8 @@ const trustStripSchema = {
 
 type TrustStripContent = ValuesOf<typeof trustStripSchema>;
 
-const TrustStrip: SectionComponent = function TrustStrip({ section }: TemplateSectionProps) {
-  const content = section.fields as TrustStripContent;
+const TrustStrip: BlockComponent = function TrustStrip({ block }: TemplateBlockProps) {
+  const content = block.fields as TrustStripContent;
   
   const stats = ([1, 2, 3, 4] as const).map(n => ({
     value: content[`stat${n}Value`] || '',

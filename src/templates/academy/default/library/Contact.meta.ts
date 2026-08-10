@@ -1,4 +1,4 @@
-import { SectionComponentMeta } from '../../../types';
+import { BlockComponentMeta } from '../../../types';
 import type { FieldsSchema } from '@/domain/entities/template.entity';
 
 /**
@@ -15,7 +15,7 @@ export const contactSchema = {
   kakaoText: { type: 'text', label: '카카오톡 안내' },
 } as const satisfies FieldsSchema;
 
-export const contactMeta: SectionComponentMeta = {
+export const contactMeta: BlockComponentMeta = {
   componentKey: 'contact',
   category: 'contact',
   label: '상담 신청 CTA',

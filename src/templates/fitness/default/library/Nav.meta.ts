@@ -1,4 +1,4 @@
-import { SectionComponentMeta } from '../../../types';
+import { BlockComponentMeta } from '../../../types';
 import type { FieldsSchema } from '@/domain/entities/template.entity';
 
 /**
@@ -12,7 +12,7 @@ export const navSchema = {
   ctaText: { type: 'text', label: 'CTA 텍스트' },
 } as const satisfies FieldsSchema;
 
-export const navMeta: SectionComponentMeta = {
+export const navMeta: BlockComponentMeta = {
   componentKey: 'nav',
   category: 'navigation',
   label: 'Fitness Navigation',

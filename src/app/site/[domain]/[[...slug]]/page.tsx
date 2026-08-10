@@ -5,10 +5,10 @@ import { loadTemplate } from '@/templates/registry';
 import { globalStylesToThemeVars } from '@/lib/template/design-tokens';
 import { SITE_URL } from '@/lib/seo/base-url';
 import {
-  allSections,
+  allBlocks,
   isMultiContent,
   resolveActivePageSeo,
-  type Section,
+  type Block,
 } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
@@ -23,7 +23,7 @@ interface Props {
  * it against — the shape check is the parse. Non-string Values (an image's
  * `{url}`, an array) are simply not description material.
  */
-function textValue(block: Section | undefined, key: string): string {
+function textValue(block: Block | undefined, key: string): string {
   const value = block?.fields[key];
   return typeof value === 'string' ? value : '';
 }
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     // Explicit PageSeo wins; fall back to hero extraction when none is authored.
     const seo = resolveActivePageSeo(content, activePageId);
-    const heroSection = allSections(content).find(s => s.type === 'hero');
+    const heroSection = allBlocks(content).find(s => s.type === 'hero');
     const heroTitle = textValue(heroSection, 'title') || textValue(heroSection, 'heading');
     const heroSubtitle = textValue(heroSection, 'subtitle');
     const title = seo?.title || site.siteName;

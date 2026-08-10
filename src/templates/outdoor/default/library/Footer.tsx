@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
+import { TemplateBlockProps, BlockComponent, NavBlockProps } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -15,10 +15,10 @@ const footerSchema = {
 
 type FooterContent = ValuesOf<typeof footerSchema>;
 
-const Footer: SectionComponent = function Footer(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as FooterContent;
-  const { navItems } = props as NavSectionProps;
+const Footer: BlockComponent = function Footer(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as FooterContent;
+  const { navItems } = props as NavBlockProps;
   const brandName = content.brandName || '능선';
   const tagline = content.tagline;
   const copyright = content.copyright || '© 능선';

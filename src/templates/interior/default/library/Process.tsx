@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { ChatIcon, RulerIcon, PenIcon, LetterIcon, HammerIcon, KeyIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -31,8 +31,8 @@ const processSchema = {
 
 type ProcessContent = ValuesOf<typeof processSchema>;
 
-const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
-  const content = section.fields as ProcessContent;
+const Process: BlockComponent = function Process({ block }: TemplateBlockProps) {
+  const content = block.fields as ProcessContent;
   const label = content.eyebrow || 'How We Work';
   const title = content.title || '';
 

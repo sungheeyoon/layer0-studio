@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
+import { TemplateBlockProps, BlockComponent, NavBlockProps } from '../../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -11,10 +11,10 @@ const navSchema = {
 
 type NavContent = ValuesOf<typeof navSchema>;
 
-const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
-  const { section } = props;
-  const { navItems } = props as NavSectionProps;
-  const content = section.fields as NavContent;
+const Nav: BlockComponent = function Nav(props: TemplateBlockProps) {
+  const { block } = props;
+  const { navItems } = props as NavBlockProps;
+  const content = block.fields as NavContent;
   const brandName = content.brandName || 'ARRC';
   const brandSubtext = content.brandSubtext || 'Clinic';
   const ctaText = content.ctaText || '예약하기';

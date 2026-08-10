@@ -21,7 +21,7 @@ function page(
   id: string,
   slug: string,
   visible: boolean,
-  navVisible: boolean,
+  placement: 'header' | 'footer' | 'none',
   label: string,
   seoTitle?: string,
 ): Page {
@@ -29,30 +29,33 @@ function page(
     id,
     slug,
     visible,
-    nav: { visible: navVisible, label },
-    sections: [],
+    name: label,
+    ...(placement === 'none' ? {} : {
+      menu: placement === 'header' ? { label } : { label, placement: 'footer' as const },
+    }),
+    blocks: [],
     ...(seoTitle ? { seo: { title: seoTitle, description: `${label} desc` } } : {}),
   };
 }
 
 const pages: Page[] = [
-  page('p-home', 'home', true, true, 'Home', 'Home Title'),
-  page('p-about', 'about', true, true, 'About'),
-  page('p-privacy', 'privacy', true, false, 'Privacy'), // routable, footer-only
-  page('p-draft', 'draft', false, false, 'Draft'), // unroutable
+  page('p-home', 'home', true, 'header', 'Home', 'Home Title'),
+  page('p-about', 'about', true, 'header', 'About'),
+  page('p-privacy', 'privacy', true, 'footer', 'Privacy'),
+  page('p-draft', 'draft', false, 'none', 'Draft'),
 ];
 
 const hrefOf = (p: Page) => (p.id === 'p-home' ? '/' : `/${p.slug}`);
 
-describe('nav projection — top nav vs footer are complementary', () => {
-  it('deriveNav lists only visible + nav.visible pages, in array order', () => {
+describe('menu projection', () => {
+  it('deriveNav lists visible header-menu pages in array order', () => {
     expect(deriveNav(pages, hrefOf)).toEqual([
       { label: 'Home', href: '/' },
       { label: 'About', href: '/about' },
     ]);
   });
 
-  it('deriveFooterNav lists visible + !nav.visible pages (privacy, not draft)', () => {
+  it('deriveFooterNav lists only explicit footer placement', () => {
     expect(deriveFooterNav(pages, hrefOf)).toEqual([
       { label: 'Privacy', href: '/privacy' },
     ]);
@@ -70,7 +73,7 @@ describe('resolveActivePageSeo', () => {
     mode: 'multi',
     templateKey: 'corporate-multipage',
     globalStyles,
-    shared: { header: [], footer: [] },
+    chrome: { header: [], footer: [] },
     pages,
   };
 
@@ -91,9 +94,18 @@ describe('resolveActivePageSeo', () => {
       mode: 'single',
       templateKey: 'cafe-default',
       globalStyles,
-      sections: [],
+      blocks: [],
       seo: { title: 'Site Title', description: 'Site desc' },
     };
     expect(resolveActivePageSeo(single)?.title).toBe('Site Title');
   });
+});
+
+it('Single menu cannot express footer placement', () => {
+  const menu = {
+    label: 'About',
+    // @ts-expect-error Single menu entries have no placement axis
+    placement: 'footer',
+  } satisfies import('../entities/template.entity').SingleMenuEntry;
+  expect(menu.label).toBe('About');
 });

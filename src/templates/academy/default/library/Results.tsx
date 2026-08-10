@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 합격 / 성적 실적 — a deep-navy band of headline numbers. */
@@ -19,8 +19,8 @@ const resultsSchema = {
 
 type ResultsContent = ValuesOf<typeof resultsSchema>;
 
-const Results: SectionComponent = function Results({ section }: TemplateSectionProps) {
-  const content = section.fields as ResultsContent;
+const Results: BlockComponent = function Results({ block }: TemplateBlockProps) {
+  const content = block.fields as ResultsContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const items = content.items ?? [];

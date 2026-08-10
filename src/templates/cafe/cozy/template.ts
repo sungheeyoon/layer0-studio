@@ -13,15 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "nav-1",
         "type": "nav",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "네비게이션"
-        },
         "fields": {
           "brandName": "COZY CORNER",
           "brandSubtext": "Warmth in a Cup"
@@ -31,10 +27,6 @@ const preset: TemplatePreset = {
         "id": "hero-1",
         "type": "hero-split",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "Homemade & Fresh"
-        },
         "fields": {
           "eyebrow": "Homemade & Fresh",
           "title1": "Find Your",
@@ -47,10 +39,6 @@ const preset: TemplatePreset = {
         "id": "story-1",
         "type": "story",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "story"
-        },
         "fields": {
           "title1": "Our Humble",
           "titleAccent": "Beginnings",
@@ -61,10 +49,6 @@ const preset: TemplatePreset = {
         "id": "visit-1",
         "type": "visit",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "visit"
-        },
         "fields": {
           "title": "Come Visit",
           "address": "123 Cozy Lane, Seoul"
@@ -74,10 +58,6 @@ const preset: TemplatePreset = {
         "id": "footer-1",
         "type": "footer",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "푸터"
-        },
         "fields": {
           "brandName": "COZY CORNER"
         }

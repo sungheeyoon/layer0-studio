@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -23,9 +23,9 @@ const processSchema = {
 
 type ProcessContent = ValuesOf<typeof processSchema>;
 
-const Process: SectionComponent = function Process(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as ProcessContent;
+const Process: BlockComponent = function Process(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as ProcessContent;
   const eyebrow = content.eyebrow;
   const heading = content.heading;
   const items = content.items ?? [];

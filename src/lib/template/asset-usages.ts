@@ -1,7 +1,7 @@
 import {
   ContentModel,
   FieldsSchema,
-  Section,
+  Block,
 } from '@/domain/entities/template.entity';
 import {
   AssetUsage,
@@ -46,13 +46,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * `itemSchema`.
  *
  * slotKey namespace (ADR-0007 Consequences, ADR-0016 §4-4):
- *   Single:        `${section.id}.${key}`
- *   Multi page:    `${page.id}.${section.id}.${key}`
- *   Multi shared:  `shared.${slot}.${section.id}.${key}`   (slot = header | footer)
+ *   Single:        `${block.id}.${key}`
+ *   Multi page:    `${page.id}.${block.id}.${key}`
+ *   Multi Chrome:  `chrome.${slot}.${block.id}.${key}`   (slot = header | footer)
  *   Array item:    `…${key}[${item.id}].${itemKey}`        (nests arbitrarily deep)
  *
- * The Multi branch walks `shared.header` / `shared.footer` (which belong to no
- * Page) in addition to every page's sections, so assets placed in a shared
+ * The Multi branch walks `chrome.header` / `chrome.footer` (which belong to no
+ * Page) in addition to every Page's Blocks, so assets placed in Chrome
  * header/footer are tracked and never mis-swept.
  *
  * **Array fields must be traversed, not skipped.** An image nested in an array
@@ -131,7 +131,7 @@ export function collectAssetUsages(
    * `SiteWriteUseCase.saveContent` collects only after validation passes, so a
    * Site whose Blocks cannot be resolved is never written in the first place.
    */
-  const collectFromSection = (section: Section, prefix: string) => {
+  const collectFromSection = (section: Block, prefix: string) => {
     const entry = library?.[section.type];
     if (!entry) return;
     collectFromValues(
@@ -146,17 +146,17 @@ export function collectAssetUsages(
   if (!library) return usages;
 
   if (content && content.mode === 'single') {
-    for (const section of content.sections ?? []) {
+    for (const section of content.blocks ?? []) {
       collectFromSection(section, '');
     }
   } else if (content && content.mode === 'multi') {
     for (const slot of ['header', 'footer'] as const) {
-      for (const section of content.shared?.[slot] ?? []) {
-        collectFromSection(section, `shared.${slot}.`);
+      for (const section of content.chrome?.[slot] ?? []) {
+        collectFromSection(section, `chrome.${slot}.`);
       }
     }
     for (const page of content.pages ?? []) {
-      for (const section of page.sections ?? []) {
+      for (const section of page.blocks ?? []) {
         collectFromSection(section, `${page.id}.`);
       }
     }

@@ -126,7 +126,7 @@ export const designTokens: DesignTokens = {
 `;
 
 const heroTsx = `import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 
 /**
  * Schema-first (ADR-0016 §4): the schema is the single source of truth and the
@@ -144,10 +144,10 @@ const heroSchema = {
 
 type HeroContent = ValuesOf<typeof heroSchema>;
 
-const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
+const Hero: BlockComponent = function Hero({ block }: TemplateBlockProps) {
   // The one place loose domain data becomes a typed Value (ADR-0016 §4-2).
   // No re-validation: the save path already ran the library-aware validator.
-  const content = section.fields as HeroContent;
+  const content = block.fields as HeroContent;
 
   // Every optional Value needs a fallback — \`getFieldValue\`'s \`?? ''\` safety
   // net is gone, and an older Site may simply not carry the key (ADR-0016 §6).
@@ -208,7 +208,7 @@ export default Hero;
 `;
 
 const featuresTsx = `import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 
 const featuresSchema = {
   title: { type: 'text', label: '섹션 타이틀' },
@@ -226,8 +226,8 @@ const featuresSchema = {
 
 type FeaturesContent = ValuesOf<typeof featuresSchema>;
 
-const Features: SectionComponent = function Features({ section }: TemplateSectionProps) {
-  const content = section.fields as FeaturesContent;
+const Features: BlockComponent = function Features({ block }: TemplateBlockProps) {
+  const content = block.fields as FeaturesContent;
 
   // An \`array\` Value can be absent on a Site created before the field existed.
   const items = content.items ?? [];
@@ -274,7 +274,7 @@ export default Features;
 `;
 
 const footerTsx = `import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 
 const footerSchema = {
   brandName: { type: 'text', label: '브랜드 이름', required: true },
@@ -284,8 +284,8 @@ const footerSchema = {
 
 type FooterContent = ValuesOf<typeof footerSchema>;
 
-const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const content = section.fields as FooterContent;
+const Footer: BlockComponent = function Footer({ block }: TemplateBlockProps) {
+  const content = block.fields as FooterContent;
 
   return (
     <footer className="py-20 px-6 lg:px-10 bg-[var(--color-secondary)] text-[var(--color-surface)]">
@@ -321,7 +321,7 @@ import Footer from './Footer';
 
 /**
  * componentKey → { Component, meta }. These keys are permanent: a live Site
- * stores \`section.type\` as a string, so renaming one blanks that section.
+ * stores \`block.type\` as a string, so renaming one blanks that section.
  *
  * Server components carry \`Component.meta\` and need only \`libEntry(C)\`. A
  * \`'use client'\` component's module body never runs on the server, so its meta
@@ -347,7 +347,7 @@ export const defaultContent: ContentModel = {
   mode: 'single',
   templateKey: '${templateKey}',
   globalStyles: defaultGlobalStyles,
-  sections: [], // Empty skeleton; the preset provides the sections
+  blocks: [], // Empty skeleton; the preset provides the sections
 };
 
 export default function ${pascal}Template(props: TemplateRendererProps) {
@@ -382,12 +382,12 @@ const preset: TemplatePreset = {
     mode: 'single',
     templateKey: '${templateKey}',
     globalStyles: defaultGlobalStyles,
-    sections: [
+    blocks: [
       {
         id: 'hero-001',
         type: 'hero',
         visible: true,
-        nav: { visible: true, label: '홈' },
+        menu: { label: '홈' },
         fields: {
           eyebrow: 'TODO — 상단 라벨',
           title: 'TODO — 메인 타이틀',
@@ -402,7 +402,7 @@ const preset: TemplatePreset = {
         id: 'features-001',
         type: 'features',
         visible: true,
-        nav: { visible: true, label: '소개' },
+        menu: { label: '소개' },
         fields: {
           title: 'TODO — 섹션 타이틀',
           // Every array item carries its own permanent \`id\` beside \`fields\`.
@@ -418,7 +418,6 @@ const preset: TemplatePreset = {
         id: 'footer-001',
         type: 'footer',
         visible: true,
-        nav: { visible: false, label: '푸터' },
         fields: {
           brandName: 'TODO — 브랜드',
           address: 'TODO — 주소',
@@ -498,5 +497,5 @@ Next:
   5. open /preview/preset/${templateKey}                    # look at it
 
   For a Multi (routable pages) Template instead, clone src/templates/outdoor/default —
-  its preset is the \`{ mode:'multi', shared:{header,footer}, pages:[…] }\` union.
+  its preset is the \`{ mode:'multi', chrome:{header,footer}, pages:[…] }\` union.
 `);

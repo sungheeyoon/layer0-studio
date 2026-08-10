@@ -13,15 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "nav-001",
         "type": "nav",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "네비게이션"
-        },
         "fields": {
           "brandName": "ARRC",
           "brandSubtext": "Clinic",
@@ -32,10 +28,6 @@ const preset: TemplatePreset = {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "ARRC Clinic — 서울 강남구 청담동"
-        },
         "fields": {
           "eyebrow": "ARRC Clinic — 서울 강남구 청담동",
           "title": "당신만의\n**아름다움**을\n설계합니다",
@@ -58,10 +50,6 @@ const preset: TemplatePreset = {
         "id": "marquee-001",
         "type": "marquee",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "마퀴"
-        },
         "fields": {
           "item1": "대한피부과학회 인정의",
           "item2": "국제심미의학학회 인증",
@@ -75,10 +63,7 @@ const preset: TemplatePreset = {
         "id": "services-001",
         "type": "services",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "진료 안내"
-        },
+        "menu": { "label": "진료 안내" },
         "fields": {
           "eyebrow": "진료 안내",
           "title": "당신의 피부에\n맞는 솔루션",
@@ -102,10 +87,7 @@ const preset: TemplatePreset = {
         "id": "space-001",
         "type": "space",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "클리닉 소개"
-        },
+        "menu": { "label": "클리닉 소개" },
         "fields": {
           "eyebrow": "클리닉 소개",
           "title": "공간이\n치유의\n시작입니다",
@@ -126,10 +108,6 @@ const preset: TemplatePreset = {
         "id": "why-001",
         "type": "why",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "아르크가 다른 이유"
-        },
         "fields": {
           "eyebrow": "아르크가 다른 이유",
           "title": "차이는 디테일에서 만들어집니다",
@@ -148,10 +126,7 @@ const preset: TemplatePreset = {
         "id": "team-001",
         "type": "team",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "의료진"
-        },
+        "menu": { "label": "의료진" },
         "fields": {
           "eyebrow": "의료진 소개",
           "title": "당신의 피부를\n책임지는 전문가",
@@ -180,10 +155,7 @@ const preset: TemplatePreset = {
         "id": "testimonials-001",
         "type": "testimonials",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "후기"
-        },
+        "menu": { "label": "후기" },
         "fields": {
           "eyebrow": "환자 후기",
           "title": "직접 경험한\n변화의 이야기",
@@ -203,10 +175,6 @@ const preset: TemplatePreset = {
         "id": "booking-001",
         "type": "booking",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "진료 예약"
-        },
         "fields": {
           "eyebrow": "진료 예약",
           "title": "첫 상담은\n무료입니다",
@@ -220,10 +188,6 @@ const preset: TemplatePreset = {
         "id": "footer-001",
         "type": "footer",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "푸터"
-        },
         "fields": {
           "brandName": "ARRC",
           "brandSubtext": "Clinic",

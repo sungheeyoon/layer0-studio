@@ -1,5 +1,5 @@
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { ArrowRightIcon, CupIcon, PieChartIcon } from '../sections/icons';
 
@@ -30,11 +30,11 @@ const menuBentoSchema = {
 
 type MenuBentoContent = ValuesOf<typeof menuBentoSchema>;
 
-const MenuBento: SectionComponent = function MenuBento({ section }: TemplateSectionProps) {
+const MenuBento: BlockComponent = function MenuBento({ block }: TemplateBlockProps) {
   // The renderer boundary is where loose domain data becomes a typed Value
   // (ADR-0016 §4-2). No re-validation here: the save path already ran the
   // library-aware validator, so we trust and cast once.
-  const content = section.fields as MenuBentoContent;
+  const content = block.fields as MenuBentoContent;
 
   const label = content.eyebrow || '메뉴';
   const title = content.title || '매일 정성껏\n내리는 한 잔';

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../medical.module.css';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
@@ -18,8 +18,8 @@ const whySchema = {
 
 type WhyContent = ValuesOf<typeof whySchema>;
 
-const Why: SectionComponent = function Why({ section }: TemplateSectionProps) {
-  const content = section.fields as WhyContent;
+const Why: BlockComponent = function Why({ block }: TemplateBlockProps) {
+  const content = block.fields as WhyContent;
   const label = content.eyebrow || '';
   const title = content.title || '';
 

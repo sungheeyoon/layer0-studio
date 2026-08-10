@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -17,9 +17,9 @@ const ctaBannerSchema = {
 
 type CtaBannerContent = ValuesOf<typeof ctaBannerSchema>;
 
-const CtaBanner: SectionComponent = function CtaBanner(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as CtaBannerContent;
+const CtaBanner: BlockComponent = function CtaBanner(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as CtaBannerContent;
   const eyebrow = content.eyebrow;
   const heading = content.heading || '진료 예약';
   const body = content.body;

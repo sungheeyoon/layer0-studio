@@ -4,7 +4,7 @@ import { ContentModel } from '../../entities/template.entity';
  * One image asset referenced by a Site, and the slot it sits in.
  *
  * `slotKey` is a stable address for *where* in the content the reference lives
- * (`<section.id>.<fieldKey>`, plus a page/shared prefix for Multi). The save RPC
+ * (`<block.id>.<fieldKey>`, plus a Page/Chrome prefix for Multi). The save RPC
  * diffs the old and new usage sets to decide which assets a Site has stopped
  * referencing, which is what keeps ADR-0003's orphan sweep from deleting a
  * binary that is still on someone's page.

@@ -225,15 +225,15 @@ export function migrateContentToValues(
   };
 
   if (content.mode === 'single') {
-    (content.sections ?? []).forEach((section) => migrateBlock(section, `sections[${section.id}]`));
+    (content.blocks ?? []).forEach((section) => migrateBlock(section, `sections[${section.id}]`));
   } else {
     for (const slot of ['header', 'footer'] as const) {
-      (content.shared?.[slot] ?? []).forEach((section) =>
+      (content.chrome?.[slot] ?? []).forEach((section) =>
         migrateBlock(section, `shared.${slot}[${section.id}]`),
       );
     }
     (content.pages ?? []).forEach((page) =>
-      (page.sections ?? []).forEach((section) => migrateBlock(section, `pages[${page.id}].${section.id}`)),
+      (page.blocks ?? []).forEach((section) => migrateBlock(section, `pages[${page.id}].${section.id}`)),
     );
   }
 

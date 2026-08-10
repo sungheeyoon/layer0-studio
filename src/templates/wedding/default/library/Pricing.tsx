@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { CheckCircleIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -57,8 +57,8 @@ const pricingSchema = {
 
 type PricingContent = ValuesOf<typeof pricingSchema>;
 
-const Pricing: SectionComponent = function Pricing({ section }: TemplateSectionProps) {
-  const content = section.fields as PricingContent;
+const Pricing: BlockComponent = function Pricing({ block }: TemplateBlockProps) {
+  const content = block.fields as PricingContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const subtitle = content.subtitle || '';

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { BuildingsIcon, SofaIcon, ShieldCheckIcon, MapPointIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -21,8 +21,8 @@ const spaceSchema = {
 
 type SpaceContent = ValuesOf<typeof spaceSchema>;
 
-const Space: SectionComponent = function Space({ section }: TemplateSectionProps) {
-  const content = section.fields as SpaceContent;
+const Space: BlockComponent = function Space({ block }: TemplateBlockProps) {
+  const content = block.fields as SpaceContent;
   const label = content.eyebrow || '';
   const title = content.title || '';
   const description = content.description || '';

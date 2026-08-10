@@ -33,7 +33,7 @@ export const defaultGlobalStyles: GlobalStyles = {
  * For a visual redesign, fork to a new leaf directory instead (a `templateKey`
  * is permanent; see CLAUDE.md "Template system").
  *
- * Section components reference these via `var(--{dim}-{key})`.
+ * Block components reference these via `var(--{dim}-{key})`.
  */
 export const designTokens: DesignTokens = {
   colors: {

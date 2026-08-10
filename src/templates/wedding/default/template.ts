@@ -13,15 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "nav-001",
         "type": "nav",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "네비게이션"
-        },
         "fields": {
           "brand": "HAUTRE",
           "tagline": "Wedding & Event",
@@ -33,10 +29,6 @@ const preset: TemplatePreset = {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "Wedding & Event Planner"
-        },
         "fields": {
           "eyebrow": "Wedding & Event Planner",
           "title": "당신의 이야기를,\n**평생의 기억**으로",
@@ -58,10 +50,6 @@ const preset: TemplatePreset = {
         "id": "philosophy-001",
         "type": "philosophy",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "Our Philosophy"
-        },
         "fields": {
           "eyebrow": "Our Philosophy",
           "title": "\"모든 결혼은 다릅니다.\n**두 사람의 온도**로\n만들어져야 하니까요.\"",
@@ -74,10 +62,7 @@ const preset: TemplatePreset = {
         "id": "services-001",
         "type": "services",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "서비스"
-        },
+        "menu": { "label": "서비스" },
         "fields": {
           "eyebrow": "Services",
           "title": "어떤 하루를 꿈꾸시나요",
@@ -102,10 +87,7 @@ const preset: TemplatePreset = {
         "id": "gallery-001",
         "type": "gallery",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "갤러리"
-        },
+        "menu": { "label": "갤러리" },
         "fields": {
           "eyebrow": "Gallery",
           "title": "오뜨르가 만든 순간들",
@@ -121,10 +103,7 @@ const preset: TemplatePreset = {
         "id": "process-001",
         "type": "process",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "진행 방식"
-        },
+        "menu": { "label": "진행 방식" },
         "fields": {
           "eyebrow": "How We Work",
           "title": "처음부터 끝까지, 함께합니다",
@@ -145,10 +124,7 @@ const preset: TemplatePreset = {
         "id": "pricing-001",
         "type": "pricing",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "패키지"
-        },
+        "menu": { "label": "패키지" },
         "fields": {
           "eyebrow": "Packages",
           "title": "패키지 안내",
@@ -192,10 +168,7 @@ const preset: TemplatePreset = {
         "id": "testimonials-001",
         "type": "testimonials",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "후기"
-        },
+        "menu": { "label": "후기" },
         "fields": {
           "eyebrow": "Reviews",
           "title": "두 분이 직접 전해주신 이야기",
@@ -219,10 +192,6 @@ const preset: TemplatePreset = {
         "id": "faq-001",
         "type": "faq",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "FAQ"
-        },
         "fields": {
           "eyebrow": "FAQ",
           "title": "자주 묻는 질문",
@@ -240,10 +209,6 @@ const preset: TemplatePreset = {
         "id": "contact-001",
         "type": "contact",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "Start Your Story"
-        },
         "fields": {
           "eyebrow": "Start Your Story",
           "title": "두 분의 날짜를\n**함께 잡아보세요.**",
@@ -260,10 +225,6 @@ const preset: TemplatePreset = {
         "id": "footer-001",
         "type": "footer",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "푸터"
-        },
         "fields": {
           "brand": "HAUTRE",
           "tagline": "Wedding & Event Planner · Seoul",

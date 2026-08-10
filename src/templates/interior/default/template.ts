@@ -13,15 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "nav-001",
         "type": "nav",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "네비게이션"
-        },
         "fields": {
           "brandName": "에스파시오",
           "ctaText": "무료 상담 신청"
@@ -31,10 +27,6 @@ const preset: TemplatePreset = {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "Seoul Premium Interior Studio"
-        },
         "fields": {
           "eyebrow": "Seoul Premium Interior Studio",
           "estLabel": "Est. 2015",
@@ -54,10 +46,6 @@ const preset: TemplatePreset = {
         "id": "stats-001",
         "type": "stats",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "통계"
-        },
         "fields": {
           "s1Value": "280",
           "s1Label": "완성된 프로젝트",
@@ -73,10 +61,7 @@ const preset: TemplatePreset = {
         "id": "about-001",
         "type": "about",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "스튜디오 소개"
-        },
+        "menu": { "label": "스튜디오 소개" },
         "fields": {
           "eyebrow": "About Espacio",
           "title": "우리는 인테리어가 아닌\n삶의 방식을 설계합니다",
@@ -94,10 +79,7 @@ const preset: TemplatePreset = {
         "id": "services-001",
         "type": "services",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "서비스"
-        },
+        "menu": { "label": "서비스" },
         "fields": {
           "eyebrow": "Our Services",
           "title": "어떤 공간이든,\n에스파시오가 함께합니다",
@@ -120,10 +102,7 @@ const preset: TemplatePreset = {
         "id": "portfolio-001",
         "type": "portfolio",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "포트폴리오"
-        },
+        "menu": { "label": "포트폴리오" },
         "fields": {
           "eyebrow": "Portfolio",
           "title": "에스파시오의\n대표 작업물",
@@ -142,10 +121,7 @@ const preset: TemplatePreset = {
         "id": "process-001",
         "type": "process",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "진행 과정"
-        },
+        "menu": { "label": "진행 과정" },
         "fields": {
           "eyebrow": "How We Work",
           "title": "투명하고 체계적인\n6단계 진행 과정",
@@ -167,10 +143,6 @@ const preset: TemplatePreset = {
         "id": "testimonials-001",
         "type": "testimonials",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "Client Reviews"
-        },
         "fields": {
           "eyebrow": "Client Reviews",
           "title": "고객의 말이\n가장 정직한 포트폴리오입니다",
@@ -189,10 +161,7 @@ const preset: TemplatePreset = {
         "id": "contact-001",
         "type": "contact",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "문의"
-        },
+        "menu": { "label": "문의" },
         "fields": {
           "eyebrow": "Get Started",
           "title": "당신의 공간을\n지금 바꿔드립니다",
@@ -206,10 +175,6 @@ const preset: TemplatePreset = {
         "id": "footer-001",
         "type": "footer",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "푸터"
-        },
         "fields": {
           "description": "공간이 삶을 바꾸는 순간을 설계하는 프리미엄 인테리어 스튜디오. 2015년 설립.",
           "address": "서울 강남구 도산대로 128, 5층",

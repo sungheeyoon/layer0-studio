@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon, HeartIcon, GiftIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -25,8 +25,8 @@ const servicesSchema = {
 
 type ServicesContent = ValuesOf<typeof servicesSchema>;
 
-const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const content = section.fields as ServicesContent;
+const Services: BlockComponent = function Services({ block }: TemplateBlockProps) {
+  const content = block.fields as ServicesContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
 

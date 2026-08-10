@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { RulerIcon, DumbbellIcon, ShowerIcon, ClockIcon, ParkingIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -26,8 +26,8 @@ const facilitySchema = {
 
 type FacilityContent = ValuesOf<typeof facilitySchema>;
 
-const Facility: SectionComponent = function Facility({ section }: TemplateSectionProps) {
-  const content = section.fields as FacilityContent;
+const Facility: BlockComponent = function Facility({ block }: TemplateBlockProps) {
+  const content = block.fields as FacilityContent;
   const label = content.eyebrow || '시설 안내';
   const title = content.title || '장비가\n결과를\n만듭니다';
   const description = content.description || '';

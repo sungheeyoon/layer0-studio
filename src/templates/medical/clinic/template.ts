@@ -58,7 +58,7 @@ const preset: TemplatePreset = {
       fontSize: '16px',
       layout: 'wide',
     },
-    shared: {
+    chrome: {
       header: [
         {
           id: 'nav-001',
@@ -92,13 +92,14 @@ const preset: TemplatePreset = {
         id: 'page-home',
         slug: 'home',
         visible: true,
-        nav: { visible: true, label: '홈' },
+        name: '홈',
+        menu: { label: '홈' },
         seo: {
           title: '온유의원 — 가까운 곳에서 믿을 수 있는 진료',
           description:
             '서울 마포 온유의원. 내과·가정의학과·건강검진. 당일 진료와 검사, 편안한 1:1 상담을 제공합니다.',
         },
-        sections: [
+        blocks: [
           {
             id: 'home-hero',
             type: 'hero',
@@ -317,12 +318,13 @@ const preset: TemplatePreset = {
         id: 'page-about',
         slug: 'about',
         visible: true,
-        nav: { visible: true, label: '병원소개' },
+        name: '병원소개',
+        menu: { label: '병원소개' },
         seo: {
           title: '병원소개 — 온유의원',
           description: '온유의원의 진료 철학과 원장 인사말, 미션·비전, 연혁, 의료진과 시설을 소개합니다.',
         },
-        sections: [
+        blocks: [
           {
             id: 'about-header',
             type: 'pageHeader',
@@ -541,12 +543,13 @@ const preset: TemplatePreset = {
         id: 'page-services',
         slug: 'services',
         visible: true,
-        nav: { visible: true, label: '진료안내' },
+        name: '진료안내',
+        menu: { label: '진료안내' },
         seo: {
           title: '진료안내 — 온유의원',
           description: '온유의원의 진료과목과 건강검진, 진료 과정, 자주 묻는 질문을 안내합니다.',
         },
-        sections: [
+        blocks: [
           {
             id: 'services-header',
             type: 'pageHeader',
@@ -737,12 +740,13 @@ const preset: TemplatePreset = {
         id: 'page-gallery',
         slug: 'gallery',
         visible: true,
-        nav: { visible: true, label: '갤러리' },
+        name: '갤러리',
+        menu: { label: '갤러리' },
         seo: {
           title: '갤러리 — 온유의원',
           description: '온유의원의 진료 공간과 검사 장비, 의료진 활동을 사진으로 만나보세요.',
         },
-        sections: [
+        blocks: [
           {
             id: 'gallery-header',
             type: 'pageHeader',
@@ -856,12 +860,13 @@ const preset: TemplatePreset = {
         id: 'page-contact',
         slug: 'contact',
         visible: true,
-        nav: { visible: true, label: '오시는길' },
+        name: '오시는길',
+        menu: { label: '오시는길' },
         seo: {
           title: '오시는 길 — 온유의원',
           description: '온유의원 위치와 진료시간, 연락처 안내. 온라인 예약도 신청하실 수 있습니다.',
         },
-        sections: [
+        blocks: [
           {
             id: 'contact-header',
             type: 'pageHeader',

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { UserHandsIcon, DocumentTextIcon, LockIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -16,8 +16,8 @@ const aboutSchema = {
 
 type AboutContent = ValuesOf<typeof aboutSchema>;
 
-const About: SectionComponent = function About({ section }: TemplateSectionProps) {
-  const content = section.fields as AboutContent;
+const About: BlockComponent = function About({ block }: TemplateBlockProps) {
+  const content = block.fields as AboutContent;
   const title = content.title || '';
   const body = content.body || '';
 

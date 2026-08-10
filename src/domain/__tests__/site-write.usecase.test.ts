@@ -130,12 +130,11 @@ describe('SiteWriteUseCase.saveContent — validation gate', () => {
     // The `id` is a sibling of `fields`, so nothing the use case does may fold
     // it in — it is the asset slot key and React's reconciliation key.
     const json = makeContent({
-      sections: [
+      blocks: [
         {
           id: 'section-1',
           type: 'menu',
           visible: true,
-          nav: { visible: false, label: 'Menu' },
           fields: {
             items: [{ id: 'item-1', fields: { title: 'Item 1' } }],
           },
@@ -144,7 +143,7 @@ describe('SiteWriteUseCase.saveContent — validation gate', () => {
     });
     const { uc, token } = setup();
     const result = await uc.saveContent('site-1', 'user-1', json, token);
-    const items = asSingle(result.content).sections[0].fields.items as Array<
+    const items = asSingle(result.content).blocks[0].fields.items as Array<
       ArrayItem<{ title: { type: 'text'; label: string } }>
     >;
     expect(items).toHaveLength(1);

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 학원 특장점 — a light band of 3–4 strength cards. */
@@ -20,8 +20,8 @@ const featuresSchema = {
 
 type FeaturesContent = ValuesOf<typeof featuresSchema>;
 
-const Features: SectionComponent = function Features({ section }: TemplateSectionProps) {
-  const content = section.fields as FeaturesContent;
+const Features: BlockComponent = function Features({ block }: TemplateBlockProps) {
+  const content = block.fields as FeaturesContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const subtitle = content.subtitle || '';

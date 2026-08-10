@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -17,9 +17,9 @@ const featureSplitSchema = {
 
 type FeatureSplitContent = ValuesOf<typeof featureSplitSchema>;
 
-const FeatureSplit: SectionComponent = function FeatureSplit(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as FeatureSplitContent;
+const FeatureSplit: BlockComponent = function FeatureSplit(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as FeatureSplitContent;
   const eyebrow = content.eyebrow;
   const heading = content.heading || '제목';
   const body = content.body;

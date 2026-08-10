@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../legal.module.css';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
@@ -18,8 +18,8 @@ const processSchema = {
 
 type ProcessContent = ValuesOf<typeof processSchema>;
 
-const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
-  const content = section.fields as ProcessContent;
+const Process: BlockComponent = function Process({ block }: TemplateBlockProps) {
+  const content = block.fields as ProcessContent;
   const title = content.title || '';
 
   const steps = ([1, 2, 3, 4, 5] as const).map(n => ({

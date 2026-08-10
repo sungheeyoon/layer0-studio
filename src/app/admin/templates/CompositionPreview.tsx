@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ContentModel, allSections } from '@/domain/entities/template.entity';
+import { ContentModel, allBlocks } from '@/domain/entities/template.entity';
 import { templateMap } from '@/templates/_generated';
 import { TemplateLibrary } from '@/templates/types';
 import { Badge } from '@/components/ui/badge';
@@ -31,25 +31,25 @@ export default function CompositionPreview({ content }: CompositionPreviewProps)
     }
   }, [content.templateKey]);
 
-  // Flat list of every section (Single: sections[]; Multi: shared + pages).
-  const sections = allSections(content);
-  if (sections.length === 0) return null;
+  // Flat list of every Block (Single root Blocks; Multi Chrome + Page Blocks).
+  const blocks = allBlocks(content);
+  if (blocks.length === 0) return null;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-medium text-muted-foreground">섹션 구성</h4>
+        <h4 className="text-xs font-medium text-muted-foreground">블록 구성</h4>
         {loading && <span className="animate-pulse text-xs text-muted-foreground">메타데이터 불러오는 중...</span>}
       </div>
 
       <div className="space-y-2">
-        {sections.map((section, index) => {
-          const entry = library?.[section.type];
+        {blocks.map((block, index) => {
+          const entry = library?.[block.type];
           const meta = entry?.meta;
 
           return (
             <div
-              key={section.id}
+              key={block.id}
               className="flex items-start gap-4 rounded-md border border-border bg-card p-3 transition-colors hover:border-foreground/30"
             >
               <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-muted font-mono text-xs text-muted-foreground">
@@ -59,7 +59,7 @@ export default function CompositionPreview({ content }: CompositionPreviewProps)
               <div className="min-w-0 flex-grow">
                 <div className="mb-1 flex items-center gap-2">
                   <span className="truncate text-sm font-medium">
-                    {meta?.label || section.type}
+                    {meta?.label || block.type}
                   </span>
                   {meta?.category && (
                     <Badge variant="outline" className="text-[10px]">
@@ -69,9 +69,9 @@ export default function CompositionPreview({ content }: CompositionPreviewProps)
                 </div>
 
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <code className="font-mono">ID: {section.id}</code>
+                  <code className="font-mono">ID: {block.id}</code>
                   <span className="text-border">|</span>
-                  <code className="font-mono">KEY: {section.type}</code>
+                  <code className="font-mono">KEY: {block.type}</code>
                 </div>
 
                 {/* Data Fields Summary */}
@@ -89,7 +89,7 @@ export default function CompositionPreview({ content }: CompositionPreviewProps)
 
               {/* Visibility Indicator */}
               <div className="flex h-6 flex-shrink-0 items-center">
-                <span className={`h-1.5 w-1.5 rounded-full ${section.visible ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
+                <span className={`h-1.5 w-1.5 rounded-full ${block.visible ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
               </div>
             </div>
           );

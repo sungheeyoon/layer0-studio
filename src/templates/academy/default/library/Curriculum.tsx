@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 커리큘럼 / 반 편성 — each row is a course track with its target grade. */
@@ -21,8 +21,8 @@ const curriculumSchema = {
 
 type CurriculumContent = ValuesOf<typeof curriculumSchema>;
 
-const Curriculum: SectionComponent = function Curriculum({ section }: TemplateSectionProps) {
-  const content = section.fields as CurriculumContent;
+const Curriculum: BlockComponent = function Curriculum({ block }: TemplateBlockProps) {
+  const content = block.fields as CurriculumContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const subtitle = content.subtitle || '';

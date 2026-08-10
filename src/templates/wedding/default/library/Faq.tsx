@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { PlusIcon } from '../sections/icons';
 import type { ValuesOf } from '@/domain/entities/template.entity';
@@ -9,8 +9,8 @@ import { faqSchema } from './Faq.meta';
 
 type FaqContent = ValuesOf<typeof faqSchema>;
 
-const Faq: SectionComponent = function Faq({ section }: TemplateSectionProps) {
-  const content = section.fields as FaqContent;
+const Faq: BlockComponent = function Faq({ block }: TemplateBlockProps) {
+  const content = block.fields as FaqContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
 

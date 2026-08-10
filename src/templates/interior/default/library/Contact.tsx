@@ -1,6 +1,6 @@
 'use client';
 
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon, PhoneIcon, LetterIcon, MapPinIcon } from '../sections/icons';
 import type { ValuesOf } from '@/domain/entities/template.entity';
@@ -8,8 +8,8 @@ import { contactSchema } from './Contact.meta';
 
 type ContactContent = ValuesOf<typeof contactSchema>;
 
-const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const content = section.fields as ContactContent;
+const Contact: BlockComponent = function Contact({ block }: TemplateBlockProps) {
+  const content = block.fields as ContactContent;
   const label = content.eyebrow || 'Get Started';
   const title = content.title || '';
   const description = content.description || '';

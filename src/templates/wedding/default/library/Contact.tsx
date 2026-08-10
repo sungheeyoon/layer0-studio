@@ -1,6 +1,6 @@
 'use client';
 
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { ClockIcon, HeartIcon, MapIcon, PhoneIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
@@ -9,8 +9,8 @@ import { contactSchema } from './Contact.meta';
 
 type ContactContent = ValuesOf<typeof contactSchema>;
 
-const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const content = section.fields as ContactContent;
+const Contact: BlockComponent = function Contact({ block }: TemplateBlockProps) {
+  const content = block.fields as ContactContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const body = content.body || '';

@@ -1,4 +1,4 @@
-import { SectionComponentMeta } from '../../../types';
+import { BlockComponentMeta } from '../../../types';
 import type { FieldsSchema } from '@/domain/entities/template.entity';
 
 /**
@@ -16,7 +16,7 @@ export const contactSchema = {
   address: { type: 'text', label: '주소' },
 } as const satisfies FieldsSchema;
 
-export const contactMeta: SectionComponentMeta = {
+export const contactMeta: BlockComponentMeta = {
   componentKey: 'contact',
   category: 'contact',
   label: 'Interior Contact',

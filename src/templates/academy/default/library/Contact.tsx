@@ -1,14 +1,14 @@
 'use client';
 
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { ValuesOf } from '@/domain/entities/template.entity';
 import { contactSchema } from './Contact.meta';
 
 /** 상담 신청 CTA — a navy band with a lead form (non-functional preview). */
 type ContactContent = ValuesOf<typeof contactSchema>;
 
-const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const content = section.fields as ContactContent;
+const Contact: BlockComponent = function Contact({ block }: TemplateBlockProps) {
+  const content = block.fields as ContactContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const subtitle = content.subtitle || '';

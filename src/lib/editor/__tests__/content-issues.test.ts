@@ -14,21 +14,21 @@ describe('indexIssues', () => {
     expect(index.globalStyles).toEqual({ primaryColor: ['NON_HEX_COLOR'] });
   });
 
-  // The three Section path shapes — Single, Multi page, Multi shared — differ only
+  // The three Block path shapes — Single, Multi page, Multi shared — differ only
   // in their prefix, so the indexer matches the tail.
   it.each([
-    ['Single', 'sections[id=hero].fields.accent'],
-    ['Multi page', 'pages[slug=about].sections[id=hero].fields.accent'],
-    ['Multi shared', 'shared.header.sections[id=hero].fields.accent'],
-  ])('indexes a Section field issue for %s', (_label, path) => {
+    ['Single', 'blocks[id=hero].fields.accent'],
+    ['Multi page', 'pages[slug=about].blocks[id=hero].fields.accent'],
+    ['Multi shared', 'shared.header.blocks[id=hero].fields.accent'],
+  ])('indexes a Block field issue for %s', (_label, path) => {
     const index = indexIssues([issue('INVALID_COLOR_FIELD', path)]);
     expect(index.fields).toEqual({ [fieldIssueKey('hero', 'accent')]: ['INVALID_COLOR_FIELD'] });
   });
 
   it('collects several issues on one field', () => {
     const index = indexIssues([
-      issue('INVALID_COLOR_FIELD', 'sections[id=hero].fields.accent'),
-      issue('INSECURE_URL', 'sections[id=hero].fields.accent'),
+      issue('INVALID_COLOR_FIELD', 'blocks[id=hero].fields.accent'),
+      issue('INSECURE_URL', 'blocks[id=hero].fields.accent'),
     ]);
     expect(index.fields[fieldIssueKey('hero', 'accent')]).toEqual([
       'INVALID_COLOR_FIELD',
@@ -39,7 +39,7 @@ describe('indexIssues', () => {
   // Authoring feedback must not surface under a User's colour picker.
   it('drops codes that are not user-actionable', () => {
     const index = indexIssues([
-      issue('UNKNOWN_DATA_FIELD', 'sections[id=hero].fields.legacy'),
+      issue('UNKNOWN_DATA_FIELD', 'blocks[id=hero].fields.legacy'),
       issue('UNKNOWN_LAYOUT', 'globalStyles.layout'),
     ]);
     expect(index).toEqual(EMPTY_ISSUE_INDEX);
@@ -51,9 +51,9 @@ describe('indexIssues', () => {
 
   // Array-item fields render inside ArrayFieldEditor, which has no anchor for a
   // message — the tail match must not mistake one for a top-level field.
-  it('does not index a nested array-item path as a Section field', () => {
+  it('does not index a nested array-item path as a Block field', () => {
     const index = indexIssues([
-      issue('INVALID_COLOR_FIELD', 'sections[id=menu].fields.items.items[0].fields.accent'),
+      issue('INVALID_COLOR_FIELD', 'blocks[id=menu].fields.items.items[0].fields.accent'),
     ]);
     expect(index.fields).toEqual({});
   });

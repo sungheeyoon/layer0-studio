@@ -12,7 +12,7 @@ export const defaultContent: ContentModel = {
   mode: 'single',
   templateKey: 'cafe-cozy',
   globalStyles: defaultGlobalStyles,
-  sections: [], // Empty skeleton; presets provide the sections
+  blocks: [], // Empty skeleton; presets provide the sections
 };
 
 export default function CafeCozyTemplate(props: TemplateRendererProps) {

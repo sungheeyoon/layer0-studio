@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { GraduationCapIcon, HospitalIcon, ClockIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -29,8 +29,8 @@ const teamSchema = {
 
 type TeamContent = ValuesOf<typeof teamSchema>;
 
-const Team: SectionComponent = function Team({ section }: TemplateSectionProps) {
-  const content = section.fields as TeamContent;
+const Team: BlockComponent = function Team({ block }: TemplateBlockProps) {
+  const content = block.fields as TeamContent;
   const label = content.eyebrow || '';
   const title = content.title || '';
   const description = content.description || '';

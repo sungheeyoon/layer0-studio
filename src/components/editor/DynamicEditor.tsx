@@ -5,17 +5,20 @@ import { UserSite } from '@/domain/entities/user-site.entity';
 import {
   ContentModel,
   GlobalStyles,
-  Section,
+  Block,
   isSingleContent,
   isMultiContent,
-  allSections,
+  allBlocks,
 } from '@/domain/entities/template.entity';
 import {
   isSinglePinned,
   reorderNavItem,
   toggleNavItemVisible,
-  toggleNavItemNavVisible,
-  relabelNavItem,
+  toggleSingleMenu,
+  setPageMenuPlacement,
+  relabelMenuItem,
+  renamePage,
+  type MenuPlacement,
 } from '@/domain/entities/ordered-nav-list';
 import { setFieldValue, type FieldValue } from '@/domain/entities/field-edit';
 import {
@@ -101,10 +104,9 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     isMultiContent(site.content) ? site.content.pages[0]?.id : undefined,
   );
 
-  // Single sites carry their sections directly (one continuous scroll); they
-  // own the rich per-section nav controls (#41).
+  // Single Sites carry Blocks directly in one continuous scroll.
   const singleSections = useMemo(
-    () => (isSingleContent(content) ? content.sections : []),
+    () => (isSingleContent(content) ? content.blocks : []),
     [content],
   );
 
@@ -118,19 +120,19 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     [pages, activePageId],
   );
 
-  // The sections shown in the Hierarchy / Parameters panel: Single → its
-  // sections; Multi → shared header + the active page's sections + shared footer
+  // Blocks shown in the Hierarchy / Parameters panel: Single → its Blocks;
+  // Multi → Chrome header + active Page Blocks + Chrome footer.
   // (so the brand, page body and footer of the previewed page are all editable).
-  const sections = useMemo<Section[]>(() => {
-    if (isSingleContent(content)) return content.sections;
+  const displayedBlocks = useMemo<Block[]>(() => {
+    if (isSingleContent(content)) return content.blocks;
     if (isMultiContent(content) && activePage) {
-      return [...content.shared.header, ...activePage.sections, ...content.shared.footer];
+      return [...content.chrome.header, ...activePage.blocks, ...content.chrome.footer];
     }
     return [];
   }, [content, activePage]);
 
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
-    sections[0]?.id ?? null
+    displayedBlocks[0]?.id ?? null
   );
 
   const [saving, setSaving] = useState(false);
@@ -346,14 +348,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     [updateContent]
   );
 
-  // ── Nav-list edits (reorder / 2-axis visibility / nav label) ──────────────
-  // The write-side mirror of `deriveNav`: one set of handlers for both Site
-  // Types, delegating to the mode-agnostic `ordered-nav-list` module (Single
-  // operates on `sections` with the nav/footer pin rule, Multi on `pages`).
-  // See ADR-0007 §D4 + PLAN §5.
+  // ── Ordered Block/Page and menu edits ──────────────────────────────────────
 
   // Drag-and-drop reorder (replaces the old up/down buttons). One handler for
-  // both Site Types — `reorderNavItem` dispatches to sections (Single, with the
+  // both Site Types — `reorderNavItem` dispatches to Blocks (Single, with the
   // nav/footer pin rule) or pages (Multi). Pins are excluded from the sortable
   // list, so they never move.
   const dndSensors = useSensors(
@@ -378,26 +376,38 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     [updateContent],
   );
 
-  const handleToggleNavItemNavVisible = useCallback(
+  const handleToggleSingleMenu = useCallback(
     (id: string) => {
-      updateContent((json) => toggleNavItemNavVisible(json, id));
+      updateContent((json) => {
+        if (!isSingleContent(json)) return;
+        const block = json.blocks.find((item) => item.id === id);
+        if (!block) return;
+        toggleSingleMenu(json, id, block.menu?.label || templateModule?.library[block.type]?.meta.label || block.type);
+      });
     },
-    [updateContent],
+    [updateContent, templateModule],
   );
 
-  const handleRelabelNavItem = useCallback(
+  const handleRelabelMenuItem = useCallback(
     (id: string, label: string) => {
-      updateContent((json) => relabelNavItem(json, id, label));
+      updateContent((json) => relabelMenuItem(json, id, label));
     },
     [updateContent],
   );
 
-  // Multi inner-section visibility (shared header/footer + page sections). These
-  // are base sections with no nav, so they stay outside the nav-list module.
+  const handlePageMenuPlacement = useCallback((id: string, placement: MenuPlacement) => {
+    updateContent((json) => setPageMenuPlacement(json, id, placement));
+  }, [updateContent]);
+
+  const handleRenamePage = useCallback((id: string, name: string) => {
+    updateContent((json) => renamePage(json, id, name));
+  }, [updateContent]);
+
+  // Multi inner-Block visibility stays outside the Page-menu mutation module.
   const handleToggleSectionVisible = useCallback(
     (sectionId: string) => {
       updateContent((json) => {
-        const section = allSections(json).find((s) => s.id === sectionId);
+        const section = allBlocks(json).find((s) => s.id === sectionId);
         if (section) section.visible = !section.visible;
       });
     },
@@ -413,7 +423,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     if (isMultiContent(json)) {
       const page = json.pages.find((p) => p.id === pageId);
       setSelectedSectionId(
-        json.shared.header[0]?.id ?? page?.sections[0]?.id ?? json.shared.footer[0]?.id ?? null,
+        json.chrome.header[0]?.id ?? page?.blocks[0]?.id ?? json.chrome.footer[0]?.id ?? null,
       );
     }
   }, []);
@@ -570,7 +580,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                   <div className="flex items-center gap-2">
                                     <button
                                       type="button"
-                                      aria-label={t.sections.reorder}
+                                      aria-label={t.blocks.reorder}
                                       className="-ml-1 shrink-0 cursor-grab touch-none text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
                                       {...attributes}
                                       {...listeners}
@@ -584,7 +594,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                       className={`flex-grow text-left text-sm transition-colors ${isActive ? 'font-medium text-primary' : page.visible ? 'text-foreground' : 'text-muted-foreground'
                                         }`}
                                     >
-                                      {page.nav.label || '(untitled page)'}
+                                      {page.name || '(untitled page)'}
                                     </button>
 
                                     <button
@@ -599,28 +609,32 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                     </button>
                                   </div>
 
-                                  {/* Row 2: nav projection (2nd axis) — in-menu toggle + page name */}
+                                  {/* Row 2: menu placement and menu label, independent from page name. */}
                                   <div className="mt-2 flex items-center gap-2 pl-1">
-                                    <button
-                                      type="button"
-                                      aria-label={page.nav.visible ? t.pages.removeFromMenu : t.pages.addToMenu}
-                                      title={page.nav.visible ? t.pages.inTopNavTitle : t.pages.notInTopNavTitle}
-                                      onClick={() => handleToggleNavItemNavVisible(page.id)}
-                                      className={`shrink-0 transition-colors ${page.nav.visible ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                                        }`}
+                                    <select
+                                      aria-label="Menu placement"
+                                      value={!page.menu ? 'none' : page.menu.placement === 'footer' ? 'footer' : 'header'}
+                                      onChange={(event) => handlePageMenuPlacement(page.id, event.target.value as MenuPlacement)}
+                                      className="h-8 rounded-md border border-input bg-background px-2 text-xs"
                                     >
-                                      {page.nav.visible ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
-                                    </button>
-                                    <span className="shrink-0 text-xs text-muted-foreground">
-                                      {t.sections.menu}
-                                    </span>
+                                      <option value="none">None</option>
+                                      <option value="header">Header</option>
+                                      <option value="footer">Footer</option>
+                                    </select>
                                     <Input
-                                      value={page.nav.label}
-                                      onChange={(e) => handleRelabelNavItem(page.id, e.target.value)}
+                                      value={page.menu?.label ?? ''}
+                                      onChange={(e) => handleRelabelMenuItem(page.id, e.target.value)}
+                                      disabled={!page.menu}
                                       placeholder={t.pages.namePlaceholder}
                                       className="h-8 flex-grow"
                                     />
                                   </div>
+                                  <Input
+                                    value={page.name}
+                                    onChange={(event) => handleRenamePage(page.id, event.target.value)}
+                                    placeholder={t.pages.namePlaceholder}
+                                    className="mt-2 h-8"
+                                  />
                                 </>
                               )}
                             </SortableRow>
@@ -637,16 +651,16 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                 <h3 className="mb-4 text-sm font-semibold text-foreground">
                   {isMulti ? (
                     <>
-                      {t.sections.sectionsLabel}{' '}
-                      <span className="font-normal text-muted-foreground">· {activePage?.nav.label ?? ''}</span>
+                      {t.blocks.blocksLabel}{' '}
+                      <span className="font-normal text-muted-foreground">· {activePage?.name ?? ''}</span>
                     </>
                   ) : (
-                    t.sections.hierarchy
+                    t.blocks.hierarchy
                   )}
                 </h3>
                 {isMulti ? (
                   <ul className="space-y-3">
-                    {sections.map((section) => {
+                    {displayedBlocks.map((section) => {
                       const isSelected = selectedSectionId === section.id;
                       return (
                         <li
@@ -665,8 +679,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                             </button>
                             <button
                               type="button"
-                              aria-label={section.visible ? t.sections.hide : t.sections.show}
-                              title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
+                              aria-label={section.visible ? t.blocks.hide : t.blocks.show}
+                              title={section.visible ? t.blocks.visibleOnPage : t.blocks.hiddenFromPage}
                               onClick={() => handleToggleSectionVisible(section.id)}
                               className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
                                 }`}
@@ -712,14 +726,14 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                   {pinned ? (
                                     <span
                                       className="shrink-0 text-muted-foreground"
-                                      title={section.type === 'nav' ? t.sections.pinnedTop : t.sections.pinnedBottom}
+                                      title={section.type === 'nav' ? t.blocks.pinnedTop : t.blocks.pinnedBottom}
                                     >
                                       <Pin className="size-3.5" />
                                     </span>
                                   ) : (
                                     <button
                                       type="button"
-                                      aria-label={t.sections.reorder}
+                                      aria-label={t.blocks.reorder}
                                       className="-ml-1 shrink-0 cursor-grab touch-none text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
                                       {...attributes}
                                       {...listeners}
@@ -739,8 +753,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
                                   <button
                                     type="button"
-                                    aria-label={section.visible ? t.sections.hide : t.sections.show}
-                                    title={section.visible ? t.sections.visibleOnPage : t.sections.hiddenFromPage}
+                                    aria-label={section.visible ? t.blocks.hide : t.blocks.show}
+                                    title={section.visible ? t.blocks.visibleOnPage : t.blocks.hiddenFromPage}
                                     onClick={() => handleToggleNavItemVisible(section.id)}
                                     className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
                                       }`}
@@ -753,22 +767,22 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                 <div className="mt-2 flex items-center gap-2 pl-1">
                                   <button
                                     type="button"
-                                    aria-label={section.nav.visible ? t.sections.removeFromMenu : t.sections.addToMenu}
-                                    title={section.nav.visible ? t.sections.inNavMenuTitle : t.sections.notInNavMenuTitle}
-                                    onClick={() => handleToggleNavItemNavVisible(section.id)}
-                                    className={`shrink-0 transition-colors ${section.nav.visible ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                                    aria-label={section.menu ? t.blocks.removeFromMenu : t.blocks.addToMenu}
+                                    title={section.menu ? t.blocks.inNavMenuTitle : t.blocks.notInNavMenuTitle}
+                                    onClick={() => handleToggleSingleMenu(section.id)}
+                                    className={`shrink-0 transition-colors ${section.menu ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                                       }`}
                                   >
-                                    {section.nav.visible ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
+                                    {section.menu ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
                                   </button>
                                   <span className="shrink-0 text-xs text-muted-foreground">
-                                    {t.sections.menu}
+                                    {t.blocks.menu}
                                   </span>
                                   <Input
-                                    value={section.nav.label}
-                                    onChange={(e) => handleRelabelNavItem(section.id, e.target.value)}
-                                    disabled={!section.nav.visible}
-                                    placeholder={t.sections.menuLabelPlaceholder}
+                                    value={section.menu?.label ?? ''}
+                                    onChange={(e) => handleRelabelMenuItem(section.id, e.target.value)}
+                                    disabled={!section.menu}
+                                    placeholder={t.blocks.menuLabelPlaceholder}
                                     className="h-8 flex-grow"
                                   />
                                 </div>
@@ -943,4 +957,3 @@ function SortableRow({
     </li>
   );
 }
-

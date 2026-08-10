@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
+import { TemplateBlockProps, BlockComponent, NavBlockProps } from '../../../types';
 import styles from '../cafe.module.css';
 import { MapPointIcon, HamburgerIcon } from '../sections/icons';
 import type { ValuesOf } from '@/domain/entities/template.entity';
@@ -9,10 +9,10 @@ import { navigationSchema } from './Navigation.meta';
 
 type NavigationContent = ValuesOf<typeof navigationSchema>;
 
-const Navigation: SectionComponent = function Navigation(props: TemplateSectionProps) {
-  const { section } = props;
-  const { navItems } = props as NavSectionProps;
-  const content = section.fields as NavigationContent;
+const Navigation: BlockComponent = function Navigation(props: TemplateBlockProps) {
+  const { block } = props;
+  const { navItems } = props as NavBlockProps;
+  const content = block.fields as NavigationContent;
   const brandName = content.brandName || 'MONO';
   const brandSubtext = content.brandSubtext || 'Specialty Coffee';
   const ctaText = content.ctaText || '오시는 길';

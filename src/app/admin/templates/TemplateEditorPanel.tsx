@@ -184,7 +184,7 @@ export default function TemplateEditorPanel({
           onSubmit={(e) => e.preventDefault()}
           className="space-y-12"
         >
-          {/* Section 1: Basic Info */}
+          {/* Block 1: Basic Info */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
               <h3 className="text-sm font-semibold">기본 정보</h3>
@@ -275,7 +275,7 @@ export default function TemplateEditorPanel({
             </div>
           </div>
 
-          {/* Section 2: Thumbnail */}
+          {/* Block 2: Thumbnail */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
               <h3 className="text-sm font-semibold">썸네일</h3>
@@ -337,7 +337,7 @@ export default function TemplateEditorPanel({
             </div>
           </div>
 
-          {/* Section 3: Data Schema */}
+          {/* Block 3: Data Schema */}
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
               <h3 className="text-sm font-semibold">데이터 스키마</h3>
@@ -369,7 +369,7 @@ export default function TemplateEditorPanel({
             </div>
           </div>
 
-          {/* Section 4: Composition */}
+          {/* Block 4: Composition */}
           {(() => {
             let parsed: ContentModel | null = null;
             try {

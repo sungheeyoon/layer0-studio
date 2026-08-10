@@ -25,7 +25,7 @@ vi.mock('@/templates/_generated', () => ({
         content: {
           mode: 'single',
           templateKey: 'missing-thumb',
-          sections: [],
+          blocks: [],
           globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' },
         },
         // File intentionally does not exist on disk → upload is skipped.
