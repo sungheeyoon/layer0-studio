@@ -5,13 +5,16 @@ The §10 traps from `docs/TEMPLATE_SYSTEM.md`, condensed for authoring. Re-read 
 ## Component & library
 
 - [ ] **`'use client'` component → meta goes in a sibling `<Name>.meta.ts`** (named export), registered as `libEntry(Component, meta)`. Server components (no `'use client'`) keep `Component.meta = {...}` inline + `libEntry(Component)`. Reason: client modules don't run their body on the server, so `Component.meta` is invisible to sync/validate → `Cannot read 'fieldsSchema' of undefined`. (§10.12)
+  - The **schema** moves with the meta: declare it in the `.meta.ts` and import it back into the `.tsx` for `ValuesOf<typeof schema>`. Still one declaration. (`cafe/default/library/Navigation.meta.ts` is the pattern.)
 - [ ] **`componentKey` is permanent.** Changing it breaks every live Site using it (renderer console.warn + blank section). New behavior = new key, never rename. (§10.2)
 - [ ] **Don't edit `src/templates/_generated.ts`** — it's codegen. Adding a directory + `pnpm generate:templates` registers it. (§10.10)
 
 ## Fields & data
 
 - [ ] **Preset data is a Value, not a `{ type, label, value }` wrapper** (ADR-0016). A `text` field stores `'42'`, a `number` field stores `42`, an `image` stores `{ url, assetId? }`, an `array` stores `{ id, fields }[]`. The schema — never the data — says which. (§10.3)
-- [ ] **`required: true` must be declared in `fieldsSchema`** or it's silently optional → empty at runtime. (§10.6)
+- [ ] **`required: true` must be declared in `fieldsSchema`** or it's silently optional → empty at runtime. It is also what makes the key mandatory in `ValuesOf`, so an optional field needs a renderer fallback (`?? ''`, `?.`) — `getFieldValue`'s old `if (!field) return ''` net is gone. (§10.6)
+- [ ] **A `number` descriptor must carry `default: number`** — it's what the editor resets an emptied input to, so the renderer never sees `NaN`. The type system requires it. (ADR-0016 §4-3)
+- [ ] **Schema changes to a *deployed* Template must be additive** — every live Site loads the renderer at serve time and its stored Values were written against the old schema. Renaming a field, adding a required one, changing a value type, narrowing `select options`, or restructuring an `itemSchema` is destructive and needs a data migration in the same deploy. (§6.4)
 - [ ] **`array` fields need `itemSchema`**; the component must guard `content.x ?? []` (an optional Value can be absent — old Sites lack the array). Every item carries its own `id` beside `fields`; key React off `item.id`, never the index (ADR-0016 §4-4). Don't style by index (`idx === 0`) — order changes in the editor leave design stuck to the slot; put per-item style in `itemSchema` as a `select`. (§10.4, §10.5, §10.14)
 - [ ] **Every declared field must be read by the component** — a field the schema declares but the JSX ignores is an editor input that changes nothing. `pnpm template:verify` enforces this (schema-jsx-consistency). The reverse direction needs no gate: the Content type is `ValuesOf<typeof schema>`, so reading an undeclared key is a compile error.
 

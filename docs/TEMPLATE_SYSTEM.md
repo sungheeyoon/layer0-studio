@@ -1,9 +1,9 @@
 # Template System — Layer0 Studio
 
 _대상: Template / Section component 를 추가·수정하거나 저작 · sync 파이프라인을 손볼 개발자_
-_최종 갱신: 2026-07-26 (문서 감사 — 사실관계 정정 및 중복 절제)_
+_최종 갱신: 2026-08-10 (ADR-0016 Field/Value 분리 — schema-first 저작으로 전면 개정, #138)_
 
-> 본 문서는 `CONTEXT.md` 의 도메인 어휘 (Template / Category / Section / Preset / Sync / Design Tokens / Global Styles) 와 `docs/adr/` 를 기반으로 한다. 특히 [ADR-0001](./adr/0001-beta-model-template-isolation.md)(isolation) · [ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)(코드가 진실) · [ADR-0005](./adr/0005-design-tokens-gradual-migration.md)(토큰 점진 전환) · [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)(Single/Multi) · [ADR-0012](./adr/0012-template-publishing-pipeline.md)(등록·공개 파이프라인) 를 먼저 일별하면 본 문서가 자연스럽게 읽힌다.
+> 본 문서는 `CONTEXT.md` 의 도메인 어휘 (Template / Category / Section / Preset / Sync / Design Tokens / Global Styles) 와 `docs/adr/` 를 기반으로 한다. 특히 [ADR-0001](./adr/0001-beta-model-template-isolation.md)(isolation) · [ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)(코드가 진실) · [ADR-0005](./adr/0005-design-tokens-gradual-migration.md)(토큰 점진 전환) · [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)(Single/Multi) · [ADR-0012](./adr/0012-template-publishing-pipeline.md)(등록·공개 파이프라인) · [ADR-0016](./adr/0016-block-rename-and-field-value-split.md)(schema-first Field/Value 분리 — **§4·§5 만 구현됨**, §2.1 참고) 를 먼저 일별하면 본 문서가 자연스럽게 읽힌다.
 
 이 문서 한 장만 읽으면 **(1) 시스템이 어떻게 굴러가는지**, **(2) 새 Template / Section 을 어떻게 추가하는지**, **(3) 어디를 만지면 무엇이 깨지는지** 모두 파악할 수 있도록 만든다. 추가 컨텍스트는 모두 코드에 있다 — 이 문서가 가리키는 위치만 따라가면 된다.
 
@@ -30,7 +30,7 @@ _최종 갱신: 2026-07-26 (문서 감사 — 사실관계 정정 및 중복 절
    (predev/prebuild 자동)             (썸네일)                          (코드 → DB 반영)
 
    새 Template 저작 = `new-template` Claude Code 스킬 (dev-time)
-   (브리프 자연어 → 6 개 파일 작성 → 검증 루프 → sync)
+   (브리프 자연어 → 골격 파일 작성 → 검증 루프 → sync)
 ```
 
 - **코드가 진실 — Template** ([ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)): `content` (구 `template_json`) / 썸네일 / `version` 은 항상 코드값으로 덮어씀.
@@ -68,7 +68,7 @@ _최종 갱신: 2026-07-26 (문서 감사 — 사실관계 정정 및 중복 절
 
 ### 1.2 저작과 Sync — 두 진입점 (ADR-0002)
 
-- **저작** (창작) — *자연어 brief* → 새 코드 파일들. **`new-template` Claude Code 스킬**(`.claude/skills/new-template/`)이 dev-time 에 수행하며 6 개 파일을 쓰고 검증 게이트를 돌린다. 사용자(최종 고객)는 Template 을 만들지 않는다.
+- **저작** (창작) — *자연어 brief* → 새 코드 파일들. **`new-template` Claude Code 스킬**(`.claude/skills/new-template/`)이 dev-time 에 수행하며 골격 파일을 쓰고 검증 게이트를 돌린다. 사용자(최종 고객)는 Template 을 만들지 않는다.
 - **Sync** (운영) — *기존 코드* → DB. `pnpm template:sync`. 프로덕션 배포 성공 후 자동([ADR-0012](./adr/0012-template-publishing-pipeline.md)).
 
 저작은 DB 에 직접 쓰지 않는다 — 반드시 sync 를 경유한다. 그래서 *코드가 진실* 약속이 유지된다.
@@ -82,6 +82,8 @@ _최종 갱신: 2026-07-26 (문서 감사 — 사실관계 정정 및 중복 절
 ### 2.1 `ContentModel` (DB 에 저장되는 형태) — `src/domain/entities/template.entity.ts`
 
 > **네이밍**: 이 타입은 예전 `TemplateJson` — `Template` 과 `Site` 가 **공유**하는 콘텐츠 형태라 엔티티 중립 이름 `ContentModel` 로 개명됐다 ([ADR-0013](./adr/0013-content-model-rename.md)). `mode` 판별 구조적 유니온(`SiteMode = 'single' | 'multi'`): `SingleContent | MultiContent`. 아래는 Single 예시.
+>
+> **ADR-0016 은 절반만 구현됐다.** 출시된 것은 §4·§5 의 **Field/Value 분리**(#132–#137, migration 026)다. §2 의 어휘 리네임(`Section`→`Block`, `sections`→`blocks`, `shared`→`chrome`, `SectionComponentMeta`→`BlockComponentMeta` …)과 §3 의 `nav`→`menu` 모델 전환은 **아직 코드에 없다** — 본 문서는 코드의 현재 진실을 쓰므로 `Section`/`sections`/`shared`/`nav:{visible,label}` 로 서술한다. nav→menu 는 [#130](https://github.com/sungheeyoon/layer0-studio/issues/130) 에서 다룬다. ADR 의 TO-BE 열과 이 문서가 다르면 **이 문서가 지금이다.**
 
 ```ts
 ContentModel (single) = {
@@ -101,27 +103,33 @@ ContentModel (single) = {
       type: 'hero',                     // ★ Template Library 의 componentKey 와 매칭
       visible: true,                    // 서빙 여부
       nav: { visible: true, label: 'Home' },  // nav projection 소스 (Single Section 만 보유)
-      fields: {                         // ★ (구 `data`) — migration 022 로 개명
-        title: { type: 'text', label: 'Main Title', value: '...', editable: true },
-        image: { type: 'image', label: '배경 이미지', value: 'https://...' },
-        // ...
+      fields: {                         // ★ Value 만 담는다 (ADR-0016) — 구 `data`(migration 022)
+        title: '천천히, 제대로',          //   text/textarea/url/color/select → string
+        columns: 3,                     //   number → number
+        image: { url: 'https://...' },  //   image  → { url, assetId? }
+        items: [                        //   array  → { id, fields }[] (재귀)
+          { id: 'a1b2…', fields: { title: '아메리카노', price: '4,500' } },
+        ],
       },
     },
   ],
 }
 // Multi 는 대신: { mode: 'multi', templateKey, globalStyles,
 //                  shared: { header: Section[], footer: Section[] },
-//                  pages: [{ id, slug, nav, sections: Section[] }, ...] }
+//                  pages: [{ id, slug, visible, nav, sections: Section[] }, ...] }
 ```
 
-**필드 타입** (`Field` / `FieldType`):
+**`fields` 는 Value 만 담는다 — `{type,label,value}` 래퍼가 아니다** ([ADR-0016](./adr/0016-block-rename-and-field-value-split.md) §4). 어떤 키가 텍스트고 어떤 키가 이미지인지는 **오직 컴포넌트의 `fieldsSchema`** 가 안다(§2.3). 인스턴스마다 `type`/`label` 을 복사해 두면 스키마와 drift 할 수 있어서 그걸 막는 규칙(`FIELD_TYPE_MISMATCH`)만 존재했다 — 저장을 안 하니 drift 자체가 사라졌다.
 
-| `type` | 입력 UI | 비고 |
+| 스키마 descriptor | 저장되는 Value | 비고 |
 |---|---|---|
-| `text` / `textarea` / `url` / `color` / `number` | 자명 | 모든 `value` 는 string (number 도) |
-| `select` | dropdown | `options: string[]` 필요 |
-| `image` | URL + 업로드 | 업로드 시 `assetId` 자동 부여 (ADR-0003 orphan 정리) |
-| `array` | repeated items CRUD | `itemSchema` (Recursive `SectionFieldsSchema`) 필수 |
+| `text` / `textarea` / `url` / `color` | `string` | |
+| `select` | `string` (`options` 중 하나) | `options: readonly string[]` 필요 |
+| `number` | `number` (진짜 숫자) | **`default: number` 필수** — 빈 입력을 에디터가 이 값으로 리셋 (§4-3) |
+| `image` | `{ url: string; assetId?: string \| null }` | `assetId` 는 스키마 메타가 아니라 콘텐츠 — ADR-0003 참조 카운팅이 읽음 |
+| `array` | `{ id: string; fields: {...} }[]` | `itemSchema` 필수(재귀). `id` 는 `fields` **바깥**의 형제 |
+
+> **`Field` union 과 `getFieldValue()` 는 삭제됐다** (#136). 남은 유일한 등장 위치는 옛 행을 변환하는 마이그레이션 러너(`scripts/lib/migrate-single-site.ts`, `migrate-field-to-value.ts`)이고, 각자 파일 안에 `LegacyField` 로 로컬 선언해 들고 있다. 새 코드가 이 모양을 읽으면 회귀다.
 
 ### 2.2 `TemplatePreset` (코드 진실) — `src/templates/types.ts`
 
@@ -137,27 +145,57 @@ interface TemplatePreset {
 
 > Preset 은 `content`(= `ContentModel`)을 **그대로** 들고 있고 sync 가 verbatim 으로 DB `content` 컬럼에 저장한다. 예전 `composition: PresetSection[]` 축약형은 제거됐다 ([ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)). 필드명·타입·DB 컬럼이 모두 `content` 로 일치한다 (필드명은 [ADR-0013](./adr/0013-content-model-rename.md) 후속 정리로 `templateJson`→`content`, DB 컬럼은 migration 021).
 
-### 2.3 `SectionComponentMeta` & Template Library entry — `src/templates/types.ts`
+### 2.3 스키마가 진실 — `fieldsSchema` 와 `ValuesOf` (ADR-0016 §4)
+
+**저작자는 스키마만 쓴다. Content 인터페이스는 쓰지 않고 추론한다.** 손으로 쓴 인터페이스를 두면 진실이 둘이 되고, 실측 결과 `satisfies` 로 묶어도 잡히는 건 키 오타 하나뿐이었다 (ADR-0016 §4-1 의 폐기 기록).
+
+```tsx
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const menuSchema = {
+  eyebrow: { type: 'text',     label: '섹션 라벨' },
+  title:   { type: 'textarea', label: '섹션 타이틀', required: true },
+  tone:    { type: 'select',   label: '톤', options: ['light', 'dark'], required: true },
+  columns: { type: 'number',   label: '열 수', default: 3 },
+  items:   { type: 'array',    label: '메뉴 항목', minItems: 1, maxItems: 6,
+             itemSchema: {
+               title: { type: 'text',  label: '제목', required: true },
+               image: { type: 'image', label: '이미지' },
+             } },
+} as const satisfies FieldsSchema;      // ★ `as const` 필수
+
+type MenuContent = ValuesOf<typeof menuSchema>;
+// → { title: string; tone: 'light'|'dark'; eyebrow?: string; columns?: number;
+//     items?: { id: string; fields: { title: string; image?: ImageValue } }[] }
+```
+
+- `required: true` → 키가 **필수**, 그 외 → **optional**. 그래서 optional Value 는 렌더러가 반드시 fallback 을 가져야 한다 (`?? ''`, `?.`) — `getFieldValue` 의 `if (!field) return ''` 방어막이 사라졌기 때문이다 (§6.4).
+- `select` 는 `options` **리터럴 유니온**으로 좁혀진다. `number` 는 진짜 `number`. `array` 는 `itemSchema` 로 재귀.
+- **스키마에 없는 키를 컴포넌트가 읽으면 컴파일 에러** — 이 방향엔 게이트가 필요 없다. 반대 방향(선언했는데 안 읽음)만 `template:verify` 가 잡는다 (§7.1).
+
+**렌더 경계에서 캐스트 한 번**. 저장 경로가 이미 검증했으므로 재검증하지 않는다 (ADR-0016 §4-2, §6):
+
+```tsx
+const Menu: SectionComponent = function Menu({ section }: TemplateSectionProps) {
+  const content = section.fields as MenuContent;   // 유일한 캐스트
+  const label = content.eyebrow ?? '';
+  const items = content.items ?? [];
+  return <>{items.map(item => <li key={item.id}>{item.fields.title}</li>)}</>;
+  //                                ↑ item.id — 인덱스 금지 (§10.4)
+};
+```
+
+타입은 도메인에 산다 (`src/domain/entities/template.entity.ts`): `FieldsSchema` · `FieldDescriptor` · `ValuesOf` · `ImageValue` · `ArrayItem`. **도메인의 `Section.fields` 자체는 계속 loose (`Record<string, unknown>`)** — Block 은 문자열 `type` 으로 디스패치되므로 도메인은 어떤 Section 이 어떤 Value 모양인지 정적으로 알 수 없다. 타입은 컴포넌트 경계에서만 좁힌다.
+
+### 2.3.1 Library entry — `src/templates/types.ts`
 
 ```ts
 interface SectionComponentMeta {
   componentKey: string;                  // 라이브러리 키 ('hero', 'menu', 'story' …)
   category: string;                      // 'hero' | 'menu' | 'story' | 'footer' | …
   label: string;                         // 어드민 카탈로그용 표시명
-  fieldsSchema: SectionFieldsSchema;
+  fieldsSchema: FieldsSchema;            // ★ 위에서 선언한 그 스키마 (단일 진실)
   previewImage?: string;
-}
-
-interface SectionFieldsSchema {
-  [fieldKey: string]: {
-    type: FieldType;
-    label: string;
-    required?: boolean;
-    itemSchema?: SectionFieldsSchema; // ★ type: 'array' 일 때 필수 (재귀 구조)
-    minItems?: number; // (선택)
-    maxItems?: number; // (선택)
-    options?: string[]; // type: 'select' 일 때
-  };
 }
 
 type SectionComponent = ComponentType<TemplateSectionProps> & { meta?: SectionComponentMeta };
@@ -179,7 +217,7 @@ function libEntry(Component, metaOverride?): TemplateLibraryEntry;
 
 운영 패턴:
 - **server 컴포넌트** (no `'use client'`): `.tsx` 안에서 `Component.meta = {...}` 으로 부착. `libEntry(Component)` 만 호출 — 헬퍼가 `Component.meta` 를 자동으로 가져옴.
-- **client 컴포넌트** (`'use client'`): meta 를 sibling `<Component>.meta.ts` 에 named export 로 정의 → `libEntry(Component, componentMeta)` 로 명시 전달.
+- **client 컴포넌트** (`'use client'`): meta 를 sibling `<Component>.meta.ts` 에 named export 로 정의 → `libEntry(Component, componentMeta)` 로 명시 전달. **스키마도 같이 옮긴다** — `.meta.ts` 에 선언하고 `.tsx` 가 그것을 import 해 `ValuesOf<typeof schema>` 를 만든다. 선언은 여전히 한 곳이다 (`cafe/default/library/Navigation.meta.ts` 참고).
 
 ### 2.4 `TemplateModule` (`src/templates/types.ts`)
 
@@ -466,35 +504,43 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 }
 ```
 
+**블로킹 기준은 ADR-0015 규칙 4 다: 저장을 막는 건 "그 모양이면 렌더러가 깨질 때" 뿐이다.** ADR-0016 이후 렌더러는 `section.fields` 를 재검증 없이 캐스팅하므로 *모양* 이 틀리면 실제로 터진다(문자열에 `.map`, `undefined` 에 `.url`). 반면 모양은 맞는데 내용이 이상한 건 — 범위를 벗어난 숫자, 옵션 밖 select, hex 아닌 색 — 경고다. 하나를 막으면 같은 `ContentModel` 안의 **다른 모든 편집이 인질**이 되기 때문이다. 이 기준 때문에 여러 규칙이 에러 → 경고로 강등됐다.
+
 ### 6.1 Errors (블로킹)
 
 | Code | 조건 |
 |---|---|
 | `UNKNOWN_TEMPLATE_KEY` | `templateKey` 가 `availableTemplateKeys` 에 없음 |
-| `PAGES_EMPTY` | `pages` 가 없거나 빈 배열 |
+| `UNKNOWN_MODE` | `mode` 가 `'single'`/`'multi'` 가 아님 |
+| `SECTIONS_EMPTY` / `PAGES_EMPTY` | Single 의 `sections` / Multi 의 `pages` 가 비었음 |
 | `MISSING_GLOBAL_STYLES` | `globalStyles` 누락 |
-| `INVALID_COLOR` | primary/secondary 누락 |
-| `INVALID_FONT_SIZE` | CSS length 패턴 불일치 |
-| `UNKNOWN_LAYOUT` | 화이트리스트 외 (`wide`/`narrow`/`asymmetric`/`default`/`full`) |
-| `DUPLICATE_PAGE_SLUG` | page.slug 중복 |
-| `DUPLICATE_SECTION_ID` | 페이지 내 section.id 중복 |
+| `MISSING_PAGE_SLUG` / `DUPLICATE_PAGE_SLUG` | page.slug 누락 / 중복 |
+| `DUPLICATE_SECTION_ID` | section.id 가 콘텐츠 전체에서 중복 |
+| `MISSING_NAV` / `INVALID_NAV_VISIBLE` / `INVALID_NAV_LABEL` | nav projection 소스가 `{visible:boolean, label:string}` 이 아님 |
 | `UNKNOWN_COMPONENT_KEY` | `templateLibrary` 옵션 + `section.type` 이 라이브러리에 없음 |
-| `MISSING_REQUIRED_FIELD` | `fieldsSchema[field].required === true` 인데 누락 |
-| `FIELD_TYPE_MISMATCH` | `field.type !== schema[field].type` |
-| `MISSING_FIELD_TYPE` / `MISSING_FIELD_LABEL` / `MISSING_FIELD_VALUE` | 필수 메타 누락 |
-| `NON_STRING_FIELD_VALUE` | `value` 가 string 아님 (array 타입 제외) |
-| `INVALID_COLOR_FIELD` | `type: 'color'` 필드 `value` 가 hex 아님 (블로킹 — globalStyles 의 `NON_HEX_COLOR` warning 과 달리 에러) |
-| `NON_ARRAY_FIELD_VALUE` | `type: 'array'` 인데 `items` 가 배열이 아니거나 누락 |
-| `MISSING_ITEM_SCHEMA` | schema 에서 `type: 'array'` 인데 `itemSchema` 가 정의 안 됨 |
-| `ARRAY_ITEMS_BELOW_MIN` / `ARRAY_ITEMS_ABOVE_MAX` | minItems/maxItems 제약 위반 |
+| `MISSING_REQUIRED_FIELD` | `required: true` 인데 키가 없거나 `null` |
+| `FIELD_VALUE_TYPE_MISMATCH` | Value 모양이 descriptor 와 불일치 (text 에 객체, number 에 `NaN`, image 에 `url` 없음, array 아님 …) |
+| `INVALID_ASSET_ID` | `image` 의 `assetId` 가 UUID 문자열이 아님 — `asset_usages.asset_id`(uuid) 로 복사되므로 RPC 가 터진다 |
+| `MISSING_ITEM_SCHEMA` | `type:'array'` 인데 `itemSchema` 없음 (런타임 가드; 타입 레벨에선 이미 필수) |
+| `ARRAY_ITEM_MALFORMED` | 배열 아이템이 `{ id, fields }` 가 아님 |
+| `ARRAY_ITEM_ID_MISSING` / `ARRAY_ITEM_ID_DUPLICATE` | 아이템 `id` 누락 / 같은 배열 안 중복 — React 재조정과 asset slot_key 를 깨뜨림 (ADR-0016 §4-4) |
 
 ### 6.2 Warnings (통과하지만 stderr)
 
 | Code | 조건 |
 |---|---|
-| `NON_HEX_COLOR` | primary/secondary 가 hex 가 아님 (CSS named color 는 통과) |
-| `UNKNOWN_DATA_FIELD` | `fields` 에 schema 에 없는 키 (오타·deprecated 감지) |
-| `INSECURE_URL` | `image` / `url` 필드가 `http://` (mixed-content 위험) |
+| `INVALID_COLOR` | globalStyles 의 primary/secondary 누락 |
+| `NON_HEX_COLOR` | globalStyles 의 primary/secondary/background 가 hex 아님 |
+| `BACKGROUND_POLARITY_FLIPPED` | 사용자 배경이 템플릿 기본값의 명암을 뒤집음 — 글자색은 따라오지 않는다 (§2.5) |
+| `INVALID_FONT_SIZE` / `UNKNOWN_LAYOUT` | CSS length 아님 / 레이아웃 화이트리스트 밖. **`layout` 은 어떤 렌더러도 읽지 않는다** |
+| `INVALID_COLOR_FIELD` | `type:'color'` 필드가 hex 아님 — 색 입력은 자유 텍스트라 `#`, `#a` 같은 중간 타이핑 상태가 매번 지나간다 |
+| `SELECT_VALUE_NOT_IN_OPTIONS` | select Value 가 `options` 밖 — 렌더러는 기본 분기로 떨어진다. 도달 경로는 배포된 스키마의 옵션 축소이고 그건 §6.4 가 막는다 |
+| `ARRAY_ITEMS_BELOW_MIN` / `ARRAY_ITEMS_ABOVE_MAX` | 에디터 add/remove 로 도달 가능하고 렌더러는 짧거나 긴 목록을 그릴 뿐 |
+| `NULL_FIELD_VALUE` | optional 키가 `null` — 키를 빼는 게 맞다 (`ValuesOf` 는 `T \| undefined` 지 `T \| null` 이 아니다) |
+| `UNKNOWN_DATA_FIELD` | `fields` 에 스키마에 없는 키 (필드명 변경·삭제로 고아가 된 데이터) |
+| `INSECURE_URL` | `image`/`url` 필드가 `http://` (mixed-content) |
+
+> **라이브러리 없이 호출하면 필드는 아예 검증되지 않는다.** Value 는 자기 `type` 을 안 들고 다니므로 비교 대상이 없다. 저장 경로(`LibraryAwareSiteContentValidator`)·sync·`template:verify` 는 항상 라이브러리를 넘긴다 — 구조만 보는 단독 호출부만 넘기지 않는다.
 
 ### 6.3 Token enforcement (인라인 색·폰트 차단)
 
@@ -517,6 +563,28 @@ Section component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변�
 **Severity**: `'error'`. #22 에서 기존 9 개 Template 의 누적 위반 ~412 건을 모두 정리한 뒤 승급됨. 신규 회귀는 `pnpm lint` 에서 즉시 차단.
 
 **규칙 추가 시**: `src/lib/template/inline-tokens.ts` 의 regex / whitelist 와 `eslint-rules/no-inline-design-tokens.mjs` 의 동일 항목을 함께 갱신할 것 (의도적 중복).
+
+### 6.4 배포된 Template 의 스키마 호환성 규칙 (ADR-0016 §6)
+
+렌더러는 `section.fields` 를 **검증 없이** 추론 타입으로 캐스팅한다 — "파싱은 경계에서 한 번". 이 신뢰는 공짜가 아니다. 컴파일 타임이 보장하는 건 **코드 안에서** 스키마와 렌더러가 합치한다는 것뿐이고, **이미 DB 에 저장된 Value 가 새 스키마와 맞는지는 아무도 보장하지 않는다.** 게다가 `getFieldValue` 가 `if (!field) return ''` 로 메워주던 누락 필드 방어막도 없다.
+
+그래서 **배포된 Template 의 스키마 변경은 기본적으로 additive 여야 한다.** 렌더러 코드는 serve-time 에 로드되므로 스키마 한 줄 수정이 곧 전 사이트 수정이다 (CLAUDE.md "What a Template edit does and does not reach").
+
+| 변경 | 판정 | 조건 |
+|---|---|---|
+| optional 필드 추가 | ✅ 허용 | 렌더러가 fallback (`?? ''`) 을 둔다 |
+| `label` 변경 · `required` 완화 · `select options` **확장** | ✅ 허용 | Value 모양 불변 |
+| 필드명 변경 | ⛔ 파괴적 | 옛 Value 는 `UNKNOWN_DATA_FIELD` 로 고아가 되고 새 키는 비어 있다 |
+| 필수 필드 추가 | ⛔ 파괴적 | 기존 행이 전부 `MISSING_REQUIRED_FIELD` |
+| 값 타입 변경 (`text`→`number` 등) | ⛔ 파괴적 | |
+| `select options` **축소** | ⛔ 파괴적 | 기존 Value 가 유니온 밖으로 나감 |
+| 배열 `itemSchema` 구조 변경 | ⛔ 파괴적 | |
+
+**파괴적 변경을 하려면** `templates.content` + `user_sites.content` + `user_sites.snapshot` 세 컬럼을 **함께** 마이그레이션하고, 전 행을 새 라이브러리로 검증해 통과한 뒤에만 배포한다 (ADR-0016 §8-1 절차; 본보기는 migration 026 — `scripts/lib/migrate-field-to-value.ts` 의 plan→전수검증→단일 트랜잭션 패턴).
+
+`componentKey` 는 이 표의 바깥에 있다 — **어떤 경우에도 변경 금지**다 (§10.2). 깨는 변경이 필요하면 새 leaf 디렉터리로 fork 한다.
+
+> **⚠️ 아직 게이트가 아니다.** ADR-0016 §6-1 은 이 표를 `pnpm schema:manifest` 스냅샷 + CI diff 로 강제하기로 했으나 **미구현이다** ([#129](https://github.com/sungheeyoon/layer0-studio/issues/129)). 지금은 리뷰어의 눈이 유일한 게이트다.
 
 ---
 
@@ -546,8 +614,9 @@ pnpm template:delete <templateKey>            # default = dry-run, 삭제 계획
 pnpm template:delete <templateKey> --apply    # DB row + storage + public + _generated 정리
 pnpm template:delete <templateKey> --apply --force  # user_sites 하드 블록 우회 (라이브 사이트 깨질 각오)
 
-# Template 디렉터리 스캐폴드 (수동 빈 골격)
-pnpm template:scaffold
+# Template 디렉터리 스캐폴드 (게이트를 통과하는 Single 골격 — 새 컨셉/카테고리용)
+pnpm template:scaffold <category>/<leaf>      # 예: bakery/default → templateKey "bakery-default"
+pnpm template:scaffold <category> <leaf>      # 같은 것 (공백 구분도 허용)
 
 # CI 게이트 (전 Template, capture 생략)
 pnpm template:verify:ci
@@ -559,23 +628,29 @@ pnpm template:verify:ci
 
 ```
 brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 content `ContentModel` 유니온 직접 작성)
-             ──▶ 디렉터리: 가까운 Template 복제 또는 template:scaffold
-             ──▶ 6 개 파일 작성 (rich 토큰; gotchas-checklist 준수)
+             ──▶ 디렉터리: 가까운 Template 복제(변형) 또는 template:scaffold(새 컨셉)
+             ──▶ 파일 작성: 스키마 선언 → ValuesOf 추론 → Value 모양 preset (rich 토큰; gotchas-checklist 준수)
              ──▶ 이미지: pnpm template:image <key> "<query>"
              ──▶ 검증 루프(아래) — 깨지면 self-fix 후 재실행
-             ──▶ /preview/preset/<key> 육안 → pnpm template:sync (dry-run) → PR
+             ──▶ 썸네일 육안 / /preview/preset/<key> → pnpm template:sync (dry-run) → PR
 ```
 
-생성 결과: `src/templates/<category>/<leaf>/` 안에 6 개 파일 (`tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`). `pnpm generate:templates` 로 `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 미리보기.
+생성 결과: `src/templates/<category>/<leaf>/` 안에 `tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`(N 개). `pnpm generate:templates` 로 `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 미리보기.
+
+**저작 부담은 ADR-0016 으로 오히려 줄었다** — 작성자는 `fieldsSchema` 하나만 쓰고 Content 타입은 `ValuesOf` 가 만든다(§2.3). preset 의 `fields` 는 Value 를 그대로 적는다: `title: '…'`, `image: { url: '…' }`, `items: [{ id, fields }]`. `{ type, label, value }` 래퍼를 적으면 `FIELD_VALUE_TYPE_MISMATCH` 로 게이트가 막는다.
+
+`pnpm template:scaffold <category>/<leaf>` 는 **게이트를 그대로 통과하는 Single 골격**을 쓴다 — hero(풀 뷰포트 + image Value) · features(`array` + `item.id`) · footer, rich 토큰, `.module.css` 없음. 배선이 아니라 디자인부터 손대라는 뜻이다. 새 category 면 i18n 라벨 키 추가를 화면에 상기시킨다.
 
 > **프리뷰 렌더 검증은 capture 로만 가능하다 — `curl` 로는 안 된다.** `TemplateClientWrapper` 가 `loadTemplate()` 를 `useEffect` 안에서 동적 import 하므로 SSR HTML 에는 직렬화된 props JSON 만 들어가고 섹션 DOM 은 없다. `curl /preview/preset/<key>` 결과에 섹션이 안 보이는 건 렌더 실패가 아니라 **의도된 동작**이다. 실제 렌더/레이아웃 확인은 Playwright capture 또는 브라우저로 한다.
 
-**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): 6 단계. (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateContent` — `preset.content`(ContentModel) 검증; (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 스키마가 선언한 모든 필드를 컴포넌트가 실제로 읽는지 확인 (`content.key` / `item.fields.key` / 계산 키; 브레이스 밸런스 파서). 반대 방향(선언 안 된 키를 읽음)은 `ValuesOf<typeof schema>` 덕분에 **컴파일 에러**라 게이트가 필요 없다; (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp. (1)–(5) 중 하나라도 실패하면 halt (캡처는 soft-fail). 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
+**검증 게이트 — `pnpm template:verify <key>`** (`scripts/lib/validate-and-capture.ts`): **7 단계.** (1) `tsc --noEmit` — 글로벌 실행 후 template dir 관련 에러만 필터; (2) `eslint <templateRoot>` — §6.3 토큰 룰 포함; (3) `validateContent` — `preset.content`(ContentModel)를 **라이브러리와 함께** 검증(§6); (4) `validateTemplateFiles` — §6.3 file-level 인라인 색·폰트 스캔; (5) **fieldsSchema ↔ JSX 일관성** — 스키마가 선언한 모든 필드를 컴포넌트가 실제로 읽는지 확인 (`content.key` / `item.fields.key` / 계산 키; 브레이스 밸런스 파서). 반대 방향(선언 안 된 키를 읽음)은 `ValuesOf<typeof schema>` 덕분에 **컴파일 에러**라 게이트가 필요 없다; (6) `pnpm template:capture <templateKey>` — Playwright Chromium 썸네일 webp; (7) `thumbnailPath` ↔ 실제 파일 존재·확장자 일치 확인(§10.1). (1)–(5), (7)은 실패 즉시 halt 한다. (6)의 실행 실패 자체는 soft-fail이지만 (7)이 실제 파일을 요구하므로 새 Template은 결국 캡처 산출물 없이는 통과하지 못한다. `--skip-capture` 로 (6) 만 건너뛰는 게 저작 중 빠른 루프다 — 단 (7) 이 아직 썸네일 없다고 실패하므로 마지막엔 캡처를 포함해 한 번 돌려야 green 이 된다. 스킬은 깨진 단계를 고치고 green 까지 재실행한다.
+
+> (5) 는 **한 방향만** 본다: "선언했는데 아무도 안 읽는 필드" = 에디터에 뜨지만 아무것도 안 바꾸는 입력칸. 예전 검사는 `getFieldValue(...)` 호출 수를 `fieldsSchema: {` 리터럴과 대조했는데, ADR-0016 이후 **양쪽 다 0 건**이라 모든 파일을 skip 한 채 초록을 보고했다 — 죽은 게이트였다. #136 에서 재작성. 배포된 스키마의 **파괴적 변경** 검출은 여전히 미구현이다(§6.4, [#129](https://github.com/sungheeyoon/layer0-studio/issues/129)).
 > `template:verify` 는 템플릿 모듈을 동적 import 하므로 첫 줄에서 `./lib/register-css-stub` 를 로드해 `.module.css` import 가 tsx 에서 깨지지 않게 한다 (sync 와 동일).
 
 **New-category 규칙**: 새 category slug 은 `^[a-z][a-z0-9-]{0,39}$` 를 만족해야 하고, 기존 디렉터리에 없는 새 top-level category 는 구조 변경이므로 사람의 명시적 승인 후 만든다. 판정은 정확 일치만 — `cafe-studio` 는 `cafe` 의 변형이 아니라 새 category 다.
 
-> **⚠️ 이 규칙은 현재 강제되지 않는다 (2026-07-26 감사).** `scripts/lib/category-gate.ts` 가 판정 함수(`validateCategorySlug` / `isExistingCategory` / `listExistingCategories`)를 제공하지만 **호출부가 자기 테스트뿐**이다 — 제거된 `template:generate` CLI 가 유일한 소비자였고, `new-template` 스킬은 이 모듈을 쓰지 않으며 SKILL.md 에도 승인 단계가 없다. 즉 지금은 **작업자의 판단에 의존하는 규약**이지 게이트가 아니다. 배선 여부는 [#125](https://github.com/sungheeyoon/layer0-studio/issues/125) 에서 다룬다.
+> `template:scaffold` 는 category/leaf 모두에 같은 slug 정규식을 적용하고, 새 top-level category 면 i18n 라벨과 사람 승인이 필요하다고 출력한다. `new-template` 스킬도 승인 단계를 명시한다. 단, 승인은 사람의 판단이므로 CLI 가 자동으로 증명하거나 우회 불가능하게 막는 종류의 게이트는 아니다.
 
 ### 7.2 이미지 호스팅 헬퍼 (Issue #15)
 
@@ -633,12 +708,12 @@ brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 content `Conten
    templateKey: 'cafe-sunlit',
    ```
 3. **`tokens.ts` 손보기** — primary / secondary, 폰트, 분위기. `designTokens` 같이.
-4. **데이터 손보기** — `template.ts` (`content`) 의 각 section `fields` 값을 새 컨셉에 맞게.
-5. **(필요 시) library 컴포넌트 수정** — β 모델: 이 Template 의 라이브러리는 이 Template 만 씀. 마음대로 손봐도 다른 Template 안 깨짐.
+4. **데이터 손보기** — `template.ts` (`content`) 의 각 section `fields` **Value** 를 새 컨셉에 맞게 (§2.1).
+5. **(필요 시) library 컴포넌트 수정** — β 모델: 이 Template 의 라이브러리는 이 Template 만 씀. 마음대로 손봐도 다른 Template 안 깨짐. **단 복제원(cafe-default)의 스키마를 고치는 건 그쪽 배포본을 건드리는 것**이니 §6.4 를 따른다.
 6. **`pnpm generate:templates`** — `_generated.ts` 자동 갱신 (predev / prebuild 에서도 자동).
-7. **`pnpm template:capture cafe-sunlit`** — 썸네일 생성.
-8. **`pnpm test` + `pnpm tsc --noEmit` + `pnpm lint`** — validate / ESLint 토큰 룰 통과 확인.
-9. **`pnpm template:sync`** dry-run → PR 머지 → 어드민 Apply.
+7. **`pnpm template:verify cafe-sunlit`** — 7 단계 게이트 + 썸네일 캡처를 한 번에 (§7.1).
+8. **`pnpm test`** — 템플릿 디렉터리 밖을 건드렸을 때만. (tsc/lint 는 7 번이 이미 커버)
+9. **`pnpm template:sync`** dry-run → PR 머지 (= 공개 승인, ADR-0012).
 
 ### B. Claude Code 로 Template 통째로 생성 (`new-template` 스킬, ADR-0002 의 짝)
 
@@ -649,7 +724,7 @@ Claude Code 에 자연어로 의뢰하면 `new-template` 스킬이 발동한다 
 "아웃도어 브랜드, 홈/스토리/제품/매장 페이지 멀티페이지로 만들어줘"
 ```
 
-→ Site Type 결정 → `src/templates/<category>/<leaf>/` 에 6 개 파일 작성 → §7.1 검증 게이트(`pnpm template:verify`)를 green 까지 self-fix → 이후 시나리오 A 의 8~9 번부터.
+→ Site Type 결정 → `src/templates/<category>/<leaf>/` 에 골격 파일 작성 → §7.1 검증 게이트(`pnpm template:verify`)를 green 까지 self-fix → 이후 시나리오 A 의 7~9 번부터.
 
 신규 Category 는 §7.1 의 슬러그 가드 + 사람 승인을 거친다.
 
@@ -658,22 +733,29 @@ Claude Code 에 자연어로 의뢰하면 `new-template` 스킬이 발동한다 
 `src/templates/cafe/default/library/HeroParallax.tsx` 신규:
 
 ```tsx
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 
-const HeroParallax: SectionComponent = function HeroParallax({ section }) {
-  const { data } = section;
+const heroParallaxSchema = {
+  title:    { type: 'text',     label: '타이틀',     required: true },
+  image:    { type: 'image',    label: '배경 이미지', required: true },
+  subtitle: { type: 'textarea', label: '설명' },
+} as const satisfies FieldsSchema;
+
+type HeroParallaxContent = ValuesOf<typeof heroParallaxSchema>;
+
+const HeroParallax: SectionComponent = function HeroParallax({ section }: TemplateSectionProps) {
+  const content = section.fields as HeroParallaxContent;   // 경계에서 한 번만 캐스트
+  const subtitle = content.subtitle ?? '';                 // optional → 반드시 fallback
   // ... 렌더 로직 — 색·폰트는 var(--color-primary), var(--font-base) 만 (§6.3)
+  //     content.title / content.image.url 은 required 라 그대로 읽으면 된다
 };
 
 HeroParallax.meta = {
   componentKey: 'hero-parallax',         // ★ 라이브러리 키 — 영원히 고정
   category: 'hero',
   label: 'Hero (Parallax)',
-  fieldsSchema: {
-    title:    { type: 'text',     label: '타이틀',    required: true },
-    imageUrl: { type: 'image',    label: '배경 이미지', required: true },
-    subtitle: { type: 'textarea', label: '설명' },
-  },
+  fieldsSchema: heroParallaxSchema,      // 스키마는 한 곳에만 산다
 };
 
 export default HeroParallax;
@@ -690,22 +772,24 @@ export const cafeDefaultLibrary: TemplateLibrary = {
 
 **만약 새 컴포넌트가 `'use client'` 라면**: `HeroParallax.meta = {...}` 대신 sibling `HeroParallax.meta.ts` 에 `export const heroParallaxMeta` 로 정의 → `libEntry(HeroParallax, heroParallaxMeta)` 로 명시 전달 (이유는 §10.12).
 
-preset 의 `content` section 에서 사용 — `{ id: 'hero-1', type: 'hero-parallax', visible: true, fields: { ... } }`. `pnpm test` → `pnpm template:sync` → 어드민 Apply.
+preset 의 `content` section 에서 사용 — `{ id: 'hero-1', type: 'hero-parallax', visible: true, nav: {...}, fields: { title: '…', image: { url: '…' } } }`. `pnpm template:verify <key>` → `pnpm template:sync`.
 
 **주의**: ADR-0001 — 이 컴포넌트는 cafe-default 전용이다. cafe-cozy 에도 같은 게 필요하면 *복제*. cross-Template 추출 금지.
 
 ### D. 새 Category 통째로 추가
 
-1. `src/templates/<category>/<leaf>/` 디렉터리 생성 (`<leaf>` = `default` 권장 — 첫 번째 Template).
-2. §3 골격대로 채움 (`tokens.ts`, `library/index.ts` + Section component 들, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `<templateKey>.module.css`).
-3. **`pnpm dev` 또는 `pnpm build`** — `predev` / `prebuild` 가 `pnpm generate:templates` 자동 실행 → `_generated.ts` 에 등록.
-4. 이후 시나리오 A 의 7~9 번부터.
+1. **`pnpm template:scaffold <category>/<leaf>`** (`<leaf>` = `default` 권장 — 첫 번째 Template). §3 골격을 게이트 통과 상태로 써 준다. 신규 Template 은 rich 토큰 패턴이므로 `.module.css` 는 만들지 않는다(§2.5).
+2. **i18n 라벨 추가** — `src/lib/i18n/messages/ko.ts` **와** `en.ts` 의 `templatesCatalog.categoryLabels` 에 **소문자** 키 (§2.6). 빠뜨리면 카탈로그에 raw slug 가 뜬다.
+3. `tokens.ts` / 컴포넌트 / `template.ts` 의 TODO 를 실제 컨셉으로 교체.
+4. 이후 시나리오 A 의 6~9 번부터.
 
-대안: `new-template` 스킬에 brief 만 던지면 Category 제안 + 슬러그 가드 + 6 파일 작성까지 한 번에. 더 빠름 (시나리오 B).
+새 top-level Category 는 구조 변경이라 사람의 명시적 승인을 먼저 받는다 (§7.1). 대안: `new-template` 스킬에 brief 만 던지면 Category 판단 + 스캐폴드 + 검증 루프까지 한 번에 (시나리오 B).
 
 ### E. `fieldsSchema` 에 `required` 추가/변경
 
-기존 preset 의 `fields` 에 해당 필드가 누락되어 있으면 `MISSING_REQUIRED_FIELD` error 로 sync 가 막힘. **반드시 같은 PR 에서 모든 영향받는 preset 의 `fields` 채우기**. UserSite (`user_sites.content`) 는 sync 가 안 건드리므로 사용자가 다음에 편집하기 전까지는 이전 데이터 그대로 — 렌더 시 컴포넌트가 빈 값에 graceful fallback 가지도록 작성.
+**먼저 §6.4 를 본다** — 배포된 Template 에 `required` 를 *추가*하는 건 파괴적 변경이다. 코드 preset 은 같은 PR 에서 채우면 되지만(`MISSING_REQUIRED_FIELD` 로 sync 가 막아준다), **sync 는 `user_sites` 를 건드리지 않으므로** 이미 존재하는 Site 들은 그 키 없이 남고 저장할 때마다 블로킹 에러를 맞는다. 데이터 마이그레이션을 동반하거나, optional + 렌더러 fallback 으로 두거나 둘 중 하나다.
+
+`required` 를 *완화*하는 방향은 언제나 안전하다. 반대로 optional 필드를 추가할 땐 렌더러가 `?? ''` fallback 을 갖는 게 조건이다 — `ValuesOf` 가 optional 로 추론하므로 안 두면 컴파일이 막아준다.
 
 ### F. Validate 룰 추가
 
@@ -714,20 +798,21 @@ preset 의 `content` section 에서 사용 — `{ id: 'hero-1', type: 'hero-para
 ### G. 반복 항목을 위한 `array` 필드 추가
 
 메뉴, 공지사항, 리뷰 등 반복되는 데이터는 `type: 'array'` 를 사용.
-1. **meta 정의**: `itemSchema` 를 필수로 포함. `minItems` / `maxItems` 로 제약 가능.
+1. **스키마 정의**: `itemSchema` 필수. `minItems` / `maxItems` 로 제약 가능(위반은 경고, §6.2).
    ```ts
    items: {
      type: 'array',
      label: '메뉴 항목',
+     minItems: 1,
      itemSchema: {
        title: { type: 'text', label: '제목', required: true },
-       price: { type: 'text', label: '가격' }
+       price: { type: 'text', label: '가격' },
      },
-     minItems: 1
    }
    ```
-2. **Preset 데이터**: `items` 배열 안에 각 item 객체 배치.
-3. **컴포넌트 렌더**: `(content.items ?? []).map(item => …)`. 각 item 은 `{ id, fields }` 이므로 값은 `item.fields.title`, React key 는 `item.id`(인덱스 금지 — ADR-0016 §4-4).
+2. **Preset 데이터**: `items: [{ id: 'menu-1', fields: { title: '…', price: '…' } }, …]`. **`id` 는 `fields` 의 형제**이고 같은 배열 안에서 unique 하면 된다(전역 unique 아님). 에디터의 "항목 추가" 는 `crypto.randomUUID()` 로 만든다. 누락·중복은 블로킹 (§6.1).
+3. **컴포넌트 렌더**: `(content.items ?? []).map(item => …)`. 값은 `item.fields.title`, React key 는 **`item.id`** (인덱스 금지 — ADR-0016 §4-4). 인덱스는 재정렬 후 다른 아이템을 가리키고, asset slot_key 도 이 id 로 인코딩된다.
+4. **인덱스로 스타일 주지 말 것** — `idx === 0` 으로 카드를 넓히면 사용자가 순서를 바꿔도 디자인이 '슬롯'에 남는다. 항목에 종속된 디자인은 `itemSchema` 에 `select` 필드로 (§10.14).
 
 ### H. 새 페이지 추가 (Multi)
 
@@ -743,14 +828,14 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 2. **`componentKey` 변경 = 사용자 사이트 깨짐**
    `user_sites.content` 의 `section.type` 이 매칭 안 되면 site 렌더러(`renderSingleSite`/`renderMultiSite`)가 console.warn + skip → 화면 빈칸. componentKey 는 **영원히** 변경 금지. 새 컴포넌트는 새 key 로.
 
-3. **모든 `value` 는 string**
-   `type: 'number'` 도 `value: '42'`. 컴포넌트에서 `Number(field.value)` 필요. validate 가 `NON_STRING_FIELD_VALUE` 로 잡음.
+3. **`fields` 는 Value 다 — `{type,label,value}` 래퍼가 아니다** ⚠️
+   가장 흔한 회귀. `title: 'MONO'`, `columns: 3`, `image: { url: '…' }`, `items: [{ id, fields }]`. `number` 는 진짜 숫자라 `Number(...)` 변환이 필요 없다. 래퍼를 적으면 `FIELD_VALUE_TYPE_MISMATCH` 로 게이트가 막는다 (§2.1, ADR-0016 §4).
 
-4. **items 의 React key (Array Field)**
-   에디터에서 `array` 필드의 각 항목은 stable 한 `_key` 가 필요함. 에디터 내부적으로 `injectKeys` / `stripKeys` 헬퍼가 임시 키를 관리하며, DB 저장 시에는 최적화를 위해 제거됨. 렌더러에서는 `item._key || index` 를 키로 사용하되, 가급적 데이터 고유값을 조합할 것.
+4. **items 의 React key 는 `item.id`** (Array Field)
+   각 아이템은 `{ id, fields }` 이고 `id` 는 콘텐츠에 **영구 저장**된다. 인덱스를 key 로 쓰면 재정렬 시 React 가 엉뚱한 카드를 재사용한다. 구 `_key` 주입/제거(`injectKeys`/`stripKeys`, `src/lib/template/keys.ts`)는 **삭제됐다** — 안정적 식별자가 없어 가짜 Field 를 심었다 빼던 우회로였다 (ADR-0016 §4-4).
 
 5. **Lazy Migration & Graceful Fallback**
-   기존 Template 컴포넌트에 `array` 필드를 추가한 경우, 기존 UserSite JSON 에는 해당 필드나 `items` 배열이 없을 수 있음. 컴포넌트 구현 시 `data.items?.items ?? []` 처럼 항상 빈 배열 fallback 을 갖추어야 런타임 에러를 방지할 수 있음. (에디터에서 한 번 저장하면 스키마에 맞춰 채워짐)
+   optional Value 는 언제든 없을 수 있다 — 그 필드가 생기기 전에 만들어진 Site 는 키 자체를 안 들고 있고, `getFieldValue` 의 `if (!field) return ''` 방어막은 사라졌다. `content.items ?? []`, `content.image?.url`, `content.subtitle ?? ''`. `required` 가 아닌 키는 `ValuesOf` 가 optional 로 추론하므로 fallback 을 빠뜨리면 대개 컴파일이 막아준다 — **`?? ''` 를 붙이는 게 관례가 아니라 §6.4 호환성 규칙의 전제다.**
 
 6. **`required: true` 를 fieldsSchema 에 안 적으면 silent**
    필수 필드를 빠뜨려도 sync 통과하고 런타임에 빈 값. `fieldsSchema` 에 명시할 것.
@@ -792,8 +877,8 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 
 | 무엇 | 어디 |
 |---|---|
-| `ContentModel` / `Section` / `Field` 타입 (구 `TemplateJson`/`TemplateSection`/`TemplateField`, ADR-0013) | `src/domain/entities/template.entity.ts` |
-| `TemplatePreset` / `SectionComponent` / `TemplateModule` / `DesignTokens` / `NavSectionProps` 타입 | `src/templates/types.ts` (`PresetSection`/`composition` 은 ADR-0007 때 제거됨) |
+| `ContentModel` / `Section` 타입 + **`FieldsSchema` / `FieldDescriptor` / `ValuesOf` / `ImageValue` / `ArrayItem`** (ADR-0013 / ADR-0016) | `src/domain/entities/template.entity.ts` |
+| `TemplatePreset` / `SectionComponent` / `SectionComponentMeta` / `TemplateModule` / `DesignTokens` / `NavSectionProps` 타입 | `src/templates/types.ts` (`PresetSection`/`composition` 은 ADR-0007 때, 구 `Field` union/`getFieldValue`/`keys.ts` 는 ADR-0016 때 제거됨) |
 | 자동생성 레지스트리 | `src/templates/_generated.ts` (커밋, 수정 금지) |
 | 동적 import 헬퍼 | `src/templates/registry.ts` (`loadTemplate(templateKey)` + legacy shim) |
 | Site 렌더러 (mode 별) | `src/templates/renderSingleSite.tsx` · `src/templates/renderMultiSite.tsx` |
@@ -811,7 +896,8 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 | Delete CLI | `scripts/delete-template.ts` (`pnpm template:delete`) |
 | Verify CLI (통합 게이트) | `scripts/verify-template.ts` (`pnpm template:verify`) |
 | Capture CLI (Playwright) | `scripts/capture-templates.ts` |
-| Scaffold (빈 골격) | `scripts/scaffold-template.ts` |
+| Scaffold (게이트 통과 골격) | `scripts/scaffold-template.ts` (`pnpm template:scaffold <category>/<leaf>`) |
+| Asset usage 수집 (스키마 기반, `item.id` slot_key) | `src/lib/template/asset-usages.ts` (호출은 `SiteWriteUseCase` — ADR-0016 §5) |
 | 이미지 호스팅 CLI/헬퍼 | `scripts/host-image.ts` (`pnpm template:image`) → `scripts/lib/image-fetch.ts` (`fetchAndHostImage`) |
 | CSS import 스텁 (tsx 모듈 로딩) | `scripts/lib/register-css-stub.ts` (sync/verify 의 첫 import) |
 | 새 카테고리 gate | `scripts/lib/category-gate.ts` |
@@ -846,4 +932,4 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 
 ## 14. 한 줄 요약
 
-> **Template = 자급자족 디렉터리** (tokens + library + preset + renderer, 다른 Template 와 공유 안 됨 — ADR-0001). **코드가 진실**, Sync 로 DB 반영 (ADR-0002). **새 Template 저작 = `new-template` Claude Code 스킬** (dev-time; brief → 6 파일 → `template:verify` 게이트 → sync). 새 variant = 디렉터리 복제 1 번. 새 Section = `library/` 에 `.meta` 동봉한 `.tsx` 1 개. 새 Category = 디렉터리 통째로 만들면 codegen 이 알아서 등록. **삭제 = `template:delete <key>` (dry-run→`--apply`) + `git rm`** — sync 의 역방향, `delete-template` 스킬이 감싼다 (§5.4).
+> **Template = 자급자족 디렉터리** (tokens + library + preset + renderer, 다른 Template 와 공유 안 됨 — ADR-0001). **코드가 진실**, Sync 로 DB 반영 (ADR-0002). **새 Template 저작 = `new-template` Claude Code 스킬** (dev-time; brief → 골격 파일 → `template:verify` 게이트 → sync). 새 variant = 디렉터리 복제 1 번. 새 Section = `library/` 에 `.meta` 동봉한 `.tsx` 1 개. 새 Category = 디렉터리 통째로 만들면 codegen 이 알아서 등록. **삭제 = `template:delete <key>` (dry-run→`--apply`) + `git rm`** — sync 의 역방향, `delete-template` 스킬이 감싼다 (§5.4).

@@ -13,11 +13,12 @@
  *   4. `validateTemplateFiles`      file-level scan (#8 rules)
  *   5. fieldsSchema ↔ JSX consistency (declared vs referenced field keys)
  *   6. `template:capture <key>`     Playwright thumbnail capture
+ *   7. thumbnail-path guard         preset/config/file agreement
  *
  * Steps 1-5 are fast (in-process or small spawn). Step 6 spawns a Chromium
- * via `pnpm template:capture` — skipped silently if Playwright isn't
- * available (we surface a warning, not a hard fail, because thumbnails
- * can be re-generated independently).
+ * via `pnpm template:capture`; `--skip-capture` omits it in CI/dry-runs.
+ * Step 7 remains blocking, so a committed thumbnail must already exist when
+ * capture is skipped.
  */
 
 import { spawnSync } from 'child_process';
