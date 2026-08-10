@@ -51,6 +51,7 @@ import {
   TRANSPORT_FAILURE_CODE,
   type SaveOutcome,
 } from '@/lib/editor/flush-retry';
+import { useFlushOnHidden } from '@/lib/editor/use-flush-on-hidden';
 import {
   indexIssues,
   EMPTY_ISSUE_INDEX,
@@ -248,6 +249,24 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   const enqueueSaveRef = useRef(enqueueSave);
   useEffect(() => { enqueueSaveRef.current = enqueueSave; }, [enqueueSave]);
+
+  // Backgrounding the tab (mobile home button, app switch) flushes too — the
+  // page is still alive there, so this reuses the save path rather than needing
+  // the beacon route ADR-0015 §2 rejected. See `use-flush-on-hidden.ts`.
+  //
+  // It dispatches through `runAutoSave`, not a bare `enqueueSave`: unlike the
+  // unmount flush this component is still mounted, so a failure *does* have a
+  // surface — the banner and the Conflict modal are waiting when the user comes
+  // back to the tab. `cancelScheduledSave` first, because the debounce timer is
+  // still armed here (`runAutoSave` only nulls the ref, as its normal caller is
+  // the timer itself) and would otherwise fire a second save.
+  useFlushOnHidden({
+    hasPendingEdits: () => autoSaveTimerRef.current !== null,
+    flush: () => {
+      cancelScheduledSave();
+      void runAutoSave();
+    },
+  });
 
   // Unmount flush — the loss path ADR-0015 §2 closes. Leaving by the chrome's
   // back Link (SPA navigation) or the browser Back button unmounts this without
