@@ -1,15 +1,25 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { BookmarkIcon, ChatSquareIcon, InstagramIcon, PlayIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const footerSchema = {
+  brand: { type: 'text', label: '브랜드 로고' },
+  tagline: { type: 'text', label: '태그라인' },
+  description: { type: 'textarea', label: '브랜드 설명' },
+  address: { type: 'textarea', label: '주소·연락처' },
+  copyright: { type: 'text', label: '저작권 표기' },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const brand = getFieldValue(fields, 'brand') || 'HAUTRE';
-  const tagline = getFieldValue(fields, 'tagline') || '';
-  const description = getFieldValue(fields, 'description') || '';
-  const address = getFieldValue(fields, 'address') || '';
-  const copyright = getFieldValue(fields, 'copyright') || '';
+  const content = section.fields as FooterContent;
+  const brand = content.brand || 'HAUTRE';
+  const tagline = content.tagline || '';
+  const description = content.description || '';
+  const address = content.address || '';
+  const copyright = content.copyright || '';
 
   return (
     <footer style={{
@@ -180,13 +190,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Wedding Footer',
-  fieldsSchema: {
-    brand: { type: 'text', label: '브랜드 로고' },
-    tagline: { type: 'text', label: '태그라인' },
-    description: { type: 'textarea', label: '브랜드 설명' },
-    address: { type: 'textarea', label: '주소·연락처' },
-    copyright: { type: 'text', label: '저작권 표기' },
-  },
+  fieldsSchema: footerSchema,
   previewImage: '/component-previews/wedding/footer.webp',
 };
 

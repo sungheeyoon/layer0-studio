@@ -1,7 +1,7 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { ChatIcon, NotebookIcon, PaletteIcon, SparkleIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 const STEP_ICONS = [
   <ChatIcon key="1" size={24} />,
@@ -10,18 +10,36 @@ const STEP_ICONS = [
   <SparkleIcon key="4" size={24} />,
 ];
 
-const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const ctaText = getFieldValue(fields, 'ctaText') || '';
-  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#';
-  const ctaNote = getFieldValue(fields, 'ctaNote') || '';
+const processSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '타이틀', required: true },
+  step1Title: { type: 'text', label: '스텝 1 제목' },
+  step1Body: { type: 'textarea', label: '스텝 1 설명' },
+  step2Title: { type: 'text', label: '스텝 2 제목' },
+  step2Body: { type: 'textarea', label: '스텝 2 설명' },
+  step3Title: { type: 'text', label: '스텝 3 제목' },
+  step3Body: { type: 'textarea', label: '스텝 3 설명' },
+  step4Title: { type: 'text', label: '스텝 4 제목' },
+  step4Body: { type: 'textarea', label: '스텝 4 설명' },
+  ctaText: { type: 'text', label: 'CTA 버튼' },
+  ctaUrl: { type: 'url', label: 'CTA 링크' },
+  ctaNote: { type: 'text', label: 'CTA 안내 문구' },
+} as const satisfies FieldsSchema;
 
-  const steps = [1, 2, 3, 4]
+type ProcessContent = ValuesOf<typeof processSchema>;
+
+const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
+  const content = section.fields as ProcessContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const ctaText = content.ctaText || '';
+  const ctaUrl = content.ctaUrl || '#';
+  const ctaNote = content.ctaNote || '';
+
+  const steps = ([1, 2, 3, 4] as const)
     .map((n) => ({
-      title: getFieldValue(fields, `step${n}Title`) || '',
-      body: getFieldValue(fields, `step${n}Body`) || '',
+      title: content[`step${n}Title`] || '',
+      body: content[`step${n}Body`] || '',
     }))
     .filter((s) => s.title);
 
@@ -80,21 +98,7 @@ Process.meta = {
   componentKey: 'process',
   category: 'content',
   label: 'Wedding Process',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '타이틀', required: true },
-    step1Title: { type: 'text', label: '스텝 1 제목' },
-    step1Body: { type: 'textarea', label: '스텝 1 설명' },
-    step2Title: { type: 'text', label: '스텝 2 제목' },
-    step2Body: { type: 'textarea', label: '스텝 2 설명' },
-    step3Title: { type: 'text', label: '스텝 3 제목' },
-    step3Body: { type: 'textarea', label: '스텝 3 설명' },
-    step4Title: { type: 'text', label: '스텝 4 제목' },
-    step4Body: { type: 'textarea', label: '스텝 4 설명' },
-    ctaText: { type: 'text', label: 'CTA 버튼' },
-    ctaUrl: { type: 'url', label: 'CTA 링크' },
-    ctaNote: { type: 'text', label: 'CTA 안내 문구' },
-  },
+  fieldsSchema: processSchema,
   previewImage: '/component-previews/wedding/process.webp',
 };
 

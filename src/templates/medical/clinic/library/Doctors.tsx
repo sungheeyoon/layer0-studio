@@ -1,17 +1,36 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * 의료진 grid — a portrait, name, specialty and a short bio per doctor.
  * Used as a preview (few cards) on the home page and the full roster on the
  * about page. `items` falls back to an empty array for older Sites.
  */
+const doctorsSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: '의료진 항목',
+    minItems: 1,
+    itemSchema: {
+      name: { type: 'text', label: '이름', required: true },
+      role: { type: 'text', label: '직함/전문과목' },
+      bio: { type: 'textarea', label: '소개' },
+      image: { type: 'image', label: '사진', required: true },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type DoctorsContent = ValuesOf<typeof doctorsSchema>;
+
 const Doctors: SectionComponent = function Doctors(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as DoctorsContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -32,13 +51,13 @@ const Doctors: SectionComponent = function Doctors(props: TemplateSectionProps) 
         )}
 
         <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, idx) => {
-            const name = getFieldValue(item.name);
-            const role = getFieldValue(item.role);
-            const bio = getFieldValue(item.bio);
-            const image = getFieldValue(item.image);
+          {items.map((item) => {
+            const name = item.fields.name;
+            const role = item.fields.role;
+            const bio = item.fields.bio;
+            const image = item.fields.image?.url;
             return (
-              <article key={name || idx} className="flex flex-col">
+              <article key={item.id} className="flex flex-col">
                 <div className="overflow-hidden rounded-2xl bg-[var(--color-surface-soft)]">
                   {image && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -73,21 +92,7 @@ Doctors.meta = {
   componentKey: 'doctors',
   category: 'team',
   label: '의료진 소개',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: '의료진 항목',
-      minItems: 1,
-      itemSchema: {
-        name: { type: 'text', label: '이름', required: true },
-        role: { type: 'text', label: '직함/전문과목' },
-        bio: { type: 'textarea', label: '소개' },
-        image: { type: 'image', label: '사진', required: true },
-      },
-    },
-  },
+  fieldsSchema: doctorsSchema,
 };
 
 export default Doctors;

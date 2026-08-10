@@ -5,7 +5,6 @@ import { RenderMultiSite } from '../renderMultiSite';
 import { TemplateLibrary, NavSectionProps, SectionComponent } from '../types';
 import {
   ContentModel,
-  getFieldValue,
   isMultiContent,
 } from '@/domain/entities/template.entity';
 
@@ -43,7 +42,7 @@ const Nav: SectionComponent = (props) => {
 };
 
 const Body: SectionComponent = ({ section }) => (
-  <main>{getFieldValue(section.fields, 'text')}</main>
+  <main>{(section.fields as { text?: string }).text ?? ''}</main>
 );
 
 const Footer: SectionComponent = (props) => {
@@ -66,7 +65,8 @@ const library: TemplateLibrary = {
   footer: { Component: Footer, meta: meta('footer') },
 };
 
-const text = (value: string) => ({ text: { type: 'text' as const, label: 'Text', value } });
+/** One Block's Values — a bare string, not a `{type,label,value}` wrapper (ADR-0016 §4). */
+const text = (value: string) => ({ text: value });
 
 const content: ContentModel = {
   mode: 'multi',

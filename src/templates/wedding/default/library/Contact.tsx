@@ -4,19 +4,22 @@ import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { ClockIcon, HeartIcon, MapIcon, PhoneIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { contactSchema } from './Contact.meta';
+
+type ContactContent = ValuesOf<typeof contactSchema>;
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const eyebrow = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const body = getFieldValue(fields, 'body') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const hours = getFieldValue(fields, 'hours') || '';
-  const location = getFieldValue(fields, 'location') || '';
-  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
-  const formTitle = getFieldValue(fields, 'formTitle') || '무료 상담 신청';
-  const formNote = getFieldValue(fields, 'formNote') || '';
+  const content = section.fields as ContactContent;
+  const eyebrow = content.eyebrow || '';
+  const title = content.title || '';
+  const body = content.body || '';
+  const phone = content.phone || '';
+  const hours = content.hours || '';
+  const location = content.location || '';
+  const bgImage = content.backgroundImage?.url || '';
+  const formTitle = content.formTitle || '무료 상담 신청';
+  const formNote = content.formNote || '';
 
   return (
     <section

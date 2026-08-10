@@ -1,19 +1,33 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const footerSchema = {
+  brandName: { type: 'text', label: '브랜드 이름' },
+  brandSubtext: { type: 'text', label: '보조 텍스트' },
+  description: { type: 'text', label: '설명' },
+  address: { type: 'text', label: '주소' },
+  phone: { type: 'text', label: '전화번호' },
+  hours: { type: 'textarea', label: '운영 시간' },
+  copyright: { type: 'text', label: '저작권' },
+  businessNum: { type: 'text', label: '사업자 번호' },
+  representative: { type: 'text', label: '대표자' },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || 'ARRC';
-  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Clinic';
-  const description = getFieldValue(fields, 'description') || '';
-  const address = getFieldValue(fields, 'address') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const hours = getFieldValue(fields, 'hours') || '';
-  const copyright = getFieldValue(fields, 'copyright') || '';
-  const businessNum = getFieldValue(fields, 'businessNum') || '';
-  const representative = getFieldValue(fields, 'representative') || '';
+  const content = section.fields as FooterContent;
+  const brandName = content.brandName || 'ARRC';
+  const brandSubtext = content.brandSubtext || 'Clinic';
+  const description = content.description || '';
+  const address = content.address || '';
+  const phone = content.phone || '';
+  const hours = content.hours || '';
+  const copyright = content.copyright || '';
+  const businessNum = content.businessNum || '';
+  const representative = content.representative || '';
 
   return (
     <footer className="bg-[var(--m-charcoal)] border-t border-[var(--m-cream)]/[0.06] pt-16 pb-10 px-6 lg:px-10">
@@ -103,17 +117,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Medical Footer',
-  fieldsSchema: {
-    brandName: { type: 'text', label: '브랜드 이름' },
-    brandSubtext: { type: 'text', label: '보조 텍스트' },
-    description: { type: 'text', label: '설명' },
-    address: { type: 'text', label: '주소' },
-    phone: { type: 'text', label: '전화번호' },
-    hours: { type: 'textarea', label: '운영 시간' },
-    copyright: { type: 'text', label: '저작권' },
-    businessNum: { type: 'text', label: '사업자 번호' },
-    representative: { type: 'text', label: '대표자' },
-  },
+  fieldsSchema: footerSchema,
   previewImage: '/component-previews/medical/footer.webp',
 };
 

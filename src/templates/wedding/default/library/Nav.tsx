@@ -1,16 +1,25 @@
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const navSchema = {
+  brand: { type: 'text', label: '브랜드 로고' },
+  tagline: { type: 'text', label: '브랜드 태그라인' },
+  ctaText: { type: 'text', label: 'CTA 버튼' },
+  ctaUrl: { type: 'url', label: 'CTA 링크' },
+} as const satisfies FieldsSchema;
+
+type NavContent = ValuesOf<typeof navSchema>;
 
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { fields } = section;
-  const brand = getFieldValue(fields, 'brand') || 'HAUTRE';
-  const tagline = getFieldValue(fields, 'tagline') || '';
-  const ctaText = getFieldValue(fields, 'ctaText') || '';
-  const ctaUrl = getFieldValue(fields, 'ctaUrl') || '#contact';
+  const content = section.fields as NavContent;
+  const brand = content.brand || 'HAUTRE';
+  const tagline = content.tagline || '';
+  const ctaText = content.ctaText || '';
+  const ctaUrl = content.ctaUrl || '#contact';
 
   return (
     <header className={styles.navWrap}>
@@ -46,12 +55,7 @@ Nav.meta = {
   componentKey: 'nav',
   category: 'navigation',
   label: 'Wedding Navigation',
-  fieldsSchema: {
-    brand: { type: 'text', label: '브랜드 로고' },
-    tagline: { type: 'text', label: '브랜드 태그라인' },
-    ctaText: { type: 'text', label: 'CTA 버튼' },
-    ctaUrl: { type: 'url', label: 'CTA 링크' },
-  },
+  fieldsSchema: navSchema,
   previewImage: '/component-previews/wedding/nav.webp',
 };
 

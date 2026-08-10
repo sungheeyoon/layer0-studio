@@ -1,19 +1,35 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import {
-  getFieldValue,
-  ArrayField,
-} from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Shop product grid. Each item is a photo, category tag, name and price.
  * `items` falls back to an empty array for older Sites (lazy migration).
  */
+const productGridSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: '제품 항목',
+    minItems: 1,
+    itemSchema: {
+      name: { type: 'text', label: '제품명', required: true },
+      category: { type: 'text', label: '분류' },
+      price: { type: 'text', label: '가격' },
+      image: { type: 'image', label: '이미지', required: true },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type ProductGridContent = ValuesOf<typeof productGridSchema>;
+
 const ProductGrid: SectionComponent = function ProductGrid(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as ProductGridContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -36,13 +52,13 @@ const ProductGrid: SectionComponent = function ProductGrid(props: TemplateSectio
         )}
 
         <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, idx) => {
-            const name = getFieldValue(item.name);
-            const category = getFieldValue(item.category);
-            const price = getFieldValue(item.price);
-            const image = getFieldValue(item.image);
+          {items.map((item) => {
+            const name = item.fields.name;
+            const category = item.fields.category;
+            const price = item.fields.price;
+            const image = item.fields.image?.url;
             return (
-              <article key={name || idx} className="group">
+              <article key={item.id} className="group">
                 <div className="overflow-hidden rounded-2xl bg-[var(--color-surface-soft)]">
                   {image && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -81,21 +97,7 @@ ProductGrid.meta = {
   componentKey: 'productGrid',
   category: 'product',
   label: '제품 그리드',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: '제품 항목',
-      minItems: 1,
-      itemSchema: {
-        name: { type: 'text', label: '제품명', required: true },
-        category: { type: 'text', label: '분류' },
-        price: { type: 'text', label: '가격' },
-        image: { type: 'image', label: '이미지', required: true },
-      },
-    },
-  },
+  fieldsSchema: productGridSchema,
 };
 
 export default ProductGrid;

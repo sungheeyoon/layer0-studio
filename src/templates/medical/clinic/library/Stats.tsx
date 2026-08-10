@@ -1,15 +1,31 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Dark stats band — a heading plus a row of value/label pairs. Sits on the
  * deep-navy surface to break up the white sections and lend credibility.
  */
+const statsSchema = {
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: '지표 항목',
+    minItems: 1,
+    itemSchema: {
+      value: { type: 'text', label: '수치', required: true },
+      label: { type: 'text', label: '라벨', required: true },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type StatsContent = ValuesOf<typeof statsSchema>;
+
 const Stats: SectionComponent = function Stats(props: TemplateSectionProps) {
   const { section } = props;
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as StatsContent;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-dark)]">
@@ -20,13 +36,13 @@ const Stats: SectionComponent = function Stats(props: TemplateSectionProps) {
           </h2>
         )}
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
-          {items.map((item, idx) => (
-            <div key={getFieldValue(item.label) || idx}>
+          {items.map((item) => (
+            <div key={item.id}>
               <p className="text-4xl font-bold tracking-tight text-[var(--color-primary-soft)] sm:text-5xl">
-                {getFieldValue(item.value)}
+                {item.fields.value}
               </p>
               <p className="mt-2 text-sm text-[var(--color-on-dark)]/75">
-                {getFieldValue(item.label)}
+                {item.fields.label}
               </p>
             </div>
           ))}
@@ -40,18 +56,7 @@ Stats.meta = {
   componentKey: 'stats',
   category: 'feature',
   label: '지표 (다크 밴드)',
-  fieldsSchema: {
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: '지표 항목',
-      minItems: 1,
-      itemSchema: {
-        value: { type: 'text', label: '수치', required: true },
-        label: { type: 'text', label: '라벨', required: true },
-      },
-    },
-  },
+  fieldsSchema: statsSchema,
 };
 
 export default Stats;

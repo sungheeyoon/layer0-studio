@@ -1,15 +1,23 @@
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const navSchema = {
+  brandName: { type: 'text', label: '브랜드 이름' },
+  brandSubtext: { type: 'text', label: '보조 텍스트' },
+  ctaText: { type: 'text', label: 'CTA 텍스트' },
+} as const satisfies FieldsSchema;
+
+type NavContent = ValuesOf<typeof navSchema>;
 
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || 'ARRC';
-  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Clinic';
-  const ctaText = getFieldValue(fields, 'ctaText') || '예약하기';
+  const content = section.fields as NavContent;
+  const brandName = content.brandName || 'ARRC';
+  const brandSubtext = content.brandSubtext || 'Clinic';
+  const ctaText = content.ctaText || '예약하기';
 
   return (
     <nav className={styles.navbar}>
@@ -49,11 +57,7 @@ Nav.meta = {
   componentKey: 'nav',
   category: 'navigation',
   label: 'Medical Navigation',
-  fieldsSchema: {
-    brandName: { type: 'text', label: '브랜드 이름' },
-    brandSubtext: { type: 'text', label: '보조 텍스트' },
-    ctaText: { type: 'text', label: 'CTA 텍스트' },
-  },
+  fieldsSchema: navSchema,
   previewImage: '/component-previews/medical/nav.webp',
 };
 

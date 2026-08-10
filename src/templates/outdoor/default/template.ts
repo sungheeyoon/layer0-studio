@@ -76,7 +76,7 @@ const preset: TemplatePreset = {
           type: 'nav',
           visible: true,
           fields: {
-            brandName: { type: 'text', label: '브랜드명', value: '능선' },
+            brandName: '능선',
           },
         },
       ],
@@ -86,18 +86,9 @@ const preset: TemplatePreset = {
           type: 'footer',
           visible: true,
           fields: {
-            brandName: { type: 'text', label: '브랜드명', value: '능선' },
-            tagline: {
-              type: 'textarea',
-              label: '태그라인',
-              value:
-                '산을 잇는 길 위에서. 능선은 오래 걷는 사람을 위한 장비와 이야기를 만듭니다.',
-            },
-            copyright: {
-              type: 'text',
-              label: '저작권 문구',
-              value: '© 2026 능선 NEUNGSEON. All rights reserved.',
-            },
+            brandName: '능선',
+            tagline: '산을 잇는 길 위에서. 능선은 오래 걷는 사람을 위한 장비와 이야기를 만듭니다.',
+            copyright: '© 2026 능선 NEUNGSEON. All rights reserved.',
           },
         },
       ],
@@ -120,17 +111,12 @@ const preset: TemplatePreset = {
             type: 'hero',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: 'SINCE 2016 · SEOUL' },
-              title: { type: 'text', label: '대제목', value: '능선을 잇다' },
-              subtitle: {
-                type: 'textarea',
-                label: '설명',
-                value:
-                  '바람이 머무는 능선과 그 아래 숲. 능선은 도시와 산을 오가는 사람을 위한 단단하고 가벼운 장비를 만듭니다.',
-              },
-              primaryCtaLabel: { type: 'text', label: '주 버튼 텍스트', value: '컬렉션 보기' },
-              secondaryCtaLabel: { type: 'text', label: '보조 버튼 텍스트', value: '브랜드 이야기' },
-              image: { type: 'image', label: '배경 이미지', value: IMG.heroHome },
+              eyebrow: 'SINCE 2016 · SEOUL',
+              title: '능선을 잇다',
+              subtitle: '바람이 머무는 능선과 그 아래 숲. 능선은 도시와 산을 오가는 사람을 위한 단단하고 가벼운 장비를 만듭니다.',
+              primaryCtaLabel: '컬렉션 보기',
+              secondaryCtaLabel: '브랜드 이야기',
+              image: { "url": IMG.heroHome },
             },
           },
           {
@@ -138,41 +124,31 @@ const preset: TemplatePreset = {
             type: 'pillars',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '능선이 일하는 방식' },
-              heading: { type: 'text', label: '제목', value: '오래 쓰는 것을, 가볍게' },
-              items: {
-                type: 'array',
-                label: '가치 항목',
-                items: [
-                  {
-                    title: { type: 'text', label: '제목', value: '필드 테스트' },
-                    body: {
-                      type: 'textarea',
-                      label: '설명',
-                      value:
-                        '모든 제품은 사계절 능선에서 직접 검증합니다. 데이터가 아니라 발끝의 감각으로.',
-                    },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '리페어 우선' },
-                    body: {
-                      type: 'textarea',
-                      label: '설명',
-                      value:
-                        '버리기보다 고쳐 쓰도록. 무상 수선과 부품 공급으로 장비의 수명을 늘립니다.',
-                    },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '책임 있는 소재' },
-                    body: {
-                      type: 'textarea',
-                      label: '설명',
-                      value:
-                        '재생 나일론과 블루사인 인증 원단을 우선합니다. 산에 진 빚을 줄이는 일.',
-                    },
-                  },
-                ],
-              },
+              eyebrow: '능선이 일하는 방식',
+              heading: '오래 쓰는 것을, 가볍게',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "title": '필드 테스트',
+                    "body": '모든 제품은 사계절 능선에서 직접 검증합니다. 데이터가 아니라 발끝의 감각으로.'
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "title": '리페어 우선',
+                    "body": '버리기보다 고쳐 쓰도록. 무상 수선과 부품 공급으로 장비의 수명을 늘립니다.'
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "title": '책임 있는 소재',
+                    "body": '재생 나일론과 블루사인 인증 원단을 우선합니다. 산에 진 빚을 줄이는 일.'
+                  }
+                }
+              ],
             },
           },
           {
@@ -180,17 +156,12 @@ const preset: TemplatePreset = {
             type: 'featureSplit',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '브랜드' },
-              heading: { type: 'text', label: '제목', value: '능선은 길에서 시작됐습니다' },
-              body: {
-                type: 'textarea',
-                label: '본문',
-                value:
-                  '2016년 겨울, 백두대간을 종주하던 세 사람이 마땅한 장비가 없어 직접 박음질을 시작했습니다.\n능선은 여전히 작은 작업실에서, 실제로 산을 걷는 사람들의 손으로 만들어집니다.',
-              },
-              note: { type: 'text', label: '강조 문구', value: '— 능선 메이커스, 서울 성수' },
-              image: { type: 'image', label: '이미지', value: IMG.storyForest },
-              imageSide: { type: 'select', label: '이미지 위치', value: 'right', options: ['left', 'right'] },
+              eyebrow: '브랜드',
+              heading: '능선은 길에서 시작됐습니다',
+              body: '2016년 겨울, 백두대간을 종주하던 세 사람이 마땅한 장비가 없어 직접 박음질을 시작했습니다.\n능선은 여전히 작은 작업실에서, 실제로 산을 걷는 사람들의 손으로 만들어집니다.',
+              note: '— 능선 메이커스, 서울 성수',
+              image: { "url": IMG.storyForest },
+              imageSide: 'right',
             },
           },
           {
@@ -198,34 +169,28 @@ const preset: TemplatePreset = {
             type: 'collectionGrid',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '대표 컬렉션' },
-              heading: { type: 'text', label: '제목', value: '계절을 입다' },
-              items: {
-                type: 'array',
-                label: '컬렉션 항목',
-                items: [
-                  {
-                    title: { type: 'text', label: '제목', value: '리지라인 셸' },
-                    season: { type: 'text', label: '시즌/태그', value: 'ALL SEASON' },
-                    description: {
-                      type: 'textarea',
-                      label: '설명',
-                      value: '3겹 방수 셸과 경량 인슐레이션. 능선 위 변덕스러운 날씨를 위한 한 벌.',
-                    },
-                    image: { type: 'image', label: '이미지', value: IMG.colA },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '포레스트 베이스' },
-                    season: { type: 'text', label: '시즌/태그', value: 'SPRING — FALL' },
-                    description: {
-                      type: 'textarea',
-                      label: '설명',
-                      value: '숲길과 도시를 잇는 데일리 레이어. 부드럽고 빠르게 마릅니다.',
-                    },
-                    image: { type: 'image', label: '이미지', value: IMG.colB },
-                  },
-                ],
-              },
+              eyebrow: '대표 컬렉션',
+              heading: '계절을 입다',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "title": '리지라인 셸',
+                    "season": 'ALL SEASON',
+                    "description": '3겹 방수 셸과 경량 인슐레이션. 능선 위 변덕스러운 날씨를 위한 한 벌.',
+                    "image": { "url": IMG.colA }
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "title": '포레스트 베이스',
+                    "season": 'SPRING — FALL',
+                    "description": '숲길과 도시를 잇는 데일리 레이어. 부드럽고 빠르게 마릅니다.',
+                    "image": { "url": IMG.colB }
+                  }
+                }
+              ],
             },
           },
           {
@@ -233,17 +198,37 @@ const preset: TemplatePreset = {
             type: 'stats',
             visible: true,
             fields: {
-              heading: { type: 'text', label: '제목', value: '숫자로 보는 능선' },
-              items: {
-                type: 'array',
-                label: '지표 항목',
-                items: [
-                  { value: { type: 'text', label: '수치', value: '9년' }, label: { type: 'text', label: '라벨', value: '필드 테스트' } },
-                  { value: { type: 'text', label: '수치', value: '42' }, label: { type: 'text', label: '라벨', value: '검증한 능선 코스' } },
-                  { value: { type: 'text', label: '수치', value: '12,800+' }, label: { type: 'text', label: '라벨', value: '무상 수선 건수' } },
-                  { value: { type: 'text', label: '수치', value: '78%' }, label: { type: 'text', label: '라벨', value: '재생 소재 비중' } },
-                ],
-              },
+              heading: '숫자로 보는 능선',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "value": '9년',
+                    "label": '필드 테스트'
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "value": '42',
+                    "label": '검증한 능선 코스'
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "value": '12,800+',
+                    "label": '무상 수선 건수'
+                  }
+                },
+                {
+                  "id": "items-4",
+                  "fields": {
+                    "value": '78%',
+                    "label": '재생 소재 비중'
+                  }
+                }
+              ],
             },
           },
           {
@@ -251,15 +236,11 @@ const preset: TemplatePreset = {
             type: 'ctaBanner',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '함께 걷기' },
-              heading: { type: 'text', label: '제목', value: '다음 능선에서 만나요' },
-              body: {
-                type: 'textarea',
-                label: '설명',
-                value: '주말 가이드 트레킹과 신제품 소식을 가장 먼저 받아보세요.',
-              },
-              ctaLabel: { type: 'text', label: '버튼 텍스트', value: '뉴스레터 구독' },
-              image: { type: 'image', label: '배경 이미지', value: IMG.ctaTrail },
+              eyebrow: '함께 걷기',
+              heading: '다음 능선에서 만나요',
+              body: '주말 가이드 트레킹과 신제품 소식을 가장 먼저 받아보세요.',
+              ctaLabel: '뉴스레터 구독',
+              image: { "url": IMG.ctaTrail },
             },
           },
         ],
@@ -281,14 +262,10 @@ const preset: TemplatePreset = {
             type: 'pageHeader',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: 'STORE' },
-              title: { type: 'text', label: '제목', value: '스토어' },
-              description: {
-                type: 'textarea',
-                label: '설명',
-                value: '오래 걷기 위해 만든 장비들. 모든 제품은 능선 위에서 한 시즌 이상 검증을 거칩니다.',
-              },
-              image: { type: 'image', label: '배경 이미지', value: IMG.hdrShop },
+              eyebrow: 'STORE',
+              title: '스토어',
+              description: '오래 걷기 위해 만든 장비들. 모든 제품은 능선 위에서 한 시즌 이상 검증을 거칩니다.',
+              image: { "url": IMG.hdrShop },
             },
           },
           {
@@ -296,50 +273,64 @@ const preset: TemplatePreset = {
             type: 'productGrid',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '신상품' },
-              heading: { type: 'text', label: '제목', value: '이번 시즌의 장비' },
-              items: {
-                type: 'array',
-                label: '제품 항목',
-                items: [
-                  {
-                    name: { type: 'text', label: '제품명', value: '리지라인 3L 셸' },
-                    category: { type: 'text', label: '분류', value: '재킷' },
-                    price: { type: 'text', label: '가격', value: '₩389,000' },
-                    image: { type: 'image', label: '이미지', value: IMG.prodA },
-                  },
-                  {
-                    name: { type: 'text', label: '제품명', value: '능선 40L 백팩' },
-                    category: { type: 'text', label: '분류', value: '백팩' },
-                    price: { type: 'text', label: '가격', value: '₩259,000' },
-                    image: { type: 'image', label: '이미지', value: IMG.prodB },
-                  },
-                  {
-                    name: { type: 'text', label: '제품명', value: '트레일러너 GTX' },
-                    category: { type: 'text', label: '분류', value: '신발' },
-                    price: { type: 'text', label: '가격', value: '₩219,000' },
-                    image: { type: 'image', label: '이미지', value: IMG.prodC },
-                  },
-                  {
-                    name: { type: 'text', label: '제품명', value: '포레스트 플리스' },
-                    category: { type: 'text', label: '분류', value: '미드레이어' },
-                    price: { type: 'text', label: '가격', value: '₩149,000' },
-                    image: { type: 'image', label: '이미지', value: IMG.prodD },
-                  },
-                  {
-                    name: { type: 'text', label: '제품명', value: '서밋 다운 700' },
-                    category: { type: 'text', label: '분류', value: '인슐레이션' },
-                    price: { type: 'text', label: '가격', value: '₩329,000' },
-                    image: { type: 'image', label: '이미지', value: IMG.prodE },
-                  },
-                  {
-                    name: { type: 'text', label: '제품명', value: '베이스캠프 텐트 2P' },
-                    category: { type: 'text', label: '분류', value: '캠핑' },
-                    price: { type: 'text', label: '가격', value: '₩459,000' },
-                    image: { type: 'image', label: '이미지', value: IMG.prodF },
-                  },
-                ],
-              },
+              eyebrow: '신상품',
+              heading: '이번 시즌의 장비',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "name": '리지라인 3L 셸',
+                    "category": '재킷',
+                    "price": '₩389,000',
+                    "image": { "url": IMG.prodA }
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "name": '능선 40L 백팩',
+                    "category": '백팩',
+                    "price": '₩259,000',
+                    "image": { "url": IMG.prodB }
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "name": '트레일러너 GTX',
+                    "category": '신발',
+                    "price": '₩219,000',
+                    "image": { "url": IMG.prodC }
+                  }
+                },
+                {
+                  "id": "items-4",
+                  "fields": {
+                    "name": '포레스트 플리스',
+                    "category": '미드레이어',
+                    "price": '₩149,000',
+                    "image": { "url": IMG.prodD }
+                  }
+                },
+                {
+                  "id": "items-5",
+                  "fields": {
+                    "name": '서밋 다운 700',
+                    "category": '인슐레이션',
+                    "price": '₩329,000',
+                    "image": { "url": IMG.prodE }
+                  }
+                },
+                {
+                  "id": "items-6",
+                  "fields": {
+                    "name": '베이스캠프 텐트 2P',
+                    "category": '캠핑',
+                    "price": '₩459,000',
+                    "image": { "url": IMG.prodF }
+                  }
+                }
+              ],
             },
           },
           {
@@ -347,15 +338,11 @@ const preset: TemplatePreset = {
             type: 'ctaBanner',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '리페어 서비스' },
-              heading: { type: 'text', label: '제목', value: '고쳐 쓰면 더 오래갑니다' },
-              body: {
-                type: 'textarea',
-                label: '설명',
-                value: '능선 제품은 평생 무상 수선을 약속합니다. 가까운 매장이나 온라인으로 접수하세요.',
-              },
-              ctaLabel: { type: 'text', label: '버튼 텍스트', value: '수선 접수하기' },
-              image: { type: 'image', label: '배경 이미지', value: IMG.ctaShop },
+              eyebrow: '리페어 서비스',
+              heading: '고쳐 쓰면 더 오래갑니다',
+              body: '능선 제품은 평생 무상 수선을 약속합니다. 가까운 매장이나 온라인으로 접수하세요.',
+              ctaLabel: '수선 접수하기',
+              image: { "url": IMG.ctaShop },
             },
           },
         ],
@@ -377,14 +364,10 @@ const preset: TemplatePreset = {
             type: 'pageHeader',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: 'COLLECTIONS' },
-              title: { type: 'text', label: '제목', value: '컬렉션' },
-              description: {
-                type: 'textarea',
-                label: '설명',
-                value: '하나의 능선을 위한 한 벌. 지형과 계절에 따라 네 개의 라인으로 나눴습니다.',
-              },
-              image: { type: 'image', label: '배경 이미지', value: IMG.hdrCollections },
+              eyebrow: 'COLLECTIONS',
+              title: '컬렉션',
+              description: '하나의 능선을 위한 한 벌. 지형과 계절에 따라 네 개의 라인으로 나눴습니다.',
+              image: { "url": IMG.hdrCollections },
             },
           },
           {
@@ -392,38 +375,46 @@ const preset: TemplatePreset = {
             type: 'collectionGrid',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '2026 라인업' },
-              heading: { type: 'text', label: '제목', value: '네 개의 능선' },
-              items: {
-                type: 'array',
-                label: '컬렉션 항목',
-                items: [
-                  {
-                    title: { type: 'text', label: '제목', value: '리지라인' },
-                    season: { type: 'text', label: '시즌/태그', value: '고산 · 사계절' },
-                    description: { type: 'textarea', label: '설명', value: '바람과 비를 정면으로 맞는 능선 위를 위한 하드셸 라인.' },
-                    image: { type: 'image', label: '이미지', value: IMG.colC },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '포레스트 베이스' },
-                    season: { type: 'text', label: '시즌/태그', value: '저지대 · 봄가을' },
-                    description: { type: 'textarea', label: '설명', value: '숲길과 도시를 잇는 데일리 레이어와 액세서리.' },
-                    image: { type: 'image', label: '이미지', value: IMG.colD },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '서밋 인슐레이션' },
-                    season: { type: 'text', label: '시즌/태그', value: '동계' },
-                    description: { type: 'textarea', label: '설명', value: '책임 있게 채취한 다운과 합성 보온재로 만든 한겨울 라인.' },
-                    image: { type: 'image', label: '이미지', value: IMG.colE },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '리버 & 레이크' },
-                    season: { type: 'text', label: '시즌/태그', value: '여름 · 물가' },
-                    description: { type: 'textarea', label: '설명', value: '계곡과 호숫가를 위한 빠른 건조 소재의 경량 라인.' },
-                    image: { type: 'image', label: '이미지', value: IMG.colA },
-                  },
-                ],
-              },
+              eyebrow: '2026 라인업',
+              heading: '네 개의 능선',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "title": '리지라인',
+                    "season": '고산 · 사계절',
+                    "description": '바람과 비를 정면으로 맞는 능선 위를 위한 하드셸 라인.',
+                    "image": { "url": IMG.colC }
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "title": '포레스트 베이스',
+                    "season": '저지대 · 봄가을',
+                    "description": '숲길과 도시를 잇는 데일리 레이어와 액세서리.',
+                    "image": { "url": IMG.colD }
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "title": '서밋 인슐레이션',
+                    "season": '동계',
+                    "description": '책임 있게 채취한 다운과 합성 보온재로 만든 한겨울 라인.',
+                    "image": { "url": IMG.colE }
+                  }
+                },
+                {
+                  "id": "items-4",
+                  "fields": {
+                    "title": '리버 & 레이크',
+                    "season": '여름 · 물가',
+                    "description": '계곡과 호숫가를 위한 빠른 건조 소재의 경량 라인.',
+                    "image": { "url": IMG.colA }
+                  }
+                }
+              ],
             },
           },
           {
@@ -431,17 +422,12 @@ const preset: TemplatePreset = {
             type: 'featureSplit',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '소재 이야기' },
-              heading: { type: 'text', label: '제목', value: '산에서 와서 산으로 돌아가도록' },
-              body: {
-                type: 'textarea',
-                label: '본문',
-                value:
-                  '능선의 원단 78%는 재생 나일론과 폴리에스터입니다. 페트병과 폐어망이 다시 능선을 오릅니다.\n남은 자투리 원단은 리페어 패치와 파우치로 되살립니다.',
-              },
-              note: { type: 'text', label: '강조 문구', value: 'bluesign® 인증 원단 사용' },
-              image: { type: 'image', label: '이미지', value: IMG.collectionsSplit },
-              imageSide: { type: 'select', label: '이미지 위치', value: 'left', options: ['left', 'right'] },
+              eyebrow: '소재 이야기',
+              heading: '산에서 와서 산으로 돌아가도록',
+              body: '능선의 원단 78%는 재생 나일론과 폴리에스터입니다. 페트병과 폐어망이 다시 능선을 오릅니다.\n남은 자투리 원단은 리페어 패치와 파우치로 되살립니다.',
+              note: 'bluesign® 인증 원단 사용',
+              image: { "url": IMG.collectionsSplit },
+              imageSide: 'left',
             },
           },
         ],
@@ -463,14 +449,10 @@ const preset: TemplatePreset = {
             type: 'pageHeader',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: 'ACTIVITIES' },
-              title: { type: 'text', label: '제목', value: '액티비티' },
-              description: {
-                type: 'textarea',
-                label: '설명',
-                value: '장비는 걸으면서 완성됩니다. 능선 메이커스가 직접 안내하는 트레킹과 워크숍.',
-              },
-              image: { type: 'image', label: '배경 이미지', value: IMG.hdrActivities },
+              eyebrow: 'ACTIVITIES',
+              title: '액티비티',
+              description: '장비는 걸으면서 완성됩니다. 능선 메이커스가 직접 안내하는 트레킹과 워크숍.',
+              image: { "url": IMG.hdrActivities },
             },
           },
           {
@@ -478,42 +460,50 @@ const preset: TemplatePreset = {
             type: 'activityGrid',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '2026 일정' },
-              heading: { type: 'text', label: '제목', value: '함께 걷는 프로그램' },
-              items: {
-                type: 'array',
-                label: '액티비티 항목',
-                items: [
-                  {
-                    title: { type: 'text', label: '제목', value: '북한산 능선 데이하이크' },
-                    level: { type: 'text', label: '난이도', value: '입문' },
-                    meta: { type: 'text', label: '소요/거리', value: '4시간 · 8km' },
-                    description: { type: 'textarea', label: '설명', value: '도심에서 가장 가까운 능선. 기본 장비 사용법을 익히며 가볍게 걷습니다.' },
-                    image: { type: 'image', label: '이미지', value: IMG.actA },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '설악 공룡능선 종주' },
-                    level: { type: 'text', label: '난이도', value: '고급' },
-                    meta: { type: 'text', label: '소요/거리', value: '1박2일 · 24km' },
-                    description: { type: 'textarea', label: '설명', value: '능선의 진면목을 만나는 종주 코스. 셸과 인슐레이션을 실전에서 테스트합니다.' },
-                    image: { type: 'image', label: '이미지', value: IMG.actB },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '숲속 베이스캠프 워크숍' },
-                    level: { type: 'text', label: '난이도', value: '입문' },
-                    meta: { type: 'text', label: '소요/거리', value: '1박2일 · 캠핑' },
-                    description: { type: 'textarea', label: '설명', value: '텐트 설치부터 야영 요리까지. 캠핑이 처음인 분을 위한 1박 프로그램.' },
-                    image: { type: 'image', label: '이미지', value: IMG.actC },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '리페어 클래스: 내 장비 고치기' },
-                    level: { type: 'text', label: '난이도', value: '워크숍' },
-                    meta: { type: 'text', label: '소요/거리', value: '3시간 · 성수 작업실' },
-                    description: { type: 'textarea', label: '설명', value: '찢어진 셸을 직접 꿰매 봅니다. 패치와 실은 능선이 제공합니다.' },
-                    image: { type: 'image', label: '이미지', value: IMG.actD },
-                  },
-                ],
-              },
+              eyebrow: '2026 일정',
+              heading: '함께 걷는 프로그램',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "title": '북한산 능선 데이하이크',
+                    "level": '입문',
+                    "meta": '4시간 · 8km',
+                    "description": '도심에서 가장 가까운 능선. 기본 장비 사용법을 익히며 가볍게 걷습니다.',
+                    "image": { "url": IMG.actA }
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "title": '설악 공룡능선 종주',
+                    "level": '고급',
+                    "meta": '1박2일 · 24km',
+                    "description": '능선의 진면목을 만나는 종주 코스. 셸과 인슐레이션을 실전에서 테스트합니다.',
+                    "image": { "url": IMG.actB }
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "title": '숲속 베이스캠프 워크숍',
+                    "level": '입문',
+                    "meta": '1박2일 · 캠핑',
+                    "description": '텐트 설치부터 야영 요리까지. 캠핑이 처음인 분을 위한 1박 프로그램.',
+                    "image": { "url": IMG.actC }
+                  }
+                },
+                {
+                  "id": "items-4",
+                  "fields": {
+                    "title": '리페어 클래스: 내 장비 고치기',
+                    "level": '워크숍',
+                    "meta": '3시간 · 성수 작업실',
+                    "description": '찢어진 셸을 직접 꿰매 봅니다. 패치와 실은 능선이 제공합니다.',
+                    "image": { "url": IMG.actD }
+                  }
+                }
+              ],
             },
           },
           {
@@ -521,11 +511,11 @@ const preset: TemplatePreset = {
             type: 'ctaBanner',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '신청 안내' },
-              heading: { type: 'text', label: '제목', value: '자리가 빠르게 마감됩니다' },
-              body: { type: 'textarea', label: '설명', value: '각 회차 정원은 12명입니다. 멤버십 회원은 우선 신청과 장비 대여 혜택을 받습니다.' },
-              ctaLabel: { type: 'text', label: '버튼 텍스트', value: '일정 신청하기' },
-              image: { type: 'image', label: '배경 이미지', value: IMG.ctaActivity },
+              eyebrow: '신청 안내',
+              heading: '자리가 빠르게 마감됩니다',
+              body: '각 회차 정원은 12명입니다. 멤버십 회원은 우선 신청과 장비 대여 혜택을 받습니다.',
+              ctaLabel: '일정 신청하기',
+              image: { "url": IMG.ctaActivity },
             },
           },
         ],
@@ -547,14 +537,10 @@ const preset: TemplatePreset = {
             type: 'pageHeader',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: 'JOURNAL' },
-              title: { type: 'text', label: '제목', value: '저널' },
-              description: {
-                type: 'textarea',
-                label: '설명',
-                value: '걷는 동안 적어 둔 기록들. 코스 가이드부터 장비를 만드는 뒷이야기까지.',
-              },
-              image: { type: 'image', label: '배경 이미지', value: IMG.hdrJournal },
+              eyebrow: 'JOURNAL',
+              title: '저널',
+              description: '걷는 동안 적어 둔 기록들. 코스 가이드부터 장비를 만드는 뒷이야기까지.',
+              image: { "url": IMG.hdrJournal },
             },
           },
           {
@@ -562,56 +548,70 @@ const preset: TemplatePreset = {
             type: 'journalGrid',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '최근 글' },
-              heading: { type: 'text', label: '제목', value: '산에서 온 이야기' },
-              items: {
-                type: 'array',
-                label: '저널 항목',
-                items: [
-                  {
-                    title: { type: 'text', label: '제목', value: '겨울 능선, 레이어링의 모든 것' },
-                    category: { type: 'text', label: '분류', value: '장비 가이드' },
-                    date: { type: 'text', label: '날짜', value: '2026.01.18' },
-                    excerpt: { type: 'textarea', label: '요약', value: '땀과 추위 사이에서 균형 잡기. 베이스부터 셸까지 세 겹의 원칙.' },
-                    image: { type: 'image', label: '커버 이미지', value: IMG.jrnA },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '공룡능선을 처음 걷는 사람에게' },
-                    category: { type: 'text', label: '분류', value: '코스' },
-                    date: { type: 'text', label: '날짜', value: '2025.11.02' },
-                    excerpt: { type: 'textarea', label: '요약', value: '24km의 바위 능선. 물과 발걸음을 어떻게 배분할지에 대한 메모.' },
-                    image: { type: 'image', label: '커버 이미지', value: IMG.jrnB },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '재생 나일론은 어떻게 능선이 되나' },
-                    category: { type: 'text', label: '분류', value: '메이킹' },
-                    date: { type: 'text', label: '날짜', value: '2025.09.20' },
-                    excerpt: { type: 'textarea', label: '요약', value: '폐어망이 셸 한 벌이 되기까지. 성수 작업실의 하루를 따라갔습니다.' },
-                    image: { type: 'image', label: '커버 이미지', value: IMG.jrnC },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '비 오는 날의 트레일러닝' },
-                    category: { type: 'text', label: '분류', value: '필드 노트' },
-                    date: { type: 'text', label: '날짜', value: '2025.08.07' },
-                    excerpt: { type: 'textarea', label: '요약', value: '젖은 흙과 미끄러운 바위. 우중 러닝에서 신발이 해야 할 일.' },
-                    image: { type: 'image', label: '커버 이미지', value: IMG.jrnD },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '능선 위의 작은 부엌' },
-                    category: { type: 'text', label: '분류', value: '캠핑' },
-                    date: { type: 'text', label: '날짜', value: '2025.06.15' },
-                    excerpt: { type: 'textarea', label: '요약', value: '버너 하나로 차리는 하룻밤. 가볍게 따뜻하게 먹는 법.' },
-                    image: { type: 'image', label: '커버 이미지', value: IMG.jrnE },
-                  },
-                  {
-                    title: { type: 'text', label: '제목', value: '수선 일지: 9년 된 셸의 부활' },
-                    category: { type: 'text', label: '분류', value: '리페어' },
-                    date: { type: 'text', label: '날짜', value: '2025.04.29' },
-                    excerpt: { type: 'textarea', label: '요약', value: '버릴 뻔한 첫 제품을 되살린 기록. 고쳐 쓴다는 것의 의미.' },
-                    image: { type: 'image', label: '커버 이미지', value: IMG.jrnF },
-                  },
-                ],
-              },
+              eyebrow: '최근 글',
+              heading: '산에서 온 이야기',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "title": '겨울 능선, 레이어링의 모든 것',
+                    "category": '장비 가이드',
+                    "date": '2026.01.18',
+                    "excerpt": '땀과 추위 사이에서 균형 잡기. 베이스부터 셸까지 세 겹의 원칙.',
+                    "image": { "url": IMG.jrnA }
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "title": '공룡능선을 처음 걷는 사람에게',
+                    "category": '코스',
+                    "date": '2025.11.02',
+                    "excerpt": '24km의 바위 능선. 물과 발걸음을 어떻게 배분할지에 대한 메모.',
+                    "image": { "url": IMG.jrnB }
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "title": '재생 나일론은 어떻게 능선이 되나',
+                    "category": '메이킹',
+                    "date": '2025.09.20',
+                    "excerpt": '폐어망이 셸 한 벌이 되기까지. 성수 작업실의 하루를 따라갔습니다.',
+                    "image": { "url": IMG.jrnC }
+                  }
+                },
+                {
+                  "id": "items-4",
+                  "fields": {
+                    "title": '비 오는 날의 트레일러닝',
+                    "category": '필드 노트',
+                    "date": '2025.08.07',
+                    "excerpt": '젖은 흙과 미끄러운 바위. 우중 러닝에서 신발이 해야 할 일.',
+                    "image": { "url": IMG.jrnD }
+                  }
+                },
+                {
+                  "id": "items-5",
+                  "fields": {
+                    "title": '능선 위의 작은 부엌',
+                    "category": '캠핑',
+                    "date": '2025.06.15',
+                    "excerpt": '버너 하나로 차리는 하룻밤. 가볍게 따뜻하게 먹는 법.',
+                    "image": { "url": IMG.jrnE }
+                  }
+                },
+                {
+                  "id": "items-6",
+                  "fields": {
+                    "title": '수선 일지: 9년 된 셸의 부활',
+                    "category": '리페어',
+                    "date": '2025.04.29',
+                    "excerpt": '버릴 뻔한 첫 제품을 되살린 기록. 고쳐 쓴다는 것의 의미.',
+                    "image": { "url": IMG.jrnF }
+                  }
+                }
+              ],
             },
           },
         ],
@@ -633,14 +633,10 @@ const preset: TemplatePreset = {
             type: 'pageHeader',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: 'ABOUT' },
-              title: { type: 'text', label: '제목', value: '산을 걷는 사람들이 만듭니다' },
-              description: {
-                type: 'textarea',
-                label: '설명',
-                value: '능선은 멀리 있는 브랜드가 아니라, 매주 산에 오르는 작은 팀입니다.',
-              },
-              image: { type: 'image', label: '배경 이미지', value: IMG.hdrAbout },
+              eyebrow: 'ABOUT',
+              title: '산을 걷는 사람들이 만듭니다',
+              description: '능선은 멀리 있는 브랜드가 아니라, 매주 산에 오르는 작은 팀입니다.',
+              image: { "url": IMG.hdrAbout },
             },
           },
           {
@@ -648,17 +644,12 @@ const preset: TemplatePreset = {
             type: 'featureSplit',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '시작' },
-              heading: { type: 'text', label: '제목', value: '마땅한 장비가 없어서, 직접 만들었습니다' },
-              body: {
-                type: 'textarea',
-                label: '본문',
-                value:
-                  '2016년, 백두대간을 종주하던 세 사람은 한국의 능선에 맞는 장비가 드물다는 걸 알았습니다.\n수입 장비는 비싸거나 우리 산과 맞지 않았고, 결국 미싱 앞에 앉았습니다. 능선은 그렇게 시작됐습니다.',
-              },
-              note: { type: 'text', label: '강조 문구', value: '— 창립 멤버 셋, 지금은 열한 명' },
-              image: { type: 'image', label: '이미지', value: IMG.aboutSplit },
-              imageSide: { type: 'select', label: '이미지 위치', value: 'right', options: ['left', 'right'] },
+              eyebrow: '시작',
+              heading: '마땅한 장비가 없어서, 직접 만들었습니다',
+              body: '2016년, 백두대간을 종주하던 세 사람은 한국의 능선에 맞는 장비가 드물다는 걸 알았습니다.\n수입 장비는 비싸거나 우리 산과 맞지 않았고, 결국 미싱 앞에 앉았습니다. 능선은 그렇게 시작됐습니다.',
+              note: '— 창립 멤버 셋, 지금은 열한 명',
+              image: { "url": IMG.aboutSplit },
+              imageSide: 'right',
             },
           },
           {
@@ -666,17 +657,31 @@ const preset: TemplatePreset = {
             type: 'pillars',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: '약속' },
-              heading: { type: 'text', label: '제목', value: '능선이 지키는 세 가지' },
-              items: {
-                type: 'array',
-                label: '가치 항목',
-                items: [
-                  { title: { type: 'text', label: '제목', value: '평생 수선' }, body: { type: 'textarea', label: '설명', value: '능선의 모든 제품은 평생 무상 수선합니다. 오래 입는 것이 가장 친환경적입니다.' } },
-                  { title: { type: 'text', label: '제목', value: '투명한 생산' }, body: { type: 'textarea', label: '설명', value: '어디서 누가 만들었는지 모든 제품에 적습니다. 성수 작업실과 파트너 공방을 공개합니다.' } },
-                  { title: { type: 'text', label: '제목', value: '산에 돌려주기' }, body: { type: 'textarea', label: '설명', value: '매출의 1%를 국립공원 등산로 복원과 쓰레기 수거 활동에 씁니다.' } },
-                ],
-              },
+              eyebrow: '약속',
+              heading: '능선이 지키는 세 가지',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "title": '평생 수선',
+                    "body": '능선의 모든 제품은 평생 무상 수선합니다. 오래 입는 것이 가장 친환경적입니다.'
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "title": '투명한 생산',
+                    "body": '어디서 누가 만들었는지 모든 제품에 적습니다. 성수 작업실과 파트너 공방을 공개합니다.'
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "title": '산에 돌려주기',
+                    "body": '매출의 1%를 국립공원 등산로 복원과 쓰레기 수거 활동에 씁니다.'
+                  }
+                }
+              ],
             },
           },
           {
@@ -684,17 +689,37 @@ const preset: TemplatePreset = {
             type: 'stats',
             visible: true,
             fields: {
-              heading: { type: 'text', label: '제목', value: '걸어온 길' },
-              items: {
-                type: 'array',
-                label: '지표 항목',
-                items: [
-                  { value: { type: 'text', label: '수치', value: '2016' }, label: { type: 'text', label: '라벨', value: '능선 시작' } },
-                  { value: { type: 'text', label: '수치', value: '11명' }, label: { type: 'text', label: '라벨', value: '메이커스' } },
-                  { value: { type: 'text', label: '수치', value: '3곳' }, label: { type: 'text', label: '라벨', value: '오프라인 매장' } },
-                  { value: { type: 'text', label: '수치', value: '₩1.2억' }, label: { type: 'text', label: '라벨', value: '누적 산림 기부' } },
-                ],
-              },
+              heading: '걸어온 길',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "value": '2016',
+                    "label": '능선 시작'
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "value": '11명',
+                    "label": '메이커스'
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "value": '3곳',
+                    "label": '오프라인 매장'
+                  }
+                },
+                {
+                  "id": "items-4",
+                  "fields": {
+                    "value": '₩1.2억',
+                    "label": '누적 산림 기부'
+                  }
+                }
+              ],
             },
           },
         ],
@@ -716,14 +741,10 @@ const preset: TemplatePreset = {
             type: 'pageHeader',
             visible: true,
             fields: {
-              eyebrow: { type: 'text', label: '상단 라벨', value: 'CONTACT' },
-              title: { type: 'text', label: '제목', value: '문의하기' },
-              description: {
-                type: 'textarea',
-                label: '설명',
-                value: '제품, 액티비티, 협업 무엇이든 편하게 연락 주세요. 평일 24시간 내에 답합니다.',
-              },
-              image: { type: 'image', label: '배경 이미지', value: IMG.hdrContact },
+              eyebrow: 'CONTACT',
+              title: '문의하기',
+              description: '제품, 액티비티, 협업 무엇이든 편하게 연락 주세요. 평일 24시간 내에 답합니다.',
+              image: { "url": IMG.hdrContact },
             },
           },
           {
@@ -731,28 +752,46 @@ const preset: TemplatePreset = {
             type: 'contact',
             visible: true,
             fields: {
-              heading: { type: 'text', label: '제목', value: '성수 플래그십 & 작업실' },
-              intro: {
-                type: 'textarea',
-                label: '안내 문구',
-                value: '능선의 본진. 매장과 리페어 작업실, 액티비티 베이스가 한 건물에 있습니다.',
-              },
-              hours: {
-                type: 'textarea',
-                label: '운영 시간',
-                value: '화–일 11:00 – 20:00\n월요일 휴무 (공휴일 정상 영업)',
-              },
-              items: {
-                type: 'array',
-                label: '연락처 항목',
-                items: [
-                  { label: { type: 'text', label: '항목명', value: '주소' }, value: { type: 'text', label: '내용', value: '서울 성동구 성수이로 14길 21, 1층' } },
-                  { label: { type: 'text', label: '항목명', value: '전화' }, value: { type: 'text', label: '내용', value: '02-1234-5678' } },
-                  { label: { type: 'text', label: '항목명', value: '이메일' }, value: { type: 'text', label: '내용', value: 'hello@neungseon.kr' } },
-                  { label: { type: 'text', label: '항목명', value: '도매·협업' }, value: { type: 'text', label: '내용', value: 'partners@neungseon.kr' } },
-                  { label: { type: 'text', label: '항목명', value: '인스타그램' }, value: { type: 'text', label: '내용', value: '@neungseon.outdoor' } },
-                ],
-              },
+              heading: '성수 플래그십 & 작업실',
+              intro: '능선의 본진. 매장과 리페어 작업실, 액티비티 베이스가 한 건물에 있습니다.',
+              hours: '화–일 11:00 – 20:00\n월요일 휴무 (공휴일 정상 영업)',
+              items: [
+                {
+                  "id": "items-1",
+                  "fields": {
+                    "label": '주소',
+                    "value": '서울 성동구 성수이로 14길 21, 1층'
+                  }
+                },
+                {
+                  "id": "items-2",
+                  "fields": {
+                    "label": '전화',
+                    "value": '02-1234-5678'
+                  }
+                },
+                {
+                  "id": "items-3",
+                  "fields": {
+                    "label": '이메일',
+                    "value": 'hello@neungseon.kr'
+                  }
+                },
+                {
+                  "id": "items-4",
+                  "fields": {
+                    "label": '도매·협업',
+                    "value": 'partners@neungseon.kr'
+                  }
+                },
+                {
+                  "id": "items-5",
+                  "fields": {
+                    "label": '인스타그램',
+                    "value": '@neungseon.outdoor'
+                  }
+                }
+              ],
             },
           },
         ],

@@ -1,19 +1,35 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import {
-  getFieldValue,
-  ArrayField,
-} from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Editorial collection cards — large imagery with a season tag, title and a
  * short description overlaid. Used on home (teaser) and the collections page.
  */
+const collectionGridSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: '컬렉션 항목',
+    minItems: 1,
+    itemSchema: {
+      title: { type: 'text', label: '제목', required: true },
+      season: { type: 'text', label: '시즌/태그' },
+      description: { type: 'textarea', label: '설명' },
+      image: { type: 'image', label: '이미지', required: true },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type CollectionGridContent = ValuesOf<typeof collectionGridSchema>;
+
 const CollectionGrid: SectionComponent = function CollectionGrid(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as CollectionGridContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-soft)]">
@@ -34,14 +50,14 @@ const CollectionGrid: SectionComponent = function CollectionGrid(props: Template
         )}
 
         <div className="grid gap-6 md:grid-cols-2">
-          {items.map((item, idx) => {
-            const title = getFieldValue(item.title);
-            const season = getFieldValue(item.season);
-            const description = getFieldValue(item.description);
-            const image = getFieldValue(item.image);
+          {items.map((item) => {
+            const title = item.fields.title;
+            const season = item.fields.season;
+            const description = item.fields.description;
+            const image = item.fields.image?.url;
             return (
               <article
-                key={title || idx}
+                key={item.id}
                 className="group relative isolate flex min-h-[22rem] flex-col justify-end overflow-hidden rounded-2xl bg-[var(--color-surface-dark)] p-8"
               >
                 {image && (
@@ -79,21 +95,7 @@ CollectionGrid.meta = {
   componentKey: 'collectionGrid',
   category: 'gallery',
   label: '컬렉션 카드',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: '컬렉션 항목',
-      minItems: 1,
-      itemSchema: {
-        title: { type: 'text', label: '제목', required: true },
-        season: { type: 'text', label: '시즌/태그' },
-        description: { type: 'textarea', label: '설명' },
-        image: { type: 'image', label: '이미지', required: true },
-      },
-    },
-  },
+  fieldsSchema: collectionGridSchema,
 };
 
 export default CollectionGrid;

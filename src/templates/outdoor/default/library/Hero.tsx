@@ -1,20 +1,32 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Full-bleed home hero — a trail photograph behind an eyebrow, headline,
  * sub-copy and two calls to action. Dark scrim keeps text legible over any
  * image.
  */
+const heroSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title: { type: 'text', label: '대제목', required: true },
+  subtitle: { type: 'textarea', label: '설명' },
+  primaryCtaLabel: { type: 'text', label: '주 버튼 텍스트' },
+  secondaryCtaLabel: { type: 'text', label: '보조 버튼 텍스트' },
+  image: { type: 'image', label: '배경 이미지', required: true },
+} as const satisfies FieldsSchema;
+
+type HeroContent = ValuesOf<typeof heroSchema>;
+
 const Hero: SectionComponent = function Hero(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const title = getFieldValue(section.fields, 'title') || '능선을 잇다';
-  const subtitle = getFieldValue(section.fields, 'subtitle');
-  const primaryCta = getFieldValue(section.fields, 'primaryCtaLabel');
-  const secondaryCta = getFieldValue(section.fields, 'secondaryCtaLabel');
-  const image = getFieldValue(section.fields, 'image');
+  const content = section.fields as HeroContent;
+  const eyebrow = content.eyebrow;
+  const title = content.title || '능선을 잇다';
+  const subtitle = content.subtitle;
+  const primaryCta = content.primaryCtaLabel;
+  const secondaryCta = content.secondaryCtaLabel;
+  const image = content.image?.url;
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-surface-dark)]">
@@ -65,14 +77,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: '히어로 (홈)',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title: { type: 'text', label: '대제목', required: true },
-    subtitle: { type: 'textarea', label: '설명' },
-    primaryCtaLabel: { type: 'text', label: '주 버튼 텍스트' },
-    secondaryCtaLabel: { type: 'text', label: '보조 버튼 텍스트' },
-    image: { type: 'image', label: '배경 이미지', required: true },
-  },
+  fieldsSchema: heroSchema,
 };
 
 export default Hero;

@@ -5,16 +5,27 @@ import { loadTemplate } from '@/templates/registry';
 import { globalStylesToThemeVars } from '@/lib/template/design-tokens';
 import { SITE_URL } from '@/lib/seo/base-url';
 import {
-  getFieldValue,
   allSections,
   isMultiContent,
   resolveActivePageSeo,
+  type Section,
 } from '@/domain/entities/template.entity';
 import type { Metadata } from 'next';
 import React from 'react';
 
 interface Props {
   params: Promise<{ domain: string; slug?: string[] }>;
+}
+
+/**
+ * One text Value off a Block. `Block.fields` is loose by design (ADR-0016 §4-2)
+ * and this reads across *every* Template, so there is no single schema to type
+ * it against — the shape check is the parse. Non-string Values (an image's
+ * `{url}`, an array) are simply not description material.
+ */
+function textValue(block: Section | undefined, key: string): string {
+  const value = block?.fields[key];
+  return typeof value === 'string' ? value : '';
 }
 
 function buildDescription(siteName: string, homeTitle: string | undefined, heroTitle: string, heroSubtitle: string): string {
@@ -49,8 +60,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Explicit PageSeo wins; fall back to hero extraction when none is authored.
     const seo = resolveActivePageSeo(content, activePageId);
     const heroSection = allSections(content).find(s => s.type === 'hero');
-    const heroTitle = getFieldValue(heroSection?.fields['title']) || getFieldValue(heroSection?.fields['heading']) || '';
-    const heroSubtitle = getFieldValue(heroSection?.fields['subtitle']) || '';
+    const heroTitle = textValue(heroSection, 'title') || textValue(heroSection, 'heading');
+    const heroSubtitle = textValue(heroSection, 'subtitle');
     const title = seo?.title || site.siteName;
     const description = seo?.description || buildDescription(site.siteName, undefined, heroTitle, heroSubtitle);
 

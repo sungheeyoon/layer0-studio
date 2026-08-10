@@ -1,16 +1,32 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../medical.module.css';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const whySchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'text', label: '섹션 타이틀', required: true },
+  f1Title: { type: 'textarea', label: '특징 1 제목' },
+  f1Desc: { type: 'textarea', label: '특징 1 설명' },
+  f1Image: { type: 'image', label: '특징 1 이미지' },
+  f2Title: { type: 'textarea', label: '특징 2 제목' },
+  f2Desc: { type: 'textarea', label: '특징 2 설명' },
+  f2Image: { type: 'image', label: '특징 2 이미지' },
+  f3Title: { type: 'textarea', label: '특징 3 제목' },
+  f3Desc: { type: 'textarea', label: '특징 3 설명' },
+  f3Image: { type: 'image', label: '특징 3 이미지' },
+} as const satisfies FieldsSchema;
+
+type WhyContent = ValuesOf<typeof whySchema>;
 
 const Why: SectionComponent = function Why({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as WhyContent;
+  const label = content.eyebrow || '';
+  const title = content.title || '';
 
   const features = [
-    { title: getFieldValue(fields, 'f1Title'), desc: getFieldValue(fields, 'f1Desc'), image: getFieldValue(fields, 'f1Image'), num: '01' },
-    { title: getFieldValue(fields, 'f2Title'), desc: getFieldValue(fields, 'f2Desc'), image: getFieldValue(fields, 'f2Image'), num: '02', reverse: true },
-    { title: getFieldValue(fields, 'f3Title'), desc: getFieldValue(fields, 'f3Desc'), image: getFieldValue(fields, 'f3Image'), num: '03' },
+    { title: content.f1Title, desc: content.f1Desc, image: content.f1Image?.url, num: '01' },
+    { title: content.f2Title, desc: content.f2Desc, image: content.f2Image?.url, num: '02', reverse: true },
+    { title: content.f3Title, desc: content.f3Desc, image: content.f3Image?.url, num: '03' },
   ].filter(f => f.title);
 
   return (
@@ -68,19 +84,7 @@ Why.meta = {
   componentKey: 'why',
   category: 'content',
   label: 'Why Medical',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'text', label: '섹션 타이틀', required: true },
-    f1Title: { type: 'textarea', label: '특징 1 제목' },
-    f1Desc: { type: 'textarea', label: '특징 1 설명' },
-    f1Image: { type: 'image', label: '특징 1 이미지' },
-    f2Title: { type: 'textarea', label: '특징 2 제목' },
-    f2Desc: { type: 'textarea', label: '특징 2 설명' },
-    f2Image: { type: 'image', label: '특징 2 이미지' },
-    f3Title: { type: 'textarea', label: '특징 3 제목' },
-    f3Desc: { type: 'textarea', label: '특징 3 설명' },
-    f3Image: { type: 'image', label: '특징 3 이미지' },
-  },
+  fieldsSchema: whySchema,
   previewImage: '/component-previews/medical/why.webp',
 };
 

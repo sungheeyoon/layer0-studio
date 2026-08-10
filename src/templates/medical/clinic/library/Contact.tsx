@@ -1,21 +1,42 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * 오시는 길 · 진료시간 · 연락처 — a map panel (an image if provided, else a
  * styled placeholder with a pin) beside the address, directions, opening
  * hours and a label/value contact list. `items` falls back to an empty array.
  */
+const contactSchema = {
+  heading: { type: 'text', label: '제목', required: true },
+  intro: { type: 'textarea', label: '안내 문구' },
+  address: { type: 'text', label: '주소' },
+  directions: { type: 'textarea', label: '교통/주차 안내' },
+  hours: { type: 'textarea', label: '진료시간' },
+  mapImage: { type: 'image', label: '지도 이미지' },
+  items: {
+    type: 'array',
+    label: '연락처 항목',
+    minItems: 1,
+    itemSchema: {
+      label: { type: 'text', label: '항목명', required: true },
+      value: { type: 'text', label: '내용', required: true },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type ContactContent = ValuesOf<typeof contactSchema>;
+
 const Contact: SectionComponent = function Contact(props: TemplateSectionProps) {
   const { section } = props;
-  const heading = getFieldValue(section.fields, 'heading') || '오시는 길';
-  const intro = getFieldValue(section.fields, 'intro');
-  const address = getFieldValue(section.fields, 'address');
-  const directions = getFieldValue(section.fields, 'directions');
-  const hours = getFieldValue(section.fields, 'hours');
-  const mapImage = getFieldValue(section.fields, 'mapImage');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as ContactContent;
+  const heading = content.heading || '오시는 길';
+  const intro = content.intro;
+  const address = content.address;
+  const directions = content.directions;
+  const hours = content.hours;
+  const mapImage = content.mapImage?.url;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -92,16 +113,16 @@ const Contact: SectionComponent = function Contact(props: TemplateSectionProps) 
 
             {items.length > 0 && (
               <dl className="divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
-                {items.map((item, idx) => (
+                {items.map((item) => (
                   <div
-                    key={getFieldValue(item.label) || idx}
+                    key={item.id}
                     className="flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:gap-6"
                   >
                     <dt className="w-24 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                      {getFieldValue(item.label)}
+                      {item.fields.label}
                     </dt>
                     <dd className="text-base font-medium text-[var(--color-ink)]">
-                      {getFieldValue(item.value)}
+                      {item.fields.value}
                     </dd>
                   </div>
                 ))}
@@ -118,23 +139,7 @@ Contact.meta = {
   componentKey: 'contact',
   category: 'contact',
   label: '오시는 길 · 진료시간',
-  fieldsSchema: {
-    heading: { type: 'text', label: '제목', required: true },
-    intro: { type: 'textarea', label: '안내 문구' },
-    address: { type: 'text', label: '주소' },
-    directions: { type: 'textarea', label: '교통/주차 안내' },
-    hours: { type: 'textarea', label: '진료시간' },
-    mapImage: { type: 'image', label: '지도 이미지' },
-    items: {
-      type: 'array',
-      label: '연락처 항목',
-      minItems: 1,
-      itemSchema: {
-        label: { type: 'text', label: '항목명', required: true },
-        value: { type: 'text', label: '내용', required: true },
-      },
-    },
-  },
+  fieldsSchema: contactSchema,
 };
 
 export default Contact;

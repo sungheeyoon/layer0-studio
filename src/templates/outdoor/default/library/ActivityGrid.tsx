@@ -1,19 +1,36 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import {
-  getFieldValue,
-  ArrayField,
-} from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Activities listing — guided programs / routes. Each item carries a photo,
  * a difficulty level, a duration meta line, a title and a description.
  */
+const activityGridSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: '액티비티 항목',
+    minItems: 1,
+    itemSchema: {
+      title: { type: 'text', label: '제목', required: true },
+      level: { type: 'text', label: '난이도' },
+      meta: { type: 'text', label: '소요/거리' },
+      description: { type: 'textarea', label: '설명' },
+      image: { type: 'image', label: '이미지', required: true },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type ActivityGridContent = ValuesOf<typeof activityGridSchema>;
+
 const ActivityGrid: SectionComponent = function ActivityGrid(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as ActivityGridContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -34,15 +51,15 @@ const ActivityGrid: SectionComponent = function ActivityGrid(props: TemplateSect
         )}
 
         <div className="grid gap-8 sm:grid-cols-2">
-          {items.map((item, idx) => {
-            const title = getFieldValue(item.title);
-            const level = getFieldValue(item.level);
-            const meta = getFieldValue(item.meta);
-            const description = getFieldValue(item.description);
-            const image = getFieldValue(item.image);
+          {items.map((item) => {
+            const title = item.fields.title;
+            const level = item.fields.level;
+            const meta = item.fields.meta;
+            const description = item.fields.description;
+            const image = item.fields.image?.url;
             return (
               <article
-                key={title || idx}
+                key={item.id}
                 className="overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)]"
               >
                 {image && (
@@ -86,22 +103,7 @@ ActivityGrid.meta = {
   componentKey: 'activityGrid',
   category: 'feature',
   label: '액티비티 그리드',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: '액티비티 항목',
-      minItems: 1,
-      itemSchema: {
-        title: { type: 'text', label: '제목', required: true },
-        level: { type: 'text', label: '난이도' },
-        meta: { type: 'text', label: '소요/거리' },
-        description: { type: 'textarea', label: '설명' },
-        image: { type: 'image', label: '이미지', required: true },
-      },
-    },
-  },
+  fieldsSchema: activityGridSchema,
 };
 
 export default ActivityGrid;

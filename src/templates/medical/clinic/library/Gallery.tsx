@@ -1,17 +1,35 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * Image-first gallery grid — facility / equipment / activity photos with an
  * optional category tag and caption. Minimal chrome, generous whitespace.
  * `items` falls back to an empty array for older Sites.
  */
+const gallerySchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: '사진 항목',
+    minItems: 1,
+    itemSchema: {
+      image: { type: 'image', label: '사진', required: true },
+      category: { type: 'text', label: '분류' },
+      caption: { type: 'text', label: '설명' },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type GalleryContent = ValuesOf<typeof gallerySchema>;
+
 const Gallery: SectionComponent = function Gallery(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as GalleryContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface)]">
@@ -32,12 +50,12 @@ const Gallery: SectionComponent = function Gallery(props: TemplateSectionProps) 
         )}
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, idx) => {
-            const image = getFieldValue(item.image);
-            const caption = getFieldValue(item.caption);
-            const category = getFieldValue(item.category);
+          {items.map((item) => {
+            const image = item.fields.image?.url;
+            const caption = item.fields.caption;
+            const category = item.fields.category;
             return (
-              <figure key={caption || idx} className="group flex flex-col">
+              <figure key={item.id} className="group flex flex-col">
                 <div className="overflow-hidden rounded-2xl bg-[var(--color-surface-soft)]">
                   {image && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -73,20 +91,7 @@ Gallery.meta = {
   componentKey: 'gallery',
   category: 'gallery',
   label: '갤러리 (이미지 그리드)',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: '사진 항목',
-      minItems: 1,
-      itemSchema: {
-        image: { type: 'image', label: '사진', required: true },
-        category: { type: 'text', label: '분류' },
-        caption: { type: 'text', label: '설명' },
-      },
-    },
-  },
+  fieldsSchema: gallerySchema,
 };
 
 export default Gallery;

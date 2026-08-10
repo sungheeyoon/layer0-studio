@@ -1,21 +1,39 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { BuildingsIcon, SofaIcon, ShieldCheckIcon, MapPointIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const spaceSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'textarea', label: '섹션 설명' },
+  mainImage: { type: 'image', label: '메인 이미지' },
+  subImage: { type: 'image', label: '보조 이미지' },
+  feature1Title: { type: 'text', label: '특징 1 제목' },
+  feature1Desc: { type: 'text', label: '특징 1 설명' },
+  feature2Title: { type: 'text', label: '특징 2 제목' },
+  feature2Desc: { type: 'text', label: '특징 2 설명' },
+  feature3Title: { type: 'text', label: '특징 3 제목' },
+  feature3Desc: { type: 'text', label: '특징 3 설명' },
+  feature4Title: { type: 'text', label: '특징 4 제목' },
+  feature4Desc: { type: 'text', label: '특징 4 설명' },
+} as const satisfies FieldsSchema;
+
+type SpaceContent = ValuesOf<typeof spaceSchema>;
 
 const Space: SectionComponent = function Space({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const description = getFieldValue(fields, 'description') || '';
-  const mainImage = getFieldValue(fields, 'mainImage') || '';
-  const subImage = getFieldValue(fields, 'subImage') || '';
+  const content = section.fields as SpaceContent;
+  const label = content.eyebrow || '';
+  const title = content.title || '';
+  const description = content.description || '';
+  const mainImage = content.mainImage?.url || '';
+  const subImage = content.subImage?.url || '';
 
   const features = [
-    { title: getFieldValue(fields, 'feature1Title'), desc: getFieldValue(fields, 'feature1Desc'), icon: <BuildingsIcon size={22} className="text-[var(--m-gold)]" /> },
-    { title: getFieldValue(fields, 'feature2Title'), desc: getFieldValue(fields, 'feature2Desc'), icon: <SofaIcon size={22} className="text-[var(--m-gold)]" /> },
-    { title: getFieldValue(fields, 'feature3Title'), desc: getFieldValue(fields, 'feature3Desc'), icon: <ShieldCheckIcon size={22} className="text-[var(--m-gold)]" /> },
-    { title: getFieldValue(fields, 'feature4Title'), desc: getFieldValue(fields, 'feature4Desc'), icon: <MapPointIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: content.feature1Title, desc: content.feature1Desc, icon: <BuildingsIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: content.feature2Title, desc: content.feature2Desc, icon: <SofaIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: content.feature3Title, desc: content.feature3Desc, icon: <ShieldCheckIcon size={22} className="text-[var(--m-gold)]" /> },
+    { title: content.feature4Title, desc: content.feature4Desc, icon: <MapPointIcon size={22} className="text-[var(--m-gold)]" /> },
   ].filter(f => f.title);
 
   return (
@@ -75,21 +93,7 @@ Space.meta = {
   componentKey: 'space',
   category: 'content',
   label: 'Medical Space',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'textarea', label: '섹션 설명' },
-    mainImage: { type: 'image', label: '메인 이미지' },
-    subImage: { type: 'image', label: '보조 이미지' },
-    feature1Title: { type: 'text', label: '특징 1 제목' },
-    feature1Desc: { type: 'text', label: '특징 1 설명' },
-    feature2Title: { type: 'text', label: '특징 2 제목' },
-    feature2Desc: { type: 'text', label: '특징 2 설명' },
-    feature3Title: { type: 'text', label: '특징 3 제목' },
-    feature3Desc: { type: 'text', label: '특징 3 설명' },
-    feature4Title: { type: 'text', label: '특징 4 제목' },
-    feature4Desc: { type: 'text', label: '특징 4 설명' },
-  },
+  fieldsSchema: spaceSchema,
   previewImage: '/component-previews/medical/space.webp',
 };
 

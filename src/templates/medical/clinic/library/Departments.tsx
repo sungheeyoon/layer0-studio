@@ -1,6 +1,6 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * 진료과목 grid — icon-led cards for each department/service. Used both as a
@@ -51,12 +51,35 @@ const ICON_PATHS: Record<string, React.ReactNode> = {
   plus: <path d="M12 5v14M5 12h14" />,
 };
 
+const departmentsSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  description: { type: 'textarea', label: '설명' },
+  items: {
+    type: 'array',
+    label: '진료과목 항목',
+    minItems: 1,
+    itemSchema: {
+      icon: {
+        type: 'select',
+        label: '아이콘',
+        options: ['stethoscope', 'heart', 'tooth', 'eye', 'bone', 'brain', 'child', 'skin', 'plus'],
+      },
+      name: { type: 'text', label: '과목명', required: true },
+      description: { type: 'textarea', label: '설명' },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type DepartmentsContent = ValuesOf<typeof departmentsSchema>;
+
 const Departments: SectionComponent = function Departments(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const description = getFieldValue(section.fields, 'description');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as DepartmentsContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const description = content.description;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-soft)]">
@@ -82,13 +105,13 @@ const Departments: SectionComponent = function Departments(props: TemplateSectio
         )}
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, idx) => {
-            const name = getFieldValue(item.name);
-            const body = getFieldValue(item.description);
-            const iconKey = getFieldValue(item.icon) || 'plus';
+          {items.map((item) => {
+            const name = item.fields.name;
+            const body = item.fields.description;
+            const iconKey = item.fields.icon || 'plus';
             return (
               <article
-                key={name || idx}
+                key={item.id}
                 className="group rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-8 transition-shadow hover:shadow-md"
               >
                 <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-surface-soft)] text-[var(--color-primary)] transition-colors group-hover:bg-[var(--color-primary)] group-hover:text-[var(--color-on-dark)]">
@@ -117,25 +140,7 @@ Departments.meta = {
   componentKey: 'departments',
   category: 'feature',
   label: '진료과목 (아이콘 카드)',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    description: { type: 'textarea', label: '설명' },
-    items: {
-      type: 'array',
-      label: '진료과목 항목',
-      minItems: 1,
-      itemSchema: {
-        icon: {
-          type: 'select',
-          label: '아이콘',
-          options: ['stethoscope', 'heart', 'tooth', 'eye', 'bone', 'brain', 'child', 'skin', 'plus'],
-        },
-        name: { type: 'text', label: '과목명', required: true },
-        description: { type: 'textarea', label: '설명' },
-      },
-    },
-  },
+  fieldsSchema: departmentsSchema,
 };
 
 export default Departments;

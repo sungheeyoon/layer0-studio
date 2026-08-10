@@ -1,43 +1,64 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { ArrowRightIcon, MagicStickIcon, SyringeIcon, LeafIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const servicesSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'textarea', label: '섹션 설명' },
+  service1Title: { type: 'text', label: '서비스 1 제목' },
+  service1Desc: { type: 'text', label: '서비스 1 설명' },
+  service1Image: { type: 'image', label: '서비스 1 이미지' },
+  service2Title: { type: 'text', label: '서비스 2 제목' },
+  service2Desc: { type: 'text', label: '서비스 2 설명' },
+  service2Image: { type: 'image', label: '서비스 2 이미지' },
+  service3Title: { type: 'text', label: '서비스 3 제목' },
+  service3Desc: { type: 'text', label: '서비스 3 설명' },
+  service4Title: { type: 'text', label: '서비스 4 제목' },
+  service4Desc: { type: 'text', label: '서비스 4 설명' },
+  service5Title: { type: 'text', label: '서비스 5 제목' },
+  service5Desc: { type: 'text', label: '서비스 5 설명' },
+  service5Image: { type: 'image', label: '서비스 5 이미지' },
+} as const satisfies FieldsSchema;
+
+type ServicesContent = ValuesOf<typeof servicesSchema>;
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '';
-  const title = getFieldValue(fields, 'title') || '';
-  const description = getFieldValue(fields, 'description') || '';
+  const content = section.fields as ServicesContent;
+  const label = content.eyebrow || '';
+  const title = content.title || '';
+  const description = content.description || '';
 
   const services = [
     {
-      title: getFieldValue(fields, 'service1Title'),
-      desc: getFieldValue(fields, 'service1Desc'),
-      image: getFieldValue(fields, 'service1Image'),
+      title: content.service1Title,
+      desc: content.service1Desc,
+      image: content.service1Image?.url,
       badge: '인기 No.1',
       colSpan: 'md:col-span-2',
     },
     {
-      title: getFieldValue(fields, 'service2Title'),
-      desc: getFieldValue(fields, 'service2Desc'),
-      image: getFieldValue(fields, 'service2Image'),
+      title: content.service2Title,
+      desc: content.service2Desc,
+      image: content.service2Image?.url,
     },
     {
-      title: getFieldValue(fields, 'service3Title'),
-      desc: getFieldValue(fields, 'service3Desc'),
+      title: content.service3Title,
+      desc: content.service3Desc,
       dark: true,
       icon: <SyringeIcon size={22} className="text-[var(--m-gold)]" />,
     },
     {
-      title: getFieldValue(fields, 'service4Title'),
-      desc: getFieldValue(fields, 'service4Desc'),
+      title: content.service4Title,
+      desc: content.service4Desc,
       light: true,
       icon: <LeafIcon size={22} />,
     },
     {
-      title: getFieldValue(fields, 'service5Title'),
-      desc: getFieldValue(fields, 'service5Desc'),
-      image: getFieldValue(fields, 'service5Image'),
+      title: content.service5Title,
+      desc: content.service5Desc,
+      image: content.service5Image?.url,
     },
   ].filter(s => s.title);
 
@@ -105,24 +126,7 @@ Services.meta = {
   componentKey: 'services',
   category: 'features',
   label: 'Medical Services',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'textarea', label: '섹션 설명' },
-    service1Title: { type: 'text', label: '서비스 1 제목' },
-    service1Desc: { type: 'text', label: '서비스 1 설명' },
-    service1Image: { type: 'image', label: '서비스 1 이미지' },
-    service2Title: { type: 'text', label: '서비스 2 제목' },
-    service2Desc: { type: 'text', label: '서비스 2 설명' },
-    service2Image: { type: 'image', label: '서비스 2 이미지' },
-    service3Title: { type: 'text', label: '서비스 3 제목' },
-    service3Desc: { type: 'text', label: '서비스 3 설명' },
-    service4Title: { type: 'text', label: '서비스 4 제목' },
-    service4Desc: { type: 'text', label: '서비스 4 설명' },
-    service5Title: { type: 'text', label: '서비스 5 제목' },
-    service5Desc: { type: 'text', label: '서비스 5 설명' },
-    service5Image: { type: 'image', label: '서비스 5 이미지' },
-  },
+  fieldsSchema: servicesSchema,
   previewImage: '/component-previews/medical/services.webp',
 };
 

@@ -1,16 +1,34 @@
 import React from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
-import { getFieldValue, ArrayField } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
  * 환자 후기 — a heading over a set of quote cards, each with an author and a
  * short meta line (visit reason / date). `items` falls back to an empty array.
  */
+const testimonialsSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  heading: { type: 'text', label: '제목' },
+  items: {
+    type: 'array',
+    label: '후기 항목',
+    minItems: 1,
+    itemSchema: {
+      quote: { type: 'textarea', label: '후기 내용', required: true },
+      author: { type: 'text', label: '작성자', required: true },
+      meta: { type: 'text', label: '방문 정보' },
+    },
+  },
+} as const satisfies FieldsSchema;
+
+type TestimonialsContent = ValuesOf<typeof testimonialsSchema>;
+
 const Testimonials: SectionComponent = function Testimonials(props: TemplateSectionProps) {
   const { section } = props;
-  const eyebrow = getFieldValue(section.fields, 'eyebrow');
-  const heading = getFieldValue(section.fields, 'heading');
-  const items = (section.fields.items as ArrayField | undefined)?.items ?? [];
+  const content = section.fields as TestimonialsContent;
+  const eyebrow = content.eyebrow;
+  const heading = content.heading;
+  const items = content.items ?? [];
 
   return (
     <section className="bg-[var(--color-surface-soft)]">
@@ -31,13 +49,13 @@ const Testimonials: SectionComponent = function Testimonials(props: TemplateSect
         )}
 
         <div className="grid gap-6 md:grid-cols-3">
-          {items.map((item, idx) => {
-            const quote = getFieldValue(item.quote);
-            const author = getFieldValue(item.author);
-            const meta = getFieldValue(item.meta);
+          {items.map((item) => {
+            const quote = item.fields.quote;
+            const author = item.fields.author;
+            const meta = item.fields.meta;
             return (
               <figure
-                key={author || idx}
+                key={item.id}
                 className="flex flex-col rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-8"
               >
                 <span className="text-3xl font-bold leading-none text-[var(--color-primary)]" aria-hidden="true">
@@ -63,20 +81,7 @@ Testimonials.meta = {
   componentKey: 'testimonials',
   category: 'social-proof',
   label: '환자 후기',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    heading: { type: 'text', label: '제목' },
-    items: {
-      type: 'array',
-      label: '후기 항목',
-      minItems: 1,
-      itemSchema: {
-        quote: { type: 'textarea', label: '후기 내용', required: true },
-        author: { type: 'text', label: '작성자', required: true },
-        meta: { type: 'text', label: '방문 정보' },
-      },
-    },
-  },
+  fieldsSchema: testimonialsSchema,
 };
 
 export default Testimonials;
