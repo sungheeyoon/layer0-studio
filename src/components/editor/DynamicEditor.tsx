@@ -47,6 +47,11 @@ import { getSiteError } from '@/lib/errors/messages';
 import { nextSaveDelay } from '@/lib/editor/autosave-schedule';
 import { createWriteQueue } from '@/lib/editor/write-queue';
 import {
+  flushWithRetry,
+  TRANSPORT_FAILURE_CODE,
+  type SaveOutcome,
+} from '@/lib/editor/flush-retry';
+import {
   indexIssues,
   EMPTY_ISSUE_INDEX,
   type IssueIndex,
@@ -83,9 +88,6 @@ import {
 interface DynamicEditorProps {
   site: UserSite;
 }
-
-/** The result of one write attempt, normalised so callers branch on a code. */
-type SaveOutcome = { ok: true; updatedAt: string } | { ok: false; code: string };
 
 export default function DynamicEditor({ site }: DynamicEditorProps) {
   const locale = useLocale();
@@ -188,8 +190,11 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       knownUpdatedAtRef.current = result.updatedAt;
       return { ok: true, updatedAt: result.updatedAt };
     } catch (err) {
+      // A throw here means the request never got an answer — the server's own
+      // failures come back as `{ error }`. Tag it apart from `UNKNOWN` so the
+      // unmount flush can tell "worth retrying" from "will fail identically".
       console.error('[editor] save request failed:', err);
-      return { ok: false, code: 'UNKNOWN' };
+      return { ok: false, code: TRANSPORT_FAILURE_CODE };
     }
   }, [site.id]);
 
@@ -252,7 +257,12 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   //
   // A live debounce timer is the precise signal for "edits exist that no request
   // has picked up yet": every edit reschedules it, every dispatch clears it.
-  // Fire-and-forget — there is no longer a surface to report a failure on.
+  //
+  // Un-awaited, because there is no surface left to report a failure on — but
+  // no longer fire-and-forget. A transport failure here used to be the one
+  // recoverable loss nobody could see, so `flushWithRetry` re-sends it a bounded
+  // number of times through the same queue. `STALE_VERSION` is still dropped in
+  // silence, deliberately: retrying it would overwrite the other tab (ADR-0004).
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -260,7 +270,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       if (!autoSaveTimerRef.current) return;
       clearTimeout(autoSaveTimerRef.current);
       autoSaveTimerRef.current = null;
-      void enqueueSaveRef.current().then((outcome) => {
+      void flushWithRetry(() => enqueueSaveRef.current()).then((outcome) => {
         if (!outcome.ok) console.error('[editor] unmount flush failed:', outcome.code);
       });
     };
@@ -473,7 +483,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         return { ok: true, updatedAt: result.updatedAt, phase: 'publish' };
       } catch (err) {
         console.error('[editor] publish request failed:', err);
-        return { ok: false, code: 'UNKNOWN', phase: 'publish' };
+        return { ok: false, code: TRANSPORT_FAILURE_CODE, phase: 'publish' };
       }
     });
 
