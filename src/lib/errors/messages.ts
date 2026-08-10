@@ -73,6 +73,12 @@ export const SITE_ERRORS: Record<string, Record<Locale, string>> = {
     ko: '다른 곳에서 먼저 수정되었습니다. 새로고침 후 다시 시도해주세요.',
     en: 'This was modified elsewhere. Refresh and try again.',
   },
+  // The editor's `TRANSPORT_FAILURE_CODE` — the request never reached the
+  // server, so unlike the other codes here the content itself is fine.
+  NETWORK_ERROR: {
+    ko: '네트워크 오류로 저장하지 못했습니다. 연결을 확인해주세요.',
+    en: 'Could not save due to a network error. Please check your connection.',
+  },
 };
 
 const UNKNOWN_ERROR: Record<Locale, string> = {
