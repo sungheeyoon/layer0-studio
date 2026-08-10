@@ -166,7 +166,7 @@ Edit loss was a **set of paths**, not one concurrency bug ([ADR-0015](./docs/adr
 
 1. **Never bypass the save RPC.** Every write goes through `save_site_template_with_lock` (migration 010) carrying `expectedUpdatedAt`; `'STALE_VERSION'` surfaces a Conflict modal. A plain `update` silently destroys another tab's work ([ADR-0004](./docs/adr/0004-optimistic-concurrency-via-rpc.md)). **New save paths must thread `expectedUpdatedAt` through.**
 2. **Every write goes through the single queue** (`src/lib/editor/write-queue.ts`) so a Site's writes are always ordered — this is what stops a tab colliding with *itself*.
-3. **The debounce has a ceiling:** `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`), plus an unmount flush so SPA/browser Back cannot drop pending edits.
+3. **The debounce has a ceiling:** `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`), plus a flush on unmount (SPA/browser Back) and on `visibilitychange` → hidden (`src/lib/editor/use-flush-on-hidden.ts`, for backgrounded tabs where the timer is throttled). Both reuse the normal save path — the page is still alive in each case, which is why no beacon route is needed. Only the unmount flush retries, and only a transport failure (`src/lib/editor/flush-retry.ts`): retrying a `STALE_VERSION` would overwrite the other tab.
 4. **A rule may block a save only when saving would break the renderer.** Anything that merely *looks* wrong is a warning the editor flags inline. Don't promote a warning to blocking — the whole `ContentModel` is validated and saved as a unit, so one bad field would hold every other edit hostage.
 
 ### Asset upload flow
