@@ -17,15 +17,15 @@ export interface AssetUsage {
 /**
  * Domain port for "which assets does this content reference, and where".
  *
- * A port rather than a plain function because of where this is heading: after
- * ADR-0016 §5 a Value carries no `type`, so finding the images means walking the
- * Template's `fieldsSchema` — and the Library is loaded by `@/templates`, which
- * the domain must not reach into. The concrete adapter lives in
- * `src/lib/template` beside the validator, the other port with the same problem.
+ * A port rather than a plain function because a Value carries no `type`
+ * (ADR-0016 §5), so finding the images means walking the Template's
+ * `fieldsSchema` — and the Library is loaded by `@/templates`, which the domain
+ * must not reach into. The concrete adapter lives in `src/lib/template` beside
+ * the validator, the other port with the same problem.
  *
- * It is also why `collect` is async: today's implementation is a synchronous
- * content walk, but the schema-driven one has to await `loadTemplate()`. Making
- * the seam async now means that change touches only the adapter.
+ * It is also why `collect` is async: the adapter awaits `loadTemplate()`. The
+ * seam was made async ahead of that change, so the schema-driven rewrite landed
+ * inside the adapter alone.
  */
 export interface AssetUsageCollector {
   collect(content: ContentModel): Promise<AssetUsage[]>;
