@@ -6,6 +6,7 @@ import {
   ContentModel,
   GlobalStyles,
   Field,
+  FieldDescriptor,
   Section,
   ArrayField,
   isSingleContent,
@@ -939,6 +940,26 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
  * renderer lays them out. Keys present in data but absent from the schema are
  * appended so nothing silently disappears.
  */
+/**
+ * The array-only facets of a descriptor. `FieldsSchema` is a discriminated union
+ * (ADR-0016 §4-1), so `itemSchema`/`minItems`/`maxItems` exist only on the
+ * `array` member — this narrows once instead of at each of the three props.
+ * Every other field type gets `undefined`, which is what `DynamicField` already
+ * expected from the old everywhere-optional shape.
+ */
+function arrayFacets(descriptor?: FieldDescriptor): {
+  itemSchema?: SectionFieldsSchema;
+  minItems?: number;
+  maxItems?: number;
+} {
+  if (descriptor?.type !== 'array') return {};
+  return {
+    itemSchema: descriptor.itemSchema,
+    minItems: descriptor.minItems,
+    maxItems: descriptor.maxItems,
+  };
+}
+
 function orderedBySchema<T>(
   data: Record<string, T>,
   schema?: SectionFieldsSchema,
@@ -1025,15 +1046,16 @@ function SectionFields({
 }) {
   return (
     <div className="space-y-6">
-      {orderedBySchema(section.fields, schema)
+      {/* The editor still edits legacy `Field` objects; ADR-0016 §8 step 4 moves
+          it to Values. `Block.fields` is loose (§4-2), so it is read back here as
+          the shape this UI was written against. */}
+      {orderedBySchema(section.fields as Record<string, Field>, schema)
         .filter(([, field]) => field.editable !== false)
         .map(([fieldKey, field]) => (
           <DynamicField
             key={`${section.id}-${fieldKey}`}
             field={field}
-            itemSchema={schema?.[fieldKey]?.itemSchema}
-            minItems={schema?.[fieldKey]?.minItems}
-            maxItems={schema?.[fieldKey]?.maxItems}
+            {...arrayFacets(schema?.[fieldKey])}
             onChange={(val, aid) => onFieldChange(section.id, fieldKey, val, aid)}
             onError={onError}
             issueCodes={issues[fieldIssueKey(section.id, fieldKey)]}
@@ -1280,9 +1302,7 @@ function ArrayFieldEditor({
                   <DynamicField
                     key={fKey}
                     field={f}
-                    itemSchema={itemSchema?.[fKey]?.itemSchema}
-                    minItems={itemSchema?.[fKey]?.minItems}
-                    maxItems={itemSchema?.[fKey]?.maxItems}
+                    {...arrayFacets(itemSchema?.[fKey])}
                     onChange={(val, aid) => handleItemFieldChange(index, fKey, val, aid)}
                     onError={onError}
                   />

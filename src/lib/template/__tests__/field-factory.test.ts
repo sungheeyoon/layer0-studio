@@ -26,7 +26,9 @@ describe('makeEmptyItem', () => {
       b: { type: 'textarea', label: 'B' },
       c: { type: 'url', label: 'C' },
       d: { type: 'color', label: 'D' },
-      e: { type: 'number', label: 'E' },
+      // `default` is mandatory on a number descriptor (ADR-0016 §4-3): it is what
+      // the editor resets an emptied input to.
+      e: { type: 'number', label: 'E', default: 0 },
     };
     const out = makeEmptyItem(schema);
     for (const key of ['a', 'b', 'c', 'd', 'e']) {
@@ -52,12 +54,10 @@ describe('makeEmptyItem', () => {
     expect(f.options).toEqual(['x', 'y', 'z']);
   });
 
-  it('defaults a select field with no options to an empty value', () => {
-    const out = makeEmptyItem({ pick: { type: 'select', label: 'Pick' } });
-    const f = out.pick as SelectField;
-    expect(f.value).toBe('');
-    expect(f.options).toEqual([]);
-  });
+  // Deleted with ADR-0016 §4-1: "a select field with no options" is no longer a
+  // state a schema can be in. `FieldDescriptor`'s select member requires
+  // `options`, so the case this guarded is now a compile error at the schema,
+  // which is strictly earlier than a runtime fallback to ''.
 
   it('builds a nested array field as an empty list', () => {
     const out = makeEmptyItem({

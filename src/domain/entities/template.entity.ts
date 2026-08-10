@@ -122,12 +122,17 @@ export type Field =
 /**
  * Safely get the string value of a field.
  * Returns empty string for 'array' type or missing value.
- * 
+ *
  * Usage:
  * 1. getFieldValue(field)
  * 2. getFieldValue(data, 'key')
+ *
+ * @deprecated ADR-0016 §2 deletes this. It takes `unknown` because `Block.fields`
+ * is now loose (§4-2) and the un-migrated Templates still calling it are reading
+ * legacy `Field` objects out of it — the cast has simply moved inside. Migrated
+ * components read the Value directly off a `ValuesOf<typeof schema>`.
  */
-export function getFieldValue(fieldOrData: Field | Record<string, Field> | undefined, key?: string): string {
+export function getFieldValue(fieldOrData: unknown, key?: string): string {
   if (!fieldOrData) return '';
 
   if (key !== undefined) {
@@ -163,7 +168,14 @@ export interface Section {
   id: string;
   type: string;
   visible: boolean;
-  fields: Record<string, Field>;
+  /**
+   * The Block's data, as Values (ADR-0016 §4). Deliberately loose: a Block is
+   * dispatched by a string `type` into `library[type]`, so the domain cannot know
+   * statically which Value shape any given Block holds. The schema does, and the
+   * typed view is taken once at the component boundary
+   * (`section.fields as XContent`, §4-2) after the save path has validated it.
+   */
+  fields: Record<string, unknown>;
 }
 
 /**

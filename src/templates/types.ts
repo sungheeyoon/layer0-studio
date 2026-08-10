@@ -1,4 +1,4 @@
-import { ContentModel, Section, FieldType } from '@/domain/entities/template.entity';
+import { ContentModel, Section, FieldsSchema } from '@/domain/entities/template.entity';
 import { ComponentType } from 'react';
 
 /**
@@ -8,21 +8,22 @@ export interface SectionComponentMeta {
   componentKey: string;            // Unique key in the library ('hero-video', 'menu-grid', etc.)
   category: string;                 // 'hero' | 'menu' | 'story' | 'footer' | ...
   label: string;                    // Display name in admin catalog
-  fieldsSchema: SectionFieldsSchema;   // Field type/required definitions
+  fieldsSchema: FieldsSchema;       // The single source of truth for this component's data (ADR-0016 §4)
   previewImage?: string;            // Admin catalog thumbnail (optional)
 }
 
-export interface SectionFieldsSchema {
-  [fieldKey: string]: {
-    type: FieldType;
-    label: string;
-    required?: boolean;
-    options?: string[]; // (select용, 이미 사실상 사용 중)
-    itemSchema?: SectionFieldsSchema; // ★ type: 'array'일 때 필수
-    minItems?: number; // ★ optional 제약
-    maxItems?: number; // ★ optional 제약
-  };
-}
+/**
+ * The schema shape now lives in the domain as {@link FieldsSchema} — a
+ * discriminated union of `FieldDescriptor`s, so `options`/`itemSchema`/`default`
+ * are demanded exactly where the `type` calls for them instead of being
+ * everywhere-optional. Declare a schema with
+ * `as const satisfies FieldsSchema` and derive its Content type with
+ * `ValuesOf<typeof schema>` (ADR-0016 §4-1).
+ *
+ * This alias only keeps the old name resolving; ADR-0016 §2 renames it to
+ * `BlockFieldsSchema` with the rest of the Section → Block vocabulary.
+ */
+export type SectionFieldsSchema = FieldsSchema;
 
 /**
  * A section component. Meta is optional here because client components

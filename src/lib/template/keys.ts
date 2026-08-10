@@ -21,7 +21,10 @@ export function makeItemKey(): Field {
 export function injectKeys(json: ContentModel): ContentModel {
   const updated = structuredClone(json);
   allSections(updated).forEach((section) => {
-    Object.values(section.fields).forEach((field) => {
+    // `Block.fields` is loose after ADR-0016 §4-2. This whole file is the `_key`
+    // workaround that §4-4 replaces with a real `item.id`, so it is read back as
+    // the legacy `Field` shape it was written against rather than modernised.
+    (Object.values(section.fields) as Field[]).forEach((field) => {
       if (field.type === 'array' && field.items) {
         field.items.forEach((item) => {
           if (!item._key) {
@@ -40,7 +43,7 @@ export function injectKeys(json: ContentModel): ContentModel {
 export function stripKeys(json: ContentModel): ContentModel {
   const updated = structuredClone(json);
   allSections(updated).forEach((section) => {
-    Object.values(section.fields).forEach((field) => {
+    (Object.values(section.fields) as Field[]).forEach((field) => {
       if (field.type === 'array' && field.items) {
         field.items.forEach((item) => {
           delete item._key;

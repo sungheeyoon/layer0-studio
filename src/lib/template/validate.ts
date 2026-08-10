@@ -1,9 +1,14 @@
-import { ContentModel, Section, Field } from '@/domain/entities/template.entity';
+import {
+  ContentModel,
+  Section,
+  FieldDescriptor,
+  FieldsSchema,
+} from '@/domain/entities/template.entity';
 import {
   SiteContentValidationIssue,
   SiteContentValidationResult,
 } from '@/domain/usecases/ports/site-content-validator.port';
-import { TemplateLibrary, SectionFieldsSchema } from '@/templates/types';
+import { TemplateLibrary } from '@/templates/types';
 
 /**
  * The validation result vocabulary is owned by the domain port
@@ -62,6 +67,24 @@ function relativeLuminance(hex: string): number | null {
  * contrast equally (√(1.05 × 0.05) − 0.05).
  */
 const LUMINANCE_MIDPOINT = 0.1791;
+
+/**
+ * One Block's stored data as the domain holds it (ADR-0016 §4-2): opaque Values
+ * keyed by field name. The schema — not the data — says what each one should be,
+ * so everything here is `unknown` until a `FieldDescriptor` says otherwise.
+ */
+type BlockValues = Record<string, unknown>;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** What a rejected Value actually was, for the error message. */
+function describeValue(value: unknown): string {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'array';
+  return typeof value;
+}
 
 export function validateContent(
   json: ContentModel,
@@ -163,6 +186,237 @@ export function validateContent(
     }
   }
 
+  /**
+   * One stored Value against the descriptor that owns it (ADR-0016 §4).
+   *
+   * Blocking vs warning follows ADR-0015 rule 4 — a rule blocks the save only
+   * when the shape would break the renderer, which after ADR-0016 §6 casts
+   * `block.fields` without re-checking it. A Value of the wrong *shape* is the
+   * thing that crashes it (`.map` on a string, `.url` on `undefined`); a Value
+   * of the right shape carrying a surprising *content* only looks wrong.
+   */
+  const validateValue = (
+    descriptor: FieldDescriptor,
+    value: unknown,
+    fieldKey: string,
+    fieldRef: string,
+  ) => {
+    const mismatch = (expected: string) =>
+      err(
+        'FIELD_VALUE_TYPE_MISMATCH',
+        `field "${fieldKey}" must hold ${expected} (got ${describeValue(value)})`,
+        fieldRef,
+      );
+
+    switch (descriptor.type) {
+      case 'text':
+      case 'textarea':
+      case 'url':
+      case 'color': {
+        if (typeof value !== 'string') return mismatch('a string');
+
+        // A non-hex colour degrades the token it feeds (ADR-0005), but the
+        // editor's colour input is free text, so every intermediate keystroke
+        // ("#", "#a", "#ab") passes through this state. Blocking here turned an
+        // in-progress edit into an unsavable ContentModel.
+        if (descriptor.type === 'color' && !HEX_RE.test(value)) {
+          warn(
+            'INVALID_COLOR_FIELD',
+            `color field "${fieldKey}" value "${value}" is not a hex color`,
+            fieldRef,
+          );
+        }
+        if (descriptor.type === 'url' && value.startsWith('http://')) {
+          warn(
+            'INSECURE_URL',
+            `field "${fieldKey}" uses http:// — prefer https to avoid mixed-content issues`,
+            fieldRef,
+          );
+        }
+        return;
+      }
+
+      case 'select': {
+        if (typeof value !== 'string') return mismatch('a string');
+
+        // Warned, not blocked: the renderer maps this value to a class or a
+        // branch and falls through to its default when it doesn't match. The
+        // reachable cause is a schema whose `options` were narrowed under
+        // already-stored data — ADR-0016 §6 calls that out as destructive and
+        // the manifest gate catches it there, before the data goes stale.
+        if (!descriptor.options.includes(value)) {
+          warn(
+            'SELECT_VALUE_NOT_IN_OPTIONS',
+            `field "${fieldKey}" value "${value}" is not one of: ${descriptor.options.join(', ')}`,
+            fieldRef,
+          );
+        }
+        return;
+      }
+
+      case 'number': {
+        // `NaN`/`Infinity` reach a style attribute as garbage. The editor resets
+        // an emptied input to the descriptor's `default` (ADR-0016 §4-3), so
+        // nothing a user types arrives here non-finite.
+        if (typeof value !== 'number' || !Number.isFinite(value)) return mismatch('a finite number');
+        return;
+      }
+
+      case 'image': {
+        // ImageValue stays an object because `assetId` is real content, not
+        // schema metadata — ADR-0003's reference counting reads it (ADR-0016 §4-3).
+        if (!isRecord(value)) return mismatch('{ url, assetId? }');
+        if (typeof value.url !== 'string') {
+          return err(
+            'FIELD_VALUE_TYPE_MISMATCH',
+            `field "${fieldKey}" must hold { url, assetId? } (url is ${describeValue(value.url)})`,
+            `${fieldRef}.url`,
+          );
+        }
+        // Blocking, and safe to block: no editor input reaches `assetId` — it is
+        // written from `confirmUploadAction`'s response. A non-string here means
+        // the asset usage row would be written against garbage (ADR-0003).
+        if (value.assetId !== undefined && value.assetId !== null && typeof value.assetId !== 'string') {
+          err(
+            'INVALID_ASSET_ID',
+            `field "${fieldKey}" assetId must be a string or null (got ${describeValue(value.assetId)})`,
+            `${fieldRef}.assetId`,
+          );
+        }
+        if (value.url.startsWith('http://')) {
+          warn(
+            'INSECURE_URL',
+            `field "${fieldKey}" uses http:// — prefer https to avoid mixed-content issues`,
+            fieldRef,
+          );
+        }
+        return;
+      }
+
+      case 'array': {
+        if (!Array.isArray(value)) return mismatch('an array of items');
+
+        // Kept as a runtime guard even though `FieldDescriptor` makes it
+        // mandatory at compile time: a library shipped as plain JS would
+        // otherwise blow up inside `Object.entries(undefined)` instead of
+        // reporting which component is malformed.
+        if (!descriptor.itemSchema) {
+          return err(
+            'MISSING_ITEM_SCHEMA',
+            `schema for array field "${fieldKey}" is missing itemSchema`,
+            fieldRef,
+          );
+        }
+
+        // Warnings, deliberately demoted from the errors they used to be. Both
+        // are reachable from the editor's add/remove buttons, and neither breaks
+        // the renderer — too few items renders a short list, too many renders a
+        // long one. Blocking held every other edit in the same ContentModel
+        // hostage to one over-full array (ADR-0015 rule 4).
+        if (descriptor.minItems !== undefined && value.length < descriptor.minItems) {
+          warn(
+            'ARRAY_ITEMS_BELOW_MIN',
+            `field "${fieldKey}" should have at least ${descriptor.minItems} items (has ${value.length})`,
+            fieldRef,
+          );
+        }
+        if (descriptor.maxItems !== undefined && value.length > descriptor.maxItems) {
+          warn(
+            'ARRAY_ITEMS_ABOVE_MAX',
+            `field "${fieldKey}" should have no more than ${descriptor.maxItems} items (has ${value.length})`,
+            fieldRef,
+          );
+        }
+
+        // `item.id` invariants (ADR-0016 §4-4). Both are blocking: a missing or
+        // repeated id makes React reuse the wrong item on reorder, and it is the
+        // slot_key an asset usage row is written under.
+        const seenIds = new Set<string>();
+        value.forEach((item, index) => {
+          const itemRef = `${fieldRef}[${index}]`;
+          if (!isRecord(item)) {
+            err(
+              'ARRAY_ITEM_MALFORMED',
+              `field "${fieldKey}" item must be { id, fields } (got ${describeValue(item)})`,
+              itemRef,
+            );
+            return;
+          }
+
+          const id = item.id;
+          const hasId = typeof id === 'string' && id.length > 0;
+          if (!hasId) {
+            err('ARRAY_ITEM_ID_MISSING', `field "${fieldKey}" item is missing a string id`, itemRef);
+          } else if (seenIds.has(id)) {
+            err('ARRAY_ITEM_ID_DUPLICATE', `field "${fieldKey}" item id "${id}" is not unique`, itemRef);
+          } else {
+            seenIds.add(id);
+          }
+
+          if (!isRecord(item.fields)) {
+            err(
+              'ARRAY_ITEM_MALFORMED',
+              `field "${fieldKey}" item must be { id, fields } (fields is ${describeValue(item.fields)})`,
+              `${itemRef}.fields`,
+            );
+            return;
+          }
+
+          // slot_key encoding from ADR-0016 §4-4: the item's own id, never its
+          // index — an index points at a different item after a reorder.
+          const idPath = hasId ? id : `#${index}`;
+          validateValues(
+            descriptor.itemSchema,
+            item.fields,
+            (subKey) => `${fieldRef}[${idPath}].${subKey}`,
+          );
+        });
+        return;
+      }
+    }
+  };
+
+  /**
+   * A schema against the Values stored under it. `pathOf` builds the reference
+   * for one key, so a Block's fields and an array item's fields can use their
+   * own path shapes without this function knowing which it is walking.
+   */
+  function validateValues(
+    schema: FieldsSchema,
+    values: BlockValues,
+    pathOf: (fieldKey: string) => string,
+  ) {
+    for (const [fieldKey, descriptor] of Object.entries(schema)) {
+      const fieldRef = pathOf(fieldKey);
+      const value = values[fieldKey];
+
+      // An absent optional key is a correct state, not a hole: the schema is the
+      // source of truth and the renderer falls back (`?? ''`, ADR-0016 §6). Only
+      // a required key going missing can crash it.
+      if (value === undefined || value === null) {
+        if (descriptor.required) {
+          err('MISSING_REQUIRED_FIELD', `required field "${fieldKey}" is missing`, fieldRef);
+        }
+        continue;
+      }
+
+      validateValue(descriptor, value, fieldKey, fieldRef);
+    }
+
+    // A stored key with no descriptor — data orphaned by a renamed or dropped
+    // field. Harmless to the renderer, which never looks it up, so it stays a
+    // warning and belongs in a build log rather than under a user's input.
+    for (const fieldKey of Object.keys(values)) {
+      if (!schema[fieldKey]) {
+        warn(
+          'UNKNOWN_DATA_FIELD',
+          `field "${fieldKey}" is not defined in component schema`,
+          pathOf(fieldKey),
+        );
+      }
+    }
+  }
+
   // Per-section validation, shared across modes.
   const sectionIds = new Set<string>();
   const validateSection = (section: Section, secRef: string) => {
@@ -172,155 +426,29 @@ export function validateContent(
       }
       sectionIds.add(section.id);
 
-      // Rule 2: section.type must be in templateLibrary (Phase 6)
-      if (options.templateLibrary) {
-        const entry = options.templateLibrary[section.type];
-        if (!entry) {
-          err(
-            'UNKNOWN_COMPONENT_KEY',
-            `componentKey "${section.type}" not found in template library for "${json.templateKey}"`,
-            `${secRef}.type`,
-          );
-        } else {
-          // Rule 2-bis: fields schema validation
-          const validateSchemaRecursively = (
-            schema: SectionFieldsSchema,
-            fields: Record<string, Field>,
-            ref: string,
-          ) => {
-            for (const [fieldKey, fieldSchema] of Object.entries(schema)) {
-              const field = fields[fieldKey];
-              const fieldRef = `${ref}.fields.${fieldKey}`;
+      // Every field rule below needs a schema to check against — after ADR-0016
+      // a Value carries no `type`/`label` of its own, so with no library there is
+      // nothing to compare it to and the fields are simply not validated. The
+      // save paths always pass one (`LibraryAwareSiteContentValidator`, sync,
+      // `template:verify`); only the standalone structural callers do not.
+      if (!options.templateLibrary) return;
 
-              if (!field && fieldSchema.required) {
-                err(
-                  'MISSING_REQUIRED_FIELD',
-                  `required field "${fieldKey}" is missing`,
-                  fieldRef,
-                );
-              } else if (field) {
-                if (field.type !== fieldSchema.type) {
-                  err(
-                    'FIELD_TYPE_MISMATCH',
-                    `field "${fieldKey}" type mismatch: expected ${fieldSchema.type}, got ${field.type}`,
-                    fieldRef,
-                  );
-                }
-
-                if (fieldSchema.type === 'array') {
-                  if (!fieldSchema.itemSchema) {
-                    err(
-                      'MISSING_ITEM_SCHEMA',
-                      `schema for array field "${fieldKey}" is missing itemSchema`,
-                      fieldRef,
-                    );
-                  } else if (field.type === 'array') {
-                    if (!Array.isArray(field.items)) {
-                      err(
-                        'NON_ARRAY_FIELD_VALUE',
-                        `field "${fieldKey}" value must be an array of items`,
-                        fieldRef,
-                      );
-                    } else {
-                      if (fieldSchema.minItems !== undefined && field.items.length < fieldSchema.minItems) {
-                        err(
-                          'ARRAY_ITEMS_BELOW_MIN',
-                          `field "${fieldKey}" must have at least ${fieldSchema.minItems} items`,
-                          fieldRef,
-                        );
-                      }
-                      if (fieldSchema.maxItems !== undefined && field.items.length > fieldSchema.maxItems) {
-                        err(
-                          'ARRAY_ITEMS_ABOVE_MAX',
-                          `field "${fieldKey}" must have no more than ${fieldSchema.maxItems} items`,
-                          fieldRef,
-                        );
-                      }
-
-                      // Recursive validation of items
-                      field.items.forEach((item, index) => {
-                        validateSchemaRecursively(
-                          fieldSchema.itemSchema!,
-                          item,
-                          `${fieldRef}.items[${index}]`,
-                        );
-                      });
-                    }
-                  }
-                }
-              }
-            }
-
-            // Warn on unknown fields
-            for (const fieldKey of Object.keys(fields)) {
-              if (!schema[fieldKey]) {
-                warn(
-                  'UNKNOWN_DATA_FIELD',
-                  `field "${fieldKey}" is not defined in component schema`,
-                  `${ref}.fields.${fieldKey}`,
-                );
-              }
-            }
-          };
-
-          validateSchemaRecursively(entry.meta.fieldsSchema, section.fields, secRef);
-        }
+      // Rule 2: section.type must be in templateLibrary
+      const entry = options.templateLibrary[section.type];
+      if (!entry) {
+        err(
+          'UNKNOWN_COMPONENT_KEY',
+          `componentKey "${section.type}" not found in template library for "${json.templateKey}"`,
+          `${secRef}.type`,
+        );
+        return;
       }
 
-      // Rules 5 & 8: basic fields integrity
-      for (const [fieldKey, field] of Object.entries(section.fields)) {
-        const fieldRef = `${secRef}.fields.${fieldKey}`;
-
-        if (!field.type) {
-          err('MISSING_FIELD_TYPE', `fields field "${fieldKey}" is missing type`, fieldRef);
-        }
-        if (field.label === undefined || field.label === null) {
-          err('MISSING_FIELD_LABEL', `fields field "${fieldKey}" is missing label`, fieldRef);
-        }
-
-        if (field.type === 'array') {
-          // Array fields don't have a 'value' property, they have 'items'
-          if (field.items === undefined || field.items === null) {
-            err('NON_ARRAY_FIELD_VALUE', `array field "${fieldKey}" is missing items`, fieldRef);
-          } else if (!Array.isArray(field.items)) {
-            err('NON_ARRAY_FIELD_VALUE', `array field "${fieldKey}" items must be an array`, fieldRef);
-          }
-        } else {
-          if (field.value === undefined || field.value === null) {
-            err('MISSING_FIELD_VALUE', `fields field "${fieldKey}" is missing value`, fieldRef);
-          } else if (typeof field.value !== 'string') {
-            err(
-              'NON_STRING_FIELD_VALUE',
-              `fields field "${fieldKey}" value must be a string (got ${typeof field.value})`,
-              fieldRef,
-            );
-          }
-
-          // Rule 11: color fields should hold a hex value (warning — ADR-0015).
-          // A non-hex value degrades the token it feeds (ADR-0005), but the
-          // editor's color input is free text, so every intermediate keystroke
-          // ("#", "#a", "#ab") passes through this state. Blocking here turned
-          // an in-progress edit into an unsavable ContentModel.
-          if (field.type === 'color' && typeof field.value === 'string' && !HEX_RE.test(field.value)) {
-            warn(
-              'INVALID_COLOR_FIELD',
-              `color field "${fieldKey}" value "${field.value}" is not a hex color`,
-              fieldRef,
-            );
-          }
-
-          // Rule 10: image/url fields should use https (warn only)
-          if ((field.type === 'image' || field.type === 'url') && typeof field.value === 'string') {
-            if (field.value.startsWith('http://')) {
-              warn(
-                'INSECURE_URL',
-                `fields field "${fieldKey}" uses http:// — prefer https to avoid mixed-content issues`,
-                fieldRef,
-              );
-            }
-          }
-        }
-      }
+      validateValues(
+        entry.meta.fieldsSchema,
+        section.fields,
+        (fieldKey) => `${secRef}.fields.${fieldKey}`,
+      );
   };
 
   // Each nav-projection source (Single section / Multi page) must carry nav:{visible,label}.

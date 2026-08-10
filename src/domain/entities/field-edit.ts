@@ -66,7 +66,9 @@ export function setFieldValue(
 ): void {
   const section = allSections(json).find((s) => s.id === sectionId);
   const field = section?.fields[fieldKey];
-  if (field) writeField(field, value, assetId);
+  // `Block.fields` is loose (ADR-0016 §4-2); this editor path still writes the
+  // legacy `Field` shape until the editor moves to Values.
+  if (field) writeField(field as Field, value, assetId);
 }
 
 /**

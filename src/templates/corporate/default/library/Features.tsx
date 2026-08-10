@@ -1,6 +1,6 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../corporate.module.css';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import { Field, getFieldValue } from '@/domain/entities/template.entity';
 
 const Features: SectionComponent = function Features({ section }: TemplateSectionProps) {
   const { fields } = section;
@@ -8,7 +8,10 @@ const Features: SectionComponent = function Features({ section }: TemplateSectio
   const subtitle = getFieldValue(fields, 'subtitle') || '';
 
   // Filter out non-feature items
-  const features = Object.entries(fields).filter(([key]) => !['title', 'subtitle', 'heading'].includes(key));
+  // Reads each Field's own `label` as copy — the schema/content drift ADR-0016
+  // §4 removes. Cast until this component is converted to a Value schema.
+  const features = (Object.entries(fields) as [string, Field][])
+    .filter(([key]) => !['title', 'subtitle', 'heading'].includes(key));
 
   return (
     <div className={styles.section}>

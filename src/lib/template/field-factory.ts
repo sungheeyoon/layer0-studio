@@ -24,8 +24,10 @@ export function makeEmptyItem(itemSchema: SectionFieldsSchema): FieldItem {
       item[key] = {
         type: 'select',
         label: schema.label,
-        value: schema.options?.[0] || '',
-        options: schema.options || [],
+        value: schema.options[0] ?? '',
+        // Copied, not aliased: the schema's `options` is a readonly literal
+        // tuple (declared `as const`) and this Field is editor-mutable state.
+        options: [...schema.options],
       };
     } else {
       item[key] = {
