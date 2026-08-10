@@ -3,6 +3,7 @@ import { ContentModel } from '../../entities/template.entity';
 import { UserSite, validateDomainSlug } from '../../entities/user-site.entity';
 import { TemplateError } from '../../errors/template.error';
 import { SiteContentValidator } from '../ports/site-content-validator.port';
+import { AssetUsageCollector } from '../ports/asset-usage-collector.port';
 
 /**
  * The single guarded door for owner-initiated Site mutations (#58).
@@ -22,6 +23,7 @@ export class SiteWriteUseCase {
   constructor(
     private userSiteRepo: IUserSiteRepository,
     private validator: SiteContentValidator,
+    private assetUsageCollector: AssetUsageCollector,
   ) {}
 
   /** Load a Site and assert the caller owns it. Single source of the ownership check. */
@@ -36,7 +38,15 @@ export class SiteWriteUseCase {
     return site;
   }
 
-  /** Replace the Site's content. */
+  /**
+   * Replace the Site's content.
+   *
+   * Asset usages are collected *here*, next to validation, rather than inside
+   * the repository. Both answers come from reading the content against its
+   * Template library, and only this layer is allowed to know the library exists
+   * (ADR-0008); a repository that loaded it would put the Template registry on
+   * every read path that happens to share the module. See ADR-0016 §5.
+   */
   async saveContent(
     siteId: string,
     userId: string,
@@ -45,7 +55,8 @@ export class SiteWriteUseCase {
   ): Promise<UserSite> {
     await this.loadOwned(siteId, userId);
     await this.validate(content);
-    return this.userSiteRepo.updateContent(siteId, content, expectedUpdatedAt);
+    const usages = await this.assetUsageCollector.collect(content);
+    return this.userSiteRepo.updateContent(siteId, content, usages, expectedUpdatedAt);
   }
 
   /** Rename the Site. */

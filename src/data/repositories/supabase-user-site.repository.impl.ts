@@ -8,7 +8,7 @@ import {
 import { ContentModel } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { isNotFoundError } from '@/data/errors/supabase-error.adapter';
-import { collectAssetUsages } from '@/lib/template/asset-usages';
+import { AssetUsage } from '@/domain/usecases/ports/asset-usage-collector.port';
 import { UserSiteRow } from '@/types/database';
 
 export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
@@ -137,9 +137,16 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     return this.mapRow(data);
   }
 
-  async updateContent(id: string, content: ContentModel, expectedUpdatedAt: string): Promise<UserSite> {
-    // Extract new asset usages (Single / Multi page / Multi shared slot_keys).
-    const newUsages = collectAssetUsages(content);
+  async updateContent(
+    id: string,
+    content: ContentModel,
+    usages: AssetUsage[],
+    expectedUpdatedAt: string,
+  ): Promise<UserSite> {
+    // The usages arrive already collected — see the port doc on
+    // IUserSiteRepository.updateContent. All that happens here is the mapping
+    // into the RPC's own payload shape, which is this layer's job.
+    const newUsages = usages.map((u) => ({ asset_id: u.assetId, slot_key: u.slotKey }));
 
     // Call Postgres RPC — atomic lock, usage diff, content update
     const { data: rpcResult, error: rpcError } = await this.supabase.rpc('save_site_template_with_lock', {
