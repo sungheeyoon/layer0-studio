@@ -3,8 +3,8 @@
  *
  * Thin CLI wrapper around `validateAndCapture` (scripts/lib/validate-and-capture.ts).
  * This is the single command the `new-template` Skill runs in its verify loop:
- * it bundles the six checks (tsc → eslint → validate-json → validate-files →
- * schema↔jsx consistency → capture) — including `checkFieldsSchemaJsxConsistency`,
+ * it bundles the seven checks (tsc → eslint → validate-json → validate-files →
+ * schema↔jsx consistency → capture → thumbnail-path) — including `checkFieldsSchemaJsxConsistency`,
  * which `pnpm test` / `pnpm lint` do NOT cover.
  *
  * Usage:

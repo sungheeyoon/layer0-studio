@@ -30,7 +30,7 @@ pnpm template:verify    # Full authoring gate for one template (tsc/eslint/valid
 pnpm template:verify:ci # Blocking CI gate across every template (skips capture)
 pnpm template:sync      # Reflect code presets → DB (dry-run by default; --apply to commit)
 pnpm template:capture   # Playwright thumbnail capture
-pnpm template:scaffold  # Scaffold an empty template directory skeleton
+pnpm template:scaffold <category>/<leaf>  # Scaffold a Single template skeleton that already passes the gate
 pnpm template:delete    # Remove a template's source + DB/storage residue
 pnpm template:image     # Fetch/host an image for a template preset
 
@@ -127,6 +127,8 @@ Two conventions, neither enforced by tooling. Both come from a bug where deletin
 - New Templates are authored with the `new-template` skill (see `.claude/skills/new-template/`), which drives the `template:verify` gate. There is no `template:generate` command.
 
 **`ContentModel`** (`src/domain/entities/template.entity.ts`) is the core data model, flowing DB → editor → renderer. Section `type` matches a `componentKey` in the Template's library; **array order = render order** (no `order` field).
+
+**Fields are schema-first** ([ADR-0016](./docs/adr/0016-block-rename-and-field-value-split.md) §4). A component declares `fieldsSchema` `as const satisfies FieldsSchema` and *derives* its Content type with `ValuesOf<typeof schema>` — never hand-written, so drift is structurally impossible. `section.fields` holds bare **Values** (`'MONO'`, `42`, `{ url }`, `{ id, fields }[]`), not `{ type, label, value }` wrappers; the old `Field` union and `getFieldValue` are deleted. The renderer casts once at the boundary and does not re-validate, which is why **schema changes to a deployed Template must be additive** — see `docs/TEMPLATE_SYSTEM.md` §6.4 for the allowed/destructive table. Note ADR-0016 §2 (the `Section`→`Block` rename) and §3 (`nav`→`menu`) are **not implemented**; the code is still `Section`/`sections`/`shared`/`nav`.
 
 **Two axes of copy/share — don't conflate them:**
 - *Template ↔ Template (code):* nothing is shared. Each Template owns its copies.
