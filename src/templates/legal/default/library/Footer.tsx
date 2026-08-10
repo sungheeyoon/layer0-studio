@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { ShieldCheckIcon, DocumentTextIcon, ChatIcon, PlayCircleIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -11,8 +11,8 @@ const footerSchema = {
 
 type FooterContent = ValuesOf<typeof footerSchema>;
 
-const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const content = section.fields as FooterContent;
+const Footer: BlockComponent = function Footer({ block }: TemplateBlockProps) {
+  const content = block.fields as FooterContent;
   const brandName = content.brandName || '하람 법률세무사무소';
   const copyright = content.copyright || '© 2024 하람 법률세무사무소. All rights reserved.';
   const address = content.address || '';

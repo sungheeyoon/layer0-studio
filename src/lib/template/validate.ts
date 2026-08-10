@@ -1,6 +1,6 @@
 import {
   ContentModel,
-  Section,
+  Block,
   FieldDescriptor,
   FieldsSchema,
 } from '@/domain/entities/template.entity';
@@ -107,8 +107,8 @@ export function validateContent(
 
   // Rule 6 (a): mode-specific top-level shape must be present
   if (json.mode === 'single') {
-    if (!Array.isArray(json.sections) || json.sections.length === 0) {
-      err('SECTIONS_EMPTY', 'sections array must contain at least one section', 'sections');
+    if (!Array.isArray(json.blocks) || json.blocks.length === 0) {
+      err('BLOCKS_EMPTY', 'blocks array must contain at least one block', 'blocks');
       return { errors, warnings };
     }
   } else if (json.mode === 'multi') {
@@ -450,14 +450,13 @@ export function validateContent(
     }
   }
 
-  // Per-section validation, shared across modes.
-  const sectionIds = new Set<string>();
-  const validateSection = (section: Section, secRef: string) => {
-      // Rule 4: section.id must be unique across the whole template
-      if (sectionIds.has(section.id)) {
-        err('DUPLICATE_SECTION_ID', `section id "${section.id}" is not unique`, secRef);
+  // Per-block validation, shared across modes.
+  const blockIds = new Set<string>();
+  const validateBlock = (block: Block, blockRef: string) => {
+      if (blockIds.has(block.id)) {
+        err('DUPLICATE_BLOCK_ID', `block id "${block.id}" is not unique`, blockRef);
       }
-      sectionIds.add(section.id);
+      blockIds.add(block.id);
 
       // Every field rule below needs a schema to check against — after ADR-0016
       // a Value carries no `type`/`label` of its own, so with no library there is
@@ -467,45 +466,52 @@ export function validateContent(
       if (!options.templateLibrary) return;
 
       // Rule 2: section.type must be in templateLibrary
-      const entry = options.templateLibrary[section.type];
+      const entry = options.templateLibrary[block.type];
       if (!entry) {
         err(
           'UNKNOWN_COMPONENT_KEY',
-          `componentKey "${section.type}" not found in template library for "${json.templateKey}"`,
-          `${secRef}.type`,
+          `componentKey "${block.type}" not found in template library for "${json.templateKey}"`,
+          `${blockRef}.type`,
         );
         return;
       }
 
       validateValues(
         entry.meta.fieldsSchema,
-        section.fields,
-        (fieldKey) => `${secRef}.fields.${fieldKey}`,
+        block.fields,
+        (fieldKey) => `${blockRef}.fields.${fieldKey}`,
       );
   };
 
-  // Each nav-projection source (Single section / Multi page) must carry nav:{visible,label}.
-  const validateNavMeta = (
-    x: { nav?: { visible?: unknown; label?: unknown } },
+  const validateMenu = (
+    menu: unknown,
     ref: string,
+    single: boolean,
   ) => {
-    if (!x.nav || typeof x.nav !== 'object') {
-      err('MISSING_NAV', 'nav:{visible,label} is required', `${ref}.nav`);
+    if (menu === undefined) return;
+    if (!isRecord(menu)) {
+      err('INVALID_MENU', 'menu must be an object when present', `${ref}.menu`);
       return;
     }
-    if (typeof x.nav.visible !== 'boolean') {
-      err('INVALID_NAV_VISIBLE', 'nav.visible must be a boolean', `${ref}.nav.visible`);
+    if (typeof menu.label !== 'string') {
+      err('INVALID_MENU_LABEL', 'menu.label must be a string', `${ref}.menu.label`);
     }
-    if (typeof x.nav.label !== 'string') {
-      err('INVALID_NAV_LABEL', 'nav.label must be a string', `${ref}.nav.label`);
+    if (single && 'placement' in menu) {
+      err(
+        'SINGLE_MENU_PLACEMENT_UNSUPPORTED',
+        'Single block menu does not support placement',
+        `${ref}.menu.placement`,
+      );
+    } else if (!single && menu.placement !== undefined && menu.placement !== 'header' && menu.placement !== 'footer') {
+      err('INVALID_MENU_PLACEMENT', 'menu.placement must be header or footer', `${ref}.menu.placement`);
     }
   };
 
   if (json.mode === 'single') {
-    json.sections.forEach((section) => {
-      const secRef = `sections[id=${section.id}]`;
-      validateSection(section, secRef);
-      validateNavMeta(section, secRef);
+    json.blocks.forEach((block) => {
+      const blockRef = `blocks[id=${block.id}]`;
+      validateBlock(block, blockRef);
+      validateMenu(block.menu, blockRef, true);
     });
   } else {
     const pageSlugs = new Set<string>();
@@ -517,16 +523,19 @@ export function validateContent(
         err('DUPLICATE_PAGE_SLUG', `page slug "${page.slug}" is not unique`, pageRef);
       }
       pageSlugs.add(page.slug);
-      validateNavMeta(page, pageRef);
-      page.sections.forEach((section) =>
-        validateSection(section, `${pageRef}.sections[id=${section.id}]`),
+      if (typeof page.name !== 'string' || !page.name) {
+        err('MISSING_PAGE_NAME', 'page name is required', `${pageRef}.name`);
+      }
+      validateMenu(page.menu, pageRef, false);
+      page.blocks.forEach((block) =>
+        validateBlock(block, `${pageRef}.blocks[id=${block.id}]`),
       );
     });
-    json.shared.header.forEach((section) =>
-      validateSection(section, `shared.header.sections[id=${section.id}]`),
+    json.chrome.header.forEach((block) =>
+      validateBlock(block, `chrome.header.blocks[id=${block.id}]`),
     );
-    json.shared.footer.forEach((section) =>
-      validateSection(section, `shared.footer.sections[id=${section.id}]`),
+    json.chrome.footer.forEach((block) =>
+      validateBlock(block, `chrome.footer.blocks[id=${block.id}]`),
     );
   }
 

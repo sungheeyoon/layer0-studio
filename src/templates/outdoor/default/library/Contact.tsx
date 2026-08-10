@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -23,9 +23,9 @@ const contactSchema = {
 
 type ContactContent = ValuesOf<typeof contactSchema>;
 
-const Contact: SectionComponent = function Contact(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as ContactContent;
+const Contact: BlockComponent = function Contact(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as ContactContent;
   const heading = content.heading || '문의하기';
   const intro = content.intro;
   const hours = content.hours;

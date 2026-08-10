@@ -11,7 +11,7 @@ export const defaultContent: ContentModel = {
   mode: 'multi',
   templateKey: 'outdoor-default',
   globalStyles: defaultGlobalStyles,
-  shared: { header: [], footer: [] },
+  chrome: { header: [], footer: [] },
   pages: [],
 };
 

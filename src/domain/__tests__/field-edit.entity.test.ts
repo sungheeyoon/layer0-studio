@@ -33,9 +33,9 @@ function makeSingle(): SingleContent {
       primaryColor: '#000', secondaryColor: '#fff', backgroundColor: '#fff',
       fontFamily: 'sans-serif', fontSize: '16px', layout: 'default',
     },
-    sections: [
+    blocks: [
       {
-        id: 'hero', type: 'hero', visible: true, nav: { visible: false, label: 'Hero' },
+        id: 'hero', type: 'hero', visible: true,
         fields: {
           title: 'Hello',
           logo: { url: 'a.png', assetId: 'asset-a' } satisfies ImageValue,
@@ -54,14 +54,14 @@ function makeMulti(): MultiContent {
       primaryColor: '#000', secondaryColor: '#fff', backgroundColor: '#fff',
       fontFamily: 'sans-serif', fontSize: '16px', layout: 'default',
     },
-    shared: {
+    chrome: {
       header: [{ id: 'nav', type: 'nav', visible: true, fields: { brand: 'Acme' } }],
       footer: [],
     },
     pages: [
       {
-        id: 'home', slug: '', visible: true, nav: { visible: true, label: 'Home' },
-        sections: [{ id: 'body', type: 'hero', visible: true, fields: { title: 'Home' } }],
+        id: 'home', slug: '', visible: true, name: 'Home', menu: { label: 'Home' },
+        blocks: [{ id: 'body', type: 'hero', visible: true, fields: { title: 'Home' } }],
       },
     ],
   };
@@ -73,32 +73,32 @@ describe('setFieldValue', () => {
   it('writes a Value on a Single section', () => {
     const json = makeSingle();
     setFieldValue(json, 'hero', 'title', 'Changed');
-    expect(json.sections[0].fields.title).toBe('Changed');
+    expect(json.blocks[0].fields.title).toBe('Changed');
   });
 
   it('writes a Value on a Multi shared section', () => {
     const json = makeMulti();
     setFieldValue(json, 'nav', 'brand', 'NewBrand');
-    expect(json.shared.header[0].fields.brand).toBe('NewBrand');
+    expect(json.chrome.header[0].fields.brand).toBe('NewBrand');
   });
 
   it('writes a Value on a Multi page section', () => {
     const json = makeMulti();
     setFieldValue(json, 'body', 'title', 'NewTitle');
-    expect(json.pages[0].sections[0].fields.title).toBe('NewTitle');
+    expect(json.pages[0].blocks[0].fields.title).toBe('NewTitle');
   });
 
   it('replaces an image Value whole — url and assetId travel together', () => {
     const json = makeSingle();
     setFieldValue(json, 'hero', 'logo', { url: 'b.png', assetId: 'asset-b' });
-    expect(json.sections[0].fields.logo).toEqual({ url: 'b.png', assetId: 'asset-b' });
+    expect(json.blocks[0].fields.logo).toEqual({ url: 'b.png', assetId: 'asset-b' });
   });
 
   it('replaces array items whole', () => {
     const json = makeSingle();
     const next = [item('itm-b', { name: 'Tea' })];
     setFieldValue(json, 'hero', 'menu', next);
-    expect(json.sections[0].fields.menu).toEqual(next);
+    expect(json.blocks[0].fields.menu).toEqual(next);
   });
 
   // The pre-ADR-0016 version skipped a key that was not already present, because
@@ -108,13 +108,13 @@ describe('setFieldValue', () => {
   it('creates a key that is not yet stored', () => {
     const json = makeSingle();
     setFieldValue(json, 'hero', 'eyebrow', 'New');
-    expect(json.sections[0].fields.eyebrow).toBe('New');
+    expect(json.blocks[0].fields.eyebrow).toBe('New');
   });
 
   it('is a no-op for an unknown section', () => {
     const json = makeSingle();
     setFieldValue(json, 'missing', 'title', 'X');
-    expect(json.sections[0].fields.title).toBe('Hello');
+    expect(json.blocks[0].fields.title).toBe('Hello');
   });
 });
 

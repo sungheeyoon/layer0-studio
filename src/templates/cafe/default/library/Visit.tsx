@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { PhoneIcon, ArrowUpRightIcon, MapPointIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -24,8 +24,8 @@ const visitSchema = {
 
 type VisitContent = ValuesOf<typeof visitSchema>;
 
-const Visit: SectionComponent = function Visit({ section }: TemplateSectionProps) {
-  const content = section.fields as VisitContent;
+const Visit: BlockComponent = function Visit({ block }: TemplateBlockProps) {
+  const content = block.fields as VisitContent;
   const bgImage = content.backgroundImage?.url || '';
   const label = content.eyebrow || '방문 안내';
   const title = content.title || '언제든\n환영합니다';

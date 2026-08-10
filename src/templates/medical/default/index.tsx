@@ -12,7 +12,7 @@ export const defaultContent: ContentModel = {
   mode: 'single',
   templateKey: 'medical-default',
   globalStyles: defaultGlobalStyles,
-  sections: [], // Empty skeleton; presets provide the sections
+  blocks: [], // Empty skeleton; presets provide the sections
 };
 
 export default function MedicalDefaultTemplate(props: TemplateRendererProps) {

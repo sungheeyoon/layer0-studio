@@ -13,15 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "nav-001",
         "type": "nav",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "네비게이션"
-        },
         "fields": {
           "brandName": "APEX",
           "ctaText": "무료 체험"
@@ -31,10 +27,6 @@ const preset: TemplatePreset = {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "Seoul Gangnam — Since 2010"
-        },
         "fields": {
           "eyebrow": "Seoul Gangnam — Since 2010",
           "title1": "한계를",
@@ -62,10 +54,6 @@ const preset: TemplatePreset = {
         "id": "marquee-001",
         "type": "marquee",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "마퀴"
-        },
         "fields": {
           "item1": "퍼스널 트레이닝",
           "item2": "그룹 클래스",
@@ -81,10 +69,7 @@ const preset: TemplatePreset = {
         "id": "programs-001",
         "type": "programs",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "프로그램"
-        },
+        "menu": { "label": "프로그램" },
         "fields": {
           "eyebrow": "프로그램",
           "title": "당신의 목표에\n맞는 프로그램",
@@ -110,10 +95,7 @@ const preset: TemplatePreset = {
         "id": "facility-001",
         "type": "facility",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "시설"
-        },
+        "menu": { "label": "시설" },
         "fields": {
           "eyebrow": "시설 안내",
           "title": "장비가\n결과를\n만듭니다",
@@ -139,10 +121,7 @@ const preset: TemplatePreset = {
         "id": "trainers-001",
         "type": "trainers",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "트레이너"
-        },
+        "menu": { "label": "트레이너" },
         "fields": {
           "eyebrow": "트레이너",
           "title": "당신 옆에서\n함께 싸웁니다",
@@ -174,10 +153,7 @@ const preset: TemplatePreset = {
         "id": "testimonials-001",
         "type": "testimonials",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "후기"
-        },
+        "menu": { "label": "후기" },
         "fields": {
           "eyebrow": "멤버 후기",
           "title": "결과가\n모든 걸\n말합니다",
@@ -198,10 +174,6 @@ const preset: TemplatePreset = {
         "id": "join-001",
         "type": "join",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "무료 체험"
-        },
         "fields": {
           "eyebrow": "무료 체험",
           "title1": "지금 시작하면",
@@ -217,10 +189,6 @@ const preset: TemplatePreset = {
         "id": "footer-001",
         "type": "footer",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "푸터"
-        },
         "fields": {
           "brandName": "APEX",
           "brandSubtext": "Fitness",

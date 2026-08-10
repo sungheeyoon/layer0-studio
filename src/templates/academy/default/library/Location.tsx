@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 오시는 길 — address + transit info beside a static map image. */
@@ -13,8 +13,8 @@ const locationSchema = {
 
 type LocationContent = ValuesOf<typeof locationSchema>;
 
-const Location: SectionComponent = function Location({ section }: TemplateSectionProps) {
-  const content = section.fields as LocationContent;
+const Location: BlockComponent = function Location({ block }: TemplateBlockProps) {
+  const content = block.fields as LocationContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const address = content.address || '';

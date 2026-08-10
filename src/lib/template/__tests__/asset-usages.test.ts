@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   SingleContent,
   MultiContent,
-  SingleSection,
+  SingleBlock,
   FieldsSchema,
 } from '@/domain/entities/template.entity';
-import { TemplateLibrary, TemplateModule, SectionComponent } from '@/templates/types';
+import { TemplateLibrary, TemplateModule, BlockComponent } from '@/templates/types';
 
 import { collectAssetUsages, ContentAssetUsageCollector } from '../asset-usages';
 import { loadTemplate } from '@/templates/registry';
@@ -73,7 +73,7 @@ function libraryOf(schemas: Record<string, FieldsSchema>): TemplateLibrary {
     Object.entries(schemas).map(([componentKey, fieldsSchema]) => [
       componentKey,
       {
-        Component: (() => null) as unknown as SectionComponent,
+        Component: (() => null) as unknown as BlockComponent,
         meta: { componentKey, category: 'test', label: componentKey, fieldsSchema },
       },
     ]),
@@ -86,21 +86,21 @@ const testLibrary = libraryOf({
   nested: nestedSchema,
 });
 
-/** A Value-shaped Block. Returns a SingleSection, which is also assignable where a base Section is expected. */
+/** A Value-shaped Block. Returns a SingleBlock, which is also assignable where a base Block is expected. */
 function block(
   id: string,
   type: string,
   fields: Record<string, unknown>,
-): SingleSection {
-  return { id, type, visible: true, nav: { visible: false, label: '' }, fields };
+): SingleBlock {
+  return { id, type, visible: true, fields };
 }
 
-function imageBlock(id: string, key: string, assetId: string): SingleSection {
+function imageBlock(id: string, key: string, assetId: string): SingleBlock {
   return block(id, 'hero', { [key]: { url: 'https://cdn/x.jpg', assetId } });
 }
 
-function single(sections: SingleSection[]): SingleContent {
-  return { mode: 'single', templateKey: 'cafe-default', globalStyles, sections };
+function single(blocks: SingleBlock[]): SingleContent {
+  return { mode: 'single', templateKey: 'cafe-default', globalStyles, blocks };
 }
 
 // ── slotKey namespaces ───────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ describe('collectAssetUsages — slotKey namespaces (ADR-0007 §F)', () => {
       mode: 'multi',
       templateKey: 'corporate-multipage',
       globalStyles,
-      shared: {
+      chrome: {
         header: [imageBlock('nav-1', 'logo', 'asset-h')],
         footer: [imageBlock('foot-1', 'badge', 'asset-f')],
       },
@@ -126,8 +126,9 @@ describe('collectAssetUsages — slotKey namespaces (ADR-0007 §F)', () => {
           id: 'page-home',
           slug: 'home',
           visible: true,
-          nav: { visible: true, label: 'Home' },
-          sections: [imageBlock('hero-1', 'bg', 'asset-p')],
+          name: 'Home',
+          menu: { label: 'Home' },
+          blocks: [imageBlock('hero-1', 'bg', 'asset-p')],
         },
       ],
     };
@@ -135,8 +136,8 @@ describe('collectAssetUsages — slotKey namespaces (ADR-0007 §F)', () => {
     const usages = collectAssetUsages(multi, testLibrary);
 
     // Shared header/footer are traversed (belong to no page) — not mis-swept.
-    expect(usages).toContainEqual({ assetId: 'asset-h', slotKey: 'shared.header.nav-1.logo' });
-    expect(usages).toContainEqual({ assetId: 'asset-f', slotKey: 'shared.footer.foot-1.badge' });
+    expect(usages).toContainEqual({ assetId: 'asset-h', slotKey: 'chrome.header.nav-1.logo' });
+    expect(usages).toContainEqual({ assetId: 'asset-f', slotKey: 'chrome.footer.foot-1.badge' });
     // Page blocks keyed by page id.
     expect(usages).toContainEqual({ assetId: 'asset-p', slotKey: 'page-home.hero-1.bg' });
     expect(usages).toHaveLength(3);
@@ -199,7 +200,7 @@ describe('collectAssetUsages — arrays (#126 regression contract)', () => {
       mode: 'multi',
       templateKey: 'corporate-multipage',
       globalStyles,
-      shared: {
+      chrome: {
         header: [galleryBlock('head-1', [{ id: 'i1', assetId: 'asset-h' }])],
         footer: [],
       },
@@ -208,8 +209,9 @@ describe('collectAssetUsages — arrays (#126 regression contract)', () => {
           id: 'page-home',
           slug: 'home',
           visible: true,
-          nav: { visible: true, label: 'Home' },
-          sections: [galleryBlock('gal-1', [{ id: 'i2', assetId: 'asset-p' }])],
+          name: 'Home',
+          menu: { label: 'Home' },
+          blocks: [galleryBlock('gal-1', [{ id: 'i2', assetId: 'asset-p' }])],
         },
       ],
     };
@@ -217,7 +219,7 @@ describe('collectAssetUsages — arrays (#126 regression contract)', () => {
     const usages = collectAssetUsages(multi, testLibrary);
     expect(usages).toContainEqual({
       assetId: 'asset-h',
-      slotKey: 'shared.header.head-1.photos[i1].image',
+      slotKey: 'chrome.header.head-1.photos[i1].image',
     });
     expect(usages).toContainEqual({
       assetId: 'asset-p',

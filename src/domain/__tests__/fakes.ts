@@ -24,12 +24,11 @@ export function makeContent(overrides: Partial<SingleContent> = {}): ContentMode
       fontSize: '16px',
       layout: 'default',
     },
-    sections: [
+    blocks: [
       {
         id: 'section-1',
         type: 'hero',
         visible: true,
-        nav: { visible: false, label: 'Hero' },
         fields: {
           // A Value, not a `{ type, label, value }` wrapper (ADR-0016 §4-2).
           title: 'Hello',

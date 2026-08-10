@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { ArrowRightIcon, LeafIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -25,8 +25,8 @@ const heroImageSchema = {
 
 type HeroImageContent = ValuesOf<typeof heroImageSchema>;
 
-const HeroImage: SectionComponent = function HeroImage({ section }: TemplateSectionProps) {
-  const content = section.fields as HeroImageContent;
+const HeroImage: BlockComponent = function HeroImage({ block }: TemplateBlockProps) {
+  const content = block.fields as HeroImageContent;
   const label = content.eyebrow || 'Seoul Seongsu — Specialty Coffee';
   const title1 = content.title1 || '천천히,';
   const titleAccent = content.titleAccent || '제대로';

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { LeafIcon, FireIcon, HandHeartIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -21,8 +21,8 @@ const storySchema = {
 
 type StoryContent = ValuesOf<typeof storySchema>;
 
-const Story: SectionComponent = function Story({ section }: TemplateSectionProps) {
-  const content = section.fields as StoryContent;
+const Story: BlockComponent = function Story({ block }: TemplateBlockProps) {
+  const content = block.fields as StoryContent;
   const label = content.eyebrow || '카페 소개';
   const title1 = content.title1 || '커피 한 잔에는';
   const titleAccent = content.titleAccent || '이야기가';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -25,9 +25,9 @@ const journalGridSchema = {
 
 type JournalGridContent = ValuesOf<typeof journalGridSchema>;
 
-const JournalGrid: SectionComponent = function JournalGrid(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as JournalGridContent;
+const JournalGrid: BlockComponent = function JournalGrid(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as JournalGridContent;
   const eyebrow = content.eyebrow;
   const heading = content.heading;
   const items = content.items ?? [];

@@ -13,15 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "히어로"
-        },
         "fields": {
           "title": "We Build Digital Experiences",
           "subtitle": "Strategy · Design · Technology",
@@ -34,10 +30,6 @@ const preset: TemplatePreset = {
         "id": "about-001",
         "type": "about",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "about"
-        },
         "fields": {
           "title": "Our Philosophy",
           "subtitle": "Crafting the future",
@@ -49,10 +41,6 @@ const preset: TemplatePreset = {
         "id": "features-001",
         "type": "features",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "features"
-        },
         "fields": {
           "title": "Core Capabilities",
           "subtitle": "What we do best",
@@ -66,10 +54,6 @@ const preset: TemplatePreset = {
         "id": "contact-001",
         "type": "contact",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "contact"
-        },
         "fields": {
           "title": "Get in Touch",
           "email": "hello@company.com",
@@ -81,10 +65,6 @@ const preset: TemplatePreset = {
         "id": "footer-001",
         "type": "footer",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "푸터"
-        },
         "fields": {
           "companyName": "ACME Corp",
           "copyright": "© 2026 ACME Corp. All rights reserved."

@@ -60,8 +60,8 @@ function legacySingle(fields: Record<string, unknown>, type = 'hero') {
     mode: 'single',
     templateKey: 'cafe-default',
     globalStyles,
-    sections: [
-      { id: 'sec-1', type, visible: true, nav: { visible: false, label: '' }, fields },
+    blocks: [
+      { id: 'sec-1', type, visible: true, menu: { label: '' }, fields },
     ],
   };
 }
@@ -70,7 +70,7 @@ const opts = { schemaFor: (t: string) => schemas[t], newId: seqIds() };
 
 /** The first Block's `fields`, without repeating the cast at every call site. */
 function blockFields(content: unknown, index = 0): Record<string, unknown> {
-  return (content as unknown as { sections: Array<{ fields: Record<string, unknown> }> }).sections[index]
+  return (content as unknown as { blocks: Array<{ fields: Record<string, unknown> }> }).blocks[index]
     .fields;
 }
 
@@ -193,7 +193,7 @@ describe('migrateContentToValues — Multi mode', () => {
       mode: 'multi',
       templateKey: 'corporate-multipage',
       globalStyles,
-      shared: {
+      chrome: {
         header: [{ id: 'nav-1', type: 'hero', visible: true, fields: { title: txt('헤더') } }],
         footer: [{ id: 'foot-1', type: 'hero', visible: true, fields: { title: txt('푸터') } }],
       },
@@ -202,20 +202,20 @@ describe('migrateContentToValues — Multi mode', () => {
           id: 'page-home',
           slug: 'home',
           visible: true,
-          nav: { visible: true, label: 'Home' },
-          sections: [{ id: 'hero-1', type: 'hero', visible: true, fields: { title: txt('본문') } }],
+          menu: { label: 'Home' },
+          blocks: [{ id: 'hero-1', type: 'hero', visible: true, fields: { title: txt('본문') } }],
         },
       ],
     };
 
     const r = migrateContentToValues(legacyMulti, opts);
     const c = r.content as unknown as {
-      shared: { header: Array<{ fields: unknown }>; footer: Array<{ fields: unknown }> };
-      pages: Array<{ sections: Array<{ fields: unknown }> }>;
+      chrome: { header: Array<{ fields: unknown }>; footer: Array<{ fields: unknown }> };
+      pages: Array<{ blocks: Array<{ fields: unknown }> }>;
     };
-    expect(c.shared.header[0].fields).toEqual({ title: '헤더' });
-    expect(c.shared.footer[0].fields).toEqual({ title: '푸터' });
-    expect(c.pages[0].sections[0].fields).toEqual({ title: '본문' });
+    expect(c.chrome.header[0].fields).toEqual({ title: '헤더' });
+    expect(c.chrome.footer[0].fields).toEqual({ title: '푸터' });
+    expect(c.pages[0].blocks[0].fields).toEqual({ title: '본문' });
   });
 });
 

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 시간표 · 수강료 — a simple pricing/schedule table. */
@@ -21,8 +21,8 @@ const tuitionSchema = {
 
 type TuitionContent = ValuesOf<typeof tuitionSchema>;
 
-const Tuition: SectionComponent = function Tuition({ section }: TemplateSectionProps) {
-  const content = section.fields as TuitionContent;
+const Tuition: BlockComponent = function Tuition({ block }: TemplateBlockProps) {
+  const content = block.fields as TuitionContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const note = content.note || '';

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { CupIcon, DiplomaIcon, ClockIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -32,8 +32,8 @@ const trainersSchema = {
 
 type TrainersContent = ValuesOf<typeof trainersSchema>;
 
-const Trainers: SectionComponent = function Trainers({ section }: TemplateSectionProps) {
-  const content = section.fields as TrainersContent;
+const Trainers: BlockComponent = function Trainers({ block }: TemplateBlockProps) {
+  const content = block.fields as TrainersContent;
   const label = content.eyebrow || '트레이너';
   const title = content.title || '당신 옆에서\n함께 싸웁니다';
   const description = content.description || '';

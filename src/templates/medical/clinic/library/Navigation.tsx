@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
+import { TemplateBlockProps, BlockComponent, NavBlockProps } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -17,10 +17,10 @@ const navigationSchema = {
 
 type NavigationContent = ValuesOf<typeof navigationSchema>;
 
-const Navigation: SectionComponent = function Navigation(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as NavigationContent;
-  const { navItems } = props as NavSectionProps;
+const Navigation: BlockComponent = function Navigation(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as NavigationContent;
+  const { navItems } = props as NavBlockProps;
   const brandName = content.brandName || '온유의원';
   const ctaLabel = content.ctaLabel;
   const ctaHref = content.ctaHref || navItems[navItems.length - 1]?.href || '/';

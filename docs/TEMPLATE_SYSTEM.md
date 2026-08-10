@@ -1,11 +1,11 @@
 # Template System — Layer0 Studio
 
-_대상: Template / Section component 를 추가·수정하거나 저작 · sync 파이프라인을 손볼 개발자_
-_최종 갱신: 2026-08-10 (ADR-0016 Field/Value 분리 — schema-first 저작으로 전면 개정, #138)_
+_대상: Template / Block component 를 추가·수정하거나 저작 · sync 파이프라인을 손볼 개발자_
+_최종 갱신: 2026-08-10 (ADR-0016 §2–§5 통합 구현, #130)_
 
-> 본 문서는 `CONTEXT.md` 의 도메인 어휘 (Template / Category / Section / Preset / Sync / Design Tokens / Global Styles) 와 `docs/adr/` 를 기반으로 한다. 특히 [ADR-0001](./adr/0001-beta-model-template-isolation.md)(isolation) · [ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)(코드가 진실) · [ADR-0005](./adr/0005-design-tokens-gradual-migration.md)(토큰 점진 전환) · [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)(Single/Multi) · [ADR-0012](./adr/0012-template-publishing-pipeline.md)(등록·공개 파이프라인) · [ADR-0016](./adr/0016-block-rename-and-field-value-split.md)(schema-first Field/Value 분리 — **§4·§5 만 구현됨**, §2.1 참고) 를 먼저 일별하면 본 문서가 자연스럽게 읽힌다.
+> 본 문서는 `CONTEXT.md` 의 도메인 어휘 (Template / Category / Block / Preset / Sync / Design Tokens / Global Styles) 와 `docs/adr/` 를 기반으로 한다. 특히 [ADR-0001](./adr/0001-beta-model-template-isolation.md)(isolation) · [ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)(코드가 진실) · [ADR-0005](./adr/0005-design-tokens-gradual-migration.md)(토큰 점진 전환) · [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md)(Single/Multi) · [ADR-0012](./adr/0012-template-publishing-pipeline.md)(등록·공개 파이프라인) · [ADR-0016](./adr/0016-block-rename-and-field-value-split.md)(schema-first Field/Value 분리 — **§4·§5 만 구현됨**, §2.1 참고) 를 먼저 일별하면 본 문서가 자연스럽게 읽힌다.
 
-이 문서 한 장만 읽으면 **(1) 시스템이 어떻게 굴러가는지**, **(2) 새 Template / Section 을 어떻게 추가하는지**, **(3) 어디를 만지면 무엇이 깨지는지** 모두 파악할 수 있도록 만든다. 추가 컨텍스트는 모두 코드에 있다 — 이 문서가 가리키는 위치만 따라가면 된다.
+이 문서 한 장만 읽으면 **(1) 시스템이 어떻게 굴러가는지**, **(2) 새 Template / Block 을 어떻게 추가하는지**, **(3) 어디를 만지면 무엇이 깨지는지** 모두 파악할 수 있도록 만든다. 추가 컨텍스트는 모두 코드에 있다 — 이 문서가 가리키는 위치만 따라가면 된다.
 
 ---
 
@@ -36,7 +36,7 @@ _최종 갱신: 2026-08-10 (ADR-0016 Field/Value 분리 — schema-first 저작�
 - **코드가 진실 — Template** ([ADR-0002](./adr/0002-templates-source-of-truth-is-code.md)): `content` (구 `template_json`) / 썸네일 / `version` 은 항상 코드값으로 덮어씀.
 - **DB 가 진실 — UserSite**: 사용자 사이트는 sync 가 안 건드림. 모든 저장은 optimistic concurrency RPC 경유 ([ADR-0004](./adr/0004-optimistic-concurrency-via-rpc.md)).
 - **Template 간 코드 공유 = 0** ([ADR-0001](./adr/0001-beta-model-template-isolation.md) β 모델): cafe-default 와 cafe-cozy 는 component / token / css 를 *전혀* 공유하지 않음.
-- **렌더 순서 = 배열 순서**: `sections[]` 의 배열 순서가 화면 위 → 아래. `section.order` 는 폐기 (Phase 6d / migration 012).
+- **렌더 순서 = 배열 순서**: `blocks[]` 의 배열 순서가 화면 위 → 아래. `section.order` 는 폐기 (Phase 6d / migration 012).
 
 ---
 
@@ -46,8 +46,8 @@ _최종 갱신: 2026-08-10 (ADR-0016 Field/Value 분리 — schema-first 저작�
 |---|---|---|---|
 | **Category** | Template 카탈로그 분류 버킷 (현재 목록은 `ls -d src/templates/*/`). **두 가지 표기**: 파일시스템은 **소문자** 디렉터리명(`src/templates/cafe/`), 카탈로그·DB(`templates.category`)·`templateCategories` 값은 **첫 글자 대문자**(`Cafe`) — codegen 이 디렉터리명을 Capitalize 해 만든다. 자세히는 §2.6 | `src/templates/<category>/` 디렉터리 이름 | 개발자 (디렉터리 추가) |
 | **Template** | 한 Category 안의 한 디자인. **모든 시각/구성 자산을 자기 디렉터리 안에 자급자족** (ADR-0001) | `src/templates/<category>/<leaf>/` | 개발자 (코드 PR) 또는 Claude Code (`new-template` 스킬) |
-| **Section component** | 자기 메타 (`componentKey` / `category` / `label` / `fieldsSchema`) 를 동봉하는 self-describing React 컴포넌트 | `<templateDir>/library/<Name>.tsx` | 개발자 |
-| **Template Library** | `componentKey → Section component` 매핑. 한 Template 의 조립 키트. **다른 Template 와 공유 안 됨** | `<templateDir>/library/index.ts` | 개발자 |
+| **Block component** | 자기 메타 (`componentKey` / `category` / `label` / `fieldsSchema`) 를 동봉하는 self-describing React 컴포넌트 | `<templateDir>/library/<Name>.tsx` | 개발자 |
+| **Template Library** | `componentKey → Block component` 매핑. 한 Template 의 조립 키트. **다른 Template 와 공유 안 됨** | `<templateDir>/library/index.ts` | 개발자 |
 | **Preset** | 코드가 진실인 시드. `content`(ContentModel) + 토큰 | `<templateDir>/template.ts` | 개발자 / LLM |
 | **Template (DB row)** | `templates` 테이블 한 행. Preset 에서 Sync 로 시드되거나 어드민이 manual 로 만듦 | DB | sync CLI / 어드민 UI |
 | **UserSite** | Template 을 복사해 사용자가 편집한 인스턴스 | DB `user_sites` | 일반 사용자 |
@@ -83,7 +83,7 @@ _최종 갱신: 2026-08-10 (ADR-0016 Field/Value 분리 — schema-first 저작�
 
 > **네이밍**: 이 타입은 예전 `TemplateJson` — `Template` 과 `Site` 가 **공유**하는 콘텐츠 형태라 엔티티 중립 이름 `ContentModel` 로 개명됐다 ([ADR-0013](./adr/0013-content-model-rename.md)). `mode` 판별 구조적 유니온(`SiteMode = 'single' | 'multi'`): `SingleContent | MultiContent`. 아래는 Single 예시.
 >
-> **ADR-0016 은 절반만 구현됐다.** 출시된 것은 §4·§5 의 **Field/Value 분리**(#132–#137, migration 026)다. §2 의 어휘 리네임(`Section`→`Block`, `sections`→`blocks`, `shared`→`chrome`, `SectionComponentMeta`→`BlockComponentMeta` …)과 §3 의 `nav`→`menu` 모델 전환은 **아직 코드에 없다** — 본 문서는 코드의 현재 진실을 쓰므로 `Section`/`sections`/`shared`/`nav:{visible,label}` 로 서술한다. nav→menu 는 [#130](https://github.com/sungheeyoon/layer0-studio/issues/130) 에서 다룬다. ADR 의 TO-BE 열과 이 문서가 다르면 **이 문서가 지금이다.**
+> ADR-0016 §2–§5가 현재 코드와 저장 JSON의 진실이다: `Block`/`blocks`/`chrome`, schema-first Values, optional `menu`, Multi `Page.name`. 이전 모양은 migration 027의 입력에서만 읽는다.
 
 ```ts
 ContentModel (single) = {
@@ -97,12 +97,12 @@ ContentModel (single) = {
     fontSize: '16px',                   // CSS length
     layout: 'wide',                     // 'wide'|'narrow'|'asymmetric'|'default'|'full'
   },
-  sections: [                           // ★ Single 은 sections[] 를 루트에 직접 (Page 없음)
+  blocks: [                           // ★ Single 은 blocks[] 를 루트에 직접 (Page 없음)
     {
       id: 'hero-001',                   // unique, 사용자 사이트에서도 보존
       type: 'hero',                     // ★ Template Library 의 componentKey 와 매칭
       visible: true,                    // 서빙 여부
-      nav: { visible: true, label: 'Home' },  // nav projection 소스 (Single Section 만 보유)
+      menu: { label: 'Home' },          // 존재 자체가 Single menu 포함을 뜻함
       fields: {                         // ★ Value 만 담는다 (ADR-0016) — 구 `data`(migration 022)
         title: '천천히, 제대로',          //   text/textarea/url/color/select → string
         columns: 3,                     //   number → number
@@ -115,8 +115,8 @@ ContentModel (single) = {
   ],
 }
 // Multi 는 대신: { mode: 'multi', templateKey, globalStyles,
-//                  shared: { header: Section[], footer: Section[] },
-//                  pages: [{ id, slug, visible, nav, sections: Section[] }, ...] }
+//                  chrome: { header: Block[], footer: Block[] },
+//                  pages: [{ id, slug, visible, name, menu?, blocks: Block[] }, ...] }
 ```
 
 **`fields` 는 Value 만 담는다 — `{type,label,value}` 래퍼가 아니다** ([ADR-0016](./adr/0016-block-rename-and-field-value-split.md) §4). 어떤 키가 텍스트고 어떤 키가 이미지인지는 **오직 컴포넌트의 `fieldsSchema`** 가 안다(§2.3). 인스턴스마다 `type`/`label` 을 복사해 두면 스키마와 drift 할 수 있어서 그걸 막는 규칙(`FIELD_TYPE_MISMATCH`)만 존재했다 — 저장을 안 하니 drift 자체가 사라졌다.
@@ -176,8 +176,8 @@ type MenuContent = ValuesOf<typeof menuSchema>;
 **렌더 경계에서 캐스트 한 번**. 저장 경로가 이미 검증했으므로 재검증하지 않는다 (ADR-0016 §4-2, §6):
 
 ```tsx
-const Menu: SectionComponent = function Menu({ section }: TemplateSectionProps) {
-  const content = section.fields as MenuContent;   // 유일한 캐스트
+const Menu: BlockComponent = function Menu({ block }: TemplateBlockProps) {
+  const content = block.fields as MenuContent;   // 유일한 캐스트
   const label = content.eyebrow ?? '';
   const items = content.items ?? [];
   return <>{items.map(item => <li key={item.id}>{item.fields.title}</li>)}</>;
@@ -185,12 +185,12 @@ const Menu: SectionComponent = function Menu({ section }: TemplateSectionProps) 
 };
 ```
 
-타입은 도메인에 산다 (`src/domain/entities/template.entity.ts`): `FieldsSchema` · `FieldDescriptor` · `ValuesOf` · `ImageValue` · `ArrayItem`. **도메인의 `Section.fields` 자체는 계속 loose (`Record<string, unknown>`)** — Block 은 문자열 `type` 으로 디스패치되므로 도메인은 어떤 Section 이 어떤 Value 모양인지 정적으로 알 수 없다. 타입은 컴포넌트 경계에서만 좁힌다.
+타입은 도메인에 산다 (`src/domain/entities/template.entity.ts`): `FieldsSchema` · `FieldDescriptor` · `ValuesOf` · `ImageValue` · `ArrayItem`. **도메인의 `Block.fields` 자체는 계속 loose (`Record<string, unknown>`)** — Block 은 문자열 `type` 으로 디스패치되므로 도메인은 어떤 Block 이 어떤 Value 모양인지 정적으로 알 수 없다. 타입은 컴포넌트 경계에서만 좁힌다.
 
 ### 2.3.1 Library entry — `src/templates/types.ts`
 
 ```ts
-interface SectionComponentMeta {
+interface BlockComponentMeta {
   componentKey: string;                  // 라이브러리 키 ('hero', 'menu', 'story' …)
   category: string;                      // 'hero' | 'menu' | 'story' | 'footer' | …
   label: string;                         // 어드민 카탈로그용 표시명
@@ -198,11 +198,11 @@ interface SectionComponentMeta {
   previewImage?: string;
 }
 
-type SectionComponent = ComponentType<TemplateSectionProps> & { meta?: SectionComponentMeta };
+type BlockComponent = ComponentType<TemplateBlockProps> & { meta?: BlockComponentMeta };
 
 interface TemplateLibraryEntry {
-  Component: SectionComponent;
-  meta: SectionComponentMeta;            // 항상 server-resolved
+  Component: BlockComponent;
+  meta: BlockComponentMeta;            // 항상 server-resolved
 }
 
 interface TemplateLibrary {
@@ -352,7 +352,7 @@ src/templates/cafe/default/
 │   ├── Footer.tsx
 │   ├── Navigation.tsx              # ★ 'use client' 컴포넌트
 │   └── Navigation.meta.ts          #    server-resolved meta (named export)
-├── sections/                       # 보조 utility 만 (아이콘, title-parts) — Section component 아님
+├── sections/                     # 보조 utility 만 (아이콘, title-parts) — Block component 아님
 ├── thumbnail.config.ts             # Playwright 캡처 설정
 ├── cafe.module.css                 # 이 Template 전용 CSS (다른 Template 와 공유 안 됨)
 ├── template.ts                     # ← 이 디렉터리의 Preset (= Source of Truth)
@@ -363,7 +363,7 @@ src/templates/cafe/default/
 
 - **Template 간 component / token / css 공유 = 0**. cafe-default 의 `HeroImage.tsx` 와 cafe-cozy 의 `HeroImage.tsx` 는 서로 다른 파일 (코드가 같아 보여도 별개).
 - **DRY 위배는 의도된 설계**. cross-Template 추출 제안은 ADR-0001 을 근거로 거절.
-- **`sections/` 폴더**는 더 이상 Section component 를 두지 않는다. 공통 아이콘 / 유틸만 사는 폴더로 축소됨. 새 Section 은 무조건 `library/`.
+- **`sections/` 폴더**는 이름만 남은 보조 아이콘/유틸 폴더다. 새 Block component는 무조건 `library/`에 둔다.
 
 ### 3.2 자동 등록
 
@@ -377,11 +377,11 @@ src/templates/cafe/default/
 
 `loadTemplate(templateKey)` 헬퍼 (`src/templates/registry.ts`) 가 `templateMap` 을 wrapping. **Backward-compat shim**: bare legacy key (예: `'cafe'`) 가 들어오면 `${key}-default` 로 fallback (migration 015–017 이 user_sites 의 templateKey 를 슬러그 형태로 정렬한 뒤로는 사실상 잔존 보호막).
 
-> **Single / Multi Site Type (구현 완료, ADR-0007):** `ContentModel` 은 `mode` 판별 구조적 유니온이다 — Single 은 `sections[]`(앵커 nav), Multi 는 `shared:{header,footer}` + `pages[]`(페이지 링크 nav). 렌더는 `renderSingleSite.tsx` / `renderMultiSite.tsx`, Multi 공개 경로는 `/site/[domain]/[[...slug]]`. 데이터 모델·nav projection·2축(`visible`/`nav.visible`)·PageSeo·asset slot_key 의 정식 설명은 [ADR-0007](./adr/0007-single-multi-site-type-structural-union.md) 과 `CONTEXT.md` 글로서리를 본다 (이 문서의 예시는 대부분 Single 기준으로 쓰여 있다).
+> **Single / Multi Site Type:** Single은 `blocks[]`의 optional `menu`로 앵커 메뉴를 만들고, Multi는 `chrome` + `pages[]`의 optional `menu`를 header/footer로 투영한다. `visible`, `Page.name`, `menu.label`은 서로 독립이다.
 
 ### 3.3 미래 구조 방향 (footnote, ADR-0001)
 
-현재 `library/` 는 *과도기 아티팩트*. multi-page 는 **데이터 모델 차원**(ADR-0007 유니온)으로 이미 출시됐지만, 디렉터리를 `<templateDir>/pages/<page>/sections/<Section>.tsx` 로 옮기는 **코드 구조 재편은 아직 미결**(ADR-0001 의 future direction) — `renderMultiSite` 는 평탄한 `library/` 를 그대로 쓴다. 그래서 글로서리 (CONTEXT.md) 에 "Library" 를 도메인 용어로 굳히지 않음.
+현재 `library/` 는 *과도기 아티팩트*. multi-page 는 **데이터 모델 차원**(ADR-0007 유니온)으로 이미 출시됐지만, 디렉터리를 `<templateDir>/pages/<page>/blocks/<Block>.tsx` 로 옮기는 **코드 구조 재편은 아직 미결**(ADR-0001 의 future direction) — `renderMultiSite` 는 평탄한 `library/` 를 그대로 쓴다. 그래서 글로서리 (CONTEXT.md) 에 "Library" 를 도메인 용어로 굳히지 않음.
 
 ---
 
@@ -398,18 +398,18 @@ TemplateRenderer (templates/<cat>/<leaf>/index.tsx)
     │  designTokens prop 으로 root 에 CSS var 주입 (ADR-0005)
     ▼
 RenderSingleSite / RenderMultiSite    ← src/templates/renderSingleSite.tsx · renderMultiSite.tsx
-    │  Single: content.sections        Multi: shared.header → active page.sections → shared.footer
-    │  sections.map((section) => library[section.type]); nav = deriveNav(source, hrefOf)
+    │  Single: content.blocks        Multi: chrome.header → active page.blocks → chrome.footer
+    │  blocks.map((block) => library[block.type]); menu = deriveNav(source, hrefOf)
     │
     ▼
-<Component section={section} />        // SectionComponent (nav/footer 엔 navItems 주입)
+<Component block={block} />            // BlockComponent (nav/footer componentKey엔 navItems 주입)
 ```
 
 핵심 규약:
 
-1. **section.type ↔ componentKey 1:1 매칭**. 라이브러리에 없으면 console.warn + skip → 화면 빈칸.
-2. **렌더 순서 = sections 배열 순서**. `order` 필드는 schema 에서 제거됨 (migration 012).
-3. **`section.visible === false` 면 skip**.
+1. **block.type ↔ componentKey 1:1 매칭**. 라이브러리에 없으면 console.warn + skip → 화면 빈칸.
+2. **렌더 순서 = blocks 배열 순서**. `order` 필드는 schema 에서 제거됨 (migration 012).
+3. **`block.visible === false` 면 skip**.
 4. **클릭 콜백**: `onSectionClick` 이 있으면 wrapper `<div>` 가 stopPropagation + 호출 (어드민 / 에디터 인라인 선택용).
 
 ---
@@ -504,7 +504,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 }
 ```
 
-**블로킹 기준은 ADR-0015 규칙 4 다: 저장을 막는 건 "그 모양이면 렌더러가 깨질 때" 뿐이다.** ADR-0016 이후 렌더러는 `section.fields` 를 재검증 없이 캐스팅하므로 *모양* 이 틀리면 실제로 터진다(문자열에 `.map`, `undefined` 에 `.url`). 반면 모양은 맞는데 내용이 이상한 건 — 범위를 벗어난 숫자, 옵션 밖 select, hex 아닌 색 — 경고다. 하나를 막으면 같은 `ContentModel` 안의 **다른 모든 편집이 인질**이 되기 때문이다. 이 기준 때문에 여러 규칙이 에러 → 경고로 강등됐다.
+**블로킹 기준은 ADR-0015 규칙 4 다: 저장을 막는 건 "그 모양이면 렌더러가 깨질 때" 뿐이다.** ADR-0016 이후 렌더러는 `block.fields` 를 재검증 없이 캐스팅하므로 *모양* 이 틀리면 실제로 터진다(문자열에 `.map`, `undefined` 에 `.url`). 반면 모양은 맞는데 내용이 이상한 건 — 범위를 벗어난 숫자, 옵션 밖 select, hex 아닌 색 — 경고다. 하나를 막으면 같은 `ContentModel` 안의 **다른 모든 편집이 인질**이 되기 때문이다. 이 기준 때문에 여러 규칙이 에러 → 경고로 강등됐다.
 
 ### 6.1 Errors (블로킹)
 
@@ -512,12 +512,14 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 |---|---|
 | `UNKNOWN_TEMPLATE_KEY` | `templateKey` 가 `availableTemplateKeys` 에 없음 |
 | `UNKNOWN_MODE` | `mode` 가 `'single'`/`'multi'` 가 아님 |
-| `SECTIONS_EMPTY` / `PAGES_EMPTY` | Single 의 `sections` / Multi 의 `pages` 가 비었음 |
+| `BLOCKS_EMPTY` / `PAGES_EMPTY` | Single 의 `blocks` / Multi 의 `pages` 가 비었음 |
 | `MISSING_GLOBAL_STYLES` | `globalStyles` 누락 |
 | `MISSING_PAGE_SLUG` / `DUPLICATE_PAGE_SLUG` | page.slug 누락 / 중복 |
-| `DUPLICATE_SECTION_ID` | section.id 가 콘텐츠 전체에서 중복 |
-| `MISSING_NAV` / `INVALID_NAV_VISIBLE` / `INVALID_NAV_LABEL` | nav projection 소스가 `{visible:boolean, label:string}` 이 아님 |
-| `UNKNOWN_COMPONENT_KEY` | `templateLibrary` 옵션 + `section.type` 이 라이브러리에 없음 |
+| `MISSING_PAGE_NAME` | Multi Page의 `name` 누락 |
+| `DUPLICATE_BLOCK_ID` | block.id가 콘텐츠 전체에서 중복 |
+| `INVALID_MENU` / `INVALID_MENU_LABEL` / `INVALID_MENU_PLACEMENT` | optional menu 모양이 잘못됨 |
+| `SINGLE_MENU_PLACEMENT_UNSUPPORTED` | Single menu에 placement가 저장됨 |
+| `UNKNOWN_COMPONENT_KEY` | `templateLibrary` 옵션 + `block.type` 이 라이브러리에 없음 |
 | `MISSING_REQUIRED_FIELD` | `required: true` 인데 키가 없거나 `null` |
 | `FIELD_VALUE_TYPE_MISMATCH` | Value 모양이 descriptor 와 불일치 (text 에 객체, number 에 `NaN`, image 에 `url` 없음, array 아님 …) |
 | `INVALID_ASSET_ID` | `image` 의 `assetId` 가 UUID 문자열이 아님 — `asset_usages.asset_id`(uuid) 로 복사되므로 RPC 가 터진다 |
@@ -544,7 +546,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 
 ### 6.3 Token enforcement (인라인 색·폰트 차단)
 
-Section component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변수로 풀리는 Tailwind arbitrary value) 로 참조해야 한다 — 이게 사용자의 `globalStyles` 오버라이드가 사이트 전역으로 전파되는 유일한 통로이기 때문 (ADR-0005). 인라인 hex/rgb/hsl 색 리터럴이나 `font-family` 문자열은 그 메커니즘을 우회한다.
+Block component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변수로 풀리는 Tailwind arbitrary value) 로 참조해야 한다 — 이게 사용자의 `globalStyles` 오버라이드가 사이트 전역으로 전파되는 유일한 통로이기 때문 (ADR-0005). 인라인 hex/rgb/hsl 색 리터럴이나 `font-family` 문자열은 그 메커니즘을 우회한다.
 
 **두 레이어로 강제**:
 
@@ -566,7 +568,7 @@ Section component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변�
 
 ### 6.4 배포된 Template 의 스키마 호환성 규칙 (ADR-0016 §6)
 
-렌더러는 `section.fields` 를 **검증 없이** 추론 타입으로 캐스팅한다 — "파싱은 경계에서 한 번". 이 신뢰는 공짜가 아니다. 컴파일 타임이 보장하는 건 **코드 안에서** 스키마와 렌더러가 합치한다는 것뿐이고, **이미 DB 에 저장된 Value 가 새 스키마와 맞는지는 아무도 보장하지 않는다.** 게다가 `getFieldValue` 가 `if (!field) return ''` 로 메워주던 누락 필드 방어막도 없다.
+렌더러는 `block.fields` 를 **검증 없이** 추론 타입으로 캐스팅한다 — "파싱은 경계에서 한 번". 이 신뢰는 공짜가 아니다. 컴파일 타임이 보장하는 건 **코드 안에서** 스키마와 렌더러가 합치한다는 것뿐이고, **이미 DB 에 저장된 Value 가 새 스키마와 맞는지는 아무도 보장하지 않는다.** 게다가 `getFieldValue` 가 `if (!field) return ''` 로 메워주던 누락 필드 방어막도 없다.
 
 그래서 **배포된 Template 의 스키마 변경은 기본적으로 additive 여야 한다.** 렌더러 코드는 serve-time 에 로드되므로 스키마 한 줄 수정이 곧 전 사이트 수정이다 (CLAUDE.md "What a Template edit does and does not reach").
 
@@ -638,7 +640,7 @@ brief(자연어) ──▶ Site Type 결정 (Single/Multi 모두 content `Conten
              ──▶ 썸네일 육안 / /preview/preset/<key> → pnpm template:sync (dry-run) → PR
 ```
 
-생성 결과: `src/templates/<category>/<leaf>/` 안에 `tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Section>.tsx`(N 개). `pnpm generate:templates` 로 `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 미리보기.
+생성 결과: `src/templates/<category>/<leaf>/` 안에 `tokens.ts`, `template.ts`, `thumbnail.config.ts`, `index.tsx`, `library/index.ts`, `library/<Block>.tsx`(N 개). `pnpm generate:templates` 로 `_generated.ts` 갱신 → `/preview/preset/<templateKey>` 미리보기.
 
 **저작 부담은 ADR-0016 으로 오히려 줄었다** — 작성자는 `fieldsSchema` 하나만 쓰고 Content 타입은 `ValuesOf` 가 만든다(§2.3). preset 의 `fields` 는 Value 를 그대로 적는다: `title: '…'`, `image: { url: '…' }`, `items: [{ id, fields }]`. `{ type, label, value }` 래퍼를 적으면 `FIELD_VALUE_TYPE_MISMATCH` 로 게이트가 막는다.
 
@@ -731,13 +733,13 @@ Claude Code 에 자연어로 의뢰하면 `new-template` 스킬이 발동한다 
 
 신규 Category 는 §7.1 의 슬러그 가드 + 사람 승인을 거친다.
 
-### C. 기존 Template 에 새 Section component 추가
+### C. 기존 Template 에 새 Block component 추가
 
 `src/templates/cafe/default/library/HeroParallax.tsx` 신규:
 
 ```tsx
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 
 const heroParallaxSchema = {
   title:    { type: 'text',     label: '타이틀',     required: true },
@@ -747,8 +749,8 @@ const heroParallaxSchema = {
 
 type HeroParallaxContent = ValuesOf<typeof heroParallaxSchema>;
 
-const HeroParallax: SectionComponent = function HeroParallax({ section }: TemplateSectionProps) {
-  const content = section.fields as HeroParallaxContent;   // 경계에서 한 번만 캐스트
+const HeroParallax: BlockComponent = function HeroParallax({ block }: TemplateBlockProps) {
+  const content = block.fields as HeroParallaxContent;   // 경계에서 한 번만 캐스트
   const subtitle = content.subtitle ?? '';                 // optional → 반드시 fallback
   // ... 렌더 로직 — 색·폰트는 var(--color-primary), var(--font-base) 만 (§6.3)
   //     content.title / content.image.url 은 required 라 그대로 읽으면 된다
@@ -775,7 +777,7 @@ export const cafeDefaultLibrary: TemplateLibrary = {
 
 **만약 새 컴포넌트가 `'use client'` 라면**: `HeroParallax.meta = {...}` 대신 sibling `HeroParallax.meta.ts` 에 `export const heroParallaxMeta` 로 정의 → `libEntry(HeroParallax, heroParallaxMeta)` 로 명시 전달 (이유는 §10.12).
 
-preset 의 `content` section 에서 사용 — `{ id: 'hero-1', type: 'hero-parallax', visible: true, nav: {...}, fields: { title: '…', image: { url: '…' } } }`. `pnpm template:verify <key>` → `pnpm template:sync`.
+preset의 `content.blocks`에서 사용 — `{ id: 'hero-1', type: 'hero-parallax', visible: true, menu: { label: 'Hero' }, fields: { title: '…', image: { url: '…' } } }`. `pnpm template:verify <key>` → `pnpm template:sync`.
 
 **주의**: ADR-0001 — 이 컴포넌트는 cafe-default 전용이다. cafe-cozy 에도 같은 게 필요하면 *복제*. cross-Template 추출 금지.
 
@@ -819,7 +821,7 @@ preset 의 `content` section 에서 사용 — `{ id: 'hero-1', type: 'hero-para
 
 ### H. 새 페이지 추가 (Multi)
 
-Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니온을 직접 작성한다 — 페이지를 추가하려면 `pages[]` 에 `{ id, slug, nav:{visible,label}, sections:[...] }` 원소를 더한다. 각 page 의 `slug` 는 unique 여야 하고(validate `DUPLICATE_PAGE_SLUG`), nav 는 `deriveNav`/`deriveFooterNav` 로 projection 된다. 공개 경로는 `/site/[domain]/[[...slug]]` (빈 slug = 첫 페이지). 참고로 ADR-0001 footnote 의 `pages/<page>/sections/` **디렉터리** 재편(렌더러 코드 구조)은 여전히 미래 작업이다.
+Multi Template은 `pages[]`에 `{ id, slug, visible, name, menu?, blocks:[...] }`를 추가한다. `menu` 생략은 어느 메뉴에도 없음, `{label}`은 header, `{label, placement:'footer'}`는 footer다. `name`은 메뉴 라벨과 독립이며 `slug`는 unique여야 한다. 공개 경로는 `/site/[domain]/[[...slug]]`다.
 
 ---
 
@@ -829,7 +831,7 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
    `.webp`/`.jpg` 어긋나면 sync 가 옛 파일을 업로드하거나 로컬 경로 문자열을 그대로 DB 에 박는다. 두 곳을 항상 일치.
 
 2. **`componentKey` 변경 = 사용자 사이트 깨짐**
-   `user_sites.content` 의 `section.type` 이 매칭 안 되면 site 렌더러(`renderSingleSite`/`renderMultiSite`)가 console.warn + skip → 화면 빈칸. componentKey 는 **영원히** 변경 금지. 새 컴포넌트는 새 key 로.
+   `user_sites.content` 의 `block.type` 이 매칭 안 되면 site 렌더러(`renderSingleSite`/`renderMultiSite`)가 console.warn + skip → 화면 빈칸. componentKey 는 **영원히** 변경 금지. 새 컴포넌트는 새 key 로.
 
 3. **`fields` 는 Value 다 — `{type,label,value}` 래퍼가 아니다** ⚠️
    가장 흔한 회귀. `title: 'MONO'`, `columns: 3`, `image: { url: '…' }`, `items: [{ id, fields }]`. `number` 는 진짜 숫자라 `Number(...)` 변환이 필요 없다. 래퍼를 적으면 `FIELD_VALUE_TYPE_MISMATCH` 로 게이트가 막는다 (§2.1, ADR-0016 §4).
@@ -880,8 +882,8 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 
 | 무엇 | 어디 |
 |---|---|
-| `ContentModel` / `Section` 타입 + **`FieldsSchema` / `FieldDescriptor` / `ValuesOf` / `ImageValue` / `ArrayItem`** (ADR-0013 / ADR-0016) | `src/domain/entities/template.entity.ts` |
-| `TemplatePreset` / `SectionComponent` / `SectionComponentMeta` / `TemplateModule` / `DesignTokens` / `NavSectionProps` 타입 | `src/templates/types.ts` (`PresetSection`/`composition` 은 ADR-0007 때, 구 `Field` union/`getFieldValue`/`keys.ts` 는 ADR-0016 때 제거됨) |
+| `ContentModel` / `Block` 타입 + **`FieldsSchema` / `FieldDescriptor` / `ValuesOf` / `ImageValue` / `ArrayItem`** (ADR-0013 / ADR-0016) | `src/domain/entities/template.entity.ts` |
+| `TemplatePreset` / `BlockComponent` / `BlockComponentMeta` / `TemplateModule` / `DesignTokens` / `NavBlockProps` 타입 | `src/templates/types.ts` (`PresetSection`/`composition` 은 ADR-0007 때, 구 `Field` union/`getFieldValue`/`keys.ts` 는 ADR-0016 때 제거됨) |
 | 자동생성 레지스트리 | `src/templates/_generated.ts` (커밋, 수정 금지) |
 | 동적 import 헬퍼 | `src/templates/registry.ts` (`loadTemplate(templateKey)` + legacy shim) |
 | Site 렌더러 (mode 별) | `src/templates/renderSingleSite.tsx` · `src/templates/renderMultiSite.tsx` |
@@ -919,9 +921,9 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 
 - **시각적 WYSIWYG preset 빌더** — 코드-PR 워크플로우가 의도된 게이트 (ADR-0002).
 - **사용자별 커스텀 Template 업로드** — 보안·격리 비용 큼.
-- **크로스-Template Section 공유** (`src/sections/` 공용 풀) — ADR-0001 위배. 별도 RFC 없이는 X.
+- **크로스-Template Block 공유** (`src/blocks/` 공용 풀) — ADR-0001 위배. 별도 RFC 없이는 X.
 - **사용자 에디터에서 섹션 추가 / 삭제·순서 변경** — 데이터 모델은 가능하지만 UX·검증 추가 비용. 현재 1 차는 preset 구조 고정.
-- **Multi 저작 편의 + 디렉터리 재편** — Multi 사이트는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). Single/Multi 모두 `preset.content` 의 `ContentModel` 유니온을 손으로 작성한다 (§2.2, §9-H; 예전 `composition` 축약형은 제거됨). 남은 미래 작업은 (1) 저작 보일러플레이트를 줄이는 헬퍼와 (2) ADR-0001 footnote 의 `pages/<page>/sections/` **디렉터리** 재편(렌더러 코드 구조)이다.
+- **Multi 저작 편의 + 디렉터리 재편** — Multi 사이트는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). Single/Multi 모두 `preset.content` 의 `ContentModel` 유니온을 손으로 작성한다 (§2.2, §9-H; 예전 `composition` 축약형은 제거됨). 남은 미래 작업은 (1) 저작 보일러플레이트를 줄이는 헬퍼와 (2) ADR-0001 footnote 의 `pages/<page>/blocks/` **디렉터리** 재편(렌더러 코드 구조)이다.
 
 ---
 
@@ -935,4 +937,4 @@ Multi Template 은 `preset.content` 의 `{ mode:'multi', pages:[...] }` 유니�
 
 ## 14. 한 줄 요약
 
-> **Template = 자급자족 디렉터리** (tokens + library + preset + renderer, 다른 Template 와 공유 안 됨 — ADR-0001). **코드가 진실**, Sync 로 DB 반영 (ADR-0002). **새 Template 저작 = `new-template` Claude Code 스킬** (dev-time; brief → 골격 파일 → `template:verify` 게이트 → sync). 새 variant = 디렉터리 복제 1 번. 새 Section = `library/` 에 `.meta` 동봉한 `.tsx` 1 개. 새 Category = 디렉터리 통째로 만들면 codegen 이 알아서 등록. **삭제 = `template:delete <key>` (dry-run→`--apply`) + `git rm`** — sync 의 역방향, `delete-template` 스킬이 감싼다 (§5.4).
+> **Template = 자급자족 디렉터리** (tokens + library + preset + renderer, 다른 Template 와 공유 안 됨 — ADR-0001). **코드가 진실**, Sync 로 DB 반영 (ADR-0002). **새 Template 저작 = `new-template` Claude Code 스킬** (dev-time; brief → 골격 파일 → `template:verify` 게이트 → sync). 새 variant = 디렉터리 복제 1 번. 새 Block = `library/` 에 `.meta` 동봉한 `.tsx` 1 개. 새 Category = 디렉터리 통째로 만들면 codegen 이 알아서 등록. **삭제 = `template:delete <key>` (dry-run→`--apply`) + `git rm`** — sync 의 역방향, `delete-template` 스킬이 감싼다 (§5.4).

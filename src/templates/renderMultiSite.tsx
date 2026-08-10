@@ -1,11 +1,11 @@
 import React, { ComponentType } from 'react';
-import { TemplateRendererProps, TemplateLibrary, DesignTokens, NavSectionProps } from './types';
+import { TemplateRendererProps, TemplateLibrary, DesignTokens, NavBlockProps } from './types';
 import { tokensToCssVars } from '@/lib/template/design-tokens';
 import {
   isMultiContent,
   deriveNav,
   deriveFooterNav,
-  Section,
+  Block,
   Page,
 } from '@/domain/entities/template.entity';
 
@@ -18,8 +18,8 @@ interface RenderMultiSiteProps extends TemplateRendererProps {
 }
 
 /**
- * Renderer for a **Multi** Site — assembles `shared.header → active page's
- * sections → shared.footer` for one page at a time. The active page is chosen
+ * Renderer for a **Multi** Site — assembles `chrome.header → active page's
+ * blocks → chrome.footer` for one page at a time. The active page is chosen
  * by `activePageId` (the route resolves it from the slug); it falls back to the
  * first page (the home page reached at the empty slug). See ADR-0007 / PLAN §3.
  *
@@ -38,7 +38,7 @@ export function RenderMultiSite({
   designTokens,
 }: RenderMultiSiteProps) {
   if (!isMultiContent(content)) return null;
-  const { shared, pages } = content;
+  const { chrome, pages } = content;
 
   // First page = home (served at the empty slug); others at `${basePath}/${slug}`.
   const homeId = pages[0]?.id;
@@ -55,45 +55,45 @@ export function RenderMultiSite({
     ? tokensToCssVars(designTokens, content.globalStyles)
     : undefined;
 
-  const renderSection = (section: Section) => {
-    if (!section.visible) return null;
+  const renderBlock = (block: Block) => {
+    if (!block.visible) return null;
 
-    const entry = library[section.type];
+    const entry = library[block.type];
     if (!entry) {
-      console.warn(`[RenderMultiSite] Component not found for type: ${section.type}`);
+      console.warn(`[RenderMultiSite] Component not found for type: ${block.type}`);
       return null;
     }
     const Component = entry.Component;
-    const isSelected = selectedSectionId === section.id;
+    const isSelected = selectedSectionId === block.id;
 
-    // Inject the derived page links into the known nav-driving sections: the
-    // top nav (`type === 'nav'`, in shared.header) gets the in-nav pages; the
-    // footer (`type === 'footer'`) gets the reachable-but-hidden pages. All
-    // other sections take plain props. See ADR-0007.
+    // Inject the derived page links into the known nav-driving blocks: the
+    // top nav (`type === 'nav'`, in chrome.header) gets header-menu pages; the
+    // footer (`type === 'footer'`) gets explicit footer-menu pages. All other
+    // Blocks take ordinary props.
     const injected =
-      section.type === 'nav' ? navItems : section.type === 'footer' ? footerItems : null;
+      block.type === 'nav' ? navItems : block.type === 'footer' ? footerItems : null;
     const inner =
       injected !== null ? (
-        React.createElement(Component as ComponentType<NavSectionProps>, {
-          section,
+        React.createElement(Component as ComponentType<NavBlockProps>, {
+          block,
           isSelected,
           navItems: injected,
         })
       ) : (
-        <Component section={section} isSelected={isSelected} />
+        <Component block={block} isSelected={isSelected} />
       );
 
     return (
       <div
-        key={section.id}
-        id={`section-${section.id}`}
+        key={block.id}
+        id={`section-${block.id}`}
         {...(onSectionClick ? {
           onClick: (e: React.MouseEvent) => {
             e.stopPropagation();
-            onSectionClick(section.id);
+            onSectionClick(block.id);
           }
         } : {})}
-        className={itemClassName?.(section.id) || ''}
+        className={itemClassName?.(block.id) || ''}
       >
         {inner}
       </div>
@@ -102,9 +102,9 @@ export function RenderMultiSite({
 
   return (
     <div className={className} style={rootStyle}>
-      {shared.header.map(renderSection)}
-      {activePage?.sections.map(renderSection)}
-      {shared.footer.map(renderSection)}
+      {chrome.header.map(renderBlock)}
+      {activePage?.blocks.map(renderBlock)}
+      {chrome.footer.map(renderBlock)}
     </div>
   );
 }

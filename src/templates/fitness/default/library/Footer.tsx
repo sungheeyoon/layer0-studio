@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { DumbbellIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, ClockIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -16,8 +16,8 @@ const footerSchema = {
 
 type FooterContent = ValuesOf<typeof footerSchema>;
 
-const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const content = section.fields as FooterContent;
+const Footer: BlockComponent = function Footer({ block }: TemplateBlockProps) {
+  const content = block.fields as FooterContent;
   const brandName = content.brandName || 'APEX';
   const brandSubtext = content.brandSubtext || 'Fitness';
   const description = content.description || '';

@@ -1,9 +1,9 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../corporate.module.css';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 const featuresSchema = {
-  title: { type: 'text', label: 'Section Title', required: true },
+  title: { type: 'text', label: 'Block Title', required: true },
   subtitle: { type: 'text', label: 'Subtitle' },
   strategy: { type: 'text', label: 'Strategy' },
   design: { type: 'text', label: 'Design' },
@@ -22,8 +22,8 @@ type FeaturesContent = ValuesOf<typeof featuresSchema>;
  */
 const FEATURE_KEYS = ['strategy', 'design', 'development', 'analytics'] as const;
 
-const Features: SectionComponent = function Features({ section }: TemplateSectionProps) {
-  const content = section.fields as FeaturesContent;
+const Features: BlockComponent = function Features({ block }: TemplateBlockProps) {
+  const content = block.fields as FeaturesContent;
   const title = content.title || 'Core Features';
   const subtitle = content.subtitle || '';
 

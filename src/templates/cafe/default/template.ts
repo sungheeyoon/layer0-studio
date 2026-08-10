@@ -13,15 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "nav-001",
         "type": "nav",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "네비게이션"
-        },
         "fields": {
           "brandName": "MONO",
           "brandSubtext": "Specialty Coffee",
@@ -32,10 +28,6 @@ const preset: TemplatePreset = {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "Seoul Seongsu — Specialty Coffee"
-        },
         "fields": {
           "eyebrow": "Seoul Seongsu — Specialty Coffee",
           "title1": "천천히,",
@@ -60,10 +52,6 @@ const preset: TemplatePreset = {
         "id": "marquee-001",
         "type": "marquee",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "마퀴"
-        },
         "fields": {
           "item1": "Single Origin",
           "item2": "직접 로스팅",
@@ -78,10 +66,7 @@ const preset: TemplatePreset = {
         "id": "menu-001",
         "type": "menu",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "메뉴"
-        },
+        "menu": { "label": "메뉴" },
         "fields": {
           "eyebrow": "메뉴",
           "title": "매일 정성껏\n내리는 한 잔",
@@ -137,10 +122,7 @@ const preset: TemplatePreset = {
         "id": "story-001",
         "type": "story",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "카페 소개"
-        },
+        "menu": { "label": "카페 소개" },
         "fields": {
           "eyebrow": "카페 소개",
           "title1": "커피 한 잔에는",
@@ -161,10 +143,7 @@ const preset: TemplatePreset = {
         "id": "space-001",
         "type": "space",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "공간"
-        },
+        "menu": { "label": "공간" },
         "fields": {
           "eyebrow": "공간",
           "title": "머물고 싶은\n공간을 만듭니다",
@@ -187,10 +166,6 @@ const preset: TemplatePreset = {
         "id": "testimonials-001",
         "type": "testimonials",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "손님 후기"
-        },
         "fields": {
           "eyebrow": "손님 후기",
           "title": "이 공간에서\n느낀 것들",
@@ -219,10 +194,7 @@ const preset: TemplatePreset = {
         "id": "visit-001",
         "type": "visit",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "방문 안내"
-        },
+        "menu": { "label": "방문 안내" },
         "fields": {
           "backgroundImage": { "url": "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1600&q=70" },
           "eyebrow": "방문 안내",
@@ -246,10 +218,6 @@ const preset: TemplatePreset = {
         "id": "footer-001",
         "type": "footer",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "푸터"
-        },
         "fields": {
           "brandName": "MONO",
           "brandSubtext": "Specialty Coffee & Bakery",

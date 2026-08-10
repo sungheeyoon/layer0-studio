@@ -12,7 +12,7 @@ export const defaultContent: ContentModel = {
   mode: 'single',
   templateKey: 'legal-default',
   globalStyles: defaultGlobalStyles,
-  sections: [], // Empty skeleton; presets provide the sections
+  blocks: [], // Empty skeleton; presets provide the sections
 };
 
 export default function LegalDefaultTemplate(props: TemplateRendererProps) {

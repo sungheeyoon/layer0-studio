@@ -1,66 +1,32 @@
-/**
- * The write-side mirror of `deriveNav` (see `template.entity.ts`).
- *
- * ADR-0007 collapsed the Single/Multi union for nav *reads* into one generic
- * path. The Editor's nav *mutations* (reorder / toggle `visible` / toggle
- * `nav.visible` / relabel) were still duplicated per Site Type. This module is
- * that collapse for writes: a pure generic core over "an ordered list of
- * nav-bearing items" (a Single Site's `SingleSection[]` or a Multi Site's
- * `Page[]` — both satisfy `{ id, visible, nav }`), plus thin
- * mode-agnostic dispatchers the Editor calls regardless of Site Type.
- *
- * The Single-only pin rule (nav pinned top, footer pinned bottom) lives here
- * (`isSinglePinned`), enforced inside `moveItem`.
- */
 import {
-  NavMeta,
   ContentModel,
-  SingleSection,
+  MenuEntry,
+  SingleBlock,
   isSingleContent,
 } from './template.entity';
 
 export type MoveDirection = 'up' | 'down';
+export type MenuPlacement = 'none' | 'header' | 'footer';
 
-interface IdItem {
-  id: string;
-}
-interface VisibleItem extends IdItem {
-  visible: boolean;
-}
-interface NavItem extends IdItem {
-  nav: NavMeta;
-}
+interface IdItem { id: string }
+interface VisibleItem extends IdItem { visible: boolean }
 
-/**
- * Move the item one step up/down within its ordered list. Never crosses a
- * pinned item (so Single keeps nav top / footer bottom). Pure: returns a new
- * array on success, or the *same* reference (no-op) when the id is unknown, the
- * move hits a boundary, or a pin blocks it.
- */
 export function moveItem<T extends IdItem>(
   items: T[],
   id: string,
   direction: MoveDirection,
   isPinned: (item: T) => boolean = () => false,
 ): T[] {
-  const i = items.findIndex((x) => x.id === id);
-  if (i < 0) return items;
-  const target = direction === 'up' ? i - 1 : i + 1;
+  const index = items.findIndex((item) => item.id === id);
+  if (index < 0) return items;
+  const target = direction === 'up' ? index - 1 : index + 1;
   if (target < 0 || target >= items.length) return items;
-  // Never let an item cross a pin (keeps nav top / footer bottom).
-  if (isPinned(items[i]) || isPinned(items[target])) return items;
+  if (isPinned(items[index]) || isPinned(items[target])) return items;
   const next = items.slice();
-  [next[i], next[target]] = [next[target], next[i]];
+  [next[index], next[target]] = [next[target], next[index]];
   return next;
 }
 
-/**
- * Move `activeId` to the slot currently held by `overId` (drag-and-drop
- * reorder). Uses `arrayMove` semantics: indices are read from the original
- * array, so it pairs directly with a sortable list's active/over ids. Never
- * moves a pinned item and never displaces one (keeps Single's nav top / footer
- * bottom). Pure: returns a new array, or the same reference on a no-op.
- */
 export function reorderItem<T extends IdItem>(
   items: T[],
   activeId: string,
@@ -68,87 +34,76 @@ export function reorderItem<T extends IdItem>(
   isPinned: (item: T) => boolean = () => false,
 ): T[] {
   if (activeId === overId) return items;
-  const from = items.findIndex((x) => x.id === activeId);
-  const to = items.findIndex((x) => x.id === overId);
-  if (from < 0 || to < 0) return items;
-  if (isPinned(items[from]) || isPinned(items[to])) return items;
+  const from = items.findIndex((item) => item.id === activeId);
+  const to = items.findIndex((item) => item.id === overId);
+  if (from < 0 || to < 0 || isPinned(items[from]) || isPinned(items[to])) return items;
   const next = items.slice();
   const [moved] = next.splice(from, 1);
   next.splice(to, 0, moved);
   return next;
 }
 
-/** Flip an item's `visible` (routable / on-page). Pure; no-op on unknown id. */
 export function toggleVisible<T extends VisibleItem>(items: T[], id: string): T[] {
-  return items.map((x) => (x.id === id ? { ...x, visible: !x.visible } : x));
+  return items.map((item) => item.id === id ? { ...item, visible: !item.visible } : item);
 }
 
-/**
- * Flip an item's `nav.visible` (shown in the nav menu) — the axis independent
- * of `visible`. Pure; no-op on unknown id.
- */
-export function toggleNavVisible<T extends NavItem>(items: T[], id: string): T[] {
-  return items.map((x) =>
-    x.id === id ? { ...x, nav: { ...x.nav, visible: !x.nav.visible } } : x,
-  );
+export function isSinglePinned(block: SingleBlock): boolean {
+  return block.type === 'nav' || block.type === 'footer';
 }
-
-/** Set an item's `nav.label` (menu text / page name). Pure; no-op on unknown id. */
-export function relabelNav<T extends NavItem>(items: T[], id: string, label: string): T[] {
-  return items.map((x) => (x.id === id ? { ...x, nav: { ...x.nav, label } } : x));
-}
-
-/**
- * The Single pin rule: the nav section is pinned to the top, the footer to the
- * bottom, so neither participates in reordering. See ADR-0007 §D4 + PLAN §5.
- */
-export function isSinglePinned(section: SingleSection): boolean {
-  return section.type === 'nav' || section.type === 'footer';
-}
-
-// ── Mode-agnostic dispatchers ────────────────────────────────────────────────
-// The Editor's single entry points: pick the nav-source array (+ pin rule) by
-// `mode` and write the result back onto `json`. They mutate the passed `json`,
-// which is the already-`structuredClone`d draft from the Editor's
-// `updateContent` — consistent with every other handler there.
 
 export function moveNavItem(json: ContentModel, id: string, direction: MoveDirection): void {
-  if (isSingleContent(json)) {
-    json.sections = moveItem(json.sections, id, direction, isSinglePinned);
-  } else {
-    json.pages = moveItem(json.pages, id, direction);
-  }
+  if (isSingleContent(json)) json.blocks = moveItem(json.blocks, id, direction, isSinglePinned);
+  else json.pages = moveItem(json.pages, id, direction);
 }
 
-/** Drag-and-drop reorder: move `activeId` to `overId`'s slot. See `reorderItem`. */
 export function reorderNavItem(json: ContentModel, activeId: string, overId: string): void {
   if (isSingleContent(json)) {
-    json.sections = reorderItem(json.sections, activeId, overId, isSinglePinned);
+    json.blocks = reorderItem(json.blocks, activeId, overId, isSinglePinned);
   } else {
     json.pages = reorderItem(json.pages, activeId, overId);
   }
 }
 
 export function toggleNavItemVisible(json: ContentModel, id: string): void {
-  if (isSingleContent(json)) {
-    json.sections = toggleVisible(json.sections, id);
-  } else {
-    json.pages = toggleVisible(json.pages, id);
-  }
+  if (isSingleContent(json)) json.blocks = toggleVisible(json.blocks, id);
+  else json.pages = toggleVisible(json.pages, id);
 }
 
-export function toggleNavItemNavVisible(json: ContentModel, id: string): void {
-  if (isSingleContent(json)) {
-    json.sections = toggleNavVisible(json.sections, id);
-  } else {
-    json.pages = toggleNavVisible(json.pages, id);
-  }
+/** Single only: menu presence is the inclusion switch. */
+export function toggleSingleMenu(json: ContentModel, id: string, defaultLabel: string): void {
+  if (!isSingleContent(json)) return;
+  const block = json.blocks.find((item) => item.id === id);
+  if (!block) return;
+  if (block.menu) delete block.menu;
+  else block.menu = { label: defaultLabel };
 }
 
-export function relabelNavItem(json: ContentModel, id: string, label: string): void {
-  if (isSingleContent(json)) {
-    json.sections = relabelNav(json.sections, id, label);
-  } else {
-    json.pages = relabelNav(json.pages, id, label);
+/** Multi only: explicit three-state projection. */
+export function setPageMenuPlacement(
+  json: ContentModel,
+  id: string,
+  placement: MenuPlacement,
+): void {
+  if (isSingleContent(json)) return;
+  const page = json.pages.find((item) => item.id === id);
+  if (!page) return;
+  if (placement === 'none') {
+    delete page.menu;
+    return;
   }
+  const label = page.menu?.label || page.name;
+  page.menu = placement === 'header' ? { label } : { label, placement: 'footer' };
+}
+
+export function relabelMenuItem(json: ContentModel, id: string, label: string): void {
+  const items: Array<{ id: string; menu?: MenuEntry | { label: string } }> =
+    isSingleContent(json) ? json.blocks : json.pages;
+  const item = items.find((candidate) => candidate.id === id);
+  if (item?.menu) item.menu.label = label;
+}
+
+export function renamePage(json: ContentModel, id: string, name: string): void {
+  if (isSingleContent(json)) return;
+  const page = json.pages.find((item) => item.id === id);
+  if (page) page.name = name;
 }

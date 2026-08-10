@@ -15,7 +15,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { presetMap, presetSlugs } from '../src/templates/_generated';
-import { isSingleContent, NavMeta } from '../src/domain/entities/template.entity';
+import { isSingleContent } from '../src/domain/entities/template.entity';
 import {
   migrateSingleSiteJson,
   type SeedNavMap,
@@ -45,9 +45,9 @@ async function buildSeedNavMap(): Promise<SeedNavMap> {
     const { default: preset } = await presetMap[slug]();
     const tj = preset.content;
     if (!isSingleContent(tj)) continue; // Multi seeds have no single sections
-    const byId = new Map<string, NavMeta>();
-    for (const s of tj.sections) {
-      byId.set(s.id, { visible: s.nav.visible, label: s.nav.label });
+    const byId = new Map<string, { visible: boolean; label: string }>();
+    for (const s of tj.blocks) {
+      byId.set(s.id, { visible: Boolean(s.menu), label: s.menu?.label ?? s.type });
     }
     map.set(tj.templateKey, byId);
   }
@@ -110,7 +110,7 @@ async function run() {
     if (site.status === 'migrated' || snap.status === 'migrated') {
       const beforeSections = sectionCount(row.site_json);
       const afterSections = isSingleContent(site.json as never)
-        ? (site.json as { sections: unknown[] }).sections.length
+        ? (site.json as import('../src/domain/entities/template.entity').SingleContent).blocks.length
         : 0;
       console.log(
         `  ✏️  ${label}  [${site.status}]  sections ${beforeSections} → ${afterSections}`,

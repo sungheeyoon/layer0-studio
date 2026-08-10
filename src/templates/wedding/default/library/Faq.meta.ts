@@ -1,4 +1,4 @@
-import { SectionComponentMeta } from '../../../types';
+import { BlockComponentMeta } from '../../../types';
 import type { FieldsSchema } from '@/domain/entities/template.entity';
 
 /**
@@ -20,7 +20,7 @@ export const faqSchema = {
   a4: { type: 'textarea', label: '답변 4' },
 } as const satisfies FieldsSchema;
 
-export const faqMeta: SectionComponentMeta = {
+export const faqMeta: BlockComponentMeta = {
   componentKey: 'faq',
   category: 'content',
   label: 'Wedding FAQ',

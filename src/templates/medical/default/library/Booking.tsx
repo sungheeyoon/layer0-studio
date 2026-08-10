@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { PhoneIcon, ChatIcon, ClockIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -14,8 +14,8 @@ const bookingSchema = {
 
 type BookingContent = ValuesOf<typeof bookingSchema>;
 
-const Booking: SectionComponent = function Booking({ section }: TemplateSectionProps) {
-  const content = section.fields as BookingContent;
+const Booking: BlockComponent = function Booking({ block }: TemplateBlockProps) {
+  const content = block.fields as BookingContent;
   const label = content.eyebrow || '';
   const title = content.title || '';
   const description = content.description || '';

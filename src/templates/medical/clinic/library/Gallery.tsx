@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -24,9 +24,9 @@ const gallerySchema = {
 
 type GalleryContent = ValuesOf<typeof gallerySchema>;
 
-const Gallery: SectionComponent = function Gallery(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as GalleryContent;
+const Gallery: BlockComponent = function Gallery(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as GalleryContent;
   const eyebrow = content.eyebrow;
   const heading = content.heading;
   const items = content.items ?? [];

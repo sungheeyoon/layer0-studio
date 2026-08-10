@@ -25,7 +25,7 @@
 import {
   ContentModel,
   ImageValue,
-  allSections,
+  allBlocks,
 } from './template.entity';
 
 /**
@@ -51,7 +51,7 @@ export type MoveDirection = 'up' | 'down';
 
 /**
  * Set a field on the section identified by `sectionId`, in place, regardless of
- * Site Type (resolves via `allSections`). No-op on an unknown section.
+ * Site Type (resolves via `allBlocks`). No-op on an unknown section.
  * Mutates the passed `json` — call inside the Editor's `updateContent` draft.
  *
  * Unlike its pre-ADR-0016 self this *creates* an absent key rather than
@@ -67,7 +67,7 @@ export function setFieldValue(
   fieldKey: string,
   value: FieldValue,
 ): void {
-  const section = allSections(json).find((s) => s.id === sectionId);
+  const section = allBlocks(json).find((s) => s.id === sectionId);
   if (section) section.fields[fieldKey] = value;
 }
 

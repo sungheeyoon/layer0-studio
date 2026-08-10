@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 import { RenderMultiSite } from '../renderMultiSite';
-import { TemplateLibrary, NavSectionProps, SectionComponent } from '../types';
+import { TemplateLibrary, NavBlockProps, BlockComponent } from '../types';
 import {
   ContentModel,
   isMultiContent,
@@ -25,8 +25,8 @@ const meta = (componentKey: string) => ({
 
 // nav/footer take injected page links; the renderer passes them via createElement
 // (see renderMultiSite), so — like the real templates — read them through a cast.
-const Nav: SectionComponent = (props) => {
-  const { navItems } = props as NavSectionProps;
+const Nav: BlockComponent = (props) => {
+  const { navItems } = props as NavBlockProps;
   return (
     <header>
       <span>Acme</span>
@@ -41,12 +41,12 @@ const Nav: SectionComponent = (props) => {
   );
 };
 
-const Body: SectionComponent = ({ section }) => (
-  <main>{(section.fields as { text?: string }).text ?? ''}</main>
+const Body: BlockComponent = ({ block }) => (
+  <main>{(block.fields as { text?: string }).text ?? ''}</main>
 );
 
-const Footer: SectionComponent = (props) => {
-  const { navItems } = props as NavSectionProps;
+const Footer: BlockComponent = (props) => {
+  const { navItems } = props as NavBlockProps;
   return (
     <footer>
       {navItems.map((i) => (
@@ -79,7 +79,7 @@ const content: ContentModel = {
     fontSize: '16px',
     layout: 'default',
   },
-  shared: {
+  chrome: {
     header: [{ id: 'nav', type: 'nav', visible: true, fields: {} }],
     footer: [{ id: 'footer', type: 'footer', visible: true, fields: {} }],
   },
@@ -88,8 +88,9 @@ const content: ContentModel = {
       id: 'page-home',
       slug: '',
       visible: true,
-      nav: { visible: true, label: 'Home' },
-      sections: [
+      name: 'Home',
+      menu: { label: 'Home' },
+      blocks: [
         { id: 's-home', type: 'body', visible: true, fields: text('We build dependable software.') },
       ],
     },
@@ -97,8 +98,9 @@ const content: ContentModel = {
       id: 'page-about',
       slug: 'about',
       visible: true,
-      nav: { visible: true, label: 'About' },
-      sections: [
+      name: 'About',
+      menu: { label: 'About' },
+      blocks: [
         { id: 's-about', type: 'body', visible: true, fields: text('A team that sweats the details.') },
       ],
     },
@@ -106,8 +108,9 @@ const content: ContentModel = {
       id: 'page-privacy',
       slug: 'privacy',
       visible: true,
-      nav: { visible: false, label: 'Privacy' },
-      sections: [
+      name: 'Privacy',
+      menu: { label: 'Privacy', placement: 'footer' },
+      blocks: [
         { id: 's-privacy', type: 'body', visible: true, fields: text('Privacy policy.') },
       ],
     },
@@ -132,8 +135,8 @@ describe('RenderMultiSite — Multi tracer assembly', () => {
   it('the fixture is a Multi Site with a shared header/footer and ≥2 pages', () => {
     expect(isMultiContent(content)).toBe(true);
     if (!isMultiContent(content)) return;
-    expect(content.shared.header.length).toBeGreaterThan(0);
-    expect(content.shared.footer.length).toBeGreaterThan(0);
+    expect(content.chrome.header.length).toBeGreaterThan(0);
+    expect(content.chrome.footer.length).toBeGreaterThan(0);
     expect(content.pages.length).toBeGreaterThanOrEqual(2);
   });
 

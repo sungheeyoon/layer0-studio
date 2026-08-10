@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../cafe.module.css';
 import { SunIcon, BuildingsIcon, LaptopIcon, BookIcon, VinylIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -23,8 +23,8 @@ const spaceSchema = {
 
 type SpaceContent = ValuesOf<typeof spaceSchema>;
 
-const Space: SectionComponent = function Space({ section }: TemplateSectionProps) {
-  const content = section.fields as SpaceContent;
+const Space: BlockComponent = function Space({ block }: TemplateBlockProps) {
+  const content = block.fields as SpaceContent;
   const label = content.eyebrow || '공간';
   const title = content.title || '머물고 싶은\n공간을 만듭니다';
   const description = content.description || '';

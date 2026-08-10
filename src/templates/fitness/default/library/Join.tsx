@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { PhoneIcon, MapPinIcon, ClockIcon, ChatIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -16,8 +16,8 @@ const joinSchema = {
 
 type JoinContent = ValuesOf<typeof joinSchema>;
 
-const Join: SectionComponent = function Join({ section }: TemplateSectionProps) {
-  const content = section.fields as JoinContent;
+const Join: BlockComponent = function Join({ block }: TemplateBlockProps) {
+  const content = block.fields as JoinContent;
   const label = content.eyebrow || '무료 체험';
   const titleLine1 = content.title1 || '지금 시작하면';
   const titleLine2 = content.title2 || '첫 주가 무료';

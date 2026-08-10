@@ -3,7 +3,7 @@ import { ContentModel } from '../../entities/template.entity';
 /**
  * A single validation finding against a Site's content (`ContentModel`).
  * `code` is a stable identifier (see the catalog in docs/TEMPLATE_SYSTEM.md §6);
- * `path` points at the offending location (e.g. `sections[id=hero].data.title`).
+ * `path` points at the offending location (e.g. `blocks[id=hero].fields.title`).
  */
 export interface SiteContentValidationIssue {
   code: string;

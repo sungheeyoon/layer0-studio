@@ -5,7 +5,7 @@ import {
   FieldDescriptor,
   FieldsSchema,
   ImageValue,
-  Section,
+  Block,
 } from '@/domain/entities/template.entity';
 import {
   EditableItem,
@@ -65,7 +65,7 @@ export function SectionFields({
   onError,
   issues,
 }: {
-  section: Section;
+  section: Block;
   schema?: FieldsSchema;
   onFieldChange: (sectionId: string, fieldKey: string, value: FieldValue) => void;
   onError: (msg: string) => void;

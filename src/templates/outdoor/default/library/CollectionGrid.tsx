@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -24,9 +24,9 @@ const collectionGridSchema = {
 
 type CollectionGridContent = ValuesOf<typeof collectionGridSchema>;
 
-const CollectionGrid: SectionComponent = function CollectionGrid(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as CollectionGridContent;
+const CollectionGrid: BlockComponent = function CollectionGrid(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as CollectionGridContent;
   const eyebrow = content.eyebrow;
   const heading = content.heading;
   const items = content.items ?? [];

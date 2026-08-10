@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -30,9 +30,9 @@ const appointmentFormSchema = {
 
 type AppointmentFormContent = ValuesOf<typeof appointmentFormSchema>;
 
-const AppointmentForm: SectionComponent = function AppointmentForm(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as AppointmentFormContent;
+const AppointmentForm: BlockComponent = function AppointmentForm(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as AppointmentFormContent;
   const heading = content.heading || '온라인 예약';
   const description = content.description;
   const submitLabel = content.submitLabel || '예약 신청';

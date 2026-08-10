@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -25,9 +25,9 @@ const doctorsSchema = {
 
 type DoctorsContent = ValuesOf<typeof doctorsSchema>;
 
-const Doctors: SectionComponent = function Doctors(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as DoctorsContent;
+const Doctors: BlockComponent = function Doctors(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as DoctorsContent;
   const eyebrow = content.eyebrow;
   const heading = content.heading;
   const items = content.items ?? [];

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
@@ -15,8 +15,8 @@ const gallerySchema = {
 
 type GalleryContent = ValuesOf<typeof gallerySchema>;
 
-const Gallery: SectionComponent = function Gallery({ section }: TemplateSectionProps) {
-  const content = section.fields as GalleryContent;
+const Gallery: BlockComponent = function Gallery({ block }: TemplateBlockProps) {
+  const content = block.fields as GalleryContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
 

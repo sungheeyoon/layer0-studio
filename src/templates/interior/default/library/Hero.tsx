@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon, PhoneIcon, MedalIcon, ShieldCheckIcon, StarIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -20,8 +20,8 @@ const heroSchema = {
 
 type HeroContent = ValuesOf<typeof heroSchema>;
 
-const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const content = section.fields as HeroContent;
+const Hero: BlockComponent = function Hero({ block }: TemplateBlockProps) {
+  const content = block.fields as HeroContent;
   const label = content.eyebrow || 'Seoul Premium Interior Studio';
   const estLabel = content.estLabel || 'Est. 2015';
   const title = content.title || '';

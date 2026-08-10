@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -25,9 +25,9 @@ const activityGridSchema = {
 
 type ActivityGridContent = ValuesOf<typeof activityGridSchema>;
 
-const ActivityGrid: SectionComponent = function ActivityGrid(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as ActivityGridContent;
+const ActivityGrid: BlockComponent = function ActivityGrid(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as ActivityGridContent;
   const eyebrow = content.eyebrow;
   const heading = content.heading;
   const items = content.items ?? [];

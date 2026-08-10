@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 const heroSchema = {
@@ -13,8 +13,8 @@ const heroSchema = {
 
 type HeroContent = ValuesOf<typeof heroSchema>;
 
-const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const content = section.fields as HeroContent;
+const Hero: BlockComponent = function Hero({ block }: TemplateBlockProps) {
+  const content = block.fields as HeroContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const subtitle = content.subtitle || '';

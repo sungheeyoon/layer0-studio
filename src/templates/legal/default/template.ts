@@ -13,15 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "nav-001",
         "type": "nav",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "네비게이션"
-        },
         "fields": {
           "brandName": "하람",
           "brandSubtext": "Law & Tax",
@@ -33,10 +29,6 @@ const preset: TemplatePreset = {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "법무부 등록 · 한국세무사회 정회원"
-        },
         "fields": {
           "eyebrow": "법무부 등록 · 한국세무사회 정회원",
           "title": "23년의 전문성,\n귀사의 든든한\n법률·세무 파트너",
@@ -57,10 +49,6 @@ const preset: TemplatePreset = {
         "id": "trust-strip-001",
         "type": "trust-strip",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "신뢰 배지"
-        },
         "fields": {
           "stat1Value": "4,700",
           "stat1Label": "법인 설립·자문",
@@ -76,10 +64,7 @@ const preset: TemplatePreset = {
         "id": "services-001",
         "type": "services",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "업무 분야"
-        },
+        "menu": { "label": "업무 분야" },
         "fields": {
           "title": "어떤 법률·세무 문제든\n하람이 함께합니다",
           "service1Title": "기업법무 · 계약",
@@ -100,10 +85,7 @@ const preset: TemplatePreset = {
         "id": "about-001",
         "type": "about",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "사무소 소개"
-        },
+        "menu": { "label": "사무소 소개" },
         "fields": {
           "title": "하람을 선택하는\n세 가지 이유",
           "body": "23년간 강남에서 하나의 사무소를 운영해온 이유는 하나입니다 — 의뢰인과의 신뢰를 지키는 것.",
@@ -119,10 +101,7 @@ const preset: TemplatePreset = {
         "id": "team-001",
         "type": "team",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "구성원"
-        },
+        "menu": { "label": "구성원" },
         "fields": {
           "title": "하람의 전문가를 소개합니다",
           "member1Name": "김준혁",
@@ -143,10 +122,7 @@ const preset: TemplatePreset = {
         "id": "process-001",
         "type": "process",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "진행 절차"
-        },
+        "menu": { "label": "진행 절차" },
         "fields": {
           "title": "투명하고 체계적인 진행 절차",
           "step1Title": "무료 초기 상담",
@@ -165,10 +141,6 @@ const preset: TemplatePreset = {
         "id": "testimonials-001",
         "type": "testimonials",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "testimonials"
-        },
         "fields": {
           "title": "의뢰인들이 직접 말하는 하람",
           "review1Body": "세무조사 통보를 받고 너무 당황했는데, 세무사님이 전략을 잘 세워주셔서 세액이 크게 줄었습니다.",
@@ -186,10 +158,7 @@ const preset: TemplatePreset = {
         "id": "faq-001",
         "type": "faq",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "자주 묻는 질문"
-        },
+        "menu": { "label": "자주 묻는 질문" },
         "fields": {
           "title": "자주 묻는 질문",
           "q1": "초기 상담은 정말 무료인가요?",
@@ -204,10 +173,7 @@ const preset: TemplatePreset = {
         "id": "contact-001",
         "type": "contact",
         "visible": true,
-        "nav": {
-          "visible": true,
-          "label": "문의하기"
-        },
+        "menu": { "label": "문의하기" },
         "fields": {
           "title": "지금 바로 상담하세요.\n첫 상담은 무료입니다.",
           "body": "문제가 더 커지기 전에 전문가의 판단을 받아보세요.",
@@ -220,10 +186,6 @@ const preset: TemplatePreset = {
         "id": "footer-001",
         "type": "footer",
         "visible": true,
-        "nav": {
-          "visible": false,
-          "label": "푸터"
-        },
         "fields": {
           "brandName": "하람 법률세무사무소",
           "copyright": "© 2024 하람 법률세무사무소. All rights reserved.",

@@ -1,18 +1,18 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../corporate.module.css';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 const aboutSchema = {
-  title: { type: 'text', label: 'Section Title', required: true },
+  title: { type: 'text', label: 'Block Title', required: true },
   subtitle: { type: 'text', label: 'Subtitle' },
   body: { type: 'textarea', label: 'Description' },
-  image: { type: 'image', label: 'Section Image' },
+  image: { type: 'image', label: 'Block Image' },
 } as const satisfies FieldsSchema;
 
 type AboutContent = ValuesOf<typeof aboutSchema>;
 
-const About: SectionComponent = function About({ section }: TemplateSectionProps) {
-  const content = section.fields as AboutContent;
+const About: BlockComponent = function About({ block }: TemplateBlockProps) {
+  const content = block.fields as AboutContent;
   const title = content.title || 'About Us';
   const subtitle = content.subtitle || '';
   const body = content.body || '';

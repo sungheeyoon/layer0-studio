@@ -35,20 +35,18 @@ const USER_ACTIONABLE_CODES: ReadonlySet<string> = new Set([
 const GLOBAL_STYLES_PATH = /^globalStyles\.([A-Za-z]+)$/;
 
 /**
- * `…sections[id=<id>].fields.<key>` — the tail is identical for all three shapes
- * a Section path can take (`sections[…]` for Single, `pages[slug=…].sections[…]`
- * and `shared.header.sections[…]` for Multi), so matching the tail covers every
- * Site Type without knowing which one produced it.
+ * `…blocks[id=<id>].fields.<key>` — the tail is identical for Single, Multi
+ * Page, and Chrome Block paths, so matching it covers every Site Type.
  *
  * `[^.[]+$` deliberately fails to match a nested array-item path
  * (`….fields.menu[<item.id>].name`, ADR-0016 §4-4): those fields render inside
  * `ArrayFieldEditor`, which has no anchor to hang a message on. No user-actionable
- * rule reaches inside array items today — Rule 11 walks only top-level Section
+ * rule reaches inside array items today — Rule 11 walks only top-level Block
  * fields — so nothing is currently dropped by this.
  */
-const SECTION_FIELD_PATH = /sections\[id=([^\]]+)\]\.fields\.([^.[]+)$/;
+const BLOCK_FIELD_PATH = /blocks\[id=([^\]]+)\]\.fields\.([^.[]+)$/;
 
-/** Lookup key for one Section's Field. */
+/** Lookup key for one Block's Field. */
 export function fieldIssueKey(sectionId: string, fieldKey: string): string {
   return `${sectionId}::${fieldKey}`;
 }
@@ -79,7 +77,7 @@ export function indexIssues(issues: readonly ValidationIssue[]): IssueIndex {
       continue;
     }
 
-    const field = SECTION_FIELD_PATH.exec(issue.path);
+    const field = BLOCK_FIELD_PATH.exec(issue.path);
     if (field) {
       (index.fields[fieldIssueKey(field[1], field[2])] ??= []).push(issue.code);
     }

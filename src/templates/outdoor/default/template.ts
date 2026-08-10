@@ -69,7 +69,7 @@ const preset: TemplatePreset = {
       fontSize: '16px',
       layout: 'wide',
     },
-    shared: {
+    chrome: {
       header: [
         {
           id: 'nav-001',
@@ -99,13 +99,14 @@ const preset: TemplatePreset = {
         id: 'page-home',
         slug: 'home',
         visible: true,
-        nav: { visible: true, label: '홈' },
+        name: '홈',
+        menu: { label: '홈' },
         seo: {
           title: '능선 — 산을 잇는 아웃도어 브랜드',
           description:
             '오래 걷는 사람을 위한 장비. 능선의 컬렉션, 액티비티, 그리고 산의 기록을 만나보세요.',
         },
-        sections: [
+        blocks: [
           {
             id: 'home-hero',
             type: 'hero',
@@ -251,12 +252,13 @@ const preset: TemplatePreset = {
         id: 'page-shop',
         slug: 'shop',
         visible: true,
-        nav: { visible: true, label: '스토어' },
+        name: '스토어',
+        menu: { label: '스토어' },
         seo: {
           title: '스토어 — 능선',
           description: '재킷, 백팩, 신발까지. 능선이 직접 테스트한 아웃도어 장비를 만나보세요.',
         },
-        sections: [
+        blocks: [
           {
             id: 'shop-header',
             type: 'pageHeader',
@@ -353,12 +355,13 @@ const preset: TemplatePreset = {
         id: 'page-collections',
         slug: 'collections',
         visible: true,
-        nav: { visible: true, label: '컬렉션' },
+        name: '컬렉션',
+        menu: { label: '컬렉션' },
         seo: {
           title: '컬렉션 — 능선',
           description: '계절과 지형에 맞춘 능선의 라인업. 리지라인부터 포레스트 베이스까지.',
         },
-        sections: [
+        blocks: [
           {
             id: 'col-header',
             type: 'pageHeader',
@@ -438,12 +441,13 @@ const preset: TemplatePreset = {
         id: 'page-activities',
         slug: 'activities',
         visible: true,
-        nav: { visible: true, label: '액티비티' },
+        name: '액티비티',
+        menu: { label: '액티비티' },
         seo: {
           title: '액티비티 — 능선',
           description: '능선이 직접 안내하는 가이드 트레킹과 워크숍. 함께 걸으며 장비를 경험하세요.',
         },
-        sections: [
+        blocks: [
           {
             id: 'act-header',
             type: 'pageHeader',
@@ -526,12 +530,13 @@ const preset: TemplatePreset = {
         id: 'page-journal',
         slug: 'journal',
         visible: true,
-        nav: { visible: true, label: '저널' },
+        name: '저널',
+        menu: { label: '저널' },
         seo: {
           title: '저널 — 능선',
           description: '산의 기록. 능선 메이커스가 전하는 코스 가이드, 장비 이야기, 필드 노트.',
         },
-        sections: [
+        blocks: [
           {
             id: 'jrn-header',
             type: 'pageHeader',
@@ -622,12 +627,13 @@ const preset: TemplatePreset = {
         id: 'page-about',
         slug: 'about',
         visible: true,
-        nav: { visible: true, label: '브랜드' },
+        name: '브랜드',
+        menu: { label: '브랜드' },
         seo: {
           title: '브랜드 — 능선',
           description: '능선이 어떻게 시작됐고, 무엇을 약속하는지. 산을 걷는 사람들이 만드는 브랜드.',
         },
-        sections: [
+        blocks: [
           {
             id: 'about-header',
             type: 'pageHeader',
@@ -730,12 +736,13 @@ const preset: TemplatePreset = {
         id: 'page-contact',
         slug: 'contact',
         visible: true,
-        nav: { visible: true, label: '문의' },
+        name: '문의',
+        menu: { label: '문의' },
         seo: {
           title: '문의 — 능선',
           description: '능선 매장과 작업실 안내, 그리고 협업·도매 문의 연락처.',
         },
-        sections: [
+        blocks: [
           {
             id: 'contact-header',
             type: 'pageHeader',

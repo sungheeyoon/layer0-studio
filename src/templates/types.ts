@@ -1,10 +1,10 @@
-import { ContentModel, Section, FieldsSchema } from '@/domain/entities/template.entity';
+import { Block, ContentModel, FieldsSchema } from '@/domain/entities/template.entity';
 import { ComponentType } from 'react';
 
 /**
  * Metadata for a section component
  */
-export interface SectionComponentMeta {
+export interface BlockComponentMeta {
   componentKey: string;            // Unique key in the library ('hero-video', 'menu-grid', etc.)
   category: string;                 // 'hero' | 'menu' | 'story' | 'footer' | ...
   label: string;                    // Display name in admin catalog
@@ -18,16 +18,16 @@ export interface SectionComponentMeta {
  * imports of client modules are wrapped as client references and the module
  * body never runs server-side. For those, meta is supplied via libEntry().
  */
-export type SectionComponent = ComponentType<TemplateSectionProps> & {
-  meta?: SectionComponentMeta;
+export type BlockComponent = ComponentType<TemplateBlockProps> & {
+  meta?: BlockComponentMeta;
 };
 
 /**
  * One entry in a template's library: the component plus its server-resolved metadata.
  */
 export interface TemplateLibraryEntry {
-  Component: SectionComponent;
-  meta: SectionComponentMeta;
+  Component: BlockComponent;
+  meta: BlockComponentMeta;
 }
 
 /**
@@ -43,8 +43,8 @@ export interface TemplateLibrary {
  * explicitly from a sibling `<Component>.meta.ts` file.
  */
 export function libEntry(
-  Component: SectionComponent,
-  metaOverride?: SectionComponentMeta,
+  Component: BlockComponent,
+  metaOverride?: BlockComponentMeta,
 ): TemplateLibraryEntry {
   const meta = metaOverride ?? Component.meta;
   if (!meta) {
@@ -108,8 +108,8 @@ export interface TemplateRendererProps {
 }
 
 /** Template individual section renderer Props (for components within slots) */
-export interface TemplateSectionProps {
-  section: Section;
+export interface TemplateBlockProps {
+  block: Block;
   isSelected?: boolean;
   onClick?: () => void;
 }
@@ -122,12 +122,12 @@ export interface NavItem {
 
 /**
  * Props for a nav section component. The nav can't see its siblings through
- * `TemplateSectionProps` (which only carries its own `section`), so the site
+ * `TemplateBlockProps` (which only carries its own `section`), so the site
  * renderer projects the menu (`deriveNav`) and injects it directly into the
  * `type === 'nav'` section. `navItems` is supplied by the renderer (always
  * present — possibly empty). See ADR-0007.
  */
-export interface NavSectionProps extends TemplateSectionProps {
+export interface NavBlockProps extends TemplateBlockProps {
   navItems: NavItem[];
 }
 
@@ -145,7 +145,7 @@ export interface TemplateModule {
  *
  * Convention: each dimension's entries become `--{dimension-singular}-{key}`
  * CSS custom properties on the template root, e.g. `colors.primary` →
- * `--color-primary`. Section components reference these via `var(--color-primary)`.
+ * `--color-primary`. Block components reference these via `var(--color-primary)`.
  *
  * AI generation pipeline (issues #11+) emits this shape directly so visual
  * identity is captured as fields, not as ad-hoc CSS strings.

@@ -4,9 +4,7 @@ A no-code website builder. Users pick a **Template**, edit it visually, and publ
 
 This file is the vocabulary only — one or two sentences per term, plus the words to avoid. Reasoning lives in `docs/adr/`; operational detail lives in `CLAUDE.md` and `docs/TEMPLATE_SYSTEM.md`.
 
-> ⚠️ **이 문서는 일부가 TO-BE(구현 대기)다 — 코드와 다르다.** **Block**, **Chrome**, **Menu**/`MenuEntry`, **Field**(스키마 서술자) / **Value**(인스턴스 데이터) 는 [ADR-0016](./docs/adr/0016-block-rename-and-field-value-split.md) 이 확정했지만 **아직 구현되지 않았다**. 코드는 여전히 `Section` / `SingleSection` / `shared` / `NavMeta` / `{type,label,value}` 를 함께 든 `Field` 다(`SingleContent.sections`, `Page.sections`, `MultiContent.shared`). 단일 빅뱅 마이그레이션 + codemod 로 일괄 전환 예정.
->
-> **코드를 읽을 때는 ADR-0016 §2 의 AS-IS 열이 현재 진실이다.** 이 문서는 목표 어휘다. 나머지 항(Site/Template/Design Tokens/Asset/Account Erasure 등)은 코드와 일치한다.
+> ADR-0016의 Block/Chrome/Menu 어휘와 schema-first Field/Value 모델이 현재 코드와 저장 JSON의 진실이다. 이전 모양은 migration 문서의 AS-IS 설명에서만 사용한다.
 
 ## Language
 
@@ -33,8 +31,6 @@ The code-side seed configuration for one Template — its Blocks, design tokens,
 _Avoid_: Template (the row, not the source). Seed, fixture, default.
 
 ### Content structure
-
-> ⚠️ 이 절 **전체가 TO-BE** 다 — 문서 상단 배너 참조([ADR-0016](./docs/adr/0016-block-rename-and-field-value-split.md), 미구현).
 
 **Page**:
 A routable unit within a **Multi** Site — its own `slug`, a `name` (editor tab / page name, independent of nav), an ordered list of Blocks, and an optional `menu` (nav membership). **Single Sites have no Pages.**
@@ -155,4 +151,4 @@ _Avoid_: account deletion, account removal, deactivation, GDPR delete.
 - **"delete" is overloaded three ways, and the collision caused a real defect:** a User ending their account is **Account Erasure**; removing an **Asset** record is not the same as destroying its binary (that half is the **Tombstone**); `pnpm template:delete` is a dev-time CLI. Before [ADR-0014](./docs/adr/0014-account-erasure-tombstone-pipeline.md) the model had no word for the second half, so "deleted the asset" meant either thing — and account erasure did only the first.
 - **"theme" is historical.** Visual identity is per-Template (**Design Tokens**); catalog grouping is **Category**. Reading old PRs, translate "theme" to whichever job it was doing. Code residue was cleared in migration 013 (`themeKey` → `templateKey`) and PR #19 (`src/themes/` → `src/templates/`).
 - **"composition" was never a separate concept** — it is the ordered **Block** list of a Site or Page. Say "the Site's Blocks", never "the composition".
-- **Code identifiers that are not domain terms:** `templateKey` (= `<category>-<leaf>`) and "leaf" are internal — say "the cafe-default Template". `ContentModel` (formerly `TemplateJson`, [ADR-0013](./docs/adr/0013-content-model-rename.md)) is the entity-neutral name for the content shape both a Template and a Site hold; that rename changed **type names only** — at the time, Section, Field, Page, nav, Shared sections all kept theirs. A Section's `fields` container was `data` until migration 022, and its eyebrow Field was `data.label` until migration 018; both appear in old PRs. [ADR-0016](./docs/adr/0016-block-rename-and-field-value-split.md) later renamed Section→Block, `shared`→Chrome, `NavMeta`→`MenuEntry`, and split Field into Field (schema descriptor) + Value (instance data) — TO-BE, not yet implemented (see banner above).
+- **Code identifiers that are not domain terms:** `templateKey` (= `<category>-<leaf>`) and "leaf" are internal. `ContentModel` is the entity-neutral content shape shared by Template and Site. Old PRs and migrations may still say Section, `sections`, `shared`, `NavMeta`, or Field wrappers; ADR-0016 and migration 027 retired those names in current code and stored JSON.

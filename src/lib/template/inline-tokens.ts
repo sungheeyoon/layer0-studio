@@ -1,7 +1,7 @@
 /**
  * Inline design-token scanner.
  *
- * Section components must reference visual tokens through `var(--*)` (or
+ * Block components must reference visual tokens through `var(--*)` (or
  * Tailwind arbitrary values that resolve to the same CSS variables) so the
  * editor's `globalStyles` overrides propagate site-wide. Hex/rgb/hsl color
  * literals and inline `font-family` strings short-circuit that mechanism.

@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { MapPointIcon, PhoneIcon, ClockIcon, InstagramIcon, YoutubeIcon, BlogIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -17,8 +17,8 @@ const footerSchema = {
 
 type FooterContent = ValuesOf<typeof footerSchema>;
 
-const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const content = section.fields as FooterContent;
+const Footer: BlockComponent = function Footer({ block }: TemplateBlockProps) {
+  const content = block.fields as FooterContent;
   const brandName = content.brandName || 'ARRC';
   const brandSubtext = content.brandSubtext || 'Clinic';
   const description = content.description || '';

@@ -1,4 +1,4 @@
-import { SectionComponentMeta } from '../../../types';
+import { BlockComponentMeta } from '../../../types';
 import type { FieldsSchema } from '@/domain/entities/template.entity';
 
 /**
@@ -8,13 +8,13 @@ import type { FieldsSchema } from '@/domain/entities/template.entity';
  * imports this schema back for its `ValuesOf` — still one declaration.
  */
 export const contactSchema = {
-  title: { type: 'text', label: 'Section Title', required: true },
+  title: { type: 'text', label: 'Block Title', required: true },
   email: { type: 'text', label: 'Email' },
   phone: { type: 'text', label: 'Phone' },
   address: { type: 'text', label: 'Address' },
 } as const satisfies FieldsSchema;
 
-export const contactMeta: SectionComponentMeta = {
+export const contactMeta: BlockComponentMeta = {
   componentKey: 'contact',
   category: 'contact',
   label: 'Corporate Contact',

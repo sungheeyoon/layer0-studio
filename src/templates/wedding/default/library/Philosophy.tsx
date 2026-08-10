@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../wedding.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import { renderAccentTitle } from '../sections/title-parts';
@@ -14,8 +14,8 @@ const philosophySchema = {
 
 type PhilosophyContent = ValuesOf<typeof philosophySchema>;
 
-const Philosophy: SectionComponent = function Philosophy({ section }: TemplateSectionProps) {
-  const content = section.fields as PhilosophyContent;
+const Philosophy: BlockComponent = function Philosophy({ block }: TemplateBlockProps) {
+  const content = block.fields as PhilosophyContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const body = content.body || '';

@@ -14,7 +14,7 @@ vi.mock('@/templates/_generated', () => ({
         content: {
           mode: 'single',
           templateKey: 'test-default',
-          sections: [],
+          blocks: [],
           globalStyles: { primaryColor: '#000', secondaryColor: '#fff', fontFamily: 'f', fontSize: '16px', layout: 'wide' }
         },
         thumbnailPath: 'test.jpg',

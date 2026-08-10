@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -19,8 +19,8 @@ const portfolioSchema = {
 
 type PortfolioContent = ValuesOf<typeof portfolioSchema>;
 
-const Portfolio: SectionComponent = function Portfolio({ section }: TemplateSectionProps) {
-  const content = section.fields as PortfolioContent;
+const Portfolio: BlockComponent = function Portfolio({ block }: TemplateBlockProps) {
+  const content = block.fields as PortfolioContent;
   const label = content.eyebrow || 'Portfolio';
   const title = content.title || '';
 

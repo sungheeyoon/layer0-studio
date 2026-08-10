@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../medical.module.css';
 import { VerifiedCheckIcon, StarIcon, ShieldCheckIcon, GraduationCapIcon, HospitalIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -14,8 +14,8 @@ const marqueeSchema = {
 
 type MarqueeContent = ValuesOf<typeof marqueeSchema>;
 
-const Marquee: SectionComponent = function Marquee({ section }: TemplateSectionProps) {
-  const content = section.fields as MarqueeContent;
+const Marquee: BlockComponent = function Marquee({ block }: TemplateBlockProps) {
+  const content = block.fields as MarqueeContent;
   const items = ([1, 2, 3, 4, 5, 6] as const).map(n => content[`item${n}`]).filter(Boolean);
 
   const icons = [

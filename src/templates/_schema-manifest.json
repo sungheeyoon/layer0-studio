@@ -1014,7 +1014,7 @@
         },
         "image": {
           "type": "image",
-          "label": "Section Image"
+          "label": "Block Image"
         },
         "subtitle": {
           "type": "text",
@@ -1022,7 +1022,7 @@
         },
         "title": {
           "type": "text",
-          "label": "Section Title",
+          "label": "Block Title",
           "required": true
         }
       },
@@ -1041,7 +1041,7 @@
         },
         "title": {
           "type": "text",
-          "label": "Section Title",
+          "label": "Block Title",
           "required": true
         }
       },
@@ -1068,7 +1068,7 @@
         },
         "title": {
           "type": "text",
-          "label": "Section Title",
+          "label": "Block Title",
           "required": true
         }
       },

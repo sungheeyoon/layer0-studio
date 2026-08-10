@@ -21,10 +21,11 @@
  */
 import {
   ContentModel,
-  NavMeta,
-  SingleSection,
+  SingleBlock,
   GlobalStyles,
 } from '@/domain/entities/template.entity';
+
+interface SeedNavMeta { visible: boolean; label: string }
 
 /**
  * The pre-ADR-0016 `Field` object: schema metadata (`type`/`label`) stored
@@ -73,7 +74,7 @@ interface LegacyTemplateJson {
 }
 
 /** Authoritative nav, from the code seeds: templateKey → (sectionId → NavMeta). */
-export type SeedNavMap = Map<string, Map<string, NavMeta>>;
+export type SeedNavMap = Map<string, Map<string, SeedNavMeta>>;
 
 export type MigrateStatus =
   | 'migrated'
@@ -158,17 +159,17 @@ export function migrateSingleSiteJson(
 
   const legacySections = pages[0].sections ?? [];
 
-  const sections: SingleSection[] = legacySections.map((s) => {
+  const blocks: SingleBlock[] = legacySections.map((s) => {
     const data = cleanData(s.type, s.data ?? {});
     const seeded = seedSections?.get(s.id);
-    const nav: NavMeta = seeded
+    const nav: SeedNavMeta = seeded
       ? { visible: seeded.visible, label: seeded.label }
       : { visible: false, label: legacyValue(data.eyebrow) || s.type };
     return {
       id: s.id,
       type: s.type,
       visible: s.visible ?? true,
-      nav,
+      ...(nav.visible ? { menu: { label: nav.label } } : {}),
       fields: data,
     };
   });
@@ -179,11 +180,11 @@ export function migrateSingleSiteJson(
   const oldNav = legacySections.find((s) => s.type === 'nav');
   if (oldNav) {
     const menuValues = orderedMenuValues(oldNav.data ?? {});
-    const targets = sections.filter((s) => s.nav.visible);
+    const targets = blocks.filter((s) => s.menu);
     let preserved = 0;
     for (let i = 0; i < Math.min(menuValues.length, targets.length); i++) {
-      if (menuValues[i] !== targets[i].nav.label) {
-        targets[i].nav.label = menuValues[i];
+      if (menuValues[i] !== targets[i].menu!.label) {
+        targets[i].menu!.label = menuValues[i];
         preserved++;
       }
     }
@@ -196,7 +197,7 @@ export function migrateSingleSiteJson(
     mode: 'single',
     templateKey,
     globalStyles: legacy.globalStyles,
-    sections,
+    blocks,
   };
 
   return { status: 'migrated', json: migrated, notes };

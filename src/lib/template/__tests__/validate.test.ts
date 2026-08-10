@@ -54,12 +54,11 @@ function minimalJson(overrides: Partial<SingleContent> = {}): SingleContent {
       fontSize: '16px',
       layout: 'wide',
     },
-    sections: [
+    blocks: [
       {
         id: 'hero-001',
         type: 'hero',
         visible: true,
-        nav: { visible: false, label: 'Hero' },
         // Values, not Field objects (ADR-0016 §4).
         fields: { title: 'Hello' },
       },
@@ -71,8 +70,8 @@ function minimalJson(overrides: Partial<SingleContent> = {}): SingleContent {
 /** `minimalJson` with the first section's fields and component key replaced. */
 function withBlock(type: string, fields: Record<string, unknown>): SingleContent {
   const json = minimalJson();
-  json.sections[0].type = type;
-  json.sections[0].fields = fields;
+  json.blocks[0].type = type;
+  json.blocks[0].fields = fields;
   return json;
 }
 
@@ -89,24 +88,26 @@ describe('validateContent — structure', () => {
     expect(result.errors).toHaveLength(0);
   });
 
-  it('errors when sections is empty', () => {
-    const result = validateContent(minimalJson({ sections: [] }));
-    expect(result.errors.some((e) => e.code === 'SECTIONS_EMPTY')).toBe(true);
+  it('errors when blocks is empty', () => {
+    const result = validateContent(minimalJson({ blocks: [] }));
+    expect(result.errors.some((e) => e.code === 'BLOCKS_EMPTY')).toBe(true);
   });
 
-  it('errors on duplicate section ids', () => {
+  it('errors on duplicate block ids', () => {
     const json = minimalJson();
-    json.sections.push({ ...json.sections[0] }); // same id
+    json.blocks.push({ ...json.blocks[0] }); // same id
     const result = validateContent(json);
-    expect(result.errors.some((e) => e.code === 'DUPLICATE_SECTION_ID')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'DUPLICATE_BLOCK_ID')).toBe(true);
   });
 
-  it('errors when a single section is missing nav', () => {
+  it('allows an omitted Single menu but rejects placement', () => {
     const json = minimalJson();
-    // @ts-expect-error intentional: drop the required nav projection source
-    delete json.sections[0].nav;
-    const result = validateContent(json);
-    expect(result.errors.some((e) => e.code === 'MISSING_NAV')).toBe(true);
+    delete json.blocks[0].menu;
+    expect(validateContent(json).errors).toHaveLength(0);
+    (json.blocks[0] as unknown as { menu: unknown }).menu = { label: 'Hero', placement: 'footer' };
+    expect(validateContent(json).errors.some(
+      (e) => e.code === 'SINGLE_MENU_PLACEMENT_UNSUPPORTED',
+    )).toBe(true);
   });
 
   // The consequence of ADR-0016 §4 worth stating out loud: a Value carries no
@@ -304,7 +305,7 @@ describe('validateContent — required / optional', () => {
     const result = validateContent(withBlock('hero', {}), { templateLibrary });
     expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_FIELD')).toBe(true);
     expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path)
-      .toBe('sections[id=hero-001].fields.title');
+      .toBe('blocks[id=hero-001].fields.title');
   });
 
   it('errors when a required field is present but null', () => {
@@ -532,7 +533,7 @@ describe('validateContent — array fields', () => {
     // The path uses the item's own id, matching the asset slot_key encoding of
     // ADR-0016 §4-4 — an index would point at a different item after a reorder.
     expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path)
-      .toBe('sections[id=hero-001].fields.items[i1].title');
+      .toBe('blocks[id=hero-001].fields.items[i1].title');
   });
 
   it('recurses into a nested array', () => {
@@ -557,7 +558,7 @@ describe('validateContent — array fields', () => {
       { templateLibrary: nested },
     );
     expect(result.errors.find((e) => e.code === 'MISSING_REQUIRED_FIELD')?.path)
-      .toBe('sections[id=hero-001].fields.items[i1].rows[r1].name');
+      .toBe('blocks[id=hero-001].fields.items[i1].rows[r1].name');
   });
 
   it('errors when an item has no id', () => {

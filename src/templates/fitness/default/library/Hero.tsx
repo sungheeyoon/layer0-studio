@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { ArrowRightIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -28,8 +28,8 @@ const heroSchema = {
 
 type HeroContent = ValuesOf<typeof heroSchema>;
 
-const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const content = section.fields as HeroContent;
+const Hero: BlockComponent = function Hero({ block }: TemplateBlockProps) {
+  const content = block.fields as HeroContent;
   const label = content.eyebrow || 'Seoul Gangnam — Since 2010';
   const titleLine1 = content.title1 || '한계를';
   const titleLine2 = content.title2 || '다시';

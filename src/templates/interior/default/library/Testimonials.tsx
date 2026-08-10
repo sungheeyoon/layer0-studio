@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { StarIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -19,8 +19,8 @@ const testimonialsSchema = {
 
 type TestimonialsContent = ValuesOf<typeof testimonialsSchema>;
 
-const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
-  const content = section.fields as TestimonialsContent;
+const Testimonials: BlockComponent = function Testimonials({ block }: TemplateBlockProps) {
+  const content = block.fields as TestimonialsContent;
   const label = content.eyebrow || 'Client Reviews';
   const title = content.title || '';
 

@@ -33,7 +33,7 @@ export const defaultGlobalStyles: GlobalStyles = {
  * is the only channel for a fleet-wide repair (bad contrast, rotten font
  * stack). For a redesign, fork to a new leaf directory instead.
  *
- * Section components reference these via `var(--{dim}-{key})` (see
+ * Block components reference these via `var(--{dim}-{key})` (see
  * `tokensToCssVars`), which keeps the editor's globalStyles overrides
  * propagating site-wide.
  */

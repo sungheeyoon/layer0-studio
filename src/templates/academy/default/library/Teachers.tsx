@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /** 강사진 소개 — photo cards. The template's primary array showcase. */
@@ -22,8 +22,8 @@ const teachersSchema = {
 
 type TeachersContent = ValuesOf<typeof teachersSchema>;
 
-const Teachers: SectionComponent = function Teachers({ section }: TemplateSectionProps) {
-  const content = section.fields as TeachersContent;
+const Teachers: BlockComponent = function Teachers({ block }: TemplateBlockProps) {
+  const content = block.fields as TeachersContent;
   const eyebrow = content.eyebrow || '';
   const title = content.title || '';
   const subtitle = content.subtitle || '';

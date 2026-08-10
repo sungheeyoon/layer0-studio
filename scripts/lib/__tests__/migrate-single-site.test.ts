@@ -63,14 +63,14 @@ describe('migrateSingleSiteJson', () => {
     expect(isSingleContent(json)).toBe(true);
     if (!isSingleContent(json)) throw new Error('unreachable');
     expect(json.templateKey).toBe('cafe-default');
-    expect(json.sections).toHaveLength(4);
+    expect(json.blocks).toHaveLength(4);
     expect('pages' in json).toBe(false);
   });
 
   it('renames data.label → data.eyebrow and drops section-level editable', () => {
     const { json } = migrateSingleSiteJson(legacy(), seedNav);
     if (!isSingleContent(json)) throw new Error('unreachable');
-    const hero = json.sections.find((s) => s.id === 'hero-001')!;
+    const hero = json.blocks.find((s) => s.id === 'hero-001')!;
     expect('label' in hero.fields).toBe(false);
     expect(valueOf(hero.fields, 'eyebrow')).toBe('Hero kicker');
     expect('editable' in hero).toBe(false);
@@ -79,25 +79,25 @@ describe('migrateSingleSiteJson', () => {
   it('strips menuN from the nav section data', () => {
     const { json } = migrateSingleSiteJson(legacy(), seedNav);
     if (!isSingleContent(json)) throw new Error('unreachable');
-    const nav = json.sections.find((s) => s.id === 'nav-001')!;
+    const nav = json.blocks.find((s) => s.id === 'nav-001')!;
     expect(Object.keys(nav.fields)).toEqual(['brandName', 'ctaText']);
   });
 
   it('injects per-section nav from the seed by id, preserving section.visible independently', () => {
     const { json } = migrateSingleSiteJson(legacy(), seedNav);
     if (!isSingleContent(json)) throw new Error('unreachable');
-    const story = json.sections.find((s) => s.id === 'story-001')!;
+    const story = json.blocks.find((s) => s.id === 'story-001')!;
     expect(story.visible).toBe(false); // own visibility preserved
-    expect(story.nav).toEqual({ visible: true, label: '카페 소개' }); // nav.visible independent
-    const nav = json.sections.find((s) => s.id === 'nav-001')!;
-    expect(nav.nav.visible).toBe(false);
+    expect(story.menu).toEqual({ label: '카페 소개' });
+    const nav = json.blocks.find((s) => s.id === 'nav-001')!;
+    expect(nav.menu).toBeUndefined();
   });
 
   it('preserves user-edited menu labels via order-zip onto nav targets', () => {
     const { json, notes } = migrateSingleSiteJson(legacy({ menu1: '음료', menu2: '우리 이야기' }), seedNav);
     if (!isSingleContent(json)) throw new Error('unreachable');
-    expect(json.sections.find((s) => s.id === 'menu-001')!.nav.label).toBe('음료');
-    expect(json.sections.find((s) => s.id === 'story-001')!.nav.label).toBe('우리 이야기');
+    expect(json.blocks.find((s) => s.id === 'menu-001')!.menu?.label).toBe('음료');
+    expect(json.blocks.find((s) => s.id === 'story-001')!.menu?.label).toBe('우리 이야기');
     expect(notes.join(' ')).toContain('preserved 2');
   });
 
@@ -106,13 +106,13 @@ describe('migrateSingleSiteJson', () => {
     input.pages[0].sections.push({ id: 'extra-001', type: 'gallery', visible: true, editable: true, data: { label: txt('Gallery') } });
     const { json, notes } = migrateSingleSiteJson(input, seedNav);
     if (!isSingleContent(json)) throw new Error('unreachable');
-    const extra = json.sections.find((s) => s.id === 'extra-001')!;
-    expect(extra.nav).toEqual({ visible: false, label: 'Gallery' });
+    const extra = json.blocks.find((s) => s.id === 'extra-001')!;
+    expect(extra.menu).toBeUndefined();
     expect(notes.length).toBe(0); // templateKey known, only the section is novel
   });
 
   it('is idempotent — already-migrated payloads are skipped', () => {
-    const already = { mode: 'single', templateKey: 'cafe-default', globalStyles: {}, sections: [] };
+    const already = { mode: 'single', templateKey: 'cafe-default', globalStyles: {}, blocks: [] };
     const { status, json } = migrateSingleSiteJson(already, seedNav);
     expect(status).toBe('skipped-already');
     expect(json).toBe(already);
@@ -127,7 +127,7 @@ describe('migrateSingleSiteJson', () => {
     const input = { ...legacy(), templateKey: 'custom-xyz' };
     const { json, notes } = migrateSingleSiteJson(input, seedNav);
     if (!isSingleContent(json)) throw new Error('unreachable');
-    expect(json.sections.every((s) => s.nav.visible === false)).toBe(true);
+    expect(json.blocks.every((s) => s.menu === undefined)).toBe(true);
     expect(notes.join(' ')).toContain('not in code registry');
   });
 });

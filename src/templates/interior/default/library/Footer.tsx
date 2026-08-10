@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import { HomeIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, LetterIcon, ClockIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
@@ -13,8 +13,8 @@ const footerSchema = {
 
 type FooterContent = ValuesOf<typeof footerSchema>;
 
-const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const content = section.fields as FooterContent;
+const Footer: BlockComponent = function Footer({ block }: TemplateBlockProps) {
+  const content = block.fields as FooterContent;
   const description = content.description || '';
   const address = content.address || '';
   const phone = content.phone || '';

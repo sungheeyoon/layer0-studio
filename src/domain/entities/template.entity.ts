@@ -78,24 +78,19 @@ export type ValuesOf<S> = Prettify<
   { [K in OptionalFieldKeys<S>]?: ValueOfDescriptor<S[K]> }
 >;
 
-/**
- * Navigation projection source — carried by the unit that drives the nav.
- * `visible` = nav-eligibility (independent of the unit's own `visible`),
- * `label` = the nav text (and, for a Page, the page's name in the editor tab).
- * See ADR-0007 and CONTEXT.md "nav projection".
- */
-export interface NavMeta {
-  visible: boolean;
+/** Multi Page menu entry. Omitted placement means the header menu. */
+export interface MenuEntry {
+  label: string;
+  placement?: 'header' | 'footer';
+}
+
+/** Single Block menu entry. Its type deliberately cannot express footer placement. */
+export interface SingleMenuEntry {
   label: string;
 }
 
-/**
- * Base section — the "content shape" of a section, shared by Single and Multi
- * so section renderers are reused. No `title` (the name lives in the nav source's
- * `nav.label`) and no `editable` (it was always `true` — dead field). Field-level
- * `Field.editable` is kept.
- */
-export interface Section {
+/** Base Block shared by Single and Multi so Block renderers are reused. */
+export interface Block {
   id: string;
   type: string;
   visible: boolean;
@@ -104,17 +99,17 @@ export interface Section {
    * dispatched by a string `type` into `library[type]`, so the domain cannot know
    * statically which Value shape any given Block holds. The schema does, and the
    * typed view is taken once at the component boundary
-   * (`section.fields as XContent`, §4-2) after the save path has validated it.
+   * (`block.fields as XContent`, §4-2) after the save path has validated it.
    */
   fields: Record<string, unknown>;
 }
 
 /**
- * Single-mode section — the section itself drives the nav (anchor scroll),
- * so it carries the unified `nav` projection source.
+ * Single-mode Block — the Block itself drives the anchor menu. Menu presence
+ * means inclusion; absence means the visible Block is not listed.
  */
-export interface SingleSection extends Section {
-  nav: NavMeta;
+export interface SingleBlock extends Block {
+  menu?: SingleMenuEntry;
 }
 
 export interface GlobalStyles {
@@ -142,16 +137,16 @@ export interface PageSeo {
 }
 
 /**
- * Multi-mode page — the page drives the nav (page link), so it carries the
- * unified `nav` projection source. Inner sections use base `Section`
- * (no nav). No `title` (name = `nav.label`); no `order` (array order = render order).
+ * Multi-mode page — `name` is the editor/page identity; optional `menu` is a
+ * separate projection source. Inner Blocks use base `Block` (no menu).
  */
 export interface Page {
   id: string;
   slug: string;
   visible: boolean; // routable? false → 404 (data preserved)
-  nav: NavMeta;
-  sections: Section[];
+  name: string;
+  menu?: MenuEntry;
+  blocks: Block[];
   seo?: PageSeo; // 🔮 Phase 6
 }
 
@@ -162,13 +157,13 @@ interface ContentModelBase {
 
 export interface SingleContent extends ContentModelBase {
   mode: 'single';
-  sections: SingleSection[]; // nav/footer inline, pinned in the editor
+  blocks: SingleBlock[]; // nav/footer Blocks inline, pinned in the editor
   seo?: PageSeo; // 🔮 Phase 6 (single has one page → site-level)
 }
 
 export interface MultiContent extends ContentModelBase {
   mode: 'multi';
-  shared: { header: Section[]; footer: Section[] };
+  chrome: { header: Block[]; footer: Block[] };
   pages: Page[];
 }
 
@@ -189,31 +184,30 @@ export function isMultiContent(json: ContentModel): json is MultiContent {
 }
 
 /**
- * Every section in a ContentModel, regardless of mode — Single's `sections`,
- * or Multi's `shared.header` + `shared.footer` + each page's `sections`.
+ * Every Block in a ContentModel, regardless of mode — Single's `blocks`, or
+ * Multi's `chrome.header` + `chrome.footer` + each page's `blocks`.
  * Returns live references (safe to mutate after a structuredClone).
  */
-export function allSections(json: ContentModel): Section[] {
-  if (json.mode === 'single') return json.sections;
+export function allBlocks(json: ContentModel): Block[] {
+  if (json.mode === 'single') return json.blocks;
   return [
-    ...json.shared.header,
-    ...json.shared.footer,
-    ...json.pages.flatMap((p) => p.sections),
+    ...json.chrome.header,
+    ...json.chrome.footer,
+    ...json.pages.flatMap((p) => p.blocks),
   ];
 }
 
 /**
- * Project a nav menu from its source (sections for Single, pages for Multi).
- * The object shape, filter rule (`visible && nav.visible`) and label source
- * (`nav.label`) are identical across modes; only the href scheme differs.
+ * Project the header menu from Blocks (Single) or Pages (Multi). Presence is
+ * eligibility; a footer placement is excluded explicitly rather than by negation.
  */
-export function deriveNav<T extends { visible: boolean; nav: NavMeta }>(
+export function deriveNav<T extends { visible: boolean; menu?: MenuEntry | SingleMenuEntry }>(
   source: T[],
   hrefOf: (x: T) => string,
 ): Array<{ label: string; href: string }> {
   return source
-    .filter((x) => x.visible && x.nav.visible)
-    .map((x) => ({ label: x.nav.label, href: hrefOf(x) }));
+    .filter((x) => x.visible && x.menu && !('placement' in x.menu && x.menu.placement === 'footer'))
+    .map((x) => ({ label: x.menu!.label, href: hrefOf(x) }));
 }
 
 /**
@@ -232,18 +226,15 @@ export function resolveActivePageSeo(
 }
 
 /**
- * Multi footer page links — the complement of the top nav: pages that are
- * reachable (`visible`) but deliberately kept out of the top nav
- * (`!nav.visible`), e.g. privacy / terms. Same shape as `deriveNav`.
- * See ADR-0007 ("nav 는 저장하지 않는다 — projection").
+ * Multi footer page links — only Pages explicitly placed in the footer menu.
  */
 export function deriveFooterNav(
   pages: Page[],
   hrefOf: (p: Page) => string,
 ): Array<{ label: string; href: string }> {
   return pages
-    .filter((p) => p.visible && !p.nav.visible)
-    .map((p) => ({ label: p.nav.label, href: hrefOf(p) }));
+    .filter((p) => p.visible && p.menu?.placement === 'footer')
+    .map((p) => ({ label: p.menu!.label, href: hrefOf(p) }));
 }
 
 export interface Template {

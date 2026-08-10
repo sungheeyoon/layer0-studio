@@ -1,6 +1,6 @@
 ---
 name: new-template
-description: Author a new website Template for layer0-studio (self-contained dir = tokens + section library + preset + renderer), then drive it through the verify gate. Use when asked to "새 템플릿 만들어줘", build a "[category] 페이지", add a Template, or do commissioned custom-page work. Dev-time code-PR workflow — end users never create Templates.
+description: Author a new website Template for layer0-studio (self-contained dir = tokens + Block library + preset + renderer), then drive it through the verify gate. Use when asked to "새 템플릿 만들어줘", build a "[category] 페이지", add a Template, or do commissioned custom-page work. Dev-time code-PR workflow — end users never create Templates.
 ---
 
 # new-template
@@ -10,7 +10,7 @@ Authoring a new Template is a **dev-time** task (you/admin stock the catalog or 
 ## Read first (knowledge lives in the repo, not here)
 
 - **`docs/TEMPLATE_SYSTEM.md`** is the single source of truth. Read **§9** (extension scenarios A/C/D), **§2.3** (schema-first fields), **§6** (validate rules + §6.4 compatibility), **§2.5** (rich design tokens). Don't duplicate it — follow it.
-- **`gotchas-checklist.md`** (this dir) — the §10 landmines. Re-read it before writing any section component. These are the things that silently break.
+- **`gotchas-checklist.md`** (this dir) — the §10 landmines. Re-read it before writing any Block component. These are the things that silently break.
 - Reference Templates: `src/templates/cafe/default/` (rich tokens + array + client-component meta), `src/templates/outdoor/default/` (the shipping Multi).
 
 ## The one thing that changed (ADR-0016)
@@ -30,8 +30,8 @@ const heroSchema = {
 
 type HeroContent = ValuesOf<typeof heroSchema>;
 
-const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const content = section.fields as HeroContent;   // the one cast, at the boundary
+const Hero: BlockComponent = function Hero({ block }: TemplateBlockProps) {
+  const content = block.fields as HeroContent;   // the one cast, at the boundary
   const eyebrow = content.eyebrow ?? '';           // optional Value → always fall back
   const imageUrl = content.image?.url;             // an image Value is { url, assetId? }
   const items = content.items ?? [];               // array Value may be absent
@@ -46,16 +46,16 @@ Both types come from `@/domain/entities/template.entity` (`FieldsSchema`, `Value
 ## Workflow
 
 1. **Pick the Site Type first — Single or Multi** (this decides how `template.ts` is written; ADR-0007, TEMPLATE_SYSTEM.md §9-H):
-   - **Single** (default — one continuous scroll, e.g. a self-intro / landing page): `content` is the `{ mode:'single', templateKey, globalStyles, sections:[ { id, type, visible, nav:{visible,label}, fields:{…} } ] }` union.
-   - **Multi** (routable pages, e.g. "outdoor brand with Home / Story / Products / Stores"): `content` is `{ mode:'multi', templateKey, globalStyles, shared:{ header, footer }, pages:[ { id, slug, visible, nav:{visible,label}, sections:[…] } ] }`. **Clone `src/templates/outdoor/default`** (능선 — the shipping Multi example). Nav is projected by `deriveNav`; never store it as a section. Served at `/site/[domain]/[[...slug]]`.
+   - **Single** (default — one continuous scroll): `content` is `{ mode:'single', templateKey, globalStyles, blocks:[ { id, type, visible, menu?:{label}, fields:{…} } ] }`. Menu presence means inclusion.
+   - **Multi** (routable pages): `content` is `{ mode:'multi', templateKey, globalStyles, chrome:{ header, footer }, pages:[ { id, slug, visible, name, menu?:{label,placement?}, blocks:[…] } ] }`. **Clone `src/templates/outdoor/default`**. `name` and `menu.label` are independent; omitted placement means header and `'footer'` means footer. Served at `/site/[domain]/[[...slug]]`.
 2. **Create the directory** (TEMPLATE_SYSTEM.md §9):
-   - New concept/category → **`pnpm template:scaffold <category>/<leaf>`**. It writes a Single skeleton (hero + array section + footer) that already passes the gate, in the shapes below — edit design, not wiring.
+   - New concept/category → **`pnpm template:scaffold <category>/<leaf>`**. It writes a Single skeleton (hero + array Block + footer) that already passes the gate, in the shapes below — edit design, not wiring.
    - New variant of an existing category → clone the closest Template: `cp -r src/templates/<cat>/<src> src/templates/<cat>/<leaf>`, then change `slug` + `templateKey` in `template.ts` (both, to `<category>-<leaf>`).
    - New category slug must match `^[a-z][a-z0-9-]{0,39}$`, and a brand-new top-level category is a structural change — get explicit sign-off, then add a **lowercase** i18n label key to *both* `src/lib/i18n/messages/ko.ts` and `en.ts` under `templatesCatalog.categoryLabels`.
 3. **Fill the files** — `tokens.ts`, `library/*.tsx` (+ `library/index.ts`), `template.ts` (the preset), `thumbnail.config.ts`, `index.tsx` (Single → `RenderSingleSite`, Multi → `RenderMultiSite`). Use the **rich token pattern** (`tokens.ts` exports `defaultGlobalStyles` + `designTokens`); do **not** add a `.module.css` declaring tokens (gotchas #6, #7).
 4. **Hard rules** (the rest are in the doc):
    - `templateKey = <category>-<leaf>`, and it is **permanent**. So is every `componentKey`.
-   - Section array order = render order. Only the **first** section (hero) is full-viewport height.
+   - Block array order = render order. Only the **first** Block (hero) is full-viewport height.
    - `fields` holds **Values**, not `{ type, label, value }` wrappers: `'MONO'`, `42`, `{ url: '…' }`, `[{ id, fields }]`. The schema says which.
    - Colour/font only via `var(--*)` — never an inline hex (ESLint **error**).
 5. **Images** — for `type:'image'` fields, decide a query and host it:
@@ -67,8 +67,8 @@ Both types come from `@/domain/entities/template.entity` (`FieldsSchema`, `Value
    pnpm template:verify <key>                     # once it's green: adds the Playwright thumbnail
    pnpm test                                      # only if you touched anything outside the template dir
    ```
-   `template:verify` runs `tsc` → `eslint` → `validateContent` → inline-token file scan → **fieldsSchema↔JSX consistency** → `capture` → `thumbnailPath` match. It covers the `tsc`/`lint` steps for the template dir, so a separate full `pnpm lint` is only needed for chrome changes.
-7. **Visual check** — the captured `.webp` *is* the design screen (1600×900). Look at it. For more than the hero, open `/preview/preset/<templateKey>` in a browser — `curl` shows no sections by design (the preview mounts the renderer client-side).
+   `template:verify` runs `tsc` → `eslint` → `validateContent` → inline-token file scan → **fieldsSchema↔JSX consistency** → `capture` → `thumbnailPath` match. It covers the `tsc`/`lint` steps for the template dir, so a separate full `pnpm lint` is only needed for changes outside it.
+7. **Visual check** — the captured `.webp` *is* the design screen (1600×900). Look at it. For more than the hero, open `/preview/preset/<templateKey>` in a browser — `curl` shows no blocks by design (the preview mounts the renderer client-side).
 8. **Reflect to DB** — `pnpm template:sync` (dry-run, review the diff) → commit/PR. Registration is automatic post-deploy and **merge is the publish approval** (ADR-0012); the local sync is a preview, not a gate, and needs `.env.local`.
 
 ## Editing a Template that is already deployed

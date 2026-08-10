@@ -1,5 +1,5 @@
 import React from 'react';
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 /**
@@ -18,9 +18,9 @@ const heroSchema = {
 
 type HeroContent = ValuesOf<typeof heroSchema>;
 
-const Hero: SectionComponent = function Hero(props: TemplateSectionProps) {
-  const { section } = props;
-  const content = section.fields as HeroContent;
+const Hero: BlockComponent = function Hero(props: TemplateBlockProps) {
+  const { block } = props;
+  const content = block.fields as HeroContent;
   const eyebrow = content.eyebrow;
   const title = content.title || '건강한 하루를 여는 곳';
   const subtitle = content.subtitle;

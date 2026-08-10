@@ -1,4 +1,4 @@
-import { TemplateSectionProps, SectionComponent } from '../../../types';
+import { TemplateBlockProps, BlockComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { ArrowUpRightIcon, BoxingIcon, YogaIcon, ChefHatIcon } from '../sections/icons';
 import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
@@ -26,8 +26,8 @@ const programsSchema = {
 
 type ProgramsContent = ValuesOf<typeof programsSchema>;
 
-const Programs: SectionComponent = function Programs({ section }: TemplateSectionProps) {
-  const content = section.fields as ProgramsContent;
+const Programs: BlockComponent = function Programs({ block }: TemplateBlockProps) {
+  const content = block.fields as ProgramsContent;
   const label = content.eyebrow || '프로그램';
   const title = content.title || '당신의 목표에 맞는 프로그램';
   const description = content.description || '';

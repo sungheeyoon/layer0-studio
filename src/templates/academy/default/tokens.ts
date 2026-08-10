@@ -29,7 +29,7 @@ export const defaultGlobalStyles: GlobalStyles = {
  * That is intended — it is the only channel for a fleet-wide repair (bad
  * contrast, rotten font stack). For a redesign, fork to a new leaf directory.
  *
- * Section components reference these via `var(--color-{key})` / `var(--font-{key})`
+ * Block components reference these via `var(--color-{key})` / `var(--font-{key})`
  * (see `tokensToCssVars`). Navy establishes 진중·신뢰, green marks 합격/성장,
  * a restrained gold accents 실적 highlights.
  */

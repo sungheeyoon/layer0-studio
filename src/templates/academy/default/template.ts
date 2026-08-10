@@ -13,12 +13,11 @@ const preset: TemplatePreset = {
       "fontSize": "16px",
       "layout": "wide"
     },
-    "sections": [
+    "blocks": [
       {
         "id": "nav-001",
         "type": "nav",
         "visible": true,
-        "nav": { "visible": false, "label": "네비게이션" },
         "fields": {
           "brandName": "우리입시학원",
           "brandSubtext": "ACADEMY",
@@ -30,7 +29,6 @@ const preset: TemplatePreset = {
         "id": "hero-001",
         "type": "hero",
         "visible": true,
-        "nav": { "visible": false, "label": "히어로" },
         "fields": {
           "eyebrow": "대치·목동 20년 입시 노하우",
           "title": "성적으로 증명하는\n맞춤 입시 전략",
@@ -45,7 +43,7 @@ const preset: TemplatePreset = {
         "id": "features-001",
         "type": "features",
         "visible": true,
-        "nav": { "visible": true, "label": "특장점" },
+        "menu": { "label": "특장점" },
         "fields": {
           "eyebrow": "WHY US",
           "title": "우리 학원만의 강점",
@@ -79,7 +77,7 @@ const preset: TemplatePreset = {
         "id": "curriculum-001",
         "type": "curriculum",
         "visible": true,
-        "nav": { "visible": true, "label": "커리큘럼" },
+        "menu": { "label": "커리큘럼" },
         "fields": {
           "eyebrow": "CURRICULUM",
           "title": "커리큘럼 · 반 편성",
@@ -116,7 +114,7 @@ const preset: TemplatePreset = {
         "id": "teachers-001",
         "type": "teachers",
         "visible": true,
-        "nav": { "visible": true, "label": "강사진" },
+        "menu": { "label": "강사진" },
         "fields": {
           "eyebrow": "TEACHERS",
           "title": "검증된 강사진",
@@ -156,7 +154,7 @@ const preset: TemplatePreset = {
         "id": "tuition-001",
         "type": "tuition",
         "visible": true,
-        "nav": { "visible": true, "label": "수강료" },
+        "menu": { "label": "수강료" },
         "fields": {
           "eyebrow": "TUITION",
           "title": "시간표 · 수강료",
@@ -193,7 +191,7 @@ const preset: TemplatePreset = {
         "id": "results-001",
         "type": "results",
         "visible": true,
-        "nav": { "visible": true, "label": "합격실적" },
+        "menu": { "label": "합격실적" },
         "fields": {
           "eyebrow": "RESULTS",
           "title": "숫자로 보는 합격 실적",
@@ -233,7 +231,6 @@ const preset: TemplatePreset = {
         "id": "contact-001",
         "type": "contact",
         "visible": true,
-        "nav": { "visible": false, "label": "상담신청" },
         "fields": {
           "eyebrow": "CONSULTING",
           "title": "지금 상담을 신청하세요",
@@ -246,7 +243,7 @@ const preset: TemplatePreset = {
         "id": "location-001",
         "type": "location",
         "visible": true,
-        "nav": { "visible": true, "label": "오시는 길" },
+        "menu": { "label": "오시는 길" },
         "fields": {
           "eyebrow": "LOCATION",
           "title": "오시는 길",
@@ -260,7 +257,6 @@ const preset: TemplatePreset = {
         "id": "footer-001",
         "type": "footer",
         "visible": true,
-        "nav": { "visible": false, "label": "푸터" },
         "fields": {
           "academyName": "우리입시학원",
           "tagline": "학생의 목표에서 시작하는 맞춤 입시",
