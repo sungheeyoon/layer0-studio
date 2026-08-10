@@ -1,23 +1,48 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { ArrowRightIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const heroSchema = {
+  eyebrow: { type: 'text', label: '상단 라벨' },
+  title1: { type: 'text', label: '타이틀 1행', required: true },
+  title2: { type: 'text', label: '타이틀 2행 (강조)', required: true },
+  title3: { type: 'text', label: '타이틀 3행', required: true },
+  description: { type: 'textarea', label: '설명' },
+  backgroundImage: { type: 'image', label: '배경 이미지', required: true },
+  ctaPrimary: { type: 'text', label: '기본 CTA' },
+  ctaSecondary: { type: 'text', label: '보조 CTA' },
+  stat1Value: { type: 'text', label: '통계 1 수치' },
+  stat1Suffix: { type: 'text', label: '통계 1 접미사' },
+  stat1Label: { type: 'text', label: '통계 1 라벨' },
+  stat2Value: { type: 'text', label: '통계 2 수치' },
+  stat2Suffix: { type: 'text', label: '통계 2 접미사' },
+  stat2Label: { type: 'text', label: '통계 2 라벨' },
+  stat3Value: { type: 'text', label: '통계 3 수치' },
+  stat3Suffix: { type: 'text', label: '통계 3 접미사' },
+  stat3Label: { type: 'text', label: '통계 3 라벨' },
+  stat4Value: { type: 'text', label: '통계 4 수치' },
+  stat4Suffix: { type: 'text', label: '통계 4 접미사' },
+  stat4Label: { type: 'text', label: '통계 4 라벨' },
+} as const satisfies FieldsSchema;
+
+type HeroContent = ValuesOf<typeof heroSchema>;
 
 const Hero: SectionComponent = function Hero({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || 'Seoul Gangnam — Since 2010';
-  const titleLine1 = getFieldValue(fields, 'title1') || '한계를';
-  const titleLine2 = getFieldValue(fields, 'title2') || '다시';
-  const titleLine3 = getFieldValue(fields, 'title3') || '정의합니다';
-  const description = getFieldValue(fields, 'description') || '';
-  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
-  const ctaPrimary = getFieldValue(fields, 'ctaPrimary') || '무료 체험 신청';
-  const ctaSecondary = getFieldValue(fields, 'ctaSecondary') || '프로그램 보기';
+  const content = section.fields as HeroContent;
+  const label = content.eyebrow || 'Seoul Gangnam — Since 2010';
+  const titleLine1 = content.title1 || '한계를';
+  const titleLine2 = content.title2 || '다시';
+  const titleLine3 = content.title3 || '정의합니다';
+  const description = content.description || '';
+  const bgImage = content.backgroundImage?.url || '';
+  const ctaPrimary = content.ctaPrimary || '무료 체험 신청';
+  const ctaSecondary = content.ctaSecondary || '프로그램 보기';
 
-  const stats = [1, 2, 3, 4].map(n => ({
-    value: getFieldValue(fields, `stat${n}Value`),
-    label: getFieldValue(fields, `stat${n}Label`),
-    suffix: getFieldValue(fields, `stat${n}Suffix`),
+  const stats = ([1, 2, 3, 4] as const).map(n => ({
+    value: content[`stat${n}Value`],
+    label: content[`stat${n}Label`],
+    suffix: content[`stat${n}Suffix`],
   })).filter(s => s.value);
 
   return (
@@ -100,28 +125,7 @@ Hero.meta = {
   componentKey: 'hero',
   category: 'hero',
   label: 'Fitness Hero',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '상단 라벨' },
-    title1: { type: 'text', label: '타이틀 1행', required: true },
-    title2: { type: 'text', label: '타이틀 2행 (강조)', required: true },
-    title3: { type: 'text', label: '타이틀 3행', required: true },
-    description: { type: 'textarea', label: '설명' },
-    backgroundImage: { type: 'image', label: '배경 이미지', required: true },
-    ctaPrimary: { type: 'text', label: '기본 CTA' },
-    ctaSecondary: { type: 'text', label: '보조 CTA' },
-    stat1Value: { type: 'text', label: '통계 1 수치' },
-    stat1Suffix: { type: 'text', label: '통계 1 접미사' },
-    stat1Label: { type: 'text', label: '통계 1 라벨' },
-    stat2Value: { type: 'text', label: '통계 2 수치' },
-    stat2Suffix: { type: 'text', label: '통계 2 접미사' },
-    stat2Label: { type: 'text', label: '통계 2 라벨' },
-    stat3Value: { type: 'text', label: '통계 3 수치' },
-    stat3Suffix: { type: 'text', label: '통계 3 접미사' },
-    stat3Label: { type: 'text', label: '통계 3 라벨' },
-    stat4Value: { type: 'text', label: '통계 4 수치' },
-    stat4Suffix: { type: 'text', label: '통계 4 접미사' },
-    stat4Label: { type: 'text', label: '통계 4 라벨' },
-  },
+  fieldsSchema: heroSchema,
   previewImage: '/component-previews/fitness/hero.webp',
 };
 

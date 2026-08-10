@@ -1,25 +1,48 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { RulerIcon, DumbbellIcon, ShowerIcon, ClockIcon, ParkingIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const facilitySchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'textarea', label: '섹션 설명' },
+  f1Title: { type: 'text', label: '특징 1 제목' },
+  f1Label: { type: 'text', label: '특징 1 라벨' },
+  f2Title: { type: 'text', label: '특징 2 제목' },
+  f2Label: { type: 'text', label: '특징 2 라벨' },
+  f3Title: { type: 'text', label: '특징 3 제목' },
+  f3Label: { type: 'text', label: '특징 3 라벨' },
+  f4Title: { type: 'text', label: '특징 4 제목' },
+  f4Label: { type: 'text', label: '특징 4 라벨' },
+  f5Title: { type: 'text', label: '특징 5 제목' },
+  f5Label: { type: 'text', label: '특징 5 라벨' },
+  image1: { type: 'image', label: '이미지 1' },
+  image2: { type: 'image', label: '이미지 2' },
+  image3: { type: 'image', label: '이미지 3' },
+  trustValue: { type: 'text', label: '신뢰 지수 수치' },
+  trustLabel: { type: 'textarea', label: '신뢰 지수 라벨' },
+} as const satisfies FieldsSchema;
+
+type FacilityContent = ValuesOf<typeof facilitySchema>;
 
 const Facility: SectionComponent = function Facility({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '시설 안내';
-  const title = getFieldValue(fields, 'title') || '장비가\n결과를\n만듭니다';
-  const description = getFieldValue(fields, 'description') || '';
+  const content = section.fields as FacilityContent;
+  const label = content.eyebrow || '시설 안내';
+  const title = content.title || '장비가\n결과를\n만듭니다';
+  const description = content.description || '';
 
   const features = [
-    { title: getFieldValue(fields, 'f1Title'), label: getFieldValue(fields, 'f1Label'), icon: <RulerIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: getFieldValue(fields, 'f2Title'), label: getFieldValue(fields, 'f2Label'), icon: <DumbbellIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: getFieldValue(fields, 'f3Title'), label: getFieldValue(fields, 'f3Label'), icon: <ShowerIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: getFieldValue(fields, 'f4Title'), label: getFieldValue(fields, 'f4Label'), icon: <ClockIcon size={18} className="text-[var(--f-lime)]" /> },
-    { title: getFieldValue(fields, 'f5Title'), label: getFieldValue(fields, 'f5Label'), icon: <ParkingIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: content.f1Title, label: content.f1Label, icon: <RulerIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: content.f2Title, label: content.f2Label, icon: <DumbbellIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: content.f3Title, label: content.f3Label, icon: <ShowerIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: content.f4Title, label: content.f4Label, icon: <ClockIcon size={18} className="text-[var(--f-lime)]" /> },
+    { title: content.f5Title, label: content.f5Label, icon: <ParkingIcon size={18} className="text-[var(--f-lime)]" /> },
   ].filter(f => f.title);
 
-  const images = [1, 2, 3].map(n => getFieldValue(fields, `image${n}`)).filter(Boolean);
-  const trustValue = getFieldValue(fields, 'trustValue') || '14';
-  const trustLabel = getFieldValue(fields, 'trustLabel') || 'Years\nof Trust';
+  const images = ([1, 2, 3] as const).map(n => content[`image${n}`]?.url).filter(Boolean);
+  const trustValue = content.trustValue || '14';
+  const trustLabel = content.trustLabel || 'Years\nof Trust';
 
   return (
     <section className="bg-[var(--f-surface)] border-y border-[var(--f-border)] overflow-hidden" id="facility">
@@ -98,26 +121,7 @@ Facility.meta = {
   componentKey: 'facility',
   category: 'content',
   label: 'Fitness Facility',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'textarea', label: '섹션 설명' },
-    f1Title: { type: 'text', label: '특징 1 제목' },
-    f1Label: { type: 'text', label: '특징 1 라벨' },
-    f2Title: { type: 'text', label: '특징 2 제목' },
-    f2Label: { type: 'text', label: '특징 2 라벨' },
-    f3Title: { type: 'text', label: '특징 3 제목' },
-    f3Label: { type: 'text', label: '특징 3 라벨' },
-    f4Title: { type: 'text', label: '특징 4 제목' },
-    f4Label: { type: 'text', label: '특징 4 라벨' },
-    f5Title: { type: 'text', label: '특징 5 제목' },
-    f5Label: { type: 'text', label: '특징 5 라벨' },
-    image1: { type: 'image', label: '이미지 1' },
-    image2: { type: 'image', label: '이미지 2' },
-    image3: { type: 'image', label: '이미지 3' },
-    trustValue: { type: 'text', label: '신뢰 지수 수치' },
-    trustLabel: { type: 'textarea', label: '신뢰 지수 라벨' },
-  },
+  fieldsSchema: facilitySchema,
   previewImage: '/component-previews/fitness/facility.webp',
 };
 

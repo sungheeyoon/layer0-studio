@@ -1,7 +1,7 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { ChatIcon, RulerIcon, PenIcon, LetterIcon, HammerIcon, KeyIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
 
 const STEP_ICONS = [
   <ChatIcon key="1" size={22} className="text-[var(--i-gold)]" />,
@@ -12,14 +12,33 @@ const STEP_ICONS = [
   <KeyIcon key="6" size={22} className="text-[var(--i-gold)]" />,
 ];
 
-const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || 'How We Work';
-  const title = getFieldValue(fields, 'title') || '';
+const processSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  step1Title: { type: 'text', label: '1단계 제목' },
+  step1Desc: { type: 'text', label: '1단계 설명' },
+  step2Title: { type: 'text', label: '2단계 제목' },
+  step2Desc: { type: 'text', label: '2단계 설명' },
+  step3Title: { type: 'text', label: '3단계 제목' },
+  step3Desc: { type: 'text', label: '3단계 설명' },
+  step4Title: { type: 'text', label: '4단계 제목' },
+  step4Desc: { type: 'text', label: '4단계 설명' },
+  step5Title: { type: 'text', label: '5단계 제목' },
+  step5Desc: { type: 'text', label: '5단계 설명' },
+  step6Title: { type: 'text', label: '6단계 제목' },
+  step6Desc: { type: 'text', label: '6단계 설명' },
+} as const satisfies FieldsSchema;
 
-  const steps = [1, 2, 3, 4, 5, 6].map(n => ({
-    title: getFieldValue(fields, `step${n}Title`),
-    desc: getFieldValue(fields, `step${n}Desc`),
+type ProcessContent = ValuesOf<typeof processSchema>;
+
+const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
+  const content = section.fields as ProcessContent;
+  const label = content.eyebrow || 'How We Work';
+  const title = content.title || '';
+
+  const steps = ([1, 2, 3, 4, 5, 6] as const).map(n => ({
+    title: content[`step${n}Title`],
+    desc: content[`step${n}Desc`],
   })).filter(s => s.title);
 
   return (
@@ -66,22 +85,7 @@ Process.meta = {
   componentKey: 'process',
   category: 'content',
   label: 'Interior Process',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    step1Title: { type: 'text', label: '1단계 제목' },
-    step1Desc: { type: 'text', label: '1단계 설명' },
-    step2Title: { type: 'text', label: '2단계 제목' },
-    step2Desc: { type: 'text', label: '2단계 설명' },
-    step3Title: { type: 'text', label: '3단계 제목' },
-    step3Desc: { type: 'text', label: '3단계 설명' },
-    step4Title: { type: 'text', label: '4단계 제목' },
-    step4Desc: { type: 'text', label: '4단계 설명' },
-    step5Title: { type: 'text', label: '5단계 제목' },
-    step5Desc: { type: 'text', label: '5단계 설명' },
-    step6Title: { type: 'text', label: '6단계 제목' },
-    step6Desc: { type: 'text', label: '6단계 설명' },
-  },
+  fieldsSchema: processSchema,
   previewImage: '/component-previews/interior/process.webp',
 };
 

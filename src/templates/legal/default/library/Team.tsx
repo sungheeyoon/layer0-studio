@@ -1,16 +1,34 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const teamSchema = {
+  title: { type: 'text', label: '섹션 타이틀', required: true },
+  member1Name: { type: 'text', label: '멤버 1 이름' },
+  member1Role: { type: 'text', label: '멤버 1 직함' },
+  member1Body: { type: 'textarea', label: '멤버 1 설명' },
+  member1Image: { type: 'image', label: '멤버 1 사진' },
+  member2Name: { type: 'text', label: '멤버 2 이름' },
+  member2Role: { type: 'text', label: '멤버 2 직함' },
+  member2Body: { type: 'textarea', label: '멤버 2 설명' },
+  member2Image: { type: 'image', label: '멤버 2 사진' },
+  member3Name: { type: 'text', label: '멤버 3 이름' },
+  member3Role: { type: 'text', label: '멤버 3 직함' },
+  member3Body: { type: 'textarea', label: '멤버 3 설명' },
+  member3Image: { type: 'image', label: '멤버 3 사진' },
+} as const satisfies FieldsSchema;
+
+type TeamContent = ValuesOf<typeof teamSchema>;
 
 const Team: SectionComponent = function Team({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as TeamContent;
+  const title = content.title || '';
 
-  const members = [1, 2, 3].map(n => ({
-    name: getFieldValue(fields, `member${n}Name`) || '',
-    role: getFieldValue(fields, `member${n}Role`) || '',
-    body: getFieldValue(fields, `member${n}Body`) || '',
-    image: getFieldValue(fields, `member${n}Image`) || `https://picsum.photos/seed/legal_team_${n}/600/450`,
+  const members = ([1, 2, 3] as const).map(n => ({
+    name: content[`member${n}Name`] || '',
+    role: content[`member${n}Role`] || '',
+    body: content[`member${n}Body`] || '',
+    image: content[`member${n}Image`]?.url || `https://picsum.photos/seed/legal_team_${n}/600/450`,
     badge: n === 1 ? '대표 변호사' : n === 2 ? '수석 세무사' : '파트너 변호사',
     badgeBg: n === 1 ? 'bg-amber-500' : 'bg-[var(--l-navy-light)]',
   }));
@@ -56,21 +74,7 @@ Team.meta = {
   componentKey: 'team',
   category: 'content',
   label: 'Legal Team',
-  fieldsSchema: {
-    title: { type: 'text', label: '섹션 타이틀', required: true },
-    member1Name: { type: 'text', label: '멤버 1 이름' },
-    member1Role: { type: 'text', label: '멤버 1 직함' },
-    member1Body: { type: 'textarea', label: '멤버 1 설명' },
-    member1Image: { type: 'image', label: '멤버 1 사진' },
-    member2Name: { type: 'text', label: '멤버 2 이름' },
-    member2Role: { type: 'text', label: '멤버 2 직함' },
-    member2Body: { type: 'textarea', label: '멤버 2 설명' },
-    member2Image: { type: 'image', label: '멤버 2 사진' },
-    member3Name: { type: 'text', label: '멤버 3 이름' },
-    member3Role: { type: 'text', label: '멤버 3 직함' },
-    member3Body: { type: 'textarea', label: '멤버 3 설명' },
-    member3Image: { type: 'image', label: '멤버 3 사진' },
-  },
+  fieldsSchema: teamSchema,
   previewImage: '/component-previews/legal/team.webp',
 };
 

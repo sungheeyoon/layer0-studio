@@ -3,14 +3,17 @@
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../interior.module.css';
 import { HomeIcon, ChatIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { navSchema } from './Nav.meta';
+
+type NavContent = ValuesOf<typeof navSchema>;
 
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || '에스파시오';
-  const ctaText = getFieldValue(fields, 'ctaText') || '무료 상담 신청';
+  const content = section.fields as NavContent;
+  const brandName = content.brandName || '에스파시오';
+  const ctaText = content.ctaText || '무료 상담 신청';
 
   return (
     <nav className={`${styles.glassNav} fixed top-0 left-0 right-0 z-50`}>

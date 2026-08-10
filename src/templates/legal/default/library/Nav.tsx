@@ -1,16 +1,25 @@
 import { TemplateSectionProps, SectionComponent, NavSectionProps } from '../../../types';
 import styles from '../legal.module.css';
 import { ShieldCheckIcon, ArrowRightIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const navSchema = {
+  brandName: { type: 'text', label: '사무소 이름' },
+  brandSubtext: { type: 'text', label: '보조 텍스트' },
+  phone: { type: 'text', label: '전화번호' },
+  ctaText: { type: 'text', label: 'CTA 버튼 텍스트' },
+} as const satisfies FieldsSchema;
+
+type NavContent = ValuesOf<typeof navSchema>;
 
 const Nav: SectionComponent = function Nav(props: TemplateSectionProps) {
   const { section } = props;
   const { navItems } = props as NavSectionProps;
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || '하람';
-  const brandSubtext = getFieldValue(fields, 'brandSubtext') || 'Law & Tax';
-  const phone = getFieldValue(fields, 'phone') || '02-3456-7890';
-  const ctaText = getFieldValue(fields, 'ctaText') || '무료 상담 신청';
+  const content = section.fields as NavContent;
+  const brandName = content.brandName || '하람';
+  const brandSubtext = content.brandSubtext || 'Law & Tax';
+  const phone = content.phone || '02-3456-7890';
+  const ctaText = content.ctaText || '무료 상담 신청';
 
   return (
     <header className={styles.navWrap}>
@@ -53,12 +62,7 @@ Nav.meta = {
   componentKey: 'nav',
   category: 'navigation',
   label: 'Legal Navigation',
-  fieldsSchema: {
-    brandName: { type: 'text', label: '사무소 이름' },
-    brandSubtext: { type: 'text', label: '보조 텍스트' },
-    phone: { type: 'text', label: '전화번호' },
-    ctaText: { type: 'text', label: 'CTA 버튼 텍스트' },
-  },
+  fieldsSchema: navSchema,
   previewImage: '/component-previews/legal/nav.webp',
 };
 

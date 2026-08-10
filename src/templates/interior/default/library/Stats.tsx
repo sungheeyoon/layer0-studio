@@ -1,12 +1,25 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../interior.module.css';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const statsSchema = {
+  s1Value: { type: 'text', label: '통계 1 수치' },
+  s1Label: { type: 'text', label: '통계 1 라벨' },
+  s2Value: { type: 'text', label: '통계 2 수치' },
+  s2Label: { type: 'text', label: '통계 2 라벨' },
+  s3Value: { type: 'text', label: '통계 3 수치' },
+  s3Label: { type: 'text', label: '통계 3 라벨' },
+  s4Value: { type: 'text', label: '통계 4 수치' },
+  s4Label: { type: 'text', label: '통계 4 라벨' },
+} as const satisfies FieldsSchema;
+
+type StatsContent = ValuesOf<typeof statsSchema>;
 
 const Stats: SectionComponent = function Stats({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const stats = [1, 2, 3, 4].map(n => ({
-    value: getFieldValue(fields, `s${n}Value`),
-    label: getFieldValue(fields, `s${n}Label`),
+  const content = section.fields as StatsContent;
+  const stats = ([1, 2, 3, 4] as const).map(n => ({
+    value: content[`s${n}Value`],
+    label: content[`s${n}Label`],
   })).filter(s => s.value);
 
   return (
@@ -36,16 +49,7 @@ Stats.meta = {
   componentKey: 'stats',
   category: 'content',
   label: 'Interior Stats Bar',
-  fieldsSchema: {
-    s1Value: { type: 'text', label: '통계 1 수치' },
-    s1Label: { type: 'text', label: '통계 1 라벨' },
-    s2Value: { type: 'text', label: '통계 2 수치' },
-    s2Label: { type: 'text', label: '통계 2 라벨' },
-    s3Value: { type: 'text', label: '통계 3 수치' },
-    s3Label: { type: 'text', label: '통계 3 라벨' },
-    s4Value: { type: 'text', label: '통계 4 수치' },
-    s4Label: { type: 'text', label: '통계 4 라벨' },
-  },
+  fieldsSchema: statsSchema,
   previewImage: '/component-previews/interior/stats.webp',
 };
 

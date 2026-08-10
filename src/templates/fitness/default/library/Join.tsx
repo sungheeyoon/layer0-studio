@@ -1,18 +1,31 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { PhoneIcon, MapPinIcon, ClockIcon, ChatIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const joinSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title1: { type: 'text', label: '타이틀 1행', required: true },
+  title2: { type: 'text', label: '타이틀 2행 (강조)', required: true },
+  description: { type: 'textarea', label: '설명' },
+  backgroundImage: { type: 'image', label: '배경 이미지', required: true },
+  phone: { type: 'text', label: '전화번호' },
+  address: { type: 'text', label: '위치' },
+  hours: { type: 'text', label: '운영 시간' },
+} as const satisfies FieldsSchema;
+
+type JoinContent = ValuesOf<typeof joinSchema>;
 
 const Join: SectionComponent = function Join({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '무료 체험';
-  const titleLine1 = getFieldValue(fields, 'title1') || '지금 시작하면';
-  const titleLine2 = getFieldValue(fields, 'title2') || '첫 주가 무료';
-  const description = getFieldValue(fields, 'description') || '';
-  const bgImage = getFieldValue(fields, 'backgroundImage') || '';
-  const phone = getFieldValue(fields, 'phone') || '02-555-9876';
-  const address = getFieldValue(fields, 'address') || '';
-  const hours = getFieldValue(fields, 'hours') || '';
+  const content = section.fields as JoinContent;
+  const label = content.eyebrow || '무료 체험';
+  const titleLine1 = content.title1 || '지금 시작하면';
+  const titleLine2 = content.title2 || '첫 주가 무료';
+  const description = content.description || '';
+  const bgImage = content.backgroundImage?.url || '';
+  const phone = content.phone || '02-555-9876';
+  const address = content.address || '';
+  const hours = content.hours || '';
 
   return (
     <section className="relative overflow-hidden py-32 lg:py-52" id="join">
@@ -85,16 +98,7 @@ Join.meta = {
   componentKey: 'join',
   category: 'contact',
   label: 'Fitness Join',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title1: { type: 'text', label: '타이틀 1행', required: true },
-    title2: { type: 'text', label: '타이틀 2행 (강조)', required: true },
-    description: { type: 'textarea', label: '설명' },
-    backgroundImage: { type: 'image', label: '배경 이미지', required: true },
-    phone: { type: 'text', label: '전화번호' },
-    address: { type: 'text', label: '위치' },
-    hours: { type: 'text', label: '운영 시간' },
-  },
+  fieldsSchema: joinSchema,
   previewImage: '/component-previews/fitness/join.webp',
 };
 

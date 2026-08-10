@@ -1,14 +1,30 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const processSchema = {
+  title: { type: 'text', label: '섹션 타이틀', required: true },
+  step1Title: { type: 'text', label: '단계 1 제목' },
+  step1Body: { type: 'textarea', label: '단계 1 설명' },
+  step2Title: { type: 'text', label: '단계 2 제목' },
+  step2Body: { type: 'textarea', label: '단계 2 설명' },
+  step3Title: { type: 'text', label: '단계 3 제목' },
+  step3Body: { type: 'textarea', label: '단계 3 설명' },
+  step4Title: { type: 'text', label: '단계 4 제목' },
+  step4Body: { type: 'textarea', label: '단계 4 설명' },
+  step5Title: { type: 'text', label: '단계 5 제목' },
+  step5Body: { type: 'textarea', label: '단계 5 설명' },
+} as const satisfies FieldsSchema;
+
+type ProcessContent = ValuesOf<typeof processSchema>;
 
 const Process: SectionComponent = function Process({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as ProcessContent;
+  const title = content.title || '';
 
-  const steps = [1, 2, 3, 4, 5].map(n => ({
-    title: getFieldValue(fields, `step${n}Title`) || '',
-    body: getFieldValue(fields, `step${n}Body`) || '',
+  const steps = ([1, 2, 3, 4, 5] as const).map(n => ({
+    title: content[`step${n}Title`] || '',
+    body: content[`step${n}Body`] || '',
   }));
 
   return (
@@ -55,19 +71,7 @@ Process.meta = {
   componentKey: 'process',
   category: 'content',
   label: 'Legal Process',
-  fieldsSchema: {
-    title: { type: 'text', label: '섹션 타이틀', required: true },
-    step1Title: { type: 'text', label: '단계 1 제목' },
-    step1Body: { type: 'textarea', label: '단계 1 설명' },
-    step2Title: { type: 'text', label: '단계 2 제목' },
-    step2Body: { type: 'textarea', label: '단계 2 설명' },
-    step3Title: { type: 'text', label: '단계 3 제목' },
-    step3Body: { type: 'textarea', label: '단계 3 설명' },
-    step4Title: { type: 'text', label: '단계 4 제목' },
-    step4Body: { type: 'textarea', label: '단계 4 설명' },
-    step5Title: { type: 'text', label: '단계 5 제목' },
-    step5Body: { type: 'textarea', label: '단계 5 설명' },
-  },
+  fieldsSchema: processSchema,
   previewImage: '/component-previews/legal/process.webp',
 };
 

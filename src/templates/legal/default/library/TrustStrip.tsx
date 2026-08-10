@@ -1,14 +1,27 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { BuildingsIcon, DocumentTextIcon, HomeIcon, UserHandsIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const trustStripSchema = {
+  stat1Value: { type: 'text', label: '통계 1 값' },
+  stat1Label: { type: 'text', label: '통계 1 라벨' },
+  stat2Value: { type: 'text', label: '통계 2 값' },
+  stat2Label: { type: 'text', label: '통계 2 라벨' },
+  stat3Value: { type: 'text', label: '통계 3 값' },
+  stat3Label: { type: 'text', label: '통계 3 라벨' },
+  stat4Value: { type: 'text', label: '통계 4 값' },
+  stat4Label: { type: 'text', label: '통계 4 라벨' },
+} as const satisfies FieldsSchema;
+
+type TrustStripContent = ValuesOf<typeof trustStripSchema>;
 
 const TrustStrip: SectionComponent = function TrustStrip({ section }: TemplateSectionProps) {
-  const { fields } = section;
+  const content = section.fields as TrustStripContent;
   
-  const stats = [1, 2, 3, 4].map(n => ({
-    value: getFieldValue(fields, `stat${n}Value`) || '',
-    label: getFieldValue(fields, `stat${n}Label`) || '',
+  const stats = ([1, 2, 3, 4] as const).map(n => ({
+    value: content[`stat${n}Value`] || '',
+    label: content[`stat${n}Label`] || '',
   }));
 
   const icons = [
@@ -39,16 +52,7 @@ TrustStrip.meta = {
   componentKey: 'trust-strip',
   category: 'content',
   label: 'Legal Trust Strip',
-  fieldsSchema: {
-    stat1Value: { type: 'text', label: '통계 1 값' },
-    stat1Label: { type: 'text', label: '통계 1 라벨' },
-    stat2Value: { type: 'text', label: '통계 2 값' },
-    stat2Label: { type: 'text', label: '통계 2 라벨' },
-    stat3Value: { type: 'text', label: '통계 3 값' },
-    stat3Label: { type: 'text', label: '통계 3 라벨' },
-    stat4Value: { type: 'text', label: '통계 4 값' },
-    stat4Label: { type: 'text', label: '통계 4 라벨' },
-  },
+  fieldsSchema: trustStripSchema,
   previewImage: '/component-previews/legal/trust-strip.webp',
 };
 

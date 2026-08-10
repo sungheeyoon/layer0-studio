@@ -3,15 +3,18 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { PhoneIcon, ClockIcon, MapPinIcon, ChatIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { contactSchema } from './Contact.meta';
+
+type ContactContent = ValuesOf<typeof contactSchema>;
 
 const Contact: SectionComponent = function Contact({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || '';
-  const body = getFieldValue(fields, 'body') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const hours = getFieldValue(fields, 'hours') || '';
-  const location = getFieldValue(fields, 'location') || '';
+  const content = section.fields as ContactContent;
+  const title = content.title || '';
+  const body = content.body || '';
+  const phone = content.phone || '';
+  const hours = content.hours || '';
+  const location = content.location || '';
 
   return (
     <section id="contact" className="py-24 md:py-32 px-4 bg-[var(--l-navy)] relative overflow-hidden">

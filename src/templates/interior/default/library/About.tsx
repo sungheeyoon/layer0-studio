@@ -1,19 +1,34 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { PenIcon, DiamondIcon, ClockIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const aboutSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'textarea', label: '설명' },
+  v1Title: { type: 'text', label: '가치 1 제목' },
+  v1Desc: { type: 'text', label: '가치 1 설명' },
+  v2Title: { type: 'text', label: '가치 2 제목' },
+  v2Desc: { type: 'text', label: '가치 2 설명' },
+  v3Title: { type: 'text', label: '가치 3 제목' },
+  v3Desc: { type: 'text', label: '가치 3 설명' },
+  projectTitle: { type: 'text', label: '이미지 프로젝트명' },
+} as const satisfies FieldsSchema;
+
+type AboutContent = ValuesOf<typeof aboutSchema>;
 
 const About: SectionComponent = function About({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || 'About Espacio';
-  const title = getFieldValue(fields, 'title') || '';
-  const description = getFieldValue(fields, 'description') || '';
-  const projectTitle = getFieldValue(fields, 'projectTitle') || '한남동 타운하우스 — 주방 리노베이션';
+  const content = section.fields as AboutContent;
+  const label = content.eyebrow || 'About Espacio';
+  const title = content.title || '';
+  const description = content.description || '';
+  const projectTitle = content.projectTitle || '한남동 타운하우스 — 주방 리노베이션';
 
   const values = [
-    { title: getFieldValue(fields, 'v1Title'), desc: getFieldValue(fields, 'v1Desc'), icon: <PenIcon size={18} className="text-[var(--i-gold)]" /> },
-    { title: getFieldValue(fields, 'v2Title'), desc: getFieldValue(fields, 'v2Desc'), icon: <DiamondIcon size={18} className="text-[var(--i-gold)]" /> },
-    { title: getFieldValue(fields, 'v3Title'), desc: getFieldValue(fields, 'v3Desc'), icon: <ClockIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: content.v1Title, desc: content.v1Desc, icon: <PenIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: content.v2Title, desc: content.v2Desc, icon: <DiamondIcon size={18} className="text-[var(--i-gold)]" /> },
+    { title: content.v3Title, desc: content.v3Desc, icon: <ClockIcon size={18} className="text-[var(--i-gold)]" /> },
   ].filter(v => v.title);
 
   return (
@@ -94,18 +109,7 @@ About.meta = {
   componentKey: 'about',
   category: 'content',
   label: 'Interior About',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'textarea', label: '설명' },
-    v1Title: { type: 'text', label: '가치 1 제목' },
-    v1Desc: { type: 'text', label: '가치 1 설명' },
-    v2Title: { type: 'text', label: '가치 2 제목' },
-    v2Desc: { type: 'text', label: '가치 2 설명' },
-    v3Title: { type: 'text', label: '가치 3 제목' },
-    v3Desc: { type: 'text', label: '가치 3 설명' },
-    projectTitle: { type: 'text', label: '이미지 프로젝트명' },
-  },
+  fieldsSchema: aboutSchema,
   previewImage: '/component-previews/interior/about.webp',
 };
 

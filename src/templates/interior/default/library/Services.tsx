@@ -1,24 +1,44 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../interior.module.css';
 import { HomeIcon, BuildingsIcon, MonitorIcon, PaletteIcon, ShieldCheckIcon, ArrowRightIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const servicesSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'textarea', label: '섹션 설명' },
+  s1Badge: { type: 'text', label: 'S1 배지' },
+  s1Title: { type: 'text', label: 'S1 제목' },
+  s1Desc: { type: 'textarea', label: 'S1 설명' },
+  s1Price: { type: 'text', label: 'S1 시작 가격' },
+  s2Title: { type: 'text', label: 'S2 제목' },
+  s2Desc: { type: 'textarea', label: 'S2 설명' },
+  s3Title: { type: 'text', label: 'S3 제목' },
+  s3Desc: { type: 'textarea', label: 'S3 설명' },
+  s4Title: { type: 'text', label: 'S4 제목' },
+  s4Desc: { type: 'textarea', label: 'S4 설명' },
+  s5Title: { type: 'text', label: 'S5 제목' },
+  s5Desc: { type: 'textarea', label: 'S5 설명' },
+} as const satisfies FieldsSchema;
+
+type ServicesContent = ValuesOf<typeof servicesSchema>;
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || 'Our Services';
-  const title = getFieldValue(fields, 'title') || '';
-  const description = getFieldValue(fields, 'description') || '';
+  const content = section.fields as ServicesContent;
+  const label = content.eyebrow || 'Our Services';
+  const title = content.title || '';
+  const description = content.description || '';
 
-  const s1Title = getFieldValue(fields, 's1Title');
-  const s1Desc = getFieldValue(fields, 's1Desc');
-  const s1Badge = getFieldValue(fields, 's1Badge');
-  const s1Price = getFieldValue(fields, 's1Price');
+  const s1Title = content.s1Title;
+  const s1Desc = content.s1Desc;
+  const s1Badge = content.s1Badge;
+  const s1Price = content.s1Price;
 
   const services = [
-    { title: getFieldValue(fields, 's2Title'), desc: getFieldValue(fields, 's2Desc'), icon: <BuildingsIcon size={22} className="text-[var(--i-gold)]" /> },
-    { title: getFieldValue(fields, 's3Title'), desc: getFieldValue(fields, 's3Desc'), icon: <MonitorIcon size={22} className="text-[var(--i-gold)]" /> },
-    { title: getFieldValue(fields, 's4Title'), desc: getFieldValue(fields, 's4Desc'), icon: <PaletteIcon size={22} className="text-[var(--i-gold)]" />, isConsulting: true },
-    { title: getFieldValue(fields, 's5Title'), desc: getFieldValue(fields, 's5Desc'), icon: <ShieldCheckIcon size={22} className="text-[var(--i-gold)]" />, isAS: true },
+    { title: content.s2Title, desc: content.s2Desc, icon: <BuildingsIcon size={22} className="text-[var(--i-gold)]" /> },
+    { title: content.s3Title, desc: content.s3Desc, icon: <MonitorIcon size={22} className="text-[var(--i-gold)]" /> },
+    { title: content.s4Title, desc: content.s4Desc, icon: <PaletteIcon size={22} className="text-[var(--i-gold)]" />, isConsulting: true },
+    { title: content.s5Title, desc: content.s5Desc, icon: <ShieldCheckIcon size={22} className="text-[var(--i-gold)]" />, isAS: true },
   ].filter(s => s.title);
 
   return (
@@ -116,23 +136,7 @@ Services.meta = {
   componentKey: 'services',
   category: 'features',
   label: 'Interior Services',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'textarea', label: '섹션 설명' },
-    s1Badge: { type: 'text', label: 'S1 배지' },
-    s1Title: { type: 'text', label: 'S1 제목' },
-    s1Desc: { type: 'textarea', label: 'S1 설명' },
-    s1Price: { type: 'text', label: 'S1 시작 가격' },
-    s2Title: { type: 'text', label: 'S2 제목' },
-    s2Desc: { type: 'textarea', label: 'S2 설명' },
-    s3Title: { type: 'text', label: 'S3 제목' },
-    s3Desc: { type: 'textarea', label: 'S3 설명' },
-    s4Title: { type: 'text', label: 'S4 제목' },
-    s4Desc: { type: 'textarea', label: 'S4 설명' },
-    s5Title: { type: 'text', label: 'S5 제목' },
-    s5Desc: { type: 'textarea', label: 'S5 설명' },
-  },
+  fieldsSchema: servicesSchema,
   previewImage: '/component-previews/interior/services.webp',
 };
 

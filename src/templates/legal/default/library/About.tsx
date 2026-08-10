@@ -1,17 +1,30 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { UserHandsIcon, DocumentTextIcon, LockIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const aboutSchema = {
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  body: { type: 'textarea', label: '본문' },
+  reason1Title: { type: 'text', label: '이유 1 제목' },
+  reason1Body: { type: 'textarea', label: '이유 1 설명' },
+  reason2Title: { type: 'text', label: '이유 2 제목' },
+  reason2Body: { type: 'textarea', label: '이유 2 설명' },
+  reason3Title: { type: 'text', label: '이유 3 제목' },
+  reason3Body: { type: 'textarea', label: '이유 3 설명' },
+} as const satisfies FieldsSchema;
+
+type AboutContent = ValuesOf<typeof aboutSchema>;
 
 const About: SectionComponent = function About({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || '';
-  const body = getFieldValue(fields, 'body') || '';
+  const content = section.fields as AboutContent;
+  const title = content.title || '';
+  const body = content.body || '';
 
   const reasons = [
-    { title: getFieldValue(fields, 'reason1Title'), body: getFieldValue(fields, 'reason1Body'), icon: <UserHandsIcon size={20} className="text-amber-400" /> },
-    { title: getFieldValue(fields, 'reason2Title'), body: getFieldValue(fields, 'reason2Body'), icon: <DocumentTextIcon size={20} className="text-amber-400" /> },
-    { title: getFieldValue(fields, 'reason3Title'), body: getFieldValue(fields, 'reason3Body'), icon: <LockIcon size={20} className="text-amber-400" /> },
+    { title: content.reason1Title, body: content.reason1Body, icon: <UserHandsIcon size={20} className="text-amber-400" /> },
+    { title: content.reason2Title, body: content.reason2Body, icon: <DocumentTextIcon size={20} className="text-amber-400" /> },
+    { title: content.reason3Title, body: content.reason3Body, icon: <LockIcon size={20} className="text-amber-400" /> },
   ];
 
   return (
@@ -52,16 +65,7 @@ About.meta = {
   componentKey: 'about',
   category: 'content',
   label: 'Legal About',
-  fieldsSchema: {
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    body: { type: 'textarea', label: '본문' },
-    reason1Title: { type: 'text', label: '이유 1 제목' },
-    reason1Body: { type: 'textarea', label: '이유 1 설명' },
-    reason2Title: { type: 'text', label: '이유 2 제목' },
-    reason2Body: { type: 'textarea', label: '이유 2 설명' },
-    reason3Title: { type: 'text', label: '이유 3 제목' },
-    reason3Body: { type: 'textarea', label: '이유 3 설명' },
-  },
+  fieldsSchema: aboutSchema,
   previewImage: '/component-previews/legal/about.webp',
 };
 

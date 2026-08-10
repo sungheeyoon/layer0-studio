@@ -1,22 +1,51 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { CupIcon, DiplomaIcon, ClockIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const trainersSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  description: { type: 'textarea', label: '섹션 설명' },
+  m1Name: { type: 'text', label: 'M1 이름' },
+  m1Role: { type: 'text', label: 'M1 직함' },
+  m1Badge: { type: 'text', label: 'M1 배지' },
+  m1Image: { type: 'image', label: 'M1 사진' },
+  m1Info1: { type: 'text', label: 'M1 정보 1' },
+  m1Info2: { type: 'text', label: 'M1 정보 2' },
+  m1Info3: { type: 'text', label: 'M1 정보 3' },
+  m2Name: { type: 'text', label: 'M2 이름' },
+  m2Role: { type: 'text', label: 'M2 직함' },
+  m2Badge: { type: 'text', label: 'M2 배지' },
+  m2Image: { type: 'image', label: 'M2 사진' },
+  m2Info1: { type: 'text', label: 'M2 정보 1' },
+  m2Info2: { type: 'text', label: 'M2 정보 2' },
+  m2Info3: { type: 'text', label: 'M2 정보 3' },
+  m3Name: { type: 'text', label: 'M3 이름' },
+  m3Role: { type: 'text', label: 'M3 직함' },
+  m3Badge: { type: 'text', label: 'M3 배지' },
+  m3Image: { type: 'image', label: 'M3 사진' },
+  m3Info1: { type: 'text', label: 'M3 정보 1' },
+  m3Info2: { type: 'text', label: 'M3 정보 2' },
+  m3Info3: { type: 'text', label: 'M3 정보 3' },
+} as const satisfies FieldsSchema;
+
+type TrainersContent = ValuesOf<typeof trainersSchema>;
 
 const Trainers: SectionComponent = function Trainers({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '트레이너';
-  const title = getFieldValue(fields, 'title') || '당신 옆에서\n함께 싸웁니다';
-  const description = getFieldValue(fields, 'description') || '';
+  const content = section.fields as TrainersContent;
+  const label = content.eyebrow || '트레이너';
+  const title = content.title || '당신 옆에서\n함께 싸웁니다';
+  const description = content.description || '';
 
-  const trainers = [1, 2, 3].map(n => ({
-    name: getFieldValue(fields, `m${n}Name`),
-    role: getFieldValue(fields, `m${n}Role`),
-    badge: getFieldValue(fields, `m${n}Badge`),
-    image: getFieldValue(fields, `m${n}Image`),
-    info1: getFieldValue(fields, `m${n}Info1`),
-    info2: getFieldValue(fields, `m${n}Info2`),
-    info3: getFieldValue(fields, `m${n}Info3`),
+  const trainers = ([1, 2, 3] as const).map(n => ({
+    name: content[`m${n}Name`],
+    role: content[`m${n}Role`],
+    badge: content[`m${n}Badge`],
+    image: content[`m${n}Image`]?.url,
+    info1: content[`m${n}Info1`],
+    info2: content[`m${n}Info2`],
+    info3: content[`m${n}Info3`],
     mt: n === 2 ? 'lg:mt-10' : '',
   })).filter(m => m.name);
 
@@ -98,32 +127,7 @@ Trainers.meta = {
   componentKey: 'trainers',
   category: 'content',
   label: 'Fitness Trainers',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    description: { type: 'textarea', label: '섹션 설명' },
-    m1Name: { type: 'text', label: 'M1 이름' },
-    m1Role: { type: 'text', label: 'M1 직함' },
-    m1Badge: { type: 'text', label: 'M1 배지' },
-    m1Image: { type: 'image', label: 'M1 사진' },
-    m1Info1: { type: 'text', label: 'M1 정보 1' },
-    m1Info2: { type: 'text', label: 'M1 정보 2' },
-    m1Info3: { type: 'text', label: 'M1 정보 3' },
-    m2Name: { type: 'text', label: 'M2 이름' },
-    m2Role: { type: 'text', label: 'M2 직함' },
-    m2Badge: { type: 'text', label: 'M2 배지' },
-    m2Image: { type: 'image', label: 'M2 사진' },
-    m2Info1: { type: 'text', label: 'M2 정보 1' },
-    m2Info2: { type: 'text', label: 'M2 정보 2' },
-    m2Info3: { type: 'text', label: 'M2 정보 3' },
-    m3Name: { type: 'text', label: 'M3 이름' },
-    m3Role: { type: 'text', label: 'M3 직함' },
-    m3Badge: { type: 'text', label: 'M3 배지' },
-    m3Image: { type: 'image', label: 'M3 사진' },
-    m3Info1: { type: 'text', label: 'M3 정보 1' },
-    m3Info2: { type: 'text', label: 'M3 정보 2' },
-    m3Info3: { type: 'text', label: 'M3 정보 3' },
-  },
+  fieldsSchema: trainersSchema,
   previewImage: '/component-previews/fitness/trainers.webp',
 };
 

@@ -1,22 +1,40 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { ArrowRightIcon, BuildingsIcon, CalculatorIcon, HomeIcon, GraphIcon, UserHandsIcon, LawIcon, CheckCircleIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const servicesSchema = {
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  service1Title: { type: 'text', label: '서비스 1 제목' },
+  service1Body: { type: 'textarea', label: '서비스 1 설명' },
+  service2Title: { type: 'text', label: '서비스 2 제목' },
+  service2Body: { type: 'textarea', label: '서비스 2 설명' },
+  service3Title: { type: 'text', label: '서비스 3 제목' },
+  service3Body: { type: 'textarea', label: '서비스 3 설명' },
+  service4Title: { type: 'text', label: '서비스 4 제목' },
+  service4Body: { type: 'textarea', label: '서비스 4 설명' },
+  service5Title: { type: 'text', label: '서비스 5 제목' },
+  service5Body: { type: 'textarea', label: '서비스 5 설명' },
+  service6Title: { type: 'text', label: '서비스 6 제목' },
+  service6Body: { type: 'textarea', label: '서비스 6 설명' },
+} as const satisfies FieldsSchema;
+
+type ServicesContent = ValuesOf<typeof servicesSchema>;
 
 const Services: SectionComponent = function Services({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as ServicesContent;
+  const title = content.title || '';
 
   const services = [
-    { title: getFieldValue(fields, 'service1Title'), body: getFieldValue(fields, 'service1Body'), icon: <BuildingsIcon size={40} className="text-amber-400 mb-5" />, large: true },
-    { title: getFieldValue(fields, 'service2Title'), body: getFieldValue(fields, 'service2Body'), icon: <CalculatorIcon size={32} className="text-amber-600 mb-4" />, bg: 'bg-amber-50 border-amber-100' },
-    { title: getFieldValue(fields, 'service3Title'), body: getFieldValue(fields, 'service3Body'), icon: <HomeIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
-    { title: getFieldValue(fields, 'service4Title'), body: getFieldValue(fields, 'service4Body'), icon: <GraphIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
-    { title: getFieldValue(fields, 'service5Title'), body: getFieldValue(fields, 'service5Body'), icon: <UserHandsIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: content.service1Title, body: content.service1Body, icon: <BuildingsIcon size={40} className="text-amber-400 mb-5" />, large: true },
+    { title: content.service2Title, body: content.service2Body, icon: <CalculatorIcon size={32} className="text-amber-600 mb-4" />, bg: 'bg-amber-50 border-amber-100' },
+    { title: content.service3Title, body: content.service3Body, icon: <HomeIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: content.service4Title, body: content.service4Body, icon: <GraphIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
+    { title: content.service5Title, body: content.service5Body, icon: <UserHandsIcon size={32} className="text-[var(--l-navy)] mb-4" />, bg: 'bg-stone-50 border-stone-200' },
   ];
 
-  const mainCtaTitle = getFieldValue(fields, 'service6Title') || '';
-  const mainCtaBody = getFieldValue(fields, 'service6Body') || '';
+  const mainCtaTitle = content.service6Title || '';
+  const mainCtaBody = content.service6Body || '';
 
   return (
     <section id="services" className="py-24 md:py-32 px-4 bg-white">
@@ -90,21 +108,7 @@ Services.meta = {
   componentKey: 'services',
   category: 'features',
   label: 'Legal Services',
-  fieldsSchema: {
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    service1Title: { type: 'text', label: '서비스 1 제목' },
-    service1Body: { type: 'textarea', label: '서비스 1 설명' },
-    service2Title: { type: 'text', label: '서비스 2 제목' },
-    service2Body: { type: 'textarea', label: '서비스 2 설명' },
-    service3Title: { type: 'text', label: '서비스 3 제목' },
-    service3Body: { type: 'textarea', label: '서비스 3 설명' },
-    service4Title: { type: 'text', label: '서비스 4 제목' },
-    service4Body: { type: 'textarea', label: '서비스 4 설명' },
-    service5Title: { type: 'text', label: '서비스 5 제목' },
-    service5Body: { type: 'textarea', label: '서비스 5 설명' },
-    service6Title: { type: 'text', label: '서비스 6 제목' },
-    service6Body: { type: 'textarea', label: '서비스 6 설명' },
-  },
+  fieldsSchema: servicesSchema,
   previewImage: '/component-previews/legal/services.webp',
 };
 

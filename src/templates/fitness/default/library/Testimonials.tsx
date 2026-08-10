@@ -1,19 +1,41 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../fitness.module.css';
 import { StarIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const testimonialsSchema = {
+  eyebrow: { type: 'text', label: '섹션 라벨' },
+  title: { type: 'textarea', label: '섹션 타이틀', required: true },
+  ratingValue: { type: 'text', label: '별점 수치' },
+  ratingLabel: { type: 'text', label: '별점 라벨' },
+  r1Body: { type: 'textarea', label: '후기 1 본문' },
+  r1Author: { type: 'text', label: '후기 1 작성자' },
+  r1Meta: { type: 'text', label: '후기 1 메타' },
+  r2Body: { type: 'textarea', label: '후기 2 본문' },
+  r2Author: { type: 'text', label: '후기 2 작성자' },
+  r2Meta: { type: 'text', label: '후기 2 메타' },
+  r3Body: { type: 'textarea', label: '후기 3 본문' },
+  r3Author: { type: 'text', label: '후기 3 작성자' },
+  r3Meta: { type: 'text', label: '후기 3 메타' },
+} as const satisfies FieldsSchema;
+
+type TestimonialsContent = ValuesOf<typeof testimonialsSchema>;
 
 const Testimonials: SectionComponent = function Testimonials({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const label = getFieldValue(fields, 'eyebrow') || '멤버 후기';
-  const title = getFieldValue(fields, 'title') || '결과가\n모든 걸\n말합니다';
-  const ratingValue = getFieldValue(fields, 'ratingValue') || '4.9';
-  const ratingLabel = getFieldValue(fields, 'ratingLabel') || 'Google 리뷰 기준 • 894개 후기';
+  const content = section.fields as TestimonialsContent;
+  const label = content.eyebrow || '멤버 후기';
+  const title = content.title || '결과가\n모든 걸\n말합니다';
+  const ratingValue = content.ratingValue || '4.9';
+  const ratingLabel = content.ratingLabel || 'Google 리뷰 기준 • 894개 후기';
 
-  const reviews = [1, 2, 3, 4, 5, 6].map(n => ({
-    body: getFieldValue(fields, `r${n}Body`),
-    author: getFieldValue(fields, `r${n}Author`),
-    meta: getFieldValue(fields, `r${n}Meta`),
+  // Three, not six. The loop used to run to 6 and `getFieldValue` returned ''
+  // for the four slots the schema never declared, so they were filtered out —
+  // dead iterations the editor could never fill. The schema is the source of
+  // truth now (ADR-0016 §4) and the compiler says so.
+  const reviews = ([1, 2, 3] as const).map(n => ({
+    body: content[`r${n}Body`],
+    author: content[`r${n}Author`],
+    meta: content[`r${n}Meta`],
     mt: n % 2 === 0 ? 'md:mt-8' : '',
   })).filter(r => r.body);
 
@@ -77,21 +99,7 @@ Testimonials.meta = {
   componentKey: 'testimonials',
   category: 'content',
   label: 'Fitness Testimonials',
-  fieldsSchema: {
-    eyebrow: { type: 'text', label: '섹션 라벨' },
-    title: { type: 'textarea', label: '섹션 타이틀', required: true },
-    ratingValue: { type: 'text', label: '별점 수치' },
-    ratingLabel: { type: 'text', label: '별점 라벨' },
-    r1Body: { type: 'textarea', label: '후기 1 본문' },
-    r1Author: { type: 'text', label: '후기 1 작성자' },
-    r1Meta: { type: 'text', label: '후기 1 메타' },
-    r2Body: { type: 'textarea', label: '후기 2 본문' },
-    r2Author: { type: 'text', label: '후기 2 작성자' },
-    r2Meta: { type: 'text', label: '후기 2 메타' },
-    r3Body: { type: 'textarea', label: '후기 3 본문' },
-    r3Author: { type: 'text', label: '후기 3 작성자' },
-    r3Meta: { type: 'text', label: '후기 3 메타' },
-  },
+  fieldsSchema: testimonialsSchema,
   previewImage: '/component-previews/fitness/testimonials.webp',
 };
 

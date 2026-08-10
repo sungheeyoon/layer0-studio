@@ -1,15 +1,26 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import { HomeIcon, InstagramIcon, YoutubeIcon, ChatIcon, MapPinIcon, PhoneIcon, LetterIcon, ClockIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const footerSchema = {
+  description: { type: 'textarea', label: '브랜드 설명' },
+  address: { type: 'text', label: '주소' },
+  phone: { type: 'text', label: '전화번호' },
+  email: { type: 'text', label: '이메일' },
+  hours: { type: 'textarea', label: '운영 시간' },
+  copyright: { type: 'text', label: '저작권' },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const description = getFieldValue(fields, 'description') || '';
-  const address = getFieldValue(fields, 'address') || '';
-  const phone = getFieldValue(fields, 'phone') || '';
-  const email = getFieldValue(fields, 'email') || '';
-  const hours = getFieldValue(fields, 'hours') || '';
-  const copyright = getFieldValue(fields, 'copyright') || '';
+  const content = section.fields as FooterContent;
+  const description = content.description || '';
+  const address = content.address || '';
+  const phone = content.phone || '';
+  const email = content.email || '';
+  const hours = content.hours || '';
+  const copyright = content.copyright || '';
 
   return (
     <footer style={{ background: 'var(--i-dark-deepest)', borderTop: '1px solid color-mix(in srgb, white 5%, transparent)' }}>
@@ -99,14 +110,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Interior Footer',
-  fieldsSchema: {
-    description: { type: 'textarea', label: '브랜드 설명' },
-    address: { type: 'text', label: '주소' },
-    phone: { type: 'text', label: '전화번호' },
-    email: { type: 'text', label: '이메일' },
-    hours: { type: 'textarea', label: '운영 시간' },
-    copyright: { type: 'text', label: '저작권' },
-  },
+  fieldsSchema: footerSchema,
   previewImage: '/component-previews/interior/footer.webp',
 };
 

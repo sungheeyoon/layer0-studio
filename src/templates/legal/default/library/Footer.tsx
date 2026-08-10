@@ -1,13 +1,21 @@
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { ShieldCheckIcon, DocumentTextIcon, ChatIcon, PlayCircleIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { FieldsSchema, ValuesOf } from '@/domain/entities/template.entity';
+
+const footerSchema = {
+  brandName: { type: 'text', label: '사무소 이름' },
+  copyright: { type: 'text', label: '저작권' },
+  address: { type: 'textarea', label: '주소' },
+} as const satisfies FieldsSchema;
+
+type FooterContent = ValuesOf<typeof footerSchema>;
 
 const Footer: SectionComponent = function Footer({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const brandName = getFieldValue(fields, 'brandName') || '하람 법률세무사무소';
-  const copyright = getFieldValue(fields, 'copyright') || '© 2024 하람 법률세무사무소. All rights reserved.';
-  const address = getFieldValue(fields, 'address') || '';
+  const content = section.fields as FooterContent;
+  const brandName = content.brandName || '하람 법률세무사무소';
+  const copyright = content.copyright || '© 2024 하람 법률세무사무소. All rights reserved.';
+  const address = content.address || '';
 
   return (
     <footer className="bg-[var(--l-navy-deep)] py-16 px-4">
@@ -81,11 +89,7 @@ Footer.meta = {
   componentKey: 'footer',
   category: 'footer',
   label: 'Legal Footer',
-  fieldsSchema: {
-    brandName: { type: 'text', label: '사무소 이름' },
-    copyright: { type: 'text', label: '저작권' },
-    address: { type: 'textarea', label: '주소' },
-  },
+  fieldsSchema: footerSchema,
   previewImage: '/component-previews/legal/footer.webp',
 };
 

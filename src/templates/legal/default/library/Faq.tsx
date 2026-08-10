@@ -4,15 +4,20 @@ import { useState } from 'react';
 import { TemplateSectionProps, SectionComponent } from '../../../types';
 import styles from '../legal.module.css';
 import { PlusIcon } from '../sections/icons';
-import { getFieldValue } from '@/domain/entities/template.entity';
+import type { ValuesOf } from '@/domain/entities/template.entity';
+import { faqSchema } from './Faq.meta';
+
+type FaqContent = ValuesOf<typeof faqSchema>;
 
 const Faq: SectionComponent = function Faq({ section }: TemplateSectionProps) {
-  const { fields } = section;
-  const title = getFieldValue(fields, 'title') || '';
+  const content = section.fields as FaqContent;
+  const title = content.title || '';
 
-  const items = [1, 2, 3, 4, 5].map(n => ({
-    q: getFieldValue(fields, `q${n}`) || '',
-    a: getFieldValue(fields, `a${n}`) || '',
+  // Three, not five: `q4`/`q5` are not in the schema and no preset carries
+  // them, so those iterations only ever produced empty rows to be filtered out.
+  const items = ([1, 2, 3] as const).map(n => ({
+    q: content[`q${n}`] || '',
+    a: content[`a${n}`] || '',
   })).filter(it => it.q);
 
   const [openIdx, setOpenIdx] = useState<number | null>(null);

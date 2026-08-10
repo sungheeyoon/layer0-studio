@@ -21,4 +21,7 @@ export const MIGRATED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   'cafe-cozy',
   'cafe-default',
   'corporate-default',
+  'fitness-default',
+  'interior-default',
+  'legal-default',
 ]);
