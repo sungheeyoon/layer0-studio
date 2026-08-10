@@ -58,7 +58,7 @@ export default function SiteListTable({ sites, empty, onHoverSite, onConfigure }
               className="group grid grid-cols-12 items-center gap-4 border-b border-border px-5 py-4 transition-colors last:border-b-0 hover:bg-muted/40"
               onMouseEnter={() => onHoverSite?.(site)}
             >
-              {/* Project: initial avatar + name + domain */}
+              {/* Project: initial avatar + name + public Site address */}
               <div className="col-span-5 flex min-w-0 items-center gap-3">
                 <div className="text-caption flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted font-semibold uppercase text-muted-foreground">
                   {site.siteName.charAt(0)}

@@ -224,7 +224,7 @@ export default function SiteSettingsDialog({
           </div>
         </section>
 
-        {/* Domain */}
+        {/* Site address (`domain` is the legacy persisted field name). */}
         <section className="space-y-3">
           <h3 className="text-title">{t.projects.domainUrl}</h3>
           <div className="space-y-2">
@@ -256,7 +256,7 @@ export default function SiteSettingsDialog({
             {domainVerified && <p className="text-caption text-primary">{t.projects.domainSet}</p>}
             {!domainError && !domainVerified && (
               <p className="text-caption text-muted-foreground">
-                {t.projects.domainHintPrefix}internal.id/{site.id.substring(0, 8)}
+                {t.projects.domainHintPrefix}/site/{editDomain.trim() || '<slug>'}
               </p>
             )}
           </div>

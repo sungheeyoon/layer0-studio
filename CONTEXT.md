@@ -99,9 +99,9 @@ _Avoid_: active (the status string — fine in code), published (overloaded with
 A state an admin can put a Site into to take it down. Distinct from draft — a Suspended Site has been Published at least once.
 _Note_: reachable at the use-case level only; the admin UI that triggered it was removed.
 
-**Subdomain**:
-The slug a User picks to publish their Site under — the `myshop` in `myshop.layer0.studio`. **Required to Publish.** Subdomain serving is designed but **not implemented** — Sites are served at the path-based `/site/<slug>` today ([ADR-0009](./docs/adr/0009-subdomain-public-serving.md)).
-_Avoid_: domain (overloaded — see below), slug, hostname, URL.
+**Site Address**:
+The public path a User chooses for a Site — `/site/myshop` for the address `myshop`. It is stored in the legacy `user_sites.domain` field even though it is not a hostname or custom domain. Published Sites are served at `/site/<slug>`; subdomain serving is deferred indefinitely ([ADR-0009](./docs/adr/0009-subdomain-public-serving.md)).
+_Avoid_: Subdomain, domain (legacy code identifier only), hostname, custom domain.
 
 **Sync** (verb):
 The operation reconciling Presets (code) into Template rows (DB). Dry-run by default; runs automatically after a successful production deploy ([ADR-0012](./docs/adr/0012-template-publishing-pipeline.md)).
@@ -146,7 +146,7 @@ _Avoid_: account deletion, account removal, deactivation, GDPR delete.
 ## Flagged ambiguities
 
 - **"copy" / "shared" span two independent axes.** *Template ↔ Template (code):* nothing is shared; each Template owns independent copies ([ADR-0001](./docs/adr/0001-beta-model-template-isolation.md)). *Site ↔ Template (runtime):* the content **data** is deep-copied per Site, but the **Renderer code** is shared by every Site of that `templateKey`. Net: a Site duplicates a few KB of JSON, never components. Name the axis before discussing storage cost or update propagation.
-- **"domain" is overloaded three ways:** the **Subdomain** product concept (`user_sites.domain`), the Clean Architecture layer (`src/domain/`), and the future bring-your-own-hostname feature (no canonical word yet — pin one when it's on the table).
+- **"domain" is overloaded:** `user_sites.domain` is the legacy code identifier for a **Site Address**, while `src/domain/` means the Clean Architecture layer. A future bring-your-own-hostname feature has no canonical product term yet — pin one if it comes onto the roadmap.
 - **"publish" is overloaded two ways:** a User **Publish**es their Site (draft → Live), and a Template becomes catalog-visible (`status = active`). The code→DB reconcile is **Sync**, never "publish". The capability name `canPublishTemplates` predates the distinction and stays as-is ([ADR-0006](./docs/adr/0006-canpublishtemplates-separate-from-admin.md)).
 - **"delete" is overloaded three ways, and the collision caused a real defect:** a User ending their account is **Account Erasure**; removing an **Asset** record is not the same as destroying its binary (that half is the **Tombstone**); `pnpm template:delete` is a dev-time CLI. Before [ADR-0014](./docs/adr/0014-account-erasure-tombstone-pipeline.md) the model had no word for the second half, so "deleted the asset" meant either thing — and account erasure did only the first.
 - **"theme" is historical.** Visual identity is per-Template (**Design Tokens**); catalog grouping is **Category**. Reading old PRs, translate "theme" to whichever job it was doing. Code residue was cleared in migration 013 (`themeKey` → `templateKey`) and PR #19 (`src/themes/` → `src/templates/`).
