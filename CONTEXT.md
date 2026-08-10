@@ -4,6 +4,10 @@ A no-code website builder. Users pick a **Template**, edit it visually, and publ
 
 This file is the vocabulary only — one or two sentences per term, plus the words to avoid. Reasoning lives in `docs/adr/`; operational detail lives in `CLAUDE.md` and `docs/TEMPLATE_SYSTEM.md`.
 
+> ⚠️ **이 문서는 일부가 TO-BE(구현 대기)다 — 코드와 다르다.** **Block**, **Chrome**, **Menu**/`MenuEntry`, **Field**(스키마 서술자) / **Value**(인스턴스 데이터) 는 [ADR-0016](./docs/adr/0016-block-rename-and-field-value-split.md) 이 확정했지만 **아직 구현되지 않았다**. 코드는 여전히 `Section` / `SingleSection` / `shared` / `NavMeta` / `{type,label,value}` 를 함께 든 `Field` 다(`SingleContent.sections`, `Page.sections`, `MultiContent.shared`). 단일 빅뱅 마이그레이션 + codemod 로 일괄 전환 예정.
+>
+> **코드를 읽을 때는 ADR-0016 §2 의 AS-IS 열이 현재 진실이다.** 이 문서는 목표 어휘다. 나머지 항(Site/Template/Design Tokens/Asset/Account Erasure 등)은 코드와 일치한다.
+
 ## Language
 
 ### Sites and Templates
@@ -17,7 +21,7 @@ Whether a Site is one continuous scroll (**Single**) or a set of routable **Page
 _Avoid_: mode (the literal discriminator — fine in code, not in conversation).
 
 **Template**:
-A designer-built blueprint that Users instantiate into Sites. Self-contained in code (its own design tokens, Section components, Renderer) and a row in the `templates` table, with status `draft | active | archived`.
+A designer-built blueprint that Users instantiate into Sites. Self-contained in code (its own design tokens, Block components, Renderer) and a row in the `templates` table, with status `draft | active | archived`.
 _Avoid_: Theme (deprecated). Preset (the source, not the row).
 
 **Category**:
@@ -25,36 +29,43 @@ A catalog bucket grouping Templates by domain (`cafe`, `medical`, `legal`, …).
 _Avoid_: Theme, tag, group.
 
 **Preset**:
-The code-side seed configuration for one Template — its Sections, design tokens, and global styles — written as a `template.ts`. A Preset and its Template are 1:1 but live in different layers (code vs DB).
+The code-side seed configuration for one Template — its Blocks, design tokens, and global styles — written as a `template.ts`. A Preset and its Template are 1:1 but live in different layers (code vs DB).
 _Avoid_: Template (the row, not the source). Seed, fixture, default.
 
 ### Content structure
 
+> ⚠️ 이 절 **전체가 TO-BE** 다 — 문서 상단 배너 참조([ADR-0016](./docs/adr/0016-block-rename-and-field-value-split.md), 미구현).
+
 **Page**:
-A routable unit within a **Multi** Site — its own `slug`, an ordered list of Sections, and a `nav`. **Single Sites have no Pages.**
+A routable unit within a **Multi** Site — its own `slug`, a `name` (editor tab / page name, independent of nav), an ordered list of Blocks, and an optional `menu` (nav membership). **Single Sites have no Pages.**
 _Avoid_: tab, screen; for a Single Site, don't say Page at all.
 
-**Section**:
-A single placed unit — typically a horizontal band like a hero, feature list, or footer — living directly on a Single Site or inside a Multi Page. Carries a `type` pointing at a Section component and a `fields` payload.
-_Avoid_: block, widget, module.
+**Block**:
+A single placed unit — typically a horizontal band like a hero, feature list, or footer — living directly on a Single Site or inside a Multi Page. Carries a `type` pointing at a Block component and a `fields` payload. The sole minimal content unit — "Section" is retired.
+_Avoid_: section, widget, module.
 
-**Section component**:
-The React renderer that turns a Section's `fields` into UI. Lives inside its Template's directory and declares its own `fieldsSchema`. Only say this when distinguishing the renderer from the placed instance.
-_Avoid_: library component.
+**Block component**:
+The React renderer that turns a Block's `fields` into UI. Lives inside its Template's directory and declares its own `fieldsSchema`. Only say this when distinguishing the renderer from the placed instance.
+_Avoid_: library component, section component.
 
 **Field**:
-A single typed editable property inside a Section's `fields` — `text`, `textarea`, `image`, `url`, `color`, `number`, `select`, or `array`. An **array Field** holds an ordered list of repeating items validated against an `itemSchema`.
-_Avoid_: input, property, attribute, prop.
+A schema-side descriptor, declared once in a Block component's `fieldsSchema` (code, developer-authored, rarely changes) — its `type`, `label`, `required`, `options`, and (for `array`) `itemSchema`. A Field never holds an instance's actual data; that is a **Value**.
+_Avoid_: input, property, attribute, prop — and don't call an instance's data a "Field" (see **Value**).
 
-**Shared sections**:
-A Multi Site's `shared.header` and `shared.footer` — Section lists rendered above and below **every** Page. Single Sites have none; their nav and footer live inline in `sections[]`.
+**Value**:
+The actual data a Block instance holds for one of its Fields — user-authored, stored per Site, changes often (a user adding a menu item is a Value change, not a schema change). Shaped by its Field's `type`: a scalar for `text`/`number`/`select`, `{ url, assetId? }` for `image` (an **ImageValue**), an ordered list of items for `array` — each item being `{ id, fields }`, mirroring how a Block carries its own `id` beside its `fields`. Never duplicates its Field's `type`/`label` — those live only in the schema.
+_Avoid_: field value (conflates the two), data, content (too generic — say "a Block's Values").
 
-**nav projection**:
-The navigation menu is **not stored** — it is derived on each render from its source (Single: the Sections, as anchors; Multi: the Pages, as slugs). Reordering the source reorders the nav.
-_Avoid_: nav config, menu data (there is no stored nav object).
+**Chrome**:
+A Multi Site's `chrome.header` and `chrome.footer` — Block lists rendered above and below **every** Page. Single Sites have none; their nav and footer live inline in `blocks[]`.
+_Avoid_: shared (the old name — describes the mechanism, not the meaning: chrome = the site's fixed frame).
 
-**`visible` vs `nav.visible`**:
-Two **independent** axes. `visible` = whether it is served at all (a Multi Page with `visible:false` 404s). `nav.visible` = whether it appears in the menu. So an item can be present yet hidden from nav — a privacy-policy Page reachable only from the footer, for instance.
+**Menu** (formerly nav projection):
+The navigation menu is **not stored** — it is derived on each render from its source's `menu?: MenuEntry` (`{ label, placement? }`). A Single Block's **presence of `menu`** means "appears in nav" (no `placement` — Single nav is header-anchor only). A Multi Page's `menu` is independent of its `name`: `name` is the editor-tab/page name, `menu.label` is the nav text — a page can have a long `name` and a short nav `label`, and `placement` (`'header' | 'footer'`, default header) says which nav it lands in.
+_Avoid_: nav config, menu data, `nav.visible` (retired — see below).
+
+**`visible` vs `menu` (presence)**:
+Two **independent** axes. `visible` = whether the Block/Page is served at all (a Multi Page with `visible:false` 404s, data preserved). **Presence of `menu`** = whether it appears in *some* nav; its absence means "reachable (if `visible`) but not in any menu" — a privacy-policy Page linked only from a footer link authored elsewhere, for instance. Replaces the old `nav.visible` boolean, which conflated "in the footer" with "in no nav at all" (couldn't tell them apart without a negation).
 
 ### Design
 
@@ -69,7 +80,7 @@ _Avoid_: globalStyles (the field name, fine in code), theme overrides, brand set
 ### Editing and serving
 
 **Editor**:
-The authenticated visual surface a User uses to modify their Site — edit Fields, reorder Sections or Pages, toggle `visible` / `nav.visible`. Users **cannot create or delete** Pages or Sections; the information architecture is template-author-defined.
+The authenticated visual surface a User uses to modify their Site — edit Values, reorder Blocks or Pages, toggle `visible` / menu membership. Users **cannot create or delete** Pages or Blocks; the information architecture is template-author-defined.
 _Avoid_: builder, designer, dashboard.
 
 **Renderer**:
@@ -120,9 +131,9 @@ _Avoid_: account deletion, account removal, deactivation, GDPR delete.
 ## Relationships
 
 - A **Template** defines its own **Design Tokens** and carries a **Global Styles** overlay the **User** can edit.
-- A **Template** owns its **Section components** and its single **Preset**, and belongs to exactly one **Category**. Nothing is shared across Templates.
+- A **Template** owns its **Block components** and its single **Preset**, and belongs to exactly one **Category**. Nothing is shared across Templates.
 - A **User** owns many **Sites**; each **Site** comes from at most one **Template**.
-- A **Single** Site has ordered **Sections** directly. A **Multi** Site has **Pages** plus **Shared sections**; each **Page** has ordered **Sections**. A **Section** has many **Fields**.
+- A **Single** Site has ordered **Blocks** directly. A **Multi** Site has **Pages** plus **Chrome**; each **Page** has ordered **Blocks**. A **Block component** declares **Fields**; a placed **Block** holds a **Value** for each.
 - A **Site** owns many **Assets**. Removing an Asset record emits a **Tombstone** that outlives it.
 - A **Site** becomes **Live** when its User **Publish**es it; an admin can **Suspend** it.
 - The **Editor** writes a Site's content; the **Renderer** reads it.
@@ -133,8 +144,8 @@ _Avoid_: account deletion, account removal, deactivation, GDPR delete.
 > **PM:** "Did they save in the **Editor**? Auto-save fires a few seconds after they stop typing, and leaving flushes whatever is pending — so an edit only goes missing if the save itself failed. Did they see an error?"
 > **Dev:** "They saved. But the **Site** is **Live** — does the **Renderer** cache?"
 > **PM:** "The Live **Renderer** reads fresh **Site** content per request. Different question — is this a **Site** from the cafe **Template**, or a custom one?"
-> **Dev:** "From the cafe **Template**. The menu's an **array Field** on the menu **Section**."
-> **PM:** "A cafe is a **Single** Site — no **Pages**, all Sections in one scroll. So check that Section's `visible`, and that they edited the right one."
+> **Dev:** "From the cafe **Template**. The menu's an `array`-typed **Field**, so the items live in that Field's **Value** on the menu **Block**."
+> **PM:** "A cafe is a **Single** Site — no **Pages**, all Blocks in one scroll. So check that Block's `visible`, and that they edited the right one."
 
 ## Flagged ambiguities
 
@@ -143,5 +154,5 @@ _Avoid_: account deletion, account removal, deactivation, GDPR delete.
 - **"publish" is overloaded two ways:** a User **Publish**es their Site (draft → Live), and a Template becomes catalog-visible (`status = active`). The code→DB reconcile is **Sync**, never "publish". The capability name `canPublishTemplates` predates the distinction and stays as-is ([ADR-0006](./docs/adr/0006-canpublishtemplates-separate-from-admin.md)).
 - **"delete" is overloaded three ways, and the collision caused a real defect:** a User ending their account is **Account Erasure**; removing an **Asset** record is not the same as destroying its binary (that half is the **Tombstone**); `pnpm template:delete` is a dev-time CLI. Before [ADR-0014](./docs/adr/0014-account-erasure-tombstone-pipeline.md) the model had no word for the second half, so "deleted the asset" meant either thing — and account erasure did only the first.
 - **"theme" is historical.** Visual identity is per-Template (**Design Tokens**); catalog grouping is **Category**. Reading old PRs, translate "theme" to whichever job it was doing. Code residue was cleared in migration 013 (`themeKey` → `templateKey`) and PR #19 (`src/themes/` → `src/templates/`).
-- **"composition" was never a separate concept** — it is the ordered **Section** list of a Site or Page. Say "the Site's Sections", never "the composition".
-- **Code identifiers that are not domain terms:** `templateKey` (= `<category>-<leaf>`) and "leaf" are internal — say "the cafe-default Template". `ContentModel` (formerly `TemplateJson`, [ADR-0013](./docs/adr/0013-content-model-rename.md)) is the entity-neutral name for the content shape both a Template and a Site hold; that rename changed **type names only** — Section, Field, Page, nav, Shared sections all kept theirs. A Section's `fields` container was `data` until migration 022, and its eyebrow Field was `data.label` until migration 018; both appear in old PRs.
+- **"composition" was never a separate concept** — it is the ordered **Block** list of a Site or Page. Say "the Site's Blocks", never "the composition".
+- **Code identifiers that are not domain terms:** `templateKey` (= `<category>-<leaf>`) and "leaf" are internal — say "the cafe-default Template". `ContentModel` (formerly `TemplateJson`, [ADR-0013](./docs/adr/0013-content-model-rename.md)) is the entity-neutral name for the content shape both a Template and a Site hold; that rename changed **type names only** — at the time, Section, Field, Page, nav, Shared sections all kept theirs. A Section's `fields` container was `data` until migration 022, and its eyebrow Field was `data.label` until migration 018; both appear in old PRs. [ADR-0016](./docs/adr/0016-block-rename-and-field-value-split.md) later renamed Section→Block, `shared`→Chrome, `NavMeta`→`MenuEntry`, and split Field into Field (schema descriptor) + Value (instance data) — TO-BE, not yet implemented (see banner above).
