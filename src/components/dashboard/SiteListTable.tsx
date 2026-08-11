@@ -39,7 +39,7 @@ export default function SiteListTable({ sites, empty, onHoverSite, onConfigure }
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       {/* Column header */}
-      <div className="grid grid-cols-12 gap-4 border-b border-border bg-muted/40 px-5 py-3">
+      <div className="hidden grid-cols-12 gap-4 border-b border-border bg-muted/40 px-5 py-3 md:grid">
         <div className="text-caption col-span-5 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colProject}</div>
         <div className="text-caption col-span-2 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colStatus}</div>
         <div className="text-caption col-span-2 font-medium uppercase tracking-wider text-muted-foreground">{t.common.colLastMod}</div>
@@ -55,11 +55,14 @@ export default function SiteListTable({ sites, empty, onHoverSite, onConfigure }
           return (
             <div
               key={site.id}
-              className="group grid grid-cols-12 items-center gap-4 border-b border-border px-5 py-4 transition-colors last:border-b-0 hover:bg-muted/40"
+              className="group grid grid-cols-1 items-center gap-3 border-b border-border px-4 py-4 outline-none transition-colors last:border-b-0 hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:grid-cols-12 md:gap-4 md:px-5"
               onMouseEnter={() => onHoverSite?.(site)}
+              onFocus={() => onHoverSite?.(site)}
+              onClick={() => onHoverSite?.(site)}
+              tabIndex={onHoverSite ? 0 : undefined}
             >
               {/* Project: initial avatar + name + public Site address */}
-              <div className="col-span-5 flex min-w-0 items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3 md:col-span-5">
                 <div className="text-caption flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted font-semibold uppercase text-muted-foreground">
                   {site.siteName.charAt(0)}
                 </div>
@@ -71,17 +74,19 @@ export default function SiteListTable({ sites, empty, onHoverSite, onConfigure }
                 </div>
               </div>
 
-              <div className="col-span-2">
+              <div className="flex items-center justify-between md:col-span-2 md:block">
+                <span className="text-caption text-muted-foreground md:hidden">{t.common.colStatus}</span>
                 <Badge variant={isPublished ? "default" : "secondary"}>
                   {isPublished ? t.common.published : t.common.draft}
                 </Badge>
               </div>
 
-              <div className="col-span-2">
+              <div className="flex items-center justify-between md:col-span-2 md:block">
+                <span className="text-caption text-muted-foreground md:hidden">{t.common.colLastMod}</span>
                 <span className="text-caption text-muted-foreground">{formatDate(site.updatedAt)}</span>
               </div>
 
-              <div className="col-span-3 flex justify-end gap-2">
+              <div className="grid grid-cols-[auto_1fr_1fr] gap-2 md:col-span-3 md:flex md:justify-end">
                 {onConfigure && (
                   <Button
                     variant="outline"

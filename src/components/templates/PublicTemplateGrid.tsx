@@ -66,10 +66,14 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
       </header>
 
       {/* Filter bar */}
-      <div className="mx-auto mb-12 flex max-w-6xl flex-wrap gap-2 border-b border-border pb-4">
+      <div
+        className="mx-auto mb-10 flex max-w-6xl snap-x gap-2 overflow-x-auto border-b border-border pb-4"
+        aria-label={t.title}
+      >
         <Button
           variant={!selectedCategory ? 'default' : 'ghost'}
           size="sm"
+          className="min-h-11 shrink-0 snap-start"
           onClick={() => handleCategoryChange(null)}
         >
           {t.all}
@@ -79,6 +83,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
             key={cat}
             variant={selectedCategory === cat ? 'default' : 'ghost'}
             size="sm"
+            className="min-h-11 shrink-0 snap-start"
             onClick={() => handleCategoryChange(cat)}
           >
             {categoryLabel(t.categoryLabels, cat)}
@@ -89,7 +94,7 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
       {/* Grid */}
       <section className={`mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 ${isPending ? 'opacity-50' : ''} transition-opacity`}>
         {currentTemplates.map((template) => (
-          <article key={template.id} className="group">
+          <article key={template.id} className="group flex h-full flex-col">
             <div className="relative mb-4 aspect-video overflow-hidden rounded-lg border border-border bg-muted">
               {template.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -104,33 +109,33 @@ export default function PublicTemplateGrid({ templates: initialTemplates, catego
                 </div>
               )}
 
-              {/* Hover actions */}
-              <div className="absolute inset-0 flex flex-col justify-end gap-2 bg-gradient-to-t from-black/60 via-black/10 to-transparent p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <Button
-                  onClick={() => handleSelect(template.id)}
-                  disabled={selectingId === template.id}
-                  className="w-full"
-                >
-                  {selectingId === template.id ? t.loading : t.useTemplate}
-                </Button>
-                <Button asChild variant="secondary" className="w-full">
-                  <a href={`/preview/${template.id}`} target="_blank" rel="noopener noreferrer">
-                    {t.preview}
-                  </a>
-                </Button>
-              </div>
-
               {/* Category badge */}
               <div className="absolute right-4 top-4">
                 <Badge variant="secondary">{template.category ? categoryLabel(t.categoryLabels, template.category) : t.generalCategory}</Badge>
               </div>
             </div>
 
-            <div className="space-y-1">
+            <div className="flex flex-1 flex-col gap-4">
+              <div className="space-y-1">
               <h3 className="text-title">{template.name}</h3>
               {template.description && (
-                <p className="text-body text-muted-foreground">{template.description}</p>
+                <p className="line-clamp-3 text-body text-muted-foreground">{template.description}</p>
               )}
+              </div>
+              <div className="mt-auto grid grid-cols-2 gap-2">
+                <Button
+                  onClick={() => handleSelect(template.id)}
+                  disabled={selectingId === template.id}
+                  className="min-h-11 w-full"
+                >
+                  {selectingId === template.id ? t.loading : t.useTemplate}
+                </Button>
+                <Button asChild variant="outline" className="min-h-11 w-full">
+                  <a href={`/preview/${template.id}`} target="_blank" rel="noopener noreferrer">
+                    {t.preview}
+                  </a>
+                </Button>
+              </div>
             </div>
           </article>
         ))}

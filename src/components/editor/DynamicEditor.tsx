@@ -39,7 +39,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { saveContentAction, publishSiteAction } from '@/app/(authenticated)/dashboard/editor/actions';
 import GlobalStylesEditor from './GlobalStylesEditor';
-import EditorPreviewFrame from './EditorPreviewFrame';
+import EditorPreviewFrame, { type PreviewViewport } from './EditorPreviewFrame';
 import { SectionFields } from './SectionFields';
 import { loadTemplate } from '@/templates/registry';
 import { TemplateModule } from '@/templates/types';
@@ -71,6 +71,8 @@ import {
   Pin,
   ExternalLink,
   CircleAlert,
+  Monitor,
+  Smartphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,6 +100,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // save. The clone keeps the server-rendered prop out of reach of any edit.
   const [content, setContent] = useState<ContentModel>(() => structuredClone(site.content));
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
+  const [workspacePanel, setWorkspacePanel] = useState<'edit' | 'preview'>('edit');
+  const [previewViewport, setPreviewViewport] = useState<PreviewViewport>('desktop');
 
   const isMulti = isMultiContent(content);
 
@@ -567,8 +571,30 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         </AlertDialogContent>
       </AlertDialog>
 
+      <div className="flex h-full min-w-0 flex-col">
+        <div className="grid shrink-0 grid-cols-2 gap-1 border-b border-border bg-card p-2 lg:hidden">
+          <Button
+            type="button"
+            variant={workspacePanel === 'edit' ? 'default' : 'ghost'}
+            onClick={() => setWorkspacePanel('edit')}
+            aria-pressed={workspacePanel === 'edit'}
+          >
+            {t.preview.editPanel}
+          </Button>
+          <Button
+            type="button"
+            variant={workspacePanel === 'preview' ? 'default' : 'ghost'}
+            onClick={() => setWorkspacePanel('preview')}
+            aria-pressed={workspacePanel === 'preview'}
+          >
+            {t.preview.previewPanel}
+          </Button>
+        </div>
+
+        <div className="flex min-h-0 min-w-0 flex-1">
+
       {/* Left Panel */}
-      <section className="flex w-[320px] min-w-[320px] shrink-0 flex-col overflow-hidden border border-border bg-card">
+      <section className={`${workspacePanel === 'edit' ? 'flex' : 'hidden'} w-full min-w-0 shrink-0 flex-col overflow-hidden border-border bg-card lg:flex lg:w-[320px] lg:min-w-[320px] lg:border`}>
         {/* Tab Switcher */}
         <Tabs
           value={activeTab}
@@ -914,9 +940,33 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
       </section>
 
       {/* Right Panel: Live Preview */}
-      <section className="relative flex flex-grow flex-col overflow-hidden border border-border bg-muted/30 p-3">
-        <div className="absolute left-3 top-3 z-10 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground">
-          {t.preview.label}
+      <section className={`${workspacePanel === 'preview' ? 'flex' : 'hidden'} relative min-w-0 flex-grow flex-col overflow-hidden border-border bg-muted/30 p-3 lg:flex lg:border`}>
+        <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
+          <span className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground">
+            {t.preview.label}
+          </span>
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
+            <Button
+              type="button"
+              size="sm"
+              variant={previewViewport === 'desktop' ? 'secondary' : 'ghost'}
+              onClick={() => setPreviewViewport('desktop')}
+              aria-pressed={previewViewport === 'desktop'}
+            >
+              <Monitor className="size-4" />
+              <span className="hidden sm:inline">{t.preview.desktop}</span>
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={previewViewport === 'mobile' ? 'secondary' : 'ghost'}
+              onClick={() => setPreviewViewport('mobile')}
+              aria-pressed={previewViewport === 'mobile'}
+            >
+              <Smartphone className="size-4" />
+              <span className="hidden sm:inline">{t.preview.mobile}</span>
+            </Button>
+          </div>
         </div>
 
         <div className="flex-grow overflow-hidden">
@@ -934,6 +984,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               activePageId={activePageId}
               onSectionClick={handleSectionClick}
               themeVariables={themeVariables}
+              viewport={previewViewport}
             />
           ) : (
             <div className="flex h-full animate-pulse items-center justify-center text-sm text-muted-foreground">
@@ -942,6 +993,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           )}
         </div>
       </section>
+        </div>
+      </div>
     </>
   );
 }

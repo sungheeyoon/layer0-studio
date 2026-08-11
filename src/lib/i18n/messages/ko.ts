@@ -155,6 +155,7 @@ export const ko = {
     },
   },
   nav: {
+    menu: '메뉴 열기',
     templates: '템플릿',
     signIn: '로그인',
     getStarted: '시작하기',
@@ -188,6 +189,7 @@ export const ko = {
   },
   dashboard: {
     sidebar: {
+      dashboardMenu: '대시보드 메뉴',
       templates: '템플릿',
       projects: '프로젝트',
       settings: '설정',
@@ -400,6 +402,10 @@ export const ko = {
     preview: {
       label: '실시간 미리보기',
       loadingRenderer: '렌더러 로딩 중...',
+      editPanel: '편집',
+      previewPanel: '미리보기',
+      desktop: '데스크톱',
+      mobile: '모바일',
     },
     loadError: {
       heading: '테마 로드 오류',

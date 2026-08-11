@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -6,15 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-function BrandMark() {
-  return (
-    <Link href="/" className="flex items-center justify-center gap-2">
-      <span className="h-2 w-2 rounded-full bg-primary" />
-      <span className="text-title font-semibold tracking-tight">Layer0 Studio</span>
-    </Link>
-  );
-}
+import AuthHeader from "@/components/auth/AuthHeader";
 
 /**
  * Shared chrome for the auth surface (ADR-0011): a centered, conventional card.
@@ -32,11 +23,9 @@ export function AuthShell({
   footer?: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
-        <div className="mb-8">
-          <BrandMark />
-        </div>
+    <main className="flex min-h-dvh flex-col items-center justify-center px-4 py-6 sm:py-10">
+      <div className="w-full max-w-md">
+        <AuthHeader />
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-title">{title}</CardTitle>
@@ -70,14 +59,17 @@ export function AuthStatus({
   action: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm text-center">
-        <span className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-          {icon}
-        </span>
-        <h1 className="text-title mb-3">{title}</h1>
-        <div className="mb-8 text-body text-muted-foreground">{children}</div>
-        {action}
+    <main className="flex min-h-dvh items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md">
+        <AuthHeader />
+        <div className="text-center">
+          <span className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            {icon}
+          </span>
+          <h1 className="text-title mb-3">{title}</h1>
+          <div className="mb-8 text-body text-muted-foreground">{children}</div>
+          {action}
+        </div>
       </div>
     </main>
   );

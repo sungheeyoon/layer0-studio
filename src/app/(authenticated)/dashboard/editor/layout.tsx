@@ -7,7 +7,7 @@ export default async function EditorLayout({ children }: { children: React.React
   const t = getDictionary(await getLocale()).editor;
 
   return (
-    <div className="flex h-screen w-full flex-col bg-background">
+    <div className="flex h-dvh w-full flex-col bg-background">
       <div className="flex h-12 shrink-0 items-center border-b border-border bg-card px-4">
         <Link
           href="/dashboard"
