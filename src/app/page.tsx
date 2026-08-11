@@ -15,11 +15,12 @@ export default async function Home() {
   const [user, locale, templateResult] = await Promise.all([
     getCurrentUser(),
     getLocale(),
-    listPaginatedTemplatesAction(1, 3),
+    listPaginatedTemplatesAction(1, 7),
   ]);
   const t = getDictionary(locale).landing;
   const featuredTemplates = templateResult.data;
-  const featuredTemplate = featuredTemplates[0];
+  const editorTemplate = featuredTemplates[5] ?? featuredTemplates[1] ?? featuredTemplates[0];
+  const spotlightTemplate = featuredTemplates[6] ?? featuredTemplates[2] ?? featuredTemplates[0];
   const primaryCtaHref = user ? "/dashboard" : "/signup";
   const primaryCtaLabel = user ? t.cta.authed : t.cta.guest;
 
@@ -37,12 +38,12 @@ export default async function Home() {
           ctaLabel={t.common.browseTemplates}
           primaryCtaHref={primaryCtaHref}
           primaryCtaLabel={primaryCtaLabel}
-          templates={featuredTemplates}
+          templates={featuredTemplates.slice(0, 5)}
         />
 
         <EditorPreview
-          previewImage={featuredTemplate?.thumbnailUrl}
-          previewName={featuredTemplate?.name}
+          previewImage={editorTemplate?.thumbnailUrl}
+          previewName={editorTemplate?.name}
         />
 
         <Features copy={t.features} />
@@ -95,20 +96,20 @@ export default async function Home() {
                   <div className="relative aspect-video overflow-hidden bg-muted">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      alt={featuredTemplate?.name ?? t.templates.corporateTitle}
+                      alt={spotlightTemplate?.name ?? t.templates.corporateTitle}
                       className="h-full w-full scale-105 object-cover transition-transform duration-700 hover:scale-100"
-                      src={featuredTemplate?.thumbnailUrl ?? "/favicon.ico"}
+                      src={spotlightTemplate?.thumbnailUrl ?? "/favicon.ico"}
                     />
                     <div className="absolute left-4 top-4 rounded-md bg-primary px-3 py-1.5 text-caption uppercase tracking-wide text-primary-foreground">
-                      {featuredTemplate?.category ?? t.templates.bestForBusiness}
+                      {spotlightTemplate?.category ?? t.templates.bestForBusiness}
                     </div>
                   </div>
                 </div>
               </div>
               <div className="flex flex-col justify-center lg:col-span-5">
-                <h3 className="text-title mb-4">{featuredTemplate?.name ?? t.templates.corporateTitle}</h3>
+                <h3 className="text-title mb-4">{spotlightTemplate?.name ?? t.templates.corporateTitle}</h3>
                 <p className="mb-8 text-body text-muted-foreground">
-                  {featuredTemplate?.description ?? t.templates.corporateBody}
+                  {spotlightTemplate?.description ?? t.templates.corporateBody}
                 </p>
                 <ul className="mb-10 space-y-3">
                   {[
