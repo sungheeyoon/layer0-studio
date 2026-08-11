@@ -14,7 +14,9 @@
 |---|---|---|
 | 편집 손실을 하나의 동시성 버그로 모델링하고 있었으나, 실제로는 **경로의 집합**이었음 — 화면 이탈 · 무한 디바운스 · 검증 함정문 · 탭 내 자기 충돌 | 미저장 손실 **무제한 → 최대 15초**<br>단독 편집 중 충돌 오류 **발생 → 제거** | [ADR-0015](docs/adr/0015-edit-loss-paths-exhaustive-defense.md) |
 | DB · Storage · Auth 를 하나의 트랜잭션으로 삭제할 수 없어, 운영 환경에서 부분 파괴(계정만 남는 상태)가 발생 | 중간 실패 시 **부분 파괴 → 재개 후 완료**<br>삭제 대상 파일 경로를 Tombstone 으로 보존 | [ADR-0014](docs/adr/0014-account-erasure-tombstone-pipeline.md) |
-| 랜딩 페이지가 Template 을 렌더링하지 않는데도 11개 Template 의 CSS 를 모두 로드 (인증 세션 조회 → DI → Template Registry 경로) | 초기 CSS **11 → 1개**<br>초기 폰트 **4.29 MiB → 233 KiB**<br>Lighthouse (Mobile) **55 → 90** | [ADR-0008](docs/adr/0008-keep-explicit-di-factories.md) |
+| 랜딩 페이지가 Template 을 렌더링하지 않는데도 11개 Template 의 CSS 를 모두 로드 (인증 세션 조회 → DI → Template Registry 경로) | 초기 stylesheet 요청 **13 → 1개**<br>Pretendard 요청 리소스 **2,061,242 → 232,628 bytes**<br>Lighthouse Mobile **72 → 97** | [ADR-0008](docs/adr/0008-keep-explicit-di-factories.md) · [검증 리포트](artifacts/lighthouse-2026-08-11/SUMMARY.md) |
+
+> 성능 수치는 보존된 최적화 전·직후 프로덕션 배포를 Lighthouse 13.4.1 Mobile의 동일한 simulated throttling 조건으로 각각 3회 측정한 중앙값입니다. 범용 벤치마크나 실제 사용자 지표가 아닙니다.
 
 ## Architecture
 
