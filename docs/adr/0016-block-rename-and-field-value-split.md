@@ -2,7 +2,7 @@
 
 > **Status: Accepted and implemented** (2026-08-10). Field/Value 전환은 migration 026, Block/Menu 전환은 migration 027로 완료했다.
 >
-> **이력:** 데이터 모델 재설계 초안을 그릴링으로 확정한 결과다. 2026-08-10 세 차례 개정을 거쳤다 — (1) §4 를 **스키마/Value 분리**로 확장, (2) 초안이 물려준 `→ SiteContent` 리네임을 **취소**(§2 하단), (3) 리뷰 반영: §4-1 의 `BlockFieldsSchema<T>` 방향을 **폐기하고 schema-first 로 교체**(아래 §4-1), nav 마이그레이션 매핑표 확정(§3), 롤아웃을 사전 검증 후 원자적 기록으로 교체(§8), asset 항목 정정(§7).
+> **이력:** 데이터 모델 재설계 초안을 그릴링으로 확정한 결과다. 2026-08-10 세 차례 개정을 거쳤다 — (1) §4 를 **스키마/Value 분리**로 확장, (2) 초안이 물려준 `→ SiteContent` 리네임을 **취소**(§2 하단), (3) 리뷰 반영: §4-1 의 수동 Content 인터페이스 + 제네릭 스키마 계약 방향을 **폐기하고 schema-first 로 교체**(아래 §4-1), nav 마이그레이션 매핑표 확정(§3), 롤아웃을 사전 검증 후 원자적 기록으로 교체(§8), asset 항목 정정(§7).
 >
 > **읽는 법:** 이 문서의 AS-IS는 결정 당시의 이전 모델, TO-BE는 현재 모델이다. 현행 용어의 짧은 정본은 `CONTEXT.md`, 저작·운영 절차는 `docs/TEMPLATE_SYSTEM.md`다.
 
@@ -42,7 +42,7 @@
 | `Field` union (`TextField`/`SelectField`/`ImageField`/`ArrayField`) | `FieldDescriptor` = **스키마 서술자 전용**, 인스턴스 데이터는 `ValuesOf<S>` 로 추론 | `template.entity.ts` (§4) |
 | `getFieldValue()` | **삭제** (865 회 호출 전부 제거) | `template.entity.ts` |
 | `SectionComponentMeta` | `BlockComponentMeta` | `templates/types.ts` |
-| `SectionFieldsSchema` | `FieldsSchema` (제네릭 아님 — §4-1) | `template.entity.ts` / `templates/types.ts` |
+| legacy Section field schema | `FieldsSchema` (제네릭 아님 — §4-1) | `template.entity.ts` / `templates/types.ts` |
 | `SectionComponent` | `BlockComponent` | `templates/types.ts` |
 | `TemplateSectionProps` | `TemplateBlockProps` | `templates/types.ts` |
 | `NavSectionProps` | `NavBlockProps` | `templates/types.ts` |
@@ -102,7 +102,7 @@ Field 가 인스턴스마다 `{type, label, value}` 를 들고 다니는 구조�
 
 #### 4-1. schema-first: Content 타입은 **작성하지 않고 추론한다**
 
-> **폐기된 방향.** 개정 전 본 ADR 은 `MenuContent` 인터페이스를 손으로 쓰고 `satisfies BlockFieldsSchema<MenuContent>` 로 연결하자고 했다. **실측 결과 이 보장은 거의 없었다** — `text|textarea|url|color|select` 가 전부 런타임 `string` 이라 `FieldDescriptor<T[K]>` 가 서로를 구분하지 못한다. 5 개 시나리오 중 **키 오타 1 개만** 잡히고, 본 ADR 이 동기로 든 `textarea`↔`text` drift 자체가 안 잡혔다. optional 키는 descriptor 도 optional 이 되어 통째로 누락 가능했고, `required` 와 optionality 도 연결되지 않았다. 수동 인터페이스를 유지하면 두 개의 진실이 남는다.
+> **폐기된 방향.** 개정 전 본 ADR 은 `MenuContent` 인터페이스를 손으로 쓰고 제네릭 스키마 계약으로 연결하자고 했다. **실측 결과 이 보장은 거의 없었다** — `text|textarea|url|color|select` 가 전부 런타임 `string` 이라 `FieldDescriptor<T[K]>` 가 서로를 구분하지 못한다. 5 개 시나리오 중 **키 오타 1 개만** 잡히고, 본 ADR 이 동기로 든 `textarea`↔`text` drift 자체가 안 잡혔다. optional 키는 descriptor 도 optional 이 되어 통째로 누락 가능했고, `required` 와 optionality 도 연결되지 않았다. 수동 인터페이스를 유지하면 두 개의 진실이 남는다.
 
 **스키마를 먼저 선언하고 Content 타입을 거기서 추론한다.** 수동 Content 인터페이스는 만들지 않는다.
 
@@ -124,7 +124,7 @@ const menuSchema = {
 type MenuContent = ValuesOf<typeof menuSchema>;
 ```
 
-타입 이름은 **`FieldsSchema`** 로 둔다. Block component가 최상위 `fieldsSchema`를 소유하지만, 같은 스키마 구조는 `array` Field의 중첩 `itemSchema`에도 재귀적으로 쓰인다. 따라서 `BlockFieldsSchema`는 실제 도메인 범위를 Block 소유로 잘못 좁힌다. Block 전용 불변식이 없는 현재 모델에서는 별도 alias도 두지 않는다.
+타입 이름은 **`FieldsSchema`** 로 둔다. Block component가 최상위 `fieldsSchema`를 소유하지만, 같은 스키마 구조는 `array` Field의 중첩 `itemSchema`에도 재귀적으로 쓰인다. Block 전용 이름은 실제 도메인 범위를 Block 소유로 잘못 좁힌다. Block 전용 불변식이 없는 현재 모델에서는 별도 alias도 두지 않는다.
 
 추론 규칙:
 
@@ -245,7 +245,7 @@ Registry의 모든 Template과 저장 JSON을 한 번에 전환했고 백워드 
 ## Considered & Rejected
 
 - **`ContentModel → SiteContent` 리네임** — ADR-0013 이 이미 기각·구현 완료. §2 하단.
-- **수동 Content 인터페이스 + `satisfies BlockFieldsSchema<T>`** — 실측 보장이 5 중 1(키 오타)뿐. string 계열 구분 불가, optional 키 누락 가능, `required` 미연결. 두 개의 진실이 남는다. §4-1.
+- **수동 Content 인터페이스 + 제네릭 스키마 계약** — 실측 보장이 5 중 1(키 오타)뿐. string 계열 구분 불가, optional 키 누락 가능, `required` 미연결. 두 개의 진실이 남는다. §4-1.
 - **Single = `pages:[Page]` 로 통일** — migration 018 이 이미 반대로 확정.
 - **배열 아이템 `id` 를 Value 인터페이스 안에 두고 `Exclude<keyof T,'id'>` 로 제외** — 콘텐츠 인터페이스마다 "시스템 키" 를 의식해야 한다. `id` 를 형제로 두면 제외 규칙 자체가 불필요(§4-3).
 - **렌더 경계에서 safe parse(매 렌더 재검증)** — 저장 시점에 이미 도는 스키마 워크를 렌더마다 반복. §6 의 호환성 규칙으로 전제를 보장한다.

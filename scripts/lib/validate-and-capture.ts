@@ -308,7 +308,7 @@ function parseSchemaFields(block: string): {
 function findSchemaBlocks(source: string): Array<{ start: number; end: number }> {
   const spans: Array<{ start: number; end: number }> = [];
 
-  for (const m of source.matchAll(/satisfies\s+(?:FieldsSchema|SectionFieldsSchema)\b/g)) {
+  for (const m of source.matchAll(/satisfies\s+FieldsSchema\b/g)) {
     const close = source.lastIndexOf('}', m.index!);
     if (close < 0) continue;
     let depth = 1;

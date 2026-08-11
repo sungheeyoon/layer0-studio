@@ -14,7 +14,7 @@ import type {
  * `@ts-expect-error` that no longer suppresses anything is itself an error.
  *
  * This exists because the *previous* design (a hand-written Content interface
- * plus `satisfies BlockFieldsSchema<T>`) claimed these guarantees and had
+ * plus a generic schema constraint) claimed these guarantees and had
  * almost none of them: `text|textarea|url|color|select` are all `string` at
  * runtime, so the mapped type could not tell them apart.
  */
