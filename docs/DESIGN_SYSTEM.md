@@ -68,6 +68,19 @@ Opacity modifiers are fine for tints: `bg-warning/10`, `border-destructive/30`.
 
 ## How to…
 
+### Choose a type role
+
+Studio chrome has two density bands. Marketing surfaces may use
+`text-display`/`text-heading`; working surfaces such as Dashboard, Editor,
+forms, tables, and metadata use `text-title`/`text-body`/`text-caption`.
+The `.studio-chrome` boundary supplies a compact Tailwind scale to chrome only.
+Published Site and Template Preview routes intentionally stay outside that
+boundary so a chrome typography change cannot restyle Template renderers.
+
+Do not use `text-title` for a compact navigation brand or metadata label. A
+smaller text utility with a 44px interaction target is preferred; readable text
+size and touch target size are separate contracts.
+
 ### Add a shadcn component
 ```bash
 npx shadcn@latest add <name>      # style: new-york, base: neutral, lucide icons

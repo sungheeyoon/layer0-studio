@@ -152,6 +152,7 @@ export const en: Messages = {
     },
   },
   nav: {
+    menu: 'Open menu',
     templates: 'Templates',
     signIn: 'Sign In',
     getStarted: 'Get Started',
@@ -185,6 +186,7 @@ export const en: Messages = {
   },
   dashboard: {
     sidebar: {
+      dashboardMenu: 'Dashboard menu',
       templates: 'Templates',
       projects: 'Projects',
       settings: 'Settings',
@@ -397,6 +399,10 @@ export const en: Messages = {
     preview: {
       label: 'LIVE PREVIEW',
       loadingRenderer: 'Loading Theme Renderer...',
+      editPanel: 'Edit',
+      previewPanel: 'Preview',
+      desktop: 'Desktop',
+      mobile: 'Mobile',
     },
     loadError: {
       heading: 'Theme Load Error',

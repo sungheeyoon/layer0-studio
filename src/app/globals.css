@@ -215,32 +215,52 @@
  * weight baked in so surfaces compose from these instead of ad-hoc text-*.
  */
 @layer components {
+  /*
+   * Studio chrome uses a compact application scale without changing Template
+   * renderers. Tailwind's text utilities resolve these inherited variables
+   * inside the boundary added by StudioChromeBoundary; /site and /preview stay
+   * on the larger Template scale above.
+   */
+  .studio-chrome {
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+    --text-5xl: 3rem;
+    --text-6xl: 3.75rem;
+    --text-7xl: 4.5rem;
+  }
+
   .text-display {
-    font-size: clamp(2.25rem, 1.6rem + 2.8vw, 3.5rem);
+    font-size: clamp(2.25rem, 1.65rem + 2.5vw, 3.5rem);
     line-height: 1.15;
     letter-spacing: -0.03em;
     font-weight: 700;
   }
   .text-heading {
-    font-size: clamp(2.125rem, 1.7rem + 1.7vw, 2.625rem);
+    font-size: clamp(1.75rem, 1.45rem + 1.3vw, 2.5rem);
     line-height: 1.25;
     letter-spacing: -0.02em;
     font-weight: 600;
   }
   .text-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     line-height: 1.4;
     letter-spacing: -0.015em;
     font-weight: 600;
   }
   .text-body {
-    font-size: 1.1875rem;
+    font-size: 1rem;
     line-height: 1.6;
     letter-spacing: -0.01em;
     font-weight: 400;
   }
   .text-caption {
-    font-size: 1rem;
+    font-size: 0.875rem;
     line-height: 1.5;
     letter-spacing: 0;
     font-weight: 400;

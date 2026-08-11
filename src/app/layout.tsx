@@ -7,6 +7,7 @@ import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
 import { I18nProvider } from "@/lib/i18n/provider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import StudioChromeBoundary from "@/components/StudioChromeBoundary";
 import "./globals.css";
 
 const SITE_NAME = "Layer0 Studio";
@@ -52,10 +53,12 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <I18nProvider locale={locale} dictionary={dictionary}>
-            <ConditionalLayoutWrapper>
-              <Navbar user={user} copy={dictionary.nav} />
-            </ConditionalLayoutWrapper>
-            {children}
+            <StudioChromeBoundary>
+              <ConditionalLayoutWrapper>
+                <Navbar user={user} copy={dictionary.nav} />
+              </ConditionalLayoutWrapper>
+              {children}
+            </StudioChromeBoundary>
           </I18nProvider>
         </ThemeProvider>
       </body>

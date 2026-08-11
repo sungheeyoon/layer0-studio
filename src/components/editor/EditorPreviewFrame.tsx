@@ -22,8 +22,12 @@ import type { ContentModel } from '@/domain/entities/template.entity';
  * - The iframe keeps its own 1440×900 viewport, so it stays the *only* scroller
  *   (no double/outer scrollbar) — scrolling it mirrors scrolling a real window.
  */
-const VIEWPORT_WIDTH = 1440;
-const VIEWPORT_HEIGHT = 900;
+export type PreviewViewport = 'desktop' | 'mobile';
+
+export const PREVIEW_VIEWPORTS: Record<PreviewViewport, { width: number; height: number }> = {
+  desktop: { width: 1440, height: 900 },
+  mobile: { width: 390, height: 844 },
+};
 
 const CLONE_MARKER = 'data-editor-preview-clone';
 
@@ -37,6 +41,7 @@ interface EditorPreviewFrameProps {
   /** `--theme-*` custom properties — set on the iframe `<body>` so the template's
    *  `var(--theme-*)` references resolve inside the frame. */
   themeVariables: React.CSSProperties;
+  viewport: PreviewViewport;
 }
 
 /**
@@ -67,6 +72,7 @@ export default function EditorPreviewFrame({
   activePageId,
   onSectionClick,
   themeVariables,
+  viewport,
 }: EditorPreviewFrameProps) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -76,9 +82,14 @@ export default function EditorPreviewFrame({
 
   // Contain-fit the fixed desktop viewport into the panel (uniform — never
   // distorts), capped at 1:1 so a wide panel doesn't magnify. See header comment.
+  const logicalViewport = PREVIEW_VIEWPORTS[viewport];
   const scale =
     panel.w && panel.h
-      ? Math.min(panel.w / VIEWPORT_WIDTH, panel.h / VIEWPORT_HEIGHT, 1)
+      ? Math.min(
+          panel.w / logicalViewport.width,
+          panel.h / logicalViewport.height,
+          1,
+        )
       : 1;
 
   // ── Measure the panel to size & scale the canvas ──────────────────────────
@@ -194,8 +205,8 @@ export default function EditorPreviewFrame({
           rounding never exceeds the panel. */}
       <div
         style={{
-          width: Math.floor(VIEWPORT_WIDTH * scale),
-          height: Math.floor(VIEWPORT_HEIGHT * scale),
+          width: Math.floor(logicalViewport.width * scale),
+          height: Math.floor(logicalViewport.height * scale),
         }}
         className="shrink-0 overflow-hidden rounded-md shadow-2xl"
       >
@@ -203,8 +214,8 @@ export default function EditorPreviewFrame({
           ref={iframeRef}
           title="preview"
           style={{
-            width: VIEWPORT_WIDTH,
-            height: VIEWPORT_HEIGHT,
+            width: logicalViewport.width,
+            height: logicalViewport.height,
             border: 0,
             backgroundColor: 'white',
             transform: `scale(${scale})`,

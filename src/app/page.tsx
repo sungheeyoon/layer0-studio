@@ -9,10 +9,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
+import { listPaginatedTemplatesAction } from "@/app/(authenticated)/dashboard/(with-sidebar)/templates/actions";
 
 export default async function Home() {
-  const [user, locale] = await Promise.all([getCurrentUser(), getLocale()]);
+  const [user, locale, templateResult] = await Promise.all([
+    getCurrentUser(),
+    getLocale(),
+    listPaginatedTemplatesAction(1, 3),
+  ]);
   const t = getDictionary(locale).landing;
+  const featuredTemplates = templateResult.data;
+  const featuredTemplate = featuredTemplates[0];
   const primaryCtaHref = user ? "/dashboard" : "/signup";
   const primaryCtaLabel = user ? t.cta.authed : t.cta.guest;
 
@@ -25,11 +32,20 @@ export default async function Home() {
   return (
     <>
       <main className="min-h-screen pt-16">
-        <Hero copy={t.hero} ctaLabel={t.common.browseTemplates} />
+        <Hero
+          copy={t.hero}
+          ctaLabel={t.common.browseTemplates}
+          primaryCtaHref={primaryCtaHref}
+          primaryCtaLabel={primaryCtaLabel}
+          templates={featuredTemplates}
+        />
+
+        <EditorPreview
+          previewImage={featuredTemplate?.thumbnailUrl}
+          previewName={featuredTemplate?.name}
+        />
 
         <Features copy={t.features} />
-
-        <EditorPreview />
 
         {/* How It Works */}
         <section className="border-b border-border px-6 py-24 md:px-10">
@@ -79,23 +95,27 @@ export default async function Home() {
                   <div className="relative aspect-video overflow-hidden bg-muted">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      alt={t.templates.corporateTitle}
+                      alt={featuredTemplate?.name ?? t.templates.corporateTitle}
                       className="h-full w-full scale-105 object-cover transition-transform duration-700 hover:scale-100"
-                      src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
+                      src={featuredTemplate?.thumbnailUrl ?? "/favicon.ico"}
                     />
                     <div className="absolute left-4 top-4 rounded-md bg-primary px-3 py-1.5 text-caption uppercase tracking-wide text-primary-foreground">
-                      {t.templates.bestForBusiness}
+                      {featuredTemplate?.category ?? t.templates.bestForBusiness}
                     </div>
                   </div>
                 </div>
               </div>
               <div className="flex flex-col justify-center lg:col-span-5">
-                <h3 className="text-title mb-4">{t.templates.corporateTitle}</h3>
+                <h3 className="text-title mb-4">{featuredTemplate?.name ?? t.templates.corporateTitle}</h3>
                 <p className="mb-8 text-body text-muted-foreground">
-                  {t.templates.corporateBody}
+                  {featuredTemplate?.description ?? t.templates.corporateBody}
                 </p>
                 <ul className="mb-10 space-y-3">
-                  {[t.templates.bullet1, t.templates.bullet2, t.templates.bullet3].map(
+                  {[
+                    t.features.layouts.title,
+                    t.features.editing.title,
+                    t.features.publishing.title,
+                  ].map(
                     (bullet) => (
                       <li key={bullet} className="flex items-center gap-3 text-body">
                         <Check className="h-4 w-4 shrink-0 text-primary" />

@@ -16,7 +16,7 @@ export default function Sidebar() {
   const t = useDictionary().dashboard.sidebar;
 
   return (
-    <aside className="fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-sidebar-border bg-sidebar py-8">
+    <aside className="fixed left-0 top-0 z-50 hidden h-full w-72 flex-col border-r border-sidebar-border bg-sidebar py-8 lg:flex">
       <div className="px-6 mb-10">
         <Link href="/dashboard" className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-primary" />

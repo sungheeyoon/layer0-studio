@@ -14,11 +14,11 @@ export default function Features({
   ];
 
   return (
-    <section className="border-b border-border px-6 py-24 md:px-10">
+    <section className="border-b border-border px-4 py-16 sm:px-6 md:px-10 md:py-20">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
         {items.map(({ icon: Icon, title, body }) => (
           <Card key={title} className="border-border">
-            <CardContent className="flex flex-col gap-4 p-8">
+            <CardContent className="flex flex-col gap-3 p-6">
               <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="h-5 w-5" />
               </span>

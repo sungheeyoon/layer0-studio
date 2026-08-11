@@ -3,10 +3,18 @@
 import { Eye, MousePointerClick } from "lucide-react";
 import { useDictionary } from "@/lib/i18n/provider";
 
-export default function EditorPreview() {
-  const t = useDictionary().landing.editorPreview;
+export default function EditorPreview({
+  previewImage,
+  previewName,
+}: {
+  previewImage?: string | null;
+  previewName?: string;
+}) {
+  const dictionary = useDictionary();
+  const t = dictionary.landing.editorPreview;
+  const editor = dictionary.editor;
   return (
-    <section className="border-b border-border bg-muted/30 px-6 py-24 md:px-10">
+    <section className="border-b border-border bg-muted/30 px-4 py-16 sm:px-6 md:px-10 md:py-20">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
           <div className="lg:col-span-5">
@@ -45,7 +53,7 @@ export default function EditorPreview() {
 
         {/* Mock Editor UI */}
         <div className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
-          <div className="flex h-[600px] overflow-hidden">
+          <div className="flex h-[420px] overflow-hidden md:h-[560px]">
             {/* Mock Left Sidebar */}
             <div className="hidden w-[240px] flex-col border-r border-border md:flex">
               <div className="flex gap-2 border-b border-border p-4">
@@ -55,16 +63,16 @@ export default function EditorPreview() {
               </div>
               <div className="flex border-b border-border">
                 <div className="flex-1 border-b-2 border-primary py-3 text-center text-xs font-semibold text-primary">
-                  Content
+                  {editor.tabs.content}
                 </div>
                 <div className="flex-1 py-3 text-center text-xs font-medium text-muted-foreground">
-                  Design
+                  {editor.tabs.design}
                 </div>
               </div>
               <div className="space-y-8 p-6">
                 <div>
                   <div className="mb-4 text-caption uppercase tracking-wide text-muted-foreground">
-                    Sections
+                    {editor.blocks.hierarchy}
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -83,7 +91,7 @@ export default function EditorPreview() {
                 </div>
                 <div>
                   <div className="mb-4 text-caption uppercase tracking-wide text-muted-foreground">
-                    Properties
+                    {editor.parameters}
                   </div>
                   <div className="space-y-4">
                     <div className="space-y-1">
@@ -104,7 +112,7 @@ export default function EditorPreview() {
               </div>
               <div className="mt-auto border-t border-border p-4">
                 <div className="cursor-pointer rounded-md bg-primary py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-primary-foreground transition-all hover:bg-primary/90">
-                  Publish Site
+                  {editor.actions.publish}
                 </div>
               </div>
             </div>
@@ -113,10 +121,10 @@ export default function EditorPreview() {
             <div className="relative flex flex-grow flex-col overflow-hidden bg-muted/40 p-8">
               <div className="absolute left-4 top-4 flex gap-2">
                 <div className="rounded bg-primary px-3 py-1 text-caption uppercase tracking-wide text-primary-foreground">
-                  Live Preview
+                  {editor.preview.label}
                 </div>
                 <div className="rounded border border-border bg-card px-3 py-1 text-caption uppercase tracking-wide text-muted-foreground">
-                  Desktop
+                  {editor.preview.desktop}
                 </div>
               </div>
 
@@ -125,26 +133,18 @@ export default function EditorPreview() {
                   <div className="h-2 w-2 rounded-full bg-border" />
                   <div className="h-3 w-32 rounded-full bg-border" />
                 </div>
-                <div className="space-y-12 p-12">
-                  <div className="space-y-4">
-                    <div className="h-2 w-16 bg-primary" />
-                    <div className="text-heading text-foreground">Digital Portfolio</div>
-                    <div className="max-w-sm text-sm text-muted-foreground">
-                      Designing high-performance web experiences.
-                    </div>
+                {previewImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewImage}
+                    alt={previewName ?? "Template preview"}
+                    className="h-full w-full object-cover object-top"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-body text-muted-foreground">
+                    {editor.preview.loadingRenderer}
                   </div>
-                  <div className="grid grid-cols-3 gap-6">
-                    {[0, 1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className="flex aspect-square flex-col justify-end rounded-md border border-border bg-muted/40 p-4"
-                      >
-                        <div className="mb-2 h-2 w-1/2 bg-primary" />
-                        <div className="h-1 w-full bg-border" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100">

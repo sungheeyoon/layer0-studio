@@ -43,7 +43,7 @@ export default async function EditorPage({ searchParams }: EditorPageProps) {
   }
 
   return (
-    <main className="flex h-full">
+    <main className="h-full min-w-0">
       <DynamicEditor site={site} />
     </main>
   );

@@ -15,8 +15,14 @@ export default function ConditionalLayoutWrapper({
   const isSite = pathname.startsWith("/site/");
   const isPreview = pathname.startsWith("/preview/");
   const isEditor = pathname.startsWith("/editor"); // In case the editor path is independent
+  const isAuth = [
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/update-password",
+  ].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
-  if (isDashboard || isAdmin || isSite || isPreview || isEditor) {
+  if (isDashboard || isAdmin || isSite || isPreview || isEditor || isAuth) {
     return null;
   }
 
