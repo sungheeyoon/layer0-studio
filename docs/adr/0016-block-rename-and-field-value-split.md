@@ -42,7 +42,7 @@
 | `Field` union (`TextField`/`SelectField`/`ImageField`/`ArrayField`) | `FieldDescriptor` = **스키마 서술자 전용**, 인스턴스 데이터는 `ValuesOf<S>` 로 추론 | `template.entity.ts` (§4) |
 | `getFieldValue()` | **삭제** (865 회 호출 전부 제거) | `template.entity.ts` |
 | `SectionComponentMeta` | `BlockComponentMeta` | `templates/types.ts` |
-| `SectionFieldsSchema` | `BlockFieldsSchema` (제네릭 아님 — §4-1) | `templates/types.ts` |
+| `SectionFieldsSchema` | `FieldsSchema` (제네릭 아님 — §4-1) | `template.entity.ts` / `templates/types.ts` |
 | `SectionComponent` | `BlockComponent` | `templates/types.ts` |
 | `TemplateSectionProps` | `TemplateBlockProps` | `templates/types.ts` |
 | `NavSectionProps` | `NavBlockProps` | `templates/types.ts` |
@@ -119,10 +119,12 @@ const menuSchema = {
                price: { type: 'text',  label: '가격' },
                image: { type: 'image', label: '이미지' },
              } },
-} as const satisfies BlockFieldsSchema;
+} as const satisfies FieldsSchema;
 
 type MenuContent = ValuesOf<typeof menuSchema>;
 ```
+
+타입 이름은 **`FieldsSchema`** 로 둔다. Block component가 최상위 `fieldsSchema`를 소유하지만, 같은 스키마 구조는 `array` Field의 중첩 `itemSchema`에도 재귀적으로 쓰인다. 따라서 `BlockFieldsSchema`는 실제 도메인 범위를 Block 소유로 잘못 좁힌다. Block 전용 불변식이 없는 현재 모델에서는 별도 alias도 두지 않는다.
 
 추론 규칙:
 
