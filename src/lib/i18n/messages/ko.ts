@@ -33,11 +33,10 @@ export const ko = {
     },
     signup: {
       title: '계정 만들기',
-      subtitle: '몇 초면 워크스페이스를 시작할 수 있습니다.',
+      subtitle: '몇 초면 계정을 만들고 시작할 수 있습니다.',
       fullNameLabel: '이름',
       emailLabel: '이메일',
       passwordLabel: '비밀번호',
-      workspaceLabel: '워크스페이스 ID',
       submit: '계정 만들기',
       loginLink: '이미 계정이 있으신가요? 로그인',
       successTitle: '가입 완료',
@@ -89,6 +88,11 @@ export const ko = {
       titleLine3: '웹사이트를 만드세요.',
       description:
         '템플릿을 고르고, 콘텐츠를 바꾸고, 즉시 배포하세요. 코드 없이 완성도 높은 디지털 경험을 만듭니다.',
+      previousTemplate: '이전 템플릿',
+      nextTemplate: '다음 템플릿',
+      pauseCarousel: '자동 전환 멈추기',
+      playCarousel: '자동 전환 시작하기',
+      selectTemplate: '템플릿 보기',
     },
     features: {
       layouts: {

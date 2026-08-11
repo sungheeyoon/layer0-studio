@@ -30,11 +30,10 @@ export const en: Messages = {
     },
     signup: {
       title: 'Create account',
-      subtitle: 'Spin up your workspace in seconds.',
+      subtitle: 'Create your account and get started in seconds.',
       fullNameLabel: 'Full name',
       emailLabel: 'Email',
       passwordLabel: 'Password',
-      workspaceLabel: 'Workspace ID',
       submit: 'Create account',
       loginLink: 'Already have an account? Sign in',
       successTitle: 'Account created',
@@ -86,6 +85,11 @@ export const en: Messages = {
       titleLine3: 'Using Templates.',
       description:
         'Choose a template, customize your content, and launch instantly. High-fidelity digital experiences with no code required.',
+      previousTemplate: 'Previous template',
+      nextTemplate: 'Next template',
+      pauseCarousel: 'Pause automatic rotation',
+      playCarousel: 'Start automatic rotation',
+      selectTemplate: 'View template',
     },
     features: {
       layouts: {

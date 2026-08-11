@@ -76,11 +76,6 @@ export default function SignupPage() {
           <Label htmlFor="password">{t.passwordLabel}</Label>
           <Input id="password" name="password" type="password" placeholder="••••••••" required />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="workspace_id">{t.workspaceLabel}</Label>
-          <Input id="workspace_id" name="workspace_id" type="text" required />
-        </div>
-
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         <Button type="submit" className="w-full" disabled={isPending}>
