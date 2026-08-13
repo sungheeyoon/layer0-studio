@@ -12,7 +12,8 @@
 
 | 문제 | Before → After | 결정 |
 |---|---|---|
-| 편집 손실을 하나의 동시성 버그로 모델링하고 있었으나, 실제로는 **경로의 집합**이었음 — 화면 이탈 · 무한 디바운스 · 검증 함정문 · 탭 내 자기 충돌 | 미저장 손실 **무제한 → 최대 15초**<br>단독 편집 중 충돌 오류 **발생 → 제거** | [ADR-0015](docs/adr/0015-edit-loss-paths-exhaustive-defense.md) |
+| 게시가 `status` 플래그였고 공개 렌더러가 편집 중인 작업본을 직접 읽고 있었음 — 첫 게시 이후 모든 저장이 곧바로 공개 사이트에 반영 | 편집 중 내용의 **공개 노출 → 차단**<br>"변경 사항 게시"가 **무의미 → 실제 승격**<br>자동저장 인프라 **4개 모듈 → 0개** | [ADR-0017](docs/adr/0017-explicit-save-and-draft-published-split.md) |
+| `SECURITY DEFINER` 함수 전부가 EXECUTE 권한을 회수한 적이 없어 PostgREST 로 직접 호출 가능 — RLS 는 우회됨 | 타 사용자 사이트 **덮어쓰기·삭제 가능 → 차단**<br>호출 롤 **PUBLIC → 함수별 1개 롤** | [마이그레이션 028](docs/migrations/028_harden_security_definer_rpcs.sql) |
 | DB · Storage · Auth 를 하나의 트랜잭션으로 삭제할 수 없어, 운영 환경에서 부분 파괴(계정만 남는 상태)가 발생 | 중간 실패 시 **부분 파괴 → 재개 후 완료**<br>삭제 대상 파일 경로를 Tombstone 으로 보존 | [ADR-0014](docs/adr/0014-account-erasure-tombstone-pipeline.md) |
 | 랜딩 페이지가 Template 을 렌더링하지 않는데도 11개 Template 의 CSS 를 모두 로드 (인증 세션 조회 → DI → Template Registry 경로) | 초기 stylesheet 요청 **13 → 1개**<br>Pretendard 요청 리소스 **2,061,242 → 232,628 bytes**<br>Lighthouse Mobile **72 → 97** | [ADR-0008](docs/adr/0008-keep-explicit-di-factories.md) · [검증 리포트](artifacts/lighthouse-2026-08-11/SUMMARY.md) |
 
@@ -42,7 +43,9 @@ flowchart LR
 
 Site 는 **Single**(한 스크롤, `blocks[]`)과 **Multi**(라우팅되는 `pages[]` + 모든 Page 를 감싸는 `chrome`) 두 Site Type 으로 나뉘며 생성 시 `mode` 로 고정됩니다 — 진화하지 않습니다 (`ContentModel` 구조적 유니온, [ADR-0007](docs/adr/0007-single-multi-site-type-structural-union.md)). Block component 의 `fieldsSchema` 가 입력 구조의 진실이고, Site 의 Block 은 사용자 입력 **Value** 만 저장합니다 ([ADR-0016](docs/adr/0016-block-rename-and-field-value-split.md)).
 
-Editor 는 콘텐츠·내비게이션·디자인을 분리해 편집합니다. Multi Site 는 콘텐츠 탭에서 Page 를 전환하고 해당 Page 의 Block 만 다루며, 내비게이션 탭에서 Page 순서·이름·노출 위치를 관리합니다. 미리보기의 Block 을 누르면 대응하는 편집 폼으로 이동하고, 콘텐츠 재렌더·자동저장 중에도 같은 Page 의 미리보기 스크롤을 보존합니다. 자동저장은 입력 중단 10초 후 실행되며 연속 편집은 최초 미저장 변경부터 최대 15초 안에 저장 요청으로 넘어갑니다 ([ADR-0015](docs/adr/0015-edit-loss-paths-exhaustive-defense.md)).
+Editor 는 콘텐츠·내비게이션·디자인을 분리해 편집합니다. Multi Site 는 콘텐츠 탭에서 Page 를 전환하고 해당 Page 의 Block 만 다루며, 내비게이션 탭에서 Page 순서·이름·노출 위치를 관리합니다. 미리보기의 Block 을 누르면 대응하는 편집 폼으로 이동하고, 콘텐츠 재렌더 중에도 같은 Page 의 미리보기 스크롤을 보존합니다.
+
+**저장은 명시적입니다** — 자동저장은 없습니다. "임시 저장"은 사용자만 볼 수 있는 작업본을 갱신하고, "변경 사항 게시"가 그 작업본을 공개본으로 복사합니다. 방문자는 공개본만 봅니다. 저장 성공 표시는 화면에 보이는 편집까지 서버가 확인했을 때만 뜨고, 앱 안에서 편집기를 벗어나면 미저장 변경을 확인합니다. 탭 종료·브라우저 뒤로가기·크래시는 의도적으로 보장 범위 밖입니다 ([ADR-0017](docs/adr/0017-explicit-save-and-draft-published-split.md)).
 
 게시된 Site 의 정식 주소는 `/site/<slug>`입니다. 서브도메인 서빙은 제품 요구와 운영 조건이 구체화될 때 새로 검토하며, 현재 로드맵에서는 무기한 보류합니다 ([ADR-0009](docs/adr/0009-subdomain-public-serving.md)).
 

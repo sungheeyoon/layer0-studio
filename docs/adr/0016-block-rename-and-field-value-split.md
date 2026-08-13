@@ -203,7 +203,7 @@ SiteWriteUseCase
 | `select options` **축소** | ⛔ 파괴적 | 기존 Value 가 유니온 밖으로 나감 |
 | 배열 `itemSchema` 구조 변경 | ⛔ 파괴적 | |
 
-**파괴적 변경을 하려면** `templates.content` + `user_sites.content` + `user_sites.snapshot` 세 컬럼을 **함께** 마이그레이션하고, 전 행을 새 Library 로 검증해 통과한 뒤에만 배포한다. migration 026/027이 이 절차의 선례다.
+**파괴적 변경을 하려면** `templates.content` + `user_sites.content` + `user_sites.published_content` + `user_sites.snapshot` **네 컬럼**을 **함께** 마이그레이션하고, 전 행을 새 Library 로 검증해 통과한 뒤에만 배포한다. migration 026/027이 이 절차의 선례이나 **둘 다 `published_content` 가 존재하기 전의 것**이므로 컬럼 목록은 베끼지 말 것 (migration 029 / [ADR-0017](./0017-explicit-save-and-draft-published-split.md)).
 
 #### 6-1. 문서 규칙이 아니라 CI 게이트로 만든다
 

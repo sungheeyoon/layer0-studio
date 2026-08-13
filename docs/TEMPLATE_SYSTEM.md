@@ -504,7 +504,7 @@ pnpm template:sync cafe             # 슬러그 또는 prefix 로 필터
 }
 ```
 
-**블로킹 기준은 ADR-0015 규칙 4 다: 저장을 막는 건 "그 모양이면 렌더러가 깨질 때" 뿐이다.** ADR-0016 이후 렌더러는 `block.fields` 를 재검증 없이 캐스팅하므로 *모양* 이 틀리면 실제로 터진다(문자열에 `.map`, `undefined` 에 `.url`). 반면 모양은 맞는데 내용이 이상한 건 — 범위를 벗어난 숫자, 옵션 밖 select, hex 아닌 색 — 경고다. 하나를 막으면 같은 `ContentModel` 안의 **다른 모든 편집이 인질**이 되기 때문이다. 이 기준 때문에 여러 규칙이 에러 → 경고로 강등됐다.
+**블로킹 기준은 ADR-0015 §4 다** (0015 는 전체적으로 ADR-0017 이 대체했지만 이 규칙은 살아남았다)**: 저장을 막는 건 "그 모양이면 렌더러가 깨질 때" 뿐이다.** ADR-0016 이후 렌더러는 `block.fields` 를 재검증 없이 캐스팅하므로 *모양* 이 틀리면 실제로 터진다(문자열에 `.map`, `undefined` 에 `.url`). 반면 모양은 맞는데 내용이 이상한 건 — 범위를 벗어난 숫자, 옵션 밖 select, hex 아닌 색 — 경고다. 하나를 막으면 같은 `ContentModel` 안의 **다른 모든 편집이 인질**이 되기 때문이다. 이 기준 때문에 여러 규칙이 에러 → 경고로 강등됐다.
 
 ### 6.1 Errors (블로킹)
 
@@ -582,11 +582,13 @@ Block component 는 모든 시각 토큰을 `var(--*)` (또는 같은 CSS 변수
 | `select options` **축소** | ⛔ 파괴적 | 기존 Value 가 유니온 밖으로 나감 |
 | 배열 `itemSchema` 구조 변경 | ⛔ 파괴적 | |
 
-**파괴적 변경을 하려면** `templates.content` + `user_sites.content` + `user_sites.snapshot` 세 컬럼을 **함께** 마이그레이션하고, 전 행을 새 라이브러리로 검증해 통과한 뒤에만 배포한다 (ADR-0016 §8-1 절차; 본보기는 migration 026 — `scripts/lib/migrate-field-to-value.ts` 의 plan→전수검증→단일 트랜잭션 패턴).
+**파괴적 변경을 하려면** `templates.content` + `user_sites.content` + `user_sites.published_content` + `user_sites.snapshot` **네 컬럼**을 **함께** 마이그레이션하고, 전 행을 새 라이브러리로 검증해 통과한 뒤에만 배포한다 (ADR-0016 §8-1 절차; 본보기는 migration 026 — `scripts/lib/migrate-field-to-value.ts` 의 plan→전수검증→단일 트랜잭션 패턴).
+
+> ⚠️ **`published_content` 는 migration 029 에서 추가된 네 번째 컬럼이다** ([ADR-0017](./adr/0017-explicit-save-and-draft-published-split.md)). 026·027 은 이 컬럼이 없던 시절의 선례라 세 컬럼만 다룬다 — 그대로 베끼면 **공개 중인 사이트의 콘텐츠만 구 스키마로 남아** 렌더러가 깨진다. 빠뜨려도 에디터에서는 아무 증상이 없다는 점이 특히 위험하다. 편집기는 `content` 를 읽기 때문이다.
 
 `componentKey` 는 이 표의 바깥에 있다 — **어떤 경우에도 변경 금지**다 (§10.2). 깨는 변경이 필요하면 새 leaf 디렉터리로 fork 한다.
 
-> **CI 게이트로 강제된다.** `pnpm schema:manifest` 가 전 Template 의 `componentKey → fieldsSchema` 를 정규화해 `src/templates/_schema-manifest.json` 으로 기록한다. CI 는 (1) 현재 라이브러리와 커밋된 manifest 의 freshness, (2) PR base manifest 와 현재 manifest 의 하위 호환성을 각각 검사한다. 파괴적 변경은 실패하며, 의도적 변경은 같은 PR 에 새 `docs/migrations/<name>.sql` + `<name>.md` 쌍이 있어야 통과한다. 이 쌍은 리뷰 증거일 뿐 SQL 의 정확성을 증명하지 않으므로 세 컬럼 전수 변환·검증 책임은 그대로다.
+> **CI 게이트로 강제된다.** `pnpm schema:manifest` 가 전 Template 의 `componentKey → fieldsSchema` 를 정규화해 `src/templates/_schema-manifest.json` 으로 기록한다. CI 는 (1) 현재 라이브러리와 커밋된 manifest 의 freshness, (2) PR base manifest 와 현재 manifest 의 하위 호환성을 각각 검사한다. 파괴적 변경은 실패하며, 의도적 변경은 같은 PR 에 새 `docs/migrations/<name>.sql` + `<name>.md` 쌍이 있어야 통과한다. 이 쌍은 리뷰 증거일 뿐 SQL 의 정확성을 증명하지 않으므로 네 컬럼 전수 변환·검증 책임은 그대로다.
 
 ---
 
