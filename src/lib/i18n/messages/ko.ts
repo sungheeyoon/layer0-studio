@@ -397,17 +397,36 @@ export const ko = {
       INSECURE_URL: 'http:// 주소라 일부 브라우저에서 이미지가 차단될 수 있습니다.',
       BACKGROUND_POLARITY_FLIPPED: '이 템플릿의 글자색은 원래 배경 밝기에 맞춰져 있어 따라 바뀌지 않습니다. 글씨가 잘 안 보일 수 있습니다.',
     },
-    autosave: {
+    saveStatus: {
       saving: '저장 중…',
       saved: '✓ 저장됨',
-      failed: '자동 저장 실패 — 수동으로 저장하세요',
+      failed: '저장 실패 — 다시 시도해 주세요',
       unsaved: '● 저장되지 않은 변경 사항',
+      unpublished: '저장됨 · 아직 게시되지 않음',
+    },
+    // 에디터 재진입 시 — 저장은 됐지만 방문자에게는 아직 안 보이는 작업본이 있을 때.
+    restoreDraft: {
+      title: '저장해둔 변경 사항이 있습니다',
+      bodyPublished: '이 사이트에는 저장했지만 아직 게시하지 않은 변경 사항이 있습니다. 이어서 편집하거나, 폐기하고 현재 공개된 내용으로 되돌릴 수 있습니다.',
+      bodyNeverPublished: '이 사이트에는 저장해둔 변경 사항이 있습니다. 이어서 편집하거나, 폐기하고 템플릿 원본으로 되돌릴 수 있습니다.',
+      keep: '이어서 편집',
+      discard: '폐기하고 되돌리기',
+    },
+    // 앱 내 이동(대시보드로 돌아가기)만 막는다. 탭 닫기·브라우저 뒤로가기는
+    // 보장 대상이 아니다 — ADR-0017.
+    leaveGuard: {
+      title: '저장하지 않은 변경 사항이 있습니다',
+      body: '지금 나가면 저장하지 않은 변경 사항이 사라집니다.',
+      stay: '계속 편집',
+      leave: '저장하지 않고 나가기',
     },
     actions: {
       publish: '변경 사항 게시',
       publishing: '게시 중...',
       saving: '저장 중...',
       saveDraft: '임시 저장',
+      discardDraft: '변경 사항 폐기',
+      discarding: '되돌리는 중...',
     },
     published: {
       line1: '게시되었습니다!',

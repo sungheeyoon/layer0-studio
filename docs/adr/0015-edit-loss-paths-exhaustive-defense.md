@@ -1,6 +1,16 @@
 # 편집 손실은 동시성 문제가 아니라 경로의 집합이다 — 전수 열거와 방어
 
-> **Status: Accepted — 구현 완료.** 언마운트 flush + 전송 실패 한정 유한 재시도 (`src/lib/editor/flush-retry.ts`) · `visibilitychange(hidden)` flush (`src/lib/editor/use-flush-on-hidden.ts`) · `AUTOSAVE_IDLE_MS = 10_000` / `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`) · 단일 write queue (`src/lib/editor/write-queue.ts`) · blocking→warning 강등 · `layout` 에디터 컨트롤 제거.
+> **Status: Superseded by [ADR-0017](./0017-explicit-save-and-draft-published-split.md) (2026-08-13).**
+>
+> 아래 §1–§3 의 결론(자동저장 + 이탈 flush + 유한 재시도 + write queue)은 **더 이상 유효하지 않다.** 자동저장이 철회되면서 그 파생 방어도 함께 제거됐고, 언급된 네 모듈(`autosave-schedule.ts` · `write-queue.ts` · `use-flush-on-hidden.ts` · `flush-retry.ts`)은 저장소에 존재하지 않는다. §2 가 기각한 `<Link onNavigate>` 게이트는 ADR-0017 §4 에서 채택됐다.
+>
+> **여전히 유효한 것이 둘 있다.** §4–§5(저장을 막을 자격의 정의, 클라이언트 검증은 차단이 아니다)는 그대로 규칙이고, 이 문서의 **위협 모델 열거 자체**는 ADR-0017 이 보장선을 그을 때 쓴 재료다. 무엇을 안 막기로 했는지 이해하려면 여기서 무엇이 열거됐는지를 먼저 읽어야 한다.
+>
+> <details><summary>원래의 Status 줄</summary>
+>
+> Accepted — 구현 완료. 언마운트 flush + 전송 실패 한정 유한 재시도 (`src/lib/editor/flush-retry.ts`) · `visibilitychange(hidden)` flush (`src/lib/editor/use-flush-on-hidden.ts`) · `AUTOSAVE_IDLE_MS = 10_000` / `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`) · 단일 write queue (`src/lib/editor/write-queue.ts`) · blocking→warning 강등 · `layout` 에디터 컨트롤 제거.
+>
+> </details>
 
 [ADR-0004](./0004-optimistic-concurrency-via-rpc.md) 는 편집 손실을 **동시성 문제**로 모델링하고 그 한 갈래(탭 간 silent overwrite)를 RPC 로 정확히 막았다. 그 결정은 지금도 옳다. 문제는 그것이 손실의 **유일한** 갈래인 것처럼 취급됐다는 점이다. 같은 데이터가 사라지는 경로는 그 뒤로도 열려 있었고, 각각 전혀 다른 메커니즘을 갖고 있었다.
 

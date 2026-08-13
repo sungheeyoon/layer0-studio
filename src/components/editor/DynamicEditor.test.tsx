@@ -3,13 +3,14 @@ import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { UserSite } from '@/domain/entities/user-site.entity';
+import type { EditorSite } from '@/domain/entities/user-site.entity';
 import type { ContentModel } from '@/domain/entities/template.entity';
 import type { TemplateModule, TemplateRendererProps } from '@/templates/types';
 
 vi.mock('@/app/(authenticated)/dashboard/editor/actions', () => ({
   saveContentAction: vi.fn(),
   publishSiteAction: vi.fn(),
+  discardDraftAction: vi.fn(),
 }));
 vi.mock('@/templates/registry', () => ({ loadTemplate: vi.fn() }));
 vi.mock('@/utils/supabase/client', () => ({ createClient: vi.fn() }));
@@ -57,7 +58,7 @@ const multiContent: ContentModel = {
   })),
 };
 
-const site: UserSite = {
+const site: EditorSite = {
   id: 'site-1',
   userId: 'user-1',
   templateId: 'template-1',
@@ -65,8 +66,8 @@ const site: UserSite = {
   domain: 'onyu',
   status: 'draft',
   content: multiContent,
-  snapshot: multiContent,
   publishedAt: null,
+  hasUnpublishedChanges: false,
   createdAt: '2026-08-01T00:00:00.000Z',
   updatedAt: '2026-08-01T00:00:00.000Z',
 };
@@ -173,51 +174,59 @@ describe('DynamicEditor information architecture', () => {
     scrollIntoView.mockRestore();
   });
 
-  it('does not stack automatic writes while a slow auto-save is still running', async () => {
-    let finishFirstSave!: (value: { success: true; updatedAt: string }) => void;
-    vi.mocked(saveContentAction)
-      .mockImplementationOnce(() => new Promise((resolve) => { finishFirstSave = resolve; }))
-      .mockResolvedValueOnce({ success: true, updatedAt: '2026-08-01T00:00:02.000Z' });
+  it('writes nothing until the user asks for it', async () => {
     renderEditor();
     const title = await screen.findByLabelText('제목');
 
     vi.useFakeTimers();
     fireEvent.change(title, { target: { value: '첫 편집' } });
-    await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
-    expect(saveContentAction).toHaveBeenCalledTimes(1);
+    // Well past every timer the old debounce used to arm.
+    await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
 
-    fireEvent.change(title, { target: { value: '두 번째 편집' } });
-    await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
-    expect(saveContentAction).toHaveBeenCalledTimes(1);
-
-    await act(async () => {
-      finishFirstSave({ success: true, updatedAt: '2026-08-01T00:00:01.000Z' });
-      await Promise.resolve();
-      await vi.advanceTimersByTimeAsync(5_000);
-    });
-    expect(saveContentAction).toHaveBeenCalledTimes(2);
+    expect(saveContentAction).not.toHaveBeenCalled();
+    expect(screen.getByText(ko.editor.saveStatus.unsaved)).toBeInTheDocument();
   });
 
-  it('flushes a newer edit on unmount while an older auto-save is still running', async () => {
-    let finishFirstSave!: (value: { success: true; updatedAt: string }) => void;
-    vi.mocked(saveContentAction)
-      .mockImplementationOnce(() => new Promise((resolve) => { finishFirstSave = resolve; }))
-      .mockResolvedValueOnce({ success: true, updatedAt: '2026-08-01T00:00:02.000Z' });
-    const { unmount } = renderEditor();
+  it('does not claim "saved" for an edit the acknowledgement did not carry', async () => {
+    let finishSave!: (value: { success: true; updatedAt: string }) => void;
+    vi.mocked(saveContentAction).mockImplementationOnce(
+      () => new Promise((resolve) => { finishSave = resolve; }),
+    );
+    renderEditor();
     const title = await screen.findByLabelText('제목');
 
-    vi.useFakeTimers();
     fireEvent.change(title, { target: { value: '첫 편집' } });
-    await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
-    fireEvent.change(title, { target: { value: '떠나기 직전 편집' } });
-    unmount();
-    expect(saveContentAction).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: ko.editor.actions.saveDraft }));
+    await waitFor(() => expect(saveContentAction).toHaveBeenCalledTimes(1));
+
+    // Typed while the request was in flight — the reply below cannot describe it.
+    fireEvent.change(title, { target: { value: '요청 중에 더 편집' } });
 
     await act(async () => {
-      finishFirstSave({ success: true, updatedAt: '2026-08-01T00:00:01.000Z' });
-      await Promise.resolve();
+      finishSave({ success: true, updatedAt: '2026-08-01T00:00:01.000Z' });
       await Promise.resolve();
     });
-    expect(saveContentAction).toHaveBeenCalledTimes(2);
+
+    await waitFor(() =>
+      expect(screen.getByText(ko.editor.saveStatus.unsaved)).toBeInTheDocument(),
+    );
+    expect(screen.queryByText(ko.editor.saveStatus.saved)).toBeNull();
+  });
+
+  it('offers to discard the draft when one was saved but never published', async () => {
+    cleanup();
+    render(
+      <I18nProvider locale="ko" dictionary={ko}>
+        <DynamicEditor site={{ ...site, hasUnpublishedChanges: true }} />
+      </I18nProvider>,
+    );
+
+    expect(await screen.findByText(ko.editor.restoreDraft.title)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: ko.editor.restoreDraft.keep }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: ko.editor.restoreDraft.discard }),
+    ).toBeInTheDocument();
   });
 });

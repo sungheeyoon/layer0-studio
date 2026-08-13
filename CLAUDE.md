@@ -11,7 +11,7 @@ Rules live here; the reasoning lives in the ADRs. When a rule below surprises yo
 | Before you touch… | Read |
 |---|---|
 | Domain vocabulary, naming, "what do we call this" | `CONTEXT.md` |
-| Any architectural decision's rationale | `docs/adr/` (0001–0016; all implemented — 0016 shipped via migrations 026/027) |
+| Any architectural decision's rationale | `docs/adr/` (0001–0017; all implemented. 0015 is superseded by 0017 — read 0015 for its threat enumeration only) |
 | Studio chrome UI — page, component, color, icon, font, `globals.css` | `docs/DESIGN_SYSTEM.md` |
 | Templates, presets, sync, validate, thumbnail capture | `docs/TEMPLATE_SYSTEM.md` |
 
@@ -64,7 +64,7 @@ src/lib/di/       ← DI: factory functions wiring repos → use cases
 src/lib/errors/   ← Domain error code → display string registry (ko/en)
 src/lib/i18n/     ← Typed ko/en dictionaries (ko canonical), cookie-based locale (ADR-0010)
 src/lib/seo/      ← SITE_URL helper (origin only, trailing slash trimmed)
-src/lib/editor/   ← Autosave schedule + write queue (ADR-0015)
+src/lib/editor/   ← Content warnings + unsaved-changes store (ADR-0017)
 src/lib/template/ ← Registry-aware validate, design-token → CSS var expansion, sync
 src/app/          ← App Router pages and Server Actions (call use cases via DI)
   (authenticated)/          ← Route group: single auth guard in layout.tsx
@@ -158,16 +158,28 @@ So a renderer edit is a fleet-wide edit. Two consequences that bite:
 
 **`array` field type:** components can declare repeating-item fields in `fieldsSchema` (menu items, FAQ rows); the editor renders add/remove/reorder and validates each item against its `itemSchema`. Phase 2 (Collections — separate table + RLS) is deferred; see `docs/plans/PLAN_crud_array_field.md` for the trigger conditions.
 
-### Editor persistence
+### Editor persistence — save is explicit, publish is a copy
 
 The editor (`src/components/editor/DynamicEditor.tsx`) dynamically imports the Template renderer via `loadTemplate()`. Clicking a section in the preview selects it for inline editing.
 
-Edit loss was a **set of paths**, not one concurrency bug ([ADR-0015](./docs/adr/0015-edit-loss-paths-exhaustive-defense.md)). Four defences, all load-bearing:
+**There is no auto-save** ([ADR-0017](./docs/adr/0017-explicit-save-and-draft-published-split.md), which supersedes ADR-0015 — that ADR's threat enumeration still reads, its conclusions do not). Don't reintroduce one, and don't add a save on unmount, `visibilitychange`, or `beforeunload`: "the user has not saved" is a state the product deliberately does not act on.
 
-1. **Never bypass the save RPC.** Every write goes through `save_site_template_with_lock` (migration 010) carrying `expectedUpdatedAt`; `'STALE_VERSION'` surfaces a Conflict modal. A plain `update` silently destroys another tab's work ([ADR-0004](./docs/adr/0004-optimistic-concurrency-via-rpc.md)). **New save paths must thread `expectedUpdatedAt` through.**
-2. **Every write goes through the single queue** (`src/lib/editor/write-queue.ts`) so a Site's writes are always ordered — this is what stops a tab colliding with *itself*.
-3. **The debounce has a ceiling:** `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`), plus a flush on unmount (SPA/browser Back) and on `visibilitychange` → hidden (`src/lib/editor/use-flush-on-hidden.ts`, for backgrounded tabs where the timer is throttled). Both reuse the normal save path — the page is still alive in each case, which is why no beacon route is needed. Only the unmount flush retries, and only a transport failure (`src/lib/editor/flush-retry.ts`): retrying a `STALE_VERSION` would overwrite the other tab.
-4. **A rule may block a save only when saving would break the renderer.** Anything that merely *looks* wrong is a warning the editor flags inline. Don't promote a warning to blocking — the whole `ContentModel` is validated and saved as a unit, so one bad field would hold every other edit hostage.
+A Site carries **two copies** (migration 029):
+
+| Column | Written by | Read by |
+|---|---|---|
+| `content` | Save Draft | the editor, preview |
+| `published_content` | Publish only | the public renderer, sitemap |
+
+1. **Never bypass the save RPC.** Every content write goes through `save_site_template_with_lock` carrying `expectedUpdatedAt`; `'STALE_VERSION'` surfaces a Conflict modal, `'NOT_FOUND'` means the RPC's own ownership check refused. A plain `update` silently destroys another tab's work ([ADR-0004](./docs/adr/0004-optimistic-concurrency-via-rpc.md)). **New save paths must thread `expectedUpdatedAt` through.** Publishing has its own RPC, `publish_site_content`.
+2. **Public reads never touch `user_sites`.** They go through the `published_sites` view → `findPublishedByDomain` → `PublishedSite`, which has no draft column to leak. Adding a public read path that queries `user_sites` directly re-opens what 029 closed.
+3. **Asset usages are scoped** (`draft` | `published`). An asset is only queued for cleanup when *both* scopes have dropped it — otherwise deleting an image from the draft breaks the live Site ([ADR-0003](./docs/adr/0003-asset-upload-two-phase-cleanup.md)).
+4. **"Saved" is a claim about a revision.** `revisionRef` vs `savedRevisionRef` — an edit made while a save is in flight keeps the indicator dirty. Don't simplify this to a boolean.
+5. **A rule may block a save only when saving would break the renderer.** Anything that merely *looks* wrong is a warning the editor flags inline. Don't promote a warning to blocking — the whole `ContentModel` is validated and saved as a unit, so one bad field would hold every other edit hostage.
+
+Leaving: the app's own exit link guards on unsaved changes via `<Link onNavigate>` + `src/lib/editor/unsaved-changes.ts`. Tab close/reload gets `beforeunload`; browser Back is uncovered on purpose.
+
+**DB functions:** every `SECURITY DEFINER` function has its EXECUTE narrowed to one role and a fixed `search_path` (migration 028). A new one without `REVOKE ... FROM PUBLIC` is callable by any anon key holder through PostgREST, RLS notwithstanding.
 
 ### Asset upload flow
 
@@ -220,7 +232,7 @@ Production builds **hard-fail** if `NEXT_PUBLIC_SITE_URL` is missing (`next.conf
 
 ### Database migrations
 
-`docs/migrations/` holds the numbered SQL migrations and the runbooks needed for coordinated data transforms (currently 018, 019, 026, and 027). Do not copy migration counts or production-application status into overview docs; inspect the directory and the target environment. Apply new migrations manually via the Supabase SQL editor or `supabase db push`, and follow a paired runbook when present.
+`docs/migrations/` holds the numbered SQL migrations and the runbooks needed for coordinated data transforms (currently 018, 019, 026, 027, and 029). Do not copy migration counts or production-application status into overview docs; inspect the directory and the target environment. Apply new migrations manually via the Supabase SQL editor or `supabase db push`, and follow a paired runbook when present.
 
 When adding one: number sequentially, and if it renames a column, remember that function bodies reference columns by text and need a `CREATE OR REPLACE` in the same migration (this is what migration 021 had to do for `save_site_template_with_lock`).
 
