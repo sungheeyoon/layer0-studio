@@ -2,6 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IUserSiteRepository } from '@/domain/repositories/user-site.repository';
 import {
   UserSite,
+  PublishedSite,
   CreateUserSiteDto,
   UpdateUserSiteDto,
 } from '@/domain/entities/user-site.entity';
@@ -9,7 +10,7 @@ import { ContentModel } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { isNotFoundError } from '@/data/errors/supabase-error.adapter';
 import { AssetUsage } from '@/domain/usecases/ports/asset-usage-collector.port';
-import { UserSiteRow } from '@/types/database';
+import { UserSiteRow, PublishedSiteRow } from '@/types/database';
 
 export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -23,9 +24,21 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       domain: row.domain,
       status: row.status,
       content: row.content,
+      publishedContent: row.published_content,
       snapshot: row.snapshot,
       publishedAt: row.published_at,
       createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
+  private mapPublishedRow = (row: PublishedSiteRow): PublishedSite => {
+    return {
+      id: row.id,
+      siteName: row.site_name,
+      domain: row.domain,
+      content: row.published_content,
+      publishedAt: row.published_at,
       updatedAt: row.updated_at,
     };
   }
@@ -85,6 +98,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
         domain: dto.domain,
         status: dto.status,
         content: dto.content,
+        published_content: dto.publishedContent,
         snapshot: dto.snapshot,
         published_at: dto.publishedAt,
       })
@@ -107,6 +121,9 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     if (dto.status !== undefined) updatePayload.status = dto.status;
     if (dto.content !== undefined) updatePayload.content = dto.content;
     if (dto.snapshot !== undefined) updatePayload.snapshot = dto.snapshot;
+    // `publishedContent` is intentionally not mapped. Promotion happens in
+    // `publishContent` alone so the content copy and the published asset
+    // references can never drift apart (migration 029).
     if (dto.publishedAt !== undefined) updatePayload.published_at = dto.publishedAt;
     updatePayload.updated_at = new Date().toISOString();
 
@@ -165,6 +182,14 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       throw new TemplateError('STALE_VERSION');
     }
 
+    // The RPC re-checks ownership itself (migration 028) and reports a missing
+    // row and someone else's row identically, so a site_id cannot be probed
+    // through it. Reaching here means the caller's own ownership check and the
+    // row disagreed — deleted in between, or the RPC was called directly.
+    if (rpcResult === 'NOT_FOUND') {
+      throw new TemplateError('SITE_NOT_FOUND');
+    }
+
     // Return the updated row
     const { data: updatedData, error: fetchError } = await this.supabase
       .from('user_sites')
@@ -177,6 +202,38 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     }
 
     return this.mapRow(updatedData);
+  }
+
+  async publishContent(id: string, expectedUpdatedAt: string): Promise<UserSite> {
+    const { data: rpcResult, error: rpcError } = await this.supabase.rpc('publish_site_content', {
+      p_site_id: id,
+      p_expected_updated_at: expectedUpdatedAt,
+    });
+
+    if (rpcError) {
+      console.error('[SupabaseUserSiteRepo::publishContent]', rpcError.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    if (rpcResult === 'STALE_VERSION') {
+      throw new TemplateError('STALE_VERSION');
+    }
+
+    if (rpcResult === 'NOT_FOUND') {
+      throw new TemplateError('SITE_NOT_FOUND');
+    }
+
+    const { data, error } = await this.supabase
+      .from('user_sites')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      throw new TemplateError('SITE_NOT_FOUND');
+    }
+
+    return this.mapRow(data);
   }
 
   async delete(id: string): Promise<void> {
@@ -206,6 +263,26 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     }
 
     return data ? this.mapRow(data) : null;
+  }
+
+  async findPublishedByDomain(domain: string): Promise<PublishedSite | null> {
+    // The view — not `user_sites`. It carries no `content` column, so an
+    // anonymous request cannot reach the draft even by asking for it, and the
+    // `status`/`domain`/`published_content IS NOT NULL` filters live in the view
+    // definition rather than being re-stated (and forgotten) per call site.
+    const { data, error } = await this.supabase
+      .from('published_sites')
+      .select('*')
+      .eq('domain', domain)
+      .single();
+
+    if (error) {
+      if (isNotFoundError(error)) return null;
+      console.error('[SupabaseUserSiteRepo::findPublishedByDomain]', error.message);
+      throw new TemplateError('UNKNOWN');
+    }
+
+    return data ? this.mapPublishedRow(data) : null;
   }
 
   async findByUserIdAndName(userId: string, name: string): Promise<UserSite | null> {
