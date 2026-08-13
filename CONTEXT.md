@@ -11,7 +11,7 @@ This file is the vocabulary only — one or two sentences per term, plus the wor
 ### Sites and Templates
 
 **Site**:
-A User's own editable, publishable website, created from a Template. Its `content` is deep-copied at creation, so it is decoupled from its Template from that moment on.
+A User's own editable, publishable website, created from a Template. Its content is deep-copied at creation, so it is decoupled from its Template from that moment on. A Site holds **two** copies of that content — its **Draft** and its **Published copy**.
 _Avoid_: UserSite (DB name only), user-site, project, page.
 
 **Site Type (Single / Multi)**:
@@ -84,20 +84,32 @@ The runtime code path that turns a Site's content into served HTML, for both Liv
 _Avoid_: theme runtime, view.
 
 **Blocking rule / Warning rule**:
-The two kinds of content-validation rule, separated by whether a rule has standing to **stop a save**. Blocking = saving would break the Renderer or corrupt the content; Warning = the result merely looks wrong ([ADR-0015](./docs/adr/0015-edit-loss-paths-exhaustive-defense.md)).
+The two kinds of content-validation rule, separated by whether a rule has standing to **stop a save**. Blocking = saving would break the Renderer or corrupt the content; Warning = the result merely looks wrong ([ADR-0015](./docs/adr/0015-edit-loss-paths-exhaustive-defense.md) §4 — superseded overall by [ADR-0017](./docs/adr/0017-explicit-save-and-draft-published-split.md), but this rule survives it).
 _Avoid_: error/warn (the field names — fine in code), strict/loose, hard/soft.
 
+**Draft** (noun — a Site's working copy):
+The content a User is editing. Changes only when the User saves, and is never served to a visitor. Every Site has one, from creation ([ADR-0017](./docs/adr/0017-explicit-save-and-draft-published-split.md)).
+_Avoid_: unsaved changes (that is the *unsaved* state, a strictly smaller thing — a saved Draft is still a Draft), working draft, staging copy.
+
+**Published copy**:
+The content visitors actually see. Changes only when the User **Publish**es, and is absent until the first Publish. A Site that has one can be taken down and restored without the User publishing again.
+_Avoid_: live content, production copy, snapshot (that word is taken — see below).
+
 **Publish** (verb):
-The User action taking a Site from not-yet-served to **Live** for the first time. One-way for Users — there is no user-level un-publish.
-_Avoid_: deploy, release, go-live.
+The User action copying a Site's **Draft** onto its **Published copy**, making it **Live**. Repeatable, and the *only* thing that changes what visitors see — saving never does ([ADR-0017](./docs/adr/0017-explicit-save-and-draft-published-split.md)). Users can also un-publish, which takes the Site down while keeping the Published copy.
+_Avoid_: deploy, release, go-live, "pushing changes".
+
+**Discard** (verb):
+Throwing a saved **Draft** away and resetting it to the **Published copy** — or, for a Site never Published, to the Template's original content. Offered on re-entering the Editor when the two differ.
+_Avoid_: revert, reset, undo (that is the in-editor keystroke, which does not touch the server).
 
 **Live** (adjective):
-A Site is Live when it is currently served at its public URL. The two non-Live states are *draft* (never Published) and **Suspended**.
+A Site is Live when its **Published copy** is currently served at its public URL. The two non-Live states are not-yet-Published and **Suspended**.
 _Avoid_: active (the status string — fine in code), published (overloaded with `publishedAt`).
 
 **Suspended**:
-A state an admin can put a Site into to take it down. Distinct from draft — a Suspended Site has been Published at least once.
-_Note_: reachable at the use-case level only; the admin UI that triggered it was removed.
+A state an admin can put a Site into to take it down. Distinct from not-yet-Published — a Suspended Site has been Published at least once, so its **Published copy** survives the takedown and a restore needs nothing from the User.
+_Note_: reachable at the use-case level only; the admin UI that triggered it was removed. An admin cannot make a Site Live that has no Published copy — that would be publishing on the User's behalf ([ADR-0017](./docs/adr/0017-explicit-save-and-draft-published-split.md) §2).
 
 **Site Address**:
 The public path a User chooses for a Site — `/site/myshop` for the address `myshop`. It is stored in the legacy `user_sites.domain` field even though it is not a hostname or custom domain. Published Sites are served at `/site/<slug>`; subdomain serving is deferred indefinitely ([ADR-0009](./docs/adr/0009-subdomain-public-serving.md)).
@@ -131,23 +143,24 @@ _Avoid_: account deletion, account removal, deactivation, GDPR delete.
 - A **User** owns many **Sites**; each **Site** comes from at most one **Template**.
 - A **Single** Site has ordered **Blocks** directly. A **Multi** Site has **Pages** plus **Chrome**; each **Page** has ordered **Blocks**. A **Block component** declares **Fields**; a placed **Block** holds a **Value** for each.
 - A **Site** owns many **Assets**. Removing an Asset record emits a **Tombstone** that outlives it.
-- A **Site** becomes **Live** when its User **Publish**es it; an admin can **Suspend** it.
-- The **Editor** writes a Site's content; the **Renderer** reads it.
+- A **Site** becomes **Live** when its User **Publish**es it — copying its **Draft** onto its **Published copy**; an admin can **Suspend** it. Saving edits the Draft and nothing else.
+- The **Editor** writes a Site's **Draft**; the **Renderer** reads its **Published copy**. Preview is the one place the Renderer is pointed at a Draft.
 
 ## Example dialogue
 
 > **Dev:** "Customer's confused — they updated their menu but their **Site** still shows the old items."
-> **PM:** "Did they save in the **Editor**? Auto-save fires 10 seconds after they stop editing, with a 15-second maximum wait from the oldest pending edit; leaving flushes whatever is pending. Did they see an error?"
-> **Dev:** "They saved. But the **Site** is **Live** — does the **Renderer** cache?"
-> **PM:** "The Live **Renderer** reads fresh **Site** content per request. Different question — is this a **Site** from the cafe **Template**, or a custom one?"
+> **PM:** "Did they **Publish**? Saving only updates their **Draft** — there is no auto-save, and a save never reaches visitors. Does the Editor show 'saved, not published yet'?"
+> **Dev:** "They published. But the **Site** is **Live** — does the **Renderer** cache?"
+> **PM:** "The Live **Renderer** reads the **Published copy** fresh per request. Different question — is this a **Site** from the cafe **Template**, or a custom one?"
 > **Dev:** "From the cafe **Template**. The menu's an `array`-typed **Field**, so the items live in that Field's **Value** on the menu **Block**."
 > **PM:** "A cafe is a **Single** Site — no **Pages**, all Blocks in one scroll. So check that Block's `visible`, and that they edited the right one."
 
 ## Flagged ambiguities
 
-- **"copy" / "shared" span two independent axes.** *Template ↔ Template (code):* nothing is shared; each Template owns independent copies ([ADR-0001](./docs/adr/0001-beta-model-template-isolation.md)). *Site ↔ Template (runtime):* the content **data** is deep-copied per Site, but the **Renderer code** is shared by every Site of that `templateKey`. Net: a Site duplicates a few KB of JSON, never components. Name the axis before discussing storage cost or update propagation.
+- **"copy" / "shared" span two independent axes.** *Template ↔ Template (code):* nothing is shared; each Template owns independent copies ([ADR-0001](./docs/adr/0001-beta-model-template-isolation.md)). *Site ↔ Template (runtime):* the content **data** is deep-copied per Site, but the **Renderer code** is shared by every Site of that `templateKey`. Net: a Site duplicates a few KB of JSON, never components. Name the axis before discussing storage cost or update propagation. A *third* sense arrived with [ADR-0017](./docs/adr/0017-explicit-save-and-draft-published-split.md): within one Site, the **Draft** and the **Published copy** are two copies of the same content, and **Publish** is the copy operation between them.
 - **"domain" is overloaded:** `user_sites.domain` is the legacy code identifier for a **Site Address**, while `src/domain/` means the Clean Architecture layer. A future bring-your-own-hostname feature has no canonical product term yet — pin one if it comes onto the roadmap.
-- **"publish" is overloaded two ways:** a User **Publish**es their Site (draft → Live), and a Template becomes catalog-visible (`status = active`). The code→DB reconcile is **Sync**, never "publish". The capability name `canPublishTemplates` predates the distinction and stays as-is ([ADR-0006](./docs/adr/0006-canpublishtemplates-separate-from-admin.md)).
+- **"draft" is overloaded two ways:** a Site's **Draft** is its working copy of the content, which every Site has including Live ones; `user_sites.status = 'draft'` means *never Published*. A Live Site therefore has a Draft while not being "a draft". Say **Draft** for the copy and "not yet Published" for the state. (`asset_usages.scope` and `discardDraft` use the first sense; the status column uses the second.)
+- **"publish" is overloaded two ways:** a User **Publish**es their Site (Draft → Published copy → Live), and a Template becomes catalog-visible (`status = active`). The code→DB reconcile is **Sync**, never "publish". The capability name `canPublishTemplates` predates the distinction and stays as-is ([ADR-0006](./docs/adr/0006-canpublishtemplates-separate-from-admin.md)).
 - **"delete" is overloaded three ways, and the collision caused a real defect:** a User ending their account is **Account Erasure**; removing an **Asset** record is not the same as destroying its binary (that half is the **Tombstone**); `pnpm template:delete` is a dev-time CLI. Before [ADR-0014](./docs/adr/0014-account-erasure-tombstone-pipeline.md) the model had no word for the second half, so "deleted the asset" meant either thing — and account erasure did only the first.
 - **"theme" is historical.** Visual identity is per-Template (**Design Tokens**); catalog grouping is **Category**. Reading old PRs, translate "theme" to whichever job it was doing. Code residue was cleared in migration 013 (`themeKey` → `templateKey`) and PR #19 (`src/themes/` → `src/templates/`).
 - **"composition" was never a separate concept** — it is the ordered **Block** list of a Site or Page. Say "the Site's Blocks", never "the composition".
