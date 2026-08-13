@@ -17,10 +17,10 @@ import { useEffect, useRef } from 'react';
  * ceiling exactly when the OS may reclaim the tab.
  *
  * `hasPendingEdits` is the guard, not an optimisation: without it every tab
- * switch would write. The live debounce timer is the signal the unmount flush
- * already uses — "edits exist that no request has picked up yet" — and it is
- * also what keeps repeated hidden/visible transitions from stacking saves, as
- * the first flush clears it.
+ * switch would write. The Editor supplies its live debounce timer or pending
+ * edit anchor — together they mean "edits exist that no request has picked up
+ * yet". The first flush clears both, so repeated hidden/visible transitions do
+ * not stack saves.
  *
  * **This raises the odds, it does not zero the loss.** Closing a desktop tab
  * fires `hidden` too, but the page dies right after and an in-flight request is

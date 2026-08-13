@@ -8,11 +8,12 @@ import {
 describe('nextSaveDelay', () => {
   it('is the plain idle debounce for a fresh edit', () => {
     expect(nextSaveDelay(1_000, 1_000)).toBe(AUTOSAVE_IDLE_MS);
+    expect(AUTOSAVE_IDLE_MS).toBe(10_000);
   });
 
   it('stays the idle debounce while the deadline is further away than it', () => {
-    // Oldest pending edit is 5s old: 10s of headroom left, more than the 4s idle.
-    expect(nextSaveDelay(0, 5_000)).toBe(AUTOSAVE_IDLE_MS);
+    // Oldest pending edit is 2s old: 13s of headroom left, more than the 10s idle.
+    expect(nextSaveDelay(0, 2_000)).toBe(AUTOSAVE_IDLE_MS);
   });
 
   it('tracks the max-wait deadline once it is nearer than the idle debounce', () => {

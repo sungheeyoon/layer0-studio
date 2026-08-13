@@ -51,12 +51,12 @@ export default async function Home() {
         {/* How It Works */}
         <section className="border-b border-border px-6 py-24 md:px-10">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-16 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+            <div className="mb-16 space-y-3">
               <h2 className="text-heading">
-                {t.howItWorks.title}{" "}
-                <span className="text-muted-foreground">{t.howItWorks.subtitle}</span>
+                <span className="block">{t.howItWorks.title}</span>
+                <span className="block text-muted-foreground">{t.howItWorks.subtitle}</span>
               </h2>
-              <p className="max-w-sm text-body text-muted-foreground">
+              <p className="text-body text-muted-foreground md:whitespace-nowrap">
                 {t.howItWorks.lead}
               </p>
             </div>

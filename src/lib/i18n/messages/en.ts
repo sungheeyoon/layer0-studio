@@ -328,10 +328,12 @@ export const en: Messages = {
     },
     tabs: {
       content: 'Content',
+      navigation: 'Navigation',
       design: 'Design',
     },
     pages: {
       heading: 'Pages',
+      switcherLabel: 'Page to edit',
       namePlaceholder: 'Page name',
       moveUp: 'Move page up',
       moveDown: 'Move page down',
@@ -343,6 +345,15 @@ export const en: Messages = {
       addToMenu: 'Add to menu',
       inTopNavTitle: 'Shown in top nav',
       notInTopNavTitle: 'Hidden from top nav',
+    },
+    navigation: {
+      singleHeading: 'Menu structure',
+      singleDescription: 'Choose which Blocks appear in the top menu and edit their labels.',
+      multiDescription: 'Set page order, routing, and menu placement.',
+      placementLabel: 'Menu placement',
+      none: 'Not in a menu',
+      header: 'Header menu',
+      footer: 'Footer menu',
     },
     blocks: {
       hierarchy: 'Hierarchy',

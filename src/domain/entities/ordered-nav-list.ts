@@ -64,6 +64,18 @@ export function reorderNavItem(json: ContentModel, activeId: string, overId: str
   }
 }
 
+/** Multi only: reorder Blocks within one Page without moving its Chrome. */
+export function reorderPageBlock(
+  json: ContentModel,
+  pageId: string,
+  activeId: string,
+  overId: string,
+): void {
+  if (isSingleContent(json)) return;
+  const page = json.pages.find((item) => item.id === pageId);
+  if (page) page.blocks = reorderItem(page.blocks, activeId, overId);
+}
+
 export function toggleNavItemVisible(json: ContentModel, id: string): void {
   if (isSingleContent(json)) json.blocks = toggleVisible(json.blocks, id);
   else json.pages = toggleVisible(json.pages, id);

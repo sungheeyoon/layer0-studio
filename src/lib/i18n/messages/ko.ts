@@ -331,10 +331,12 @@ export const ko = {
     },
     tabs: {
       content: '콘텐츠',
+      navigation: '네비게이션',
       design: '디자인',
     },
     pages: {
       heading: '페이지',
+      switcherLabel: '편집할 페이지',
       namePlaceholder: '페이지 이름',
       moveUp: '페이지 위로 이동',
       moveDown: '페이지 아래로 이동',
@@ -346,6 +348,15 @@ export const ko = {
       addToMenu: '메뉴에 추가',
       inTopNavTitle: '상단 메뉴에 표시됨',
       notInTopNavTitle: '상단 메뉴에서 숨김',
+    },
+    navigation: {
+      singleHeading: '메뉴 구성',
+      singleDescription: '상단 메뉴에 표시할 블록과 메뉴 이름을 설정합니다.',
+      multiDescription: '페이지 순서, 공개 여부와 메뉴 위치를 설정합니다.',
+      placementLabel: '메뉴 위치',
+      none: '메뉴에 표시 안 함',
+      header: '상단 메뉴',
+      footer: '하단 메뉴',
     },
     blocks: {
       hierarchy: '구조',

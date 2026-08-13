@@ -4,17 +4,18 @@
  * Two timings, and the second one is the whole point:
  *
  * - `AUTOSAVE_IDLE_MS` — the debounce proper. A save fires this long after the
- *   user stops changing things.
+ *   user stops changing things. Ten seconds avoids turning short pauses between
+ *   fields into separate requests while still staying inside the max-wait cap.
  * - `AUTOSAVE_MAX_WAIT_MS` — the ceiling on how long the *oldest* edit not yet
  *   handed to a request may sit in memory.
  *
  * A bare idle debounce reschedules on every keystroke, so a user who types
  * without pausing never triggers a save at all: the unsaved window is unbounded,
- * not "at most 4 seconds". The ceiling converts that into a fixed worst case,
+ * not the historical "at most 4 seconds" assumption. The ceiling converts that into a fixed worst case,
  * which is what lets the tab-close and crash paths stay out of scope for the
  * unmount flush. See ADR-0015 §2 and §6.
  */
-export const AUTOSAVE_IDLE_MS = 4_000;
+export const AUTOSAVE_IDLE_MS = 10_000;
 export const AUTOSAVE_MAX_WAIT_MS = 15_000;
 
 /**

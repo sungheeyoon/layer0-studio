@@ -4,6 +4,7 @@ import {
   moveItem,
   reorderItem,
   reorderNavItem,
+  reorderPageBlock,
   toggleNavItemVisible,
   toggleSingleMenu,
   setPageMenuPlacement,
@@ -84,5 +85,17 @@ describe('menu write model', () => {
     const multi = multiJson();
     reorderNavItem(multi, 'home', 'about');
     expect(ids(multi.pages)).toEqual(['about', 'home']);
+  });
+
+  it('reorders Blocks only inside the selected Multi Page', () => {
+    const json = multiJson();
+    json.pages[0].blocks = [block('hero', 'hero'), block('services', 'services')];
+    json.chrome.header = [block('header', 'header')];
+
+    reorderPageBlock(json, 'home', 'hero', 'services');
+
+    expect(ids(json.pages[0].blocks)).toEqual(['services', 'hero']);
+    expect(ids(json.chrome.header)).toEqual(['header']);
+    expect(ids(json.pages[1].blocks)).toEqual([]);
   });
 });

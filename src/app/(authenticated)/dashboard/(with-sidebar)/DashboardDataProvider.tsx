@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { UserSite } from '@/domain/entities/user-site.entity';
 
@@ -22,13 +22,16 @@ interface ProviderProps {
 
 export function DashboardDataProvider({ user, initialSites, children }: ProviderProps) {
   const [sites, setSites] = useState<UserSite[]>(initialSites);
+  const [serverSites, setServerSites] = useState(initialSites);
 
-  // When server re-renders the layout (after revalidatePath/router.refresh),
-  // initialSites prop receives fresh data — sync it into client state so
-  // optimistic updates merge with the latest server snapshot.
-  useEffect(() => {
+  // A refresh can deliver a newer server snapshot after local patch/remove
+  // updates. Adjust before rendering consumers so they never see a stale frame.
+  // Keeping the reset here (instead of keying the provider) also preserves
+  // descendant UI state such as an open settings dialog or a search query.
+  if (initialSites !== serverSites) {
+    setServerSites(initialSites);
     setSites(initialSites);
-  }, [initialSites]);
+  }
 
   const patchSite = useCallback((id: string, partial: Partial<UserSite>) => {
     setSites(prev => prev.map(s => (s.id === id ? { ...s, ...partial } : s)));

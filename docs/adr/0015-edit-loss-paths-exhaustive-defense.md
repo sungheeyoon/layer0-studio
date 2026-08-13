@@ -1,6 +1,6 @@
 # 편집 손실은 동시성 문제가 아니라 경로의 집합이다 — 전수 열거와 방어
 
-> **Status: Accepted — 구현 완료.** 언마운트 flush + 전송 실패 한정 유한 재시도 (`src/lib/editor/flush-retry.ts`) · `visibilitychange(hidden)` flush (`src/lib/editor/use-flush-on-hidden.ts`) · `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`) · 단일 write queue (`src/lib/editor/write-queue.ts`) · blocking→warning 강등 · `layout` 에디터 컨트롤 제거.
+> **Status: Accepted — 구현 완료.** 언마운트 flush + 전송 실패 한정 유한 재시도 (`src/lib/editor/flush-retry.ts`) · `visibilitychange(hidden)` flush (`src/lib/editor/use-flush-on-hidden.ts`) · `AUTOSAVE_IDLE_MS = 10_000` / `AUTOSAVE_MAX_WAIT_MS = 15_000` (`src/lib/editor/autosave-schedule.ts`) · 단일 write queue (`src/lib/editor/write-queue.ts`) · blocking→warning 강등 · `layout` 에디터 컨트롤 제거.
 
 [ADR-0004](./0004-optimistic-concurrency-via-rpc.md) 는 편집 손실을 **동시성 문제**로 모델링하고 그 한 갈래(탭 간 silent overwrite)를 RPC 로 정확히 막았다. 그 결정은 지금도 옳다. 문제는 그것이 손실의 **유일한** 갈래인 것처럼 취급됐다는 점이다. 같은 데이터가 사라지는 경로는 그 뒤로도 열려 있었고, 각각 전혀 다른 메커니즘을 갖고 있었다.
 
@@ -62,6 +62,8 @@
 자동저장 · 초안 저장 · 게시 · flush 를 전부 하나의 promise chain 으로 직렬화한다. `lastSaveRef` 의 2초 throttle 은 제거한다 — 그건 위의 자기충돌을 어설프게 가리던 반창고였고, 큐가 있으면 의미를 잃는다.
 
 flush 를 추가하는 것만으로 동시 쓰기 지점이 셋이 되므로 이 직렬화는 flush 의 **선행 조건**이다. ADR-0004 의 탭 간 방어에 대응하는 탭 내 방어이며, 둘이 합쳐져야 "한 Site 에 대한 쓰기는 항상 순서가 있다"가 성립한다.
+
+**후속 조정(2026-08-13):** 15초 `maxWait` 안전 상한은 그대로 두되, 일반 idle 디바운스는 4초에서 10초로 늘렸다. 짧은 입력 간 멈춤마다 요청을 만들지 않으면서도 연속 입력의 미저장 상한은 바뀌지 않는다. 느린 자동저장이 아직 진행 중일 때 다음 타이머가 만료되면 자동 쓰기를 큐에 계속 쌓지 않고, 진행 중 요청이 끝난 뒤 최신 대기 편집 하나만 다시 예약한다. 수동 저장·게시·flush 는 기존대로 단일 write queue 를 모두 통과한다.
 
 ### 4. Blocking rule 과 Warning rule — 저장을 막을 자격의 정의
 

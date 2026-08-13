@@ -13,6 +13,7 @@ import {
 import {
   isSinglePinned,
   reorderNavItem,
+  reorderPageBlock,
   toggleNavItemVisible,
   toggleSingleMenu,
   setPageMenuPlacement,
@@ -78,6 +79,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -99,7 +107,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // (ADR-0016 §4-4), so there is nothing to stamp on at load or strip off at
   // save. The clone keeps the server-rendered prop out of reach of any edit.
   const [content, setContent] = useState<ContentModel>(() => structuredClone(site.content));
-  const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'navigation' | 'design'>('content');
   const [workspacePanel, setWorkspacePanel] = useState<'edit' | 'preview'>('edit');
   const [previewViewport, setPreviewViewport] = useState<PreviewViewport>('desktop');
 
@@ -153,6 +161,8 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** When the oldest edit not yet handed to a request arrived — anchors MAX_WAIT. */
   const pendingSinceRef = useRef<number | null>(null);
+  const autoSaveDispatchCountRef = useRef(0);
+  const runAutoSaveRef = useRef<() => Promise<void>>(async () => {});
   const contentRef = useRef(content);
   const knownUpdatedAtRef = useRef<string>(site.updatedAt);
   const mountedRef = useRef(true);
@@ -218,26 +228,57 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     pendingSinceRef.current = null;
   }, []);
 
-  const runAutoSave = useCallback(async () => {
-    autoSaveTimerRef.current = null;
-    pendingSinceRef.current = null;
+  const dispatchAutoSave = useCallback(async () => {
+    autoSaveDispatchCountRef.current += 1;
     setAutoSaveStatus('saving');
     const outcome = await enqueueSave();
-    if (!mountedRef.current) return;
-    if (outcome.ok) {
-      setIsDirty(false);
-      setAutoSaveStatus('saved');
-    } else if (outcome.code === 'STALE_VERSION') {
-      setAutoSaveStatus('idle');
-      setConflictDetected(true);
-    } else {
-      // Every failure gets the banner, not just INVALID_TEMPLATE_JSON. A failed
-      // auto-save used to show one 12px grey line and nothing else, which is how
-      // a save that stopped working stayed unnoticed.
-      setAutoSaveStatus('error');
-      setActionError(getSiteError(outcome.code, locale, t.saveFailedFallback));
+    autoSaveDispatchCountRef.current -= 1;
+
+    if (mountedRef.current) {
+      if (outcome.ok) {
+        const hasNewerEdits = pendingSinceRef.current !== null
+          || autoSaveDispatchCountRef.current > 0;
+        setIsDirty(hasNewerEdits);
+        setAutoSaveStatus(hasNewerEdits ? 'idle' : 'saved');
+      } else if (outcome.code === 'STALE_VERSION') {
+        setAutoSaveStatus('idle');
+        setConflictDetected(true);
+      } else {
+        // Every failure gets the banner, not just INVALID_TEMPLATE_JSON. A failed
+        // auto-save used to show one 12px grey line and nothing else, which is how
+        // a save that stopped working stayed unnoticed.
+        setAutoSaveStatus('error');
+        setActionError(getSiteError(outcome.code, locale, t.saveFailedFallback));
+      }
+    }
+
+    if (
+      mountedRef.current
+      && pendingSinceRef.current !== null
+      && autoSaveDispatchCountRef.current === 0
+      && !autoSaveTimerRef.current
+    ) {
+      const now = Date.now();
+      autoSaveTimerRef.current = setTimeout(
+        () => { void runAutoSaveRef.current(); },
+        nextSaveDelay(pendingSinceRef.current, now),
+      );
     }
   }, [enqueueSave, locale, t.saveFailedFallback]);
+
+  const runAutoSave = useCallback(async () => {
+    autoSaveTimerRef.current = null;
+    // A slow request may outlive the debounce. Do not stack another automatic
+    // write behind it; edits made meanwhile retain their pendingSince anchor and
+    // are scheduled once every already-dispatched automatic write finishes.
+    if (autoSaveDispatchCountRef.current > 0) return;
+    pendingSinceRef.current = null;
+    await dispatchAutoSave();
+  }, [dispatchAutoSave]);
+
+  useEffect(() => {
+    runAutoSaveRef.current = runAutoSave;
+  }, [runAutoSave]);
 
   const scheduleAutoSave = useCallback(() => {
     const now = Date.now();
@@ -245,6 +286,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     setIsDirty(true);
     setAutoSaveStatus('idle');
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    if (autoSaveDispatchCountRef.current > 0) {
+      autoSaveTimerRef.current = null;
+      return;
+    }
     autoSaveTimerRef.current = setTimeout(
       () => { void runAutoSave(); },
       nextSaveDelay(pendingSinceRef.current, now),
@@ -258,17 +303,16 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // page is still alive there, so this reuses the save path rather than needing
   // the beacon route ADR-0015 §2 rejected. See `use-flush-on-hidden.ts`.
   //
-  // It dispatches through `runAutoSave`, not a bare `enqueueSave`: unlike the
-  // unmount flush this component is still mounted, so a failure *does* have a
-  // surface — the banner and the Conflict modal are waiting when the user comes
-  // back to the tab. `cancelScheduledSave` first, because the debounce timer is
-  // still armed here (`runAutoSave` only nulls the ref, as its normal caller is
-  // the timer itself) and would otherwise fire a second save.
+  // Unlike the unmount flush this component is still mounted, so a failure has
+  // a surface — the banner and Conflict modal wait for the user to return. If an
+  // older automatic write is still running, dispatch one follow-up through the
+  // same queue; otherwise the normal automatic path takes ownership.
   useFlushOnHidden({
-    hasPendingEdits: () => autoSaveTimerRef.current !== null,
+    hasPendingEdits: () => autoSaveTimerRef.current !== null || pendingSinceRef.current !== null,
     flush: () => {
+      const saveAlreadyDispatched = autoSaveDispatchCountRef.current > 0;
       cancelScheduledSave();
-      void runAutoSave();
+      void (saveAlreadyDispatched ? dispatchAutoSave() : runAutoSave());
     },
   });
 
@@ -278,8 +322,9 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   // the pending edit died in silence. The page survives both, so an un-awaited
   // request still completes.
   //
-  // A live debounce timer is the precise signal for "edits exist that no request
-  // has picked up yet": every edit reschedules it, every dispatch clears it.
+  // A live debounce timer or pendingSince anchor signals "edits exist that no
+  // request has picked up yet". The anchor covers edits made while a slow
+  // automatic request is already in flight, when no redundant timer is armed.
   //
   // Un-awaited, because there is no surface left to report a failure on — but
   // no longer fire-and-forget. A transport failure here used to be the one
@@ -290,9 +335,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      if (!autoSaveTimerRef.current) return;
-      clearTimeout(autoSaveTimerRef.current);
+      if (!autoSaveTimerRef.current && pendingSinceRef.current === null) return;
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
       autoSaveTimerRef.current = null;
+      pendingSinceRef.current = null;
       void flushWithRetry(() => enqueueSaveRef.current()).then((outcome) => {
         if (!outcome.ok) console.error('[editor] unmount flush failed:', outcome.code);
       });
@@ -383,16 +429,29 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   // ── Ordered Block/Page and menu edits ──────────────────────────────────────
 
-  // Drag-and-drop reorder (replaces the old up/down buttons). One handler for
-  // both Site Types — `reorderNavItem` dispatches to Blocks (Single, with the
-  // nav/footer pin rule) or pages (Multi). Pins are excluded from the sortable
-  // list, so they never move.
+  // Drag-and-drop reorder (replaces the old up/down buttons). Single Blocks,
+  // Multi Page Blocks and Multi Pages have separate ownership boundaries.
   const dndSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const handleDragEnd = useCallback(
+  const handleBlockDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+      updateContent((json) => {
+        if (isSingleContent(json)) {
+          reorderNavItem(json, String(active.id), String(over.id));
+        } else if (activePage) {
+          reorderPageBlock(json, activePage.id, String(active.id), String(over.id));
+        }
+      });
+    },
+    [activePage, updateContent],
+  );
+
+  const handlePageDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
       if (over && active.id !== over.id) {
@@ -456,7 +515,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
     if (isMultiContent(json)) {
       const page = json.pages.find((p) => p.id === pageId);
       setSelectedSectionId(
-        json.chrome.header[0]?.id ?? page?.blocks[0]?.id ?? json.chrome.footer[0]?.id ?? null,
+        page?.blocks[0]?.id ?? json.chrome.header[0]?.id ?? json.chrome.footer[0]?.id ?? null,
       );
     }
   }, []);
@@ -533,6 +592,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
   const handleSectionClick = useCallback((sectionId: string) => {
     setSelectedSectionId(sectionId);
     setActiveTab('content');
+    setWorkspacePanel('edit');
   }, []);
 
   // Inside the editor the rendered template's links must stay inert — Multi page
@@ -546,12 +606,12 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
 
   useEffect(() => {
     if (selectedSectionId) {
-      const element = document.getElementById(`section-${selectedSectionId}`);
+      const element = document.getElementById(`editor-block-${selectedSectionId}`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
-  }, [selectedSectionId]);
+  }, [activeTab, selectedSectionId]);
 
   return (
     <>
@@ -594,111 +654,41 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         <div className="flex min-h-0 min-w-0 flex-1">
 
       {/* Left Panel */}
-      <section className={`${workspacePanel === 'edit' ? 'flex' : 'hidden'} w-full min-w-0 shrink-0 flex-col overflow-hidden border-border bg-card lg:flex lg:w-[320px] lg:min-w-[320px] lg:border`}>
+      <section className={`${workspacePanel === 'edit' ? 'flex' : 'hidden'} w-full min-w-0 shrink-0 flex-col overflow-hidden border-border bg-card lg:flex lg:w-[360px] lg:min-w-[360px] lg:border`}>
         {/* Tab Switcher */}
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as 'content' | 'design')}
+          onValueChange={(v) => setActiveTab(v as 'content' | 'navigation' | 'design')}
           className="gap-0 border-b border-border p-2"
         >
           <TabsList variant="line" className="w-full">
             <TabsTrigger value="content">{t.tabs.content}</TabsTrigger>
+            <TabsTrigger value="navigation">{t.tabs.navigation}</TabsTrigger>
             <TabsTrigger value="design">{t.tabs.design}</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <div className="flex-grow overflow-y-auto p-6">
+        <div className="flex-grow overflow-y-auto p-4">
           {activeTab === 'content' ? (
-            <div className="space-y-8">
-              {/* Pages (Multi only) — page management: reorder + 2-axis + label */}
+            <div className="space-y-6">
+              {/* Multi Page switcher stays in Content; settings live in Navigation. */}
               {isMulti && (
-                <div>
-                  <h3 className="mb-4 text-sm font-semibold text-foreground">
-                    {t.pages.heading}
-                  </h3>
-                  <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={pages.map((p) => p.id)} strategy={verticalListSortingStrategy}>
-                      <ul className="space-y-3">
-                        {pages.map((page) => {
-                          const isActive = page.id === activePageId;
-                          return (
-                            <SortableRow
-                              key={page.id}
-                              id={page.id}
-                              className={(isDragging) =>
-                                `rounded-md border p-3 transition-colors ${isActive ? 'border-primary bg-primary/5' : 'border-border'} ${isDragging ? 'shadow-lg' : ''}`
-                              }
-                            >
-                              {({ attributes, listeners }) => (
-                                <>
-                                  {/* Row 1: drag · page name (switch context) · routable */}
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      type="button"
-                                      aria-label={t.blocks.reorder}
-                                      className="-ml-1 shrink-0 cursor-grab touch-none text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
-                                      {...attributes}
-                                      {...listeners}
-                                    >
-                                      <GripVertical className="size-4" />
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      onClick={() => handleSelectPage(page.id)}
-                                      className={`flex-grow text-left text-sm transition-colors ${isActive ? 'font-medium text-primary' : page.visible ? 'text-foreground' : 'text-muted-foreground'
-                                        }`}
-                                    >
-                                      {page.name || '(untitled page)'}
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      aria-label={page.visible ? t.pages.makeUnroutable : t.pages.makeRoutable}
-                                      title={page.visible ? t.pages.routableTitle : t.pages.unroutableTitle}
-                                      onClick={() => handleToggleNavItemVisible(page.id)}
-                                      className={`shrink-0 transition-colors ${page.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
-                                        }`}
-                                    >
-                                      {page.visible ? <Globe className="size-4" /> : <GlobeLock className="size-4" />}
-                                    </button>
-                                  </div>
-
-                                  {/* Row 2: menu placement and menu label, independent from page name. */}
-                                  <div className="mt-2 flex items-center gap-2 pl-1">
-                                    <select
-                                      aria-label="Menu placement"
-                                      value={!page.menu ? 'none' : page.menu.placement === 'footer' ? 'footer' : 'header'}
-                                      onChange={(event) => handlePageMenuPlacement(page.id, event.target.value as MenuPlacement)}
-                                      className="h-8 rounded-md border border-input bg-background px-2 text-xs"
-                                    >
-                                      <option value="none">None</option>
-                                      <option value="header">Header</option>
-                                      <option value="footer">Footer</option>
-                                    </select>
-                                    <Input
-                                      value={page.menu?.label ?? ''}
-                                      onChange={(e) => handleRelabelMenuItem(page.id, e.target.value)}
-                                      disabled={!page.menu}
-                                      placeholder={t.pages.namePlaceholder}
-                                      className="h-8 flex-grow"
-                                    />
-                                  </div>
-                                  <Input
-                                    value={page.name}
-                                    onChange={(event) => handleRenamePage(page.id, event.target.value)}
-                                    placeholder={t.pages.namePlaceholder}
-                                    className="mt-2 h-8"
-                                  />
-                                </>
-                              )}
-                            </SortableRow>
-                          );
-                        })}
-                      </ul>
-                    </SortableContext>
-                  </DndContext>
-                </div>
+                <Tabs value={activePage?.id} onValueChange={handleSelectPage} className="gap-0">
+                  <TabsList
+                    aria-label={t.pages.switcherLabel}
+                    className="grid w-full grid-cols-3 gap-1 bg-muted p-1 group-data-[orientation=horizontal]/tabs:h-auto"
+                  >
+                    {pages.map((page) => (
+                      <TabsTrigger
+                        key={page.id}
+                        value={page.id}
+                        className="h-8 w-full min-w-0 flex-none truncate px-3 text-xs"
+                      >
+                        {page.name || t.pages.namePlaceholder}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
               )}
 
               {/* Hierarchy */}
@@ -714,52 +704,85 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                   )}
                 </h3>
                 {isMulti ? (
-                  <ul className="space-y-3">
-                    {displayedBlocks.map((section) => {
-                      const isSelected = selectedSectionId === section.id;
-                      return (
-                        <li
-                          key={section.id}
-                          className={`rounded-md border transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border'
-                            }`}
-                        >
-                          <div className="flex items-center gap-2 p-3">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedSectionId(isSelected ? null : section.id)}
-                              className={`flex-grow text-left text-sm transition-colors ${isSelected ? 'font-medium text-primary' : section.visible ? 'text-foreground' : 'text-muted-foreground'
-                                }`}
+                  <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleBlockDragEnd}>
+                    <SortableContext items={displayedBlocks.map((section) => section.id)} strategy={verticalListSortingStrategy}>
+                      <ul className="space-y-3">
+                        {displayedBlocks.map((section) => {
+                          const isSelected = selectedSectionId === section.id;
+                          const isPageBlock = activePage?.blocks.some((block) => block.id === section.id) ?? false;
+                          const isHeaderBlock = isMultiContent(content)
+                            && content.chrome.header.some((block) => block.id === section.id);
+                          return (
+                            <SortableRow
+                              key={section.id}
+                              id={section.id}
+                              editorBlockId={section.id}
+                              disabled={!isPageBlock}
+                              className={(isDragging) =>
+                                `rounded-md border transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border'} ${isDragging ? 'shadow-lg' : ''}`
+                              }
                             >
-                              {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
-                            </button>
-                            <button
-                              type="button"
-                              aria-label={section.visible ? t.blocks.hide : t.blocks.show}
-                              title={section.visible ? t.blocks.visibleOnPage : t.blocks.hiddenFromPage}
-                              onClick={() => handleToggleSectionVisible(section.id)}
-                              className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
-                                }`}
-                            >
-                              {section.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                            </button>
-                          </div>
-                          {isSelected && (
-                            <div className="border-t border-border p-3">
-                              <SectionFields
-                                section={section}
-                                schema={templateModule?.library[section.type]?.meta.fieldsSchema}
-                                onFieldChange={handleFieldChange}
-                                onError={setActionError}
-                                issues={issueIndex.fields}
-                              />
-                            </div>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
+                              {({ attributes, listeners }) => (
+                                <>
+                                  <div className="flex items-center gap-2 p-3">
+                                    {isPageBlock ? (
+                                      <button
+                                        type="button"
+                                        aria-label={t.blocks.reorder}
+                                        className="-ml-1 shrink-0 cursor-grab touch-none text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
+                                        {...attributes}
+                                        {...listeners}
+                                      >
+                                        <GripVertical className="size-4" />
+                                      </button>
+                                    ) : (
+                                      <span
+                                        className="-ml-1 shrink-0 text-muted-foreground"
+                                        title={isHeaderBlock ? t.blocks.pinnedTop : t.blocks.pinnedBottom}
+                                      >
+                                        <Pin className="size-3.5" />
+                                      </span>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedSectionId(isSelected ? null : section.id)}
+                                      className={`flex-grow text-left text-sm transition-colors ${isSelected ? 'font-medium text-primary' : section.visible ? 'text-foreground' : 'text-muted-foreground'
+                                        }`}
+                                    >
+                                      {section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      aria-label={section.visible ? t.blocks.hide : t.blocks.show}
+                                      title={section.visible ? t.blocks.visibleOnPage : t.blocks.hiddenFromPage}
+                                      onClick={() => handleToggleSectionVisible(section.id)}
+                                      className={`shrink-0 transition-colors ${section.visible ? 'text-foreground hover:text-primary' : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                    >
+                                      {section.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                                    </button>
+                                  </div>
+                                  {isSelected && (
+                                    <div className="border-t border-border p-3">
+                                      <SectionFields
+                                        section={section}
+                                        schema={templateModule?.library[section.type]?.meta.fieldsSchema}
+                                        onFieldChange={handleFieldChange}
+                                        onError={setActionError}
+                                        issues={issueIndex.fields}
+                                      />
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </SortableRow>
+                          );
+                        })}
+                      </ul>
+                    </SortableContext>
+                  </DndContext>
                 ) : (
-                <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleBlockDragEnd}>
                   <SortableContext items={singleSections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
                     <ul className="space-y-3">
                       {singleSections.map((section) => {
@@ -769,6 +792,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                           <SortableRow
                             key={section.id}
                             id={section.id}
+                            editorBlockId={section.id}
                             disabled={pinned}
                             className={(isDragging) =>
                               `rounded-md border p-3 transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border'} ${isDragging ? 'shadow-lg' : ''}`
@@ -818,30 +842,6 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
                                   </button>
                                 </div>
 
-                                {/* Row 2: nav projection (2nd axis) — in-menu toggle + label */}
-                                <div className="mt-2 flex items-center gap-2 pl-1">
-                                  <button
-                                    type="button"
-                                    aria-label={section.menu ? t.blocks.removeFromMenu : t.blocks.addToMenu}
-                                    title={section.menu ? t.blocks.inNavMenuTitle : t.blocks.notInNavMenuTitle}
-                                    onClick={() => handleToggleSingleMenu(section.id)}
-                                    className={`shrink-0 transition-colors ${section.menu ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                                      }`}
-                                  >
-                                    {section.menu ? <ToggleRight className="size-5" /> : <ToggleLeft className="size-5" />}
-                                  </button>
-                                  <span className="shrink-0 text-xs text-muted-foreground">
-                                    {t.blocks.menu}
-                                  </span>
-                                  <Input
-                                    value={section.menu?.label ?? ''}
-                                    onChange={(e) => handleRelabelMenuItem(section.id, e.target.value)}
-                                    disabled={!section.menu}
-                                    placeholder={t.blocks.menuLabelPlaceholder}
-                                    className="h-8 flex-grow"
-                                  />
-                                </div>
-
                                 {/* Accordion: editable fields, inline under the selected section */}
                                 {isSelected && (
                                   <div className="mt-3 border-t border-border pt-3">
@@ -866,6 +866,129 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
               </div>
 
             </div>
+          ) : activeTab === 'navigation' ? (
+            <div className="space-y-4">
+              {isMulti ? (
+                <>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">{t.pages.heading}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      {t.navigation.multiDescription}
+                    </p>
+                  </div>
+                  <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handlePageDragEnd}>
+                    <SortableContext items={pages.map((page) => page.id)} strategy={verticalListSortingStrategy}>
+                      <ul className="space-y-3">
+                        {pages.map((page) => (
+                          <SortableRow
+                            key={page.id}
+                            id={page.id}
+                            className={(isDragging) =>
+                              `rounded-md border border-border bg-card p-3 transition-shadow ${isDragging ? 'shadow-lg' : ''}`
+                            }
+                          >
+                            {({ attributes, listeners }) => (
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    aria-label={t.blocks.reorder}
+                                    className="-ml-1 shrink-0 cursor-grab touch-none text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
+                                    {...attributes}
+                                    {...listeners}
+                                  >
+                                    <GripVertical className="size-4" />
+                                  </button>
+                                  <Input
+                                    value={page.name}
+                                    onChange={(event) => handleRenamePage(page.id, event.target.value)}
+                                    aria-label={`${t.pages.namePlaceholder}: ${page.name}`}
+                                    placeholder={t.pages.namePlaceholder}
+                                    className="h-8 flex-grow"
+                                  />
+                                  <Button
+                                    type="button"
+                                    size="icon-sm"
+                                    variant="ghost"
+                                    aria-label={page.visible ? t.pages.makeUnroutable : t.pages.makeRoutable}
+                                    title={page.visible ? t.pages.routableTitle : t.pages.unroutableTitle}
+                                    onClick={() => handleToggleNavItemVisible(page.id)}
+                                  >
+                                    {page.visible ? <Globe className="size-4" /> : <GlobeLock className="size-4 text-muted-foreground" />}
+                                  </Button>
+                                </div>
+                                <div className="mt-2 grid grid-cols-[8.5rem_minmax(0,1fr)] gap-2">
+                                  <Select
+                                    value={!page.menu ? 'none' : page.menu.placement === 'footer' ? 'footer' : 'header'}
+                                    onValueChange={(value) => handlePageMenuPlacement(page.id, value as MenuPlacement)}
+                                  >
+                                    <SelectTrigger size="sm" aria-label={t.navigation.placementLabel} className="w-full">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="none">{t.navigation.none}</SelectItem>
+                                      <SelectItem value="header">{t.navigation.header}</SelectItem>
+                                      <SelectItem value="footer">{t.navigation.footer}</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Input
+                                    value={page.menu?.label ?? ''}
+                                    onChange={(event) => handleRelabelMenuItem(page.id, event.target.value)}
+                                    disabled={!page.menu}
+                                    aria-label={`${t.blocks.menu}: ${page.name}`}
+                                    placeholder={t.blocks.menuLabelPlaceholder}
+                                    className="h-8 min-w-0"
+                                  />
+                                </div>
+                              </>
+                            )}
+                          </SortableRow>
+                        ))}
+                      </ul>
+                    </SortableContext>
+                  </DndContext>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">{t.navigation.singleHeading}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      {t.navigation.singleDescription}
+                    </p>
+                  </div>
+                  <ul className="space-y-3">
+                    {singleSections.filter((section) => !isSinglePinned(section)).map((section) => (
+                      <li key={section.id} className="rounded-md border border-border p-3">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            size="icon-sm"
+                            variant="ghost"
+                            aria-label={section.menu ? t.blocks.removeFromMenu : t.blocks.addToMenu}
+                            title={section.menu ? t.blocks.inNavMenuTitle : t.blocks.notInNavMenuTitle}
+                            onClick={() => handleToggleSingleMenu(section.id)}
+                          >
+                            {section.menu ? <ToggleRight className="size-5 text-primary" /> : <ToggleLeft className="size-5 text-muted-foreground" />}
+                          </Button>
+                          <span className="min-w-0 flex-grow truncate text-sm font-medium text-foreground">
+                            {templateModule?.library[section.type]?.meta.label
+                              ?? section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/-/g, ' ')}
+                          </span>
+                        </div>
+                        <Input
+                          value={section.menu?.label ?? ''}
+                          onChange={(event) => handleRelabelMenuItem(section.id, event.target.value)}
+                          disabled={!section.menu}
+                          aria-label={`${t.blocks.menu}: ${section.type}`}
+                          placeholder={t.blocks.menuLabelPlaceholder}
+                          className="mt-2 h-8"
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
           ) : (
             <div className="space-y-6">
               <h3 className="text-sm font-semibold text-foreground">
@@ -882,7 +1005,7 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="shrink-0 border-t border-border bg-muted/40 p-6">
+        <div className="shrink-0 border-t border-border bg-muted/40 p-4">
           <div className="mb-3 flex h-4 items-center text-xs">
             {autoSaveStatus === 'saving' && (
               <span className="text-muted-foreground">{t.autosave.saving}</span>
@@ -1007,11 +1130,13 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
  */
 function SortableRow({
   id,
+  editorBlockId,
   disabled,
   className,
   children,
 }: {
   id: string;
+  editorBlockId?: string;
   disabled?: boolean;
   className?: string | ((isDragging: boolean) => string);
   children: (handle: {
@@ -1032,6 +1157,8 @@ function SortableRow({
   return (
     <li
       ref={setNodeRef}
+      id={editorBlockId ? `editor-block-${editorBlockId}` : undefined}
+      data-editor-block-id={editorBlockId}
       style={style}
       className={typeof className === 'function' ? className(isDragging) : className}
     >

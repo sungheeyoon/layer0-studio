@@ -55,14 +55,52 @@ interface EditorPreviewFrameProps {
  */
 function syncHeadStyles(targetDoc: Document) {
   const targetHead = targetDoc.head;
-  targetHead.querySelectorAll(`[${CLONE_MARKER}]`).forEach((n) => n.remove());
-  document.head
-    .querySelectorAll('style, link[rel="stylesheet"]')
-    .forEach((node) => {
-      const clone = node.cloneNode(true) as HTMLElement;
-      clone.setAttribute(CLONE_MARKER, '');
-      targetHead.appendChild(clone);
-    });
+  const sources = Array.from(document.head.querySelectorAll<HTMLElement>('style, link[rel="stylesheet"]'));
+  const existing = Array.from(targetHead.querySelectorAll<HTMLElement>(`[${CLONE_MARKER}]`));
+  const scrollTop = Math.max(targetDoc.documentElement.scrollTop, targetDoc.body.scrollTop);
+  const scrollLeft = Math.max(targetDoc.documentElement.scrollLeft, targetDoc.body.scrollLeft);
+
+  sources.forEach((source, index) => {
+    const current = existing[index];
+    const desired = source.cloneNode(true) as HTMLElement;
+    desired.setAttribute(CLONE_MARKER, '');
+
+    if (!current) {
+      targetHead.appendChild(desired);
+      return;
+    }
+
+    if (current.tagName !== desired.tagName) {
+      current.replaceWith(desired);
+      return;
+    }
+
+    // Reconcile in place. Removing every stylesheet before cloning the new set
+    // briefly collapses the iframe document; browsers clamp its scroll position
+    // to zero during that unstyled frame. Keeping unchanged nodes also avoids
+    // re-downloading linked CSS after an unrelated Next.js head update.
+    for (const attribute of Array.from(current.attributes)) {
+      if (!desired.hasAttribute(attribute.name)) current.removeAttribute(attribute.name);
+    }
+    for (const attribute of Array.from(desired.attributes)) {
+      if (current.getAttribute(attribute.name) !== attribute.value) {
+        current.setAttribute(attribute.name, attribute.value);
+      }
+    }
+    if (current.textContent !== desired.textContent) current.textContent = desired.textContent;
+  });
+
+  existing.slice(sources.length).forEach((node) => node.remove());
+
+  // CSS updates can legitimately change document height. Restore the user's
+  // position after layout settles instead of letting an intermediate short
+  // layout pull the preview back to the top.
+  requestAnimationFrame(() => {
+    targetDoc.documentElement.scrollTop = scrollTop;
+    targetDoc.documentElement.scrollLeft = scrollLeft;
+    targetDoc.body.scrollTop = scrollTop;
+    targetDoc.body.scrollLeft = scrollLeft;
+  });
 }
 
 export default function EditorPreviewFrame({
@@ -77,6 +115,7 @@ export default function EditorPreviewFrame({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const rootRef = useRef<Root | null>(null);
+  const renderedPageRef = useRef<string | undefined>(activePageId);
   const [ready, setReady] = useState(false);
   const [panel, setPanel] = useState({ w: 0, h: 0 });
 
@@ -174,6 +213,14 @@ export default function EditorPreviewFrame({
   useEffect(() => {
     if (!ready || !rootRef.current) return;
     const doc = iframeRef.current?.contentDocument;
+    const preserveScroll = renderedPageRef.current === activePageId;
+    const scrollTop = doc
+      ? Math.max(doc.documentElement.scrollTop, doc.body.scrollTop)
+      : 0;
+    const scrollLeft = doc
+      ? Math.max(doc.documentElement.scrollLeft, doc.body.scrollLeft)
+      : 0;
+    renderedPageRef.current = activePageId;
     if (doc) {
       Object.entries(themeVariables).forEach(([key, value]) => {
         doc.body.style.setProperty(key, String(value));
@@ -187,6 +234,16 @@ export default function EditorPreviewFrame({
         activePageId={activePageId}
       />,
     );
+    if (doc) {
+      requestAnimationFrame(() => {
+        const nextTop = preserveScroll ? scrollTop : 0;
+        const nextLeft = preserveScroll ? scrollLeft : 0;
+        doc.documentElement.scrollTop = nextTop;
+        doc.documentElement.scrollLeft = nextLeft;
+        doc.body.scrollTop = nextTop;
+        doc.body.scrollLeft = nextLeft;
+      });
+    }
   }, [
     ready,
     TemplateRenderer,

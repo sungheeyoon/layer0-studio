@@ -39,7 +39,6 @@ export async function saveContentAction(siteId: string, content: ContentModel, e
   return withUser(async (user, supabase) => {
     const useCase = createSiteWriteUseCase(supabase);
     const site = await useCase.saveContent(siteId, user.id, content, expectedUpdatedAt);
-    revalidatePath('/dashboard/editor');
     return { success: true as const, updatedAt: site.updatedAt };
   });
 }
