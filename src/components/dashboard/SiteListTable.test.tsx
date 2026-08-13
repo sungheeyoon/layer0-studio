@@ -20,6 +20,7 @@ const site: UserSite = {
   domain: 'onyu',
   status: 'active',
   content: { mode: 'single', templateKey: 'medical-clinic', globalStyles: {} as never, blocks: [] },
+  publishedContent: null,
   snapshot: { mode: 'single', templateKey: 'medical-clinic', globalStyles: {} as never, blocks: [] },
   publishedAt: '2026-08-11T00:00:00.000Z',
   createdAt: '2026-08-11T00:00:00.000Z',

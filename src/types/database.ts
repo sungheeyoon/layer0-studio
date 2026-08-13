@@ -23,9 +23,23 @@ export type UserSiteRow = {
   domain: string | null;
   status: 'draft' | 'active' | 'suspended';
   content: ContentModel;
+  published_content: ContentModel | null;
   snapshot: ContentModel;
   published_at: string | null;
   created_at: string;
+  updated_at: string;
+};
+
+/**
+ * The `published_sites` view (migration 029) — the only shape an anonymous
+ * visitor can read. `content` and `snapshot` are not columns of it.
+ */
+export type PublishedSiteRow = {
+  id: string;
+  site_name: string;
+  domain: string;
+  published_content: ContentModel;
+  published_at: string | null;
   updated_at: string;
 };
 

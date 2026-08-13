@@ -1,5 +1,10 @@
 import { ContentModel } from '../entities/template.entity';
-import { UserSite, CreateUserSiteDto, UpdateUserSiteDto } from '../entities/user-site.entity';
+import {
+  UserSite,
+  PublishedSite,
+  CreateUserSiteDto,
+  UpdateUserSiteDto,
+} from '../entities/user-site.entity';
 import { AssetUsage } from '../usecases/ports/asset-usage-collector.port';
 
 export interface IUserSiteRepository {
@@ -25,7 +30,17 @@ export interface IUserSiteRepository {
     usages: AssetUsage[],
     expectedUpdatedAt: string,
   ): Promise<UserSite>;
+  /**
+   * Version-guarded promotion of the working copy to the public copy. Atomic by
+   * necessity: the content copy and the swap of published asset references have
+   * to land together, or a visitor can catch the new JSON pointing at binaries
+   * the cleanup queue has already claimed (migration 029).
+   */
+  publishContent(id: string, expectedUpdatedAt: string): Promise<UserSite>;
   delete(id: string): Promise<void>;
+  /** Owner-scoped lookup — carries the draft. Used for domain-uniqueness checks. */
   findByDomain(domain: string): Promise<UserSite | null>;
+  /** Public read path. Reads the `published_sites` view, which has no draft column. */
+  findPublishedByDomain(domain: string): Promise<PublishedSite | null>;
   findByUserIdAndName(userId: string, name: string): Promise<UserSite | null>;
 }

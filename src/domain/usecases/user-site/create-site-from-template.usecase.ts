@@ -49,6 +49,8 @@ export class CreateSiteFromTemplateUseCase {
       domain: null,
       status: 'draft',
       content,
+      // Nothing is public until the owner publishes — see ADR-0017.
+      publishedContent: null,
       snapshot: template.content, // Original template snapshot
       publishedAt: null,
     });
@@ -65,6 +67,7 @@ export class CreateSiteFromTemplateUseCase {
       domain: input.domain ?? null,
       status: 'draft',
       content: input.content,
+      publishedContent: null,
       snapshot: input.content, // For custom sites, use initial JSON as snapshot
       publishedAt: null,
     });

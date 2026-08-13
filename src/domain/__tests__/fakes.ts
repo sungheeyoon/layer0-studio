@@ -1,5 +1,10 @@
 import { IUserSiteRepository } from '../repositories/user-site.repository';
-import { UserSite, CreateUserSiteDto, UpdateUserSiteDto } from '../entities/user-site.entity';
+import {
+  UserSite,
+  PublishedSite,
+  CreateUserSiteDto,
+  UpdateUserSiteDto,
+} from '../entities/user-site.entity';
 import { ContentModel, SingleContent } from '../entities/template.entity';
 import { TemplateError } from '../errors/template.error';
 import {
@@ -49,6 +54,7 @@ export function makeSite(overrides: Partial<UserSite> = {}): UserSite {
     domain: null,
     status: 'draft',
     content: json,
+    publishedContent: null,
     snapshot: json,
     publishedAt: null,
     createdAt: new Date().toISOString(),
@@ -115,6 +121,26 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return this.sites.find(s => s.domain === domain) ?? null;
   }
 
+  /**
+   * Mirrors the `published_sites` view: only published Sites, and only ever the
+   * published copy. A fake that returned `content` here would let a test pass
+   * while the real read path served a draft.
+   */
+  async findPublishedByDomain(domain: string): Promise<PublishedSite | null> {
+    const site = this.sites.find(
+      s => s.domain === domain && s.status === 'active' && s.publishedContent !== null,
+    );
+    if (!site || !site.publishedContent || !site.domain) return null;
+    return {
+      id: site.id,
+      siteName: site.siteName,
+      domain: site.domain,
+      content: site.publishedContent,
+      publishedAt: site.publishedAt,
+      updatedAt: site.updatedAt,
+    };
+  }
+
   async findByUserIdAndName(userId: string, name: string) {
     return this.sites.find(s => s.userId === userId && s.siteName === name) ?? null;
   }
@@ -145,6 +171,19 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     const idx = this.guardVersion(id, expectedUpdatedAt);
     this.lastUsages = usages;
     this.sites[idx] = { ...this.sites[idx], content, updatedAt: this.nextUpdatedAt() };
+    return this.sites[idx];
+  }
+
+  async publishContent(id: string, expectedUpdatedAt: string): Promise<UserSite> {
+    const idx = this.guardVersion(id, expectedUpdatedAt);
+    const site = this.sites[idx];
+    this.sites[idx] = {
+      ...site,
+      publishedContent: structuredClone(site.content),
+      status: 'active',
+      publishedAt: new Date().toISOString(),
+      updatedAt: this.nextUpdatedAt(),
+    };
     return this.sites[idx];
   }
 

@@ -15,6 +15,7 @@ const makeSite = (siteName: string, updatedAt: string): UserSite => ({
   domain: null,
   status: 'draft',
   content: { mode: 'single', templateKey: 'cafe-default', globalStyles: {} as never, blocks: [] },
+  publishedContent: null,
   snapshot: { mode: 'single', templateKey: 'cafe-default', globalStyles: {} as never, blocks: [] },
   publishedAt: null,
   createdAt: '2026-07-01T00:00:00.000Z',
