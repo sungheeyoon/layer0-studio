@@ -76,7 +76,7 @@ _Avoid_: globalStyles (the field name, fine in code), theme overrides, brand set
 ### Editing and serving
 
 **Editor**:
-The authenticated visual surface a User uses to modify their Site — edit Values, reorder Blocks or Pages, toggle `visible` / menu membership. Users **cannot create or delete** Pages or Blocks; the information architecture is template-author-defined.
+The authenticated visual surface a User uses to modify their Site — edit Values, reorder Blocks or Pages, toggle `visible` / menu membership. Its Content, Navigation, and Design tabs are separate concerns: a Multi Site's Page switcher selects the Page being edited, while Navigation owns Page order/name/menu placement. Selecting a Block in the live preview focuses the same Block in Content. Users **cannot create or delete** Pages or Blocks; the information architecture is template-author-defined.
 _Avoid_: builder, designer, dashboard.
 
 **Renderer**:
@@ -137,7 +137,7 @@ _Avoid_: account deletion, account removal, deactivation, GDPR delete.
 ## Example dialogue
 
 > **Dev:** "Customer's confused — they updated their menu but their **Site** still shows the old items."
-> **PM:** "Did they save in the **Editor**? Auto-save fires a few seconds after they stop typing, and leaving flushes whatever is pending — so an edit only goes missing if the save itself failed. Did they see an error?"
+> **PM:** "Did they save in the **Editor**? Auto-save fires 10 seconds after they stop editing, with a 15-second maximum wait from the oldest pending edit; leaving flushes whatever is pending. Did they see an error?"
 > **Dev:** "They saved. But the **Site** is **Live** — does the **Renderer** cache?"
 > **PM:** "The Live **Renderer** reads fresh **Site** content per request. Different question — is this a **Site** from the cafe **Template**, or a custom one?"
 > **Dev:** "From the cafe **Template**. The menu's an `array`-typed **Field**, so the items live in that Field's **Value** on the menu **Block**."

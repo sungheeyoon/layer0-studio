@@ -42,6 +42,8 @@ flowchart LR
 
 Site 는 **Single**(한 스크롤, `blocks[]`)과 **Multi**(라우팅되는 `pages[]` + 모든 Page 를 감싸는 `chrome`) 두 Site Type 으로 나뉘며 생성 시 `mode` 로 고정됩니다 — 진화하지 않습니다 (`ContentModel` 구조적 유니온, [ADR-0007](docs/adr/0007-single-multi-site-type-structural-union.md)). Block component 의 `fieldsSchema` 가 입력 구조의 진실이고, Site 의 Block 은 사용자 입력 **Value** 만 저장합니다 ([ADR-0016](docs/adr/0016-block-rename-and-field-value-split.md)).
 
+Editor 는 콘텐츠·내비게이션·디자인을 분리해 편집합니다. Multi Site 는 콘텐츠 탭에서 Page 를 전환하고 해당 Page 의 Block 만 다루며, 내비게이션 탭에서 Page 순서·이름·노출 위치를 관리합니다. 미리보기의 Block 을 누르면 대응하는 편집 폼으로 이동하고, 콘텐츠 재렌더·자동저장 중에도 같은 Page 의 미리보기 스크롤을 보존합니다. 자동저장은 입력 중단 10초 후 실행되며 연속 편집은 최초 미저장 변경부터 최대 15초 안에 저장 요청으로 넘어갑니다 ([ADR-0015](docs/adr/0015-edit-loss-paths-exhaustive-defense.md)).
+
 게시된 Site 의 정식 주소는 `/site/<slug>`입니다. 서브도메인 서빙은 제품 요구와 운영 조건이 구체화될 때 새로 검토하며, 현재 로드맵에서는 무기한 보류합니다 ([ADR-0009](docs/adr/0009-subdomain-public-serving.md)).
 
 새 Template 은 Claude Code 의 `new-template` 스킬이 자연어 brief 로부터 자급식 디렉터리(토큰·라이브러리·프리셋·렌더러)를 만들고 verify 게이트까지 통과시키는 방식으로 저작합니다.

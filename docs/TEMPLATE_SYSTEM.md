@@ -914,6 +914,17 @@ Multi Template은 `pages[]`에 `{ id, slug, visible, name, menu?, blocks:[...] }
 | Admin UI (manual JSON 편집) | `src/app/admin/templates/TemplateEditorPanel.tsx` |
 | Composition preview (capture 용) | `src/app/preview/preset/[...key]/page.tsx` |
 | 사용자 에디터 | `src/components/editor/DynamicEditor.tsx` |
+| 에디터 미리보기 iframe (선택·스크롤 보존) | `src/components/editor/EditorPreviewFrame.tsx` |
+| 자동저장 스케줄 (`idle = 10s`, `maxWait = 15s`) | `src/lib/editor/autosave-schedule.ts` |
+
+### 11.1 사용자 에디터의 현재 편집 경계
+
+- 상위 탭은 **콘텐츠 / 내비게이션 / 디자인**으로 분리한다. 세 탭은 같은 고정 폭 패널을 공유하고, 스크롤바 유무에 따른 폭 흔들림은 stable scrollbar gutter로 막는다.
+- **Single**: 콘텐츠 탭에서 일반 Block을 drag-and-drop으로 재정렬한다. `nav`와 `footer` Block은 각각 위·아래에 고정한다. 내비게이션 탭은 각 Block의 메뉴 포함 여부와 라벨만 관리한다.
+- **Multi**: 콘텐츠 상단의 Page switcher로 활성 Page를 고르고, 그 Page의 Block만 drag-and-drop으로 재정렬한다. Chrome header/footer는 보이되 해당 Page 목록에서는 고정한다. 내비게이션 탭에서 Page 순서·이름·라우팅 가능 여부·header/footer 메뉴 배치·메뉴 라벨을 관리한다. `pages[]` 순서가 메뉴 투영 순서다.
+- 미리보기에서 Block을 누르면 콘텐츠 탭으로 전환하고 해당 Block 폼을 펼쳐 중앙으로 스크롤한다. 미리보기 안 링크는 편집 중 이동하지 않으며, Page 전환은 Page switcher가 담당한다.
+- 콘텐츠나 저장 상태가 갱신돼 같은 Page를 다시 렌더할 때 미리보기 iframe의 스크롤 위치를 복원한다. 다른 Page로 전환한 경우에만 새 Page 맨 위에서 시작한다.
+- 자동저장은 마지막 편집 후 10초 idle에 실행하며, 연속 편집은 최초 미저장 변경부터 15초 `maxWait`을 넘기지 않는다. 저장 중 새 변경은 요청을 무한히 쌓지 않고 최신 대기 편집 한 번으로 합친다. 상세한 손실 방어와 flush 정책은 ADR-0015가 정본이다.
 
 ---
 
@@ -922,7 +933,7 @@ Multi Template은 `pages[]`에 `{ id, slug, visible, name, menu?, blocks:[...] }
 - **시각적 WYSIWYG preset 빌더** — 코드-PR 워크플로우가 의도된 게이트 (ADR-0002).
 - **사용자별 커스텀 Template 업로드** — 보안·격리 비용 큼.
 - **크로스-Template Block 공유** (`src/blocks/` 공용 풀) — ADR-0001 위배. 별도 RFC 없이는 X.
-- **사용자 에디터에서 Block 추가 / 삭제·순서 변경** — 데이터 모델은 가능하지만 UX·검증 추가 비용. 현재 1 차는 preset 구조 고정.
+- **사용자 에디터에서 Block / Page 추가·삭제** — 순서 변경은 지원하지만 구조의 생성·삭제는 여전히 Template 저작자가 Preset에서 정의한다.
 - **Multi 저작 편의 + 디렉터리 재편** — Multi 사이트는 출시됨 (ADR-0007: renderMultiSite + `[[...slug]]` nav). Single/Multi 모두 `preset.content` 의 `ContentModel` 유니온을 손으로 작성한다 (§2.2, §9-H; 예전 `composition` 축약형은 제거됨). 남은 미래 작업은 (1) 저작 보일러플레이트를 줄이는 헬퍼와 (2) ADR-0001 footnote 의 `pages/<page>/blocks/` **디렉터리** 재편(렌더러 코드 구조)이다.
 
 ---
