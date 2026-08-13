@@ -100,19 +100,26 @@ export default function SiteListTable({ sites, empty, onHoverSite, onConfigure }
                     <SettingsIcon className="h-4 w-4" />
                   </Button>
                 )}
-                {isPublished && site.domain ? (
+                {/* View and Preview answer different questions since ADR-0017:
+                    View opens the *published* copy, Preview opens the *draft*.
+                    A published Site therefore still needs Preview — it is the
+                    only full-size view of edits that are saved but not live.
+
+                    `/preview/site/<id>`, not `/preview/<id>` — the latter
+                    previews a *Template* catalog row, so passing a Site id
+                    looked a `user_sites` id up in `templates` and 404'd. */}
+                {isPublished && site.domain && (
                   <Button asChild variant="outline" size="sm">
                     <a href={`/site/${site.domain}`} target="_blank" rel="noopener noreferrer">
                       {t.common.view}
                     </a>
                   </Button>
-                ) : (
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/preview/${site.id}`} target="_blank">
-                      {t.common.preview}
-                    </Link>
-                  </Button>
                 )}
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/preview/site/${site.id}`} target="_blank">
+                    {t.common.preview}
+                  </Link>
+                </Button>
                 <Button asChild size="sm">
                   <Link href={`/dashboard/editor?siteId=${site.id}`}>{t.common.edit}</Link>
                 </Button>
