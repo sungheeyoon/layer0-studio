@@ -100,7 +100,8 @@ Route groups make URLs non-obvious from the file tree, so this table is authorit
 | `/dashboard/settings` | Account settings — change password, Account Erasure |
 | `/admin`, `/admin/templates` | Admin area (**Templates only**) — requires `app_metadata.role === 'admin'`. `/admin` redirects to `/admin/templates` |
 | `/site/[domain]/[[...slug]]` | Public published Site renderer (empty slug = home page) |
-| `/preview/[id]/[[...slug]]` | Preview a Site before publishing |
+| `/preview/[id]/[[...slug]]` | Preview a **Template** catalog row (linked from the catalogs). Not for Sites — a Site id here resolves in `templates` and 404s |
+| `/preview/site/[id]/[[...slug]]` | Preview a **Site's draft** at full size, owner-only. The only such surface — the public renderer serves `publishedContent` ([ADR-0017](./docs/adr/0017-explicit-save-and-draft-published-split.md)) |
 | `/preview/preset/[...key]` | Preview a Template preset straight from code (used by the authoring loop) |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts`, `src/app/robots.ts` |
 | `/api/cron/cleanup-assets` | Orphan asset cleanup cron. Bearer `CRON_SECRET`. `0 3 * * *` (Hobby plan = 1 cron/day) |

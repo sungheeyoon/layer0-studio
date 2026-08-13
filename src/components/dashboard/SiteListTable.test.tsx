@@ -43,4 +43,32 @@ describe('SiteListTable responsive interaction', () => {
     fireEvent.click(row!);
     expect(onSelect).toHaveBeenCalledTimes(2);
   });
+
+  // The link used to be `/preview/<site.id>`, which is the *Template* preview
+  // route — it looked a `user_sites` id up in `templates`, so Preview 404'd for
+  // every Site, published or not.
+  it('points Preview at the Site preview route, not the Template one', () => {
+    render(
+      <I18nProvider locale="ko" dictionary={ko}>
+        <SiteListTable sites={[site]} empty={null} />
+      </I18nProvider>,
+    );
+    const preview = screen.getByRole('link', { name: ko.dashboard.common.preview });
+    expect(preview).toHaveAttribute('href', '/preview/site/site-1');
+  });
+
+  // Since ADR-0017 the two buttons answer different questions — View opens the
+  // published copy, Preview opens the draft — so a published Site needs both.
+  it('offers both View and Preview once the Site is published', () => {
+    render(
+      <I18nProvider locale="ko" dictionary={ko}>
+        <SiteListTable sites={[site]} empty={null} />
+      </I18nProvider>,
+    );
+    expect(screen.getByRole('link', { name: ko.dashboard.common.view })).toHaveAttribute(
+      'href',
+      '/site/onyu',
+    );
+    expect(screen.getByRole('link', { name: ko.dashboard.common.preview })).toBeInTheDocument();
+  });
 });
