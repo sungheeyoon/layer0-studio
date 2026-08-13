@@ -14,11 +14,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const supabase = await createClient();
+  // `published_sites`, not `user_sites`: the sitemap must enumerate the Pages a
+  // visitor can actually reach. Reading the draft here would list Pages that
+  // only exist in the owner's unpublished edit (migration 029).
   const { data, error } = await supabase
-    .from('user_sites')
-    .select('domain, published_at, content')
-    .eq('status', 'active')
-    .not('domain', 'is', null)
+    .from('published_sites')
+    .select('domain, published_at, published_content')
     .order('published_at', { ascending: false })
     .limit(500);
 
@@ -31,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const row of data ?? []) {
     const base = `${SITE_URL}/site/${row.domain}`;
     const lastModified = row.published_at ?? now;
-    const content = row.content as ContentModel | null;
+    const content = row.published_content as ContentModel | null;
 
     if (content && isMultiContent(content)) {
       // Every routable (visible) Page gets a URL: the first page = home (base),

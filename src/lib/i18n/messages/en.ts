@@ -394,17 +394,36 @@ export const en: Messages = {
       INSECURE_URL: 'An http:// address may be blocked by some browsers.',
       BACKGROUND_POLARITY_FLIPPED: "This template's text colours are tuned for its original background brightness and do not follow. Text may be hard to read.",
     },
-    autosave: {
+    saveStatus: {
       saving: 'Saving…',
       saved: '✓ Saved',
-      failed: 'Auto-save failed — save manually',
+      failed: 'Save failed — please try again',
       unsaved: '● Unsaved changes',
+      unpublished: 'Saved · not published yet',
+    },
+    // Shown on re-entry when a saved draft exists that visitors cannot see.
+    restoreDraft: {
+      title: 'You have saved changes',
+      bodyPublished: 'This site has changes you saved but never published. Keep editing them, or discard them and go back to what visitors see now.',
+      bodyNeverPublished: 'This site has changes you saved earlier. Keep editing them, or discard them and go back to the original template.',
+      keep: 'Keep editing',
+      discard: 'Discard and revert',
+    },
+    // Guards in-app navigation only. Closing the tab and the browser Back
+    // button are deliberately out of scope — see ADR-0017.
+    leaveGuard: {
+      title: 'You have unsaved changes',
+      body: 'If you leave now, your unsaved changes will be lost.',
+      stay: 'Keep editing',
+      leave: 'Leave without saving',
     },
     actions: {
       publish: 'Publish Changes',
       publishing: 'Publishing...',
       saving: 'Saving...',
       saveDraft: 'Save Draft',
+      discardDraft: 'Discard changes',
+      discarding: 'Reverting...',
     },
     published: {
       line1: 'Published!',

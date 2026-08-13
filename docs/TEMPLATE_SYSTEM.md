@@ -915,7 +915,7 @@ Multi Template은 `pages[]`에 `{ id, slug, visible, name, menu?, blocks:[...] }
 | Composition preview (capture 용) | `src/app/preview/preset/[...key]/page.tsx` |
 | 사용자 에디터 | `src/components/editor/DynamicEditor.tsx` |
 | 에디터 미리보기 iframe (선택·스크롤 보존) | `src/components/editor/EditorPreviewFrame.tsx` |
-| 자동저장 스케줄 (`idle = 10s`, `maxWait = 15s`) | `src/lib/editor/autosave-schedule.ts` |
+| 미저장 변경 공유 스토어 (이탈 확인용, ADR-0017) | `src/lib/editor/unsaved-changes.ts` |
 
 ### 11.1 사용자 에디터의 현재 편집 경계
 
@@ -924,7 +924,7 @@ Multi Template은 `pages[]`에 `{ id, slug, visible, name, menu?, blocks:[...] }
 - **Multi**: 콘텐츠 상단의 Page switcher로 활성 Page를 고르고, 그 Page의 Block만 drag-and-drop으로 재정렬한다. Chrome header/footer는 보이되 해당 Page 목록에서는 고정한다. 내비게이션 탭에서 Page 순서·이름·라우팅 가능 여부·header/footer 메뉴 배치·메뉴 라벨을 관리한다. `pages[]` 순서가 메뉴 투영 순서다.
 - 미리보기에서 Block을 누르면 콘텐츠 탭으로 전환하고 해당 Block 폼을 펼쳐 중앙으로 스크롤한다. 미리보기 안 링크는 편집 중 이동하지 않으며, Page 전환은 Page switcher가 담당한다.
 - 콘텐츠나 저장 상태가 갱신돼 같은 Page를 다시 렌더할 때 미리보기 iframe의 스크롤 위치를 복원한다. 다른 Page로 전환한 경우에만 새 Page 맨 위에서 시작한다.
-- 자동저장은 마지막 편집 후 10초 idle에 실행하며, 연속 편집은 최초 미저장 변경부터 15초 `maxWait`을 넘기지 않는다. 저장 중 새 변경은 요청을 무한히 쌓지 않고 최신 대기 편집 한 번으로 합친다. 상세한 손실 방어와 flush 정책은 ADR-0015가 정본이다.
+- **자동저장은 없다.** 작업본(`content`)은 사용자가 "임시 저장"을 누를 때만 바뀌고, 공개본(`published_content`)은 "변경 사항 게시"로만 바뀐다. "✓ 저장됨"은 화면에 보이는 편집 revision이 서버에 확인됐을 때만 뜬다. 앱 내 이동은 이탈 확인을 띄우고, 탭 닫기·브라우저 뒤로가기는 의도적으로 보장하지 않는다. 저장 계약의 정본은 ADR-0017이다.
 
 ---
 

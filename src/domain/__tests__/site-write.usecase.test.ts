@@ -117,6 +117,74 @@ describe('SiteWriteUseCase — version guard', () => {
 });
 
 // --- saveContent validation gate (#56) ------------------------------------------
+// --- Draft / published split (ADR-0017) --------------------------------------
+//
+// The behaviour these cover is the one the old model got wrong: a save used to
+// be visible to the world the moment the Site was `active`.
+describe('SiteWriteUseCase — draft and published copies', () => {
+  const edited = (): ContentModel => {
+    const json = asSingle(makeContent());
+    json.templateKey = 'edited-key';
+    return json;
+  };
+
+  it('saveContent leaves the published copy alone', async () => {
+    const { uc, repo, token } = setup({ status: 'active' });
+    await uc.publish('site-1', 'user-1', token);
+    const published = repo.sites[0].publishedContent;
+    const afterPublish = repo.sites[0].updatedAt;
+
+    const saved = await uc.saveContent('site-1', 'user-1', edited(), afterPublish);
+
+    expect(asSingle(saved.content).templateKey).toBe('edited-key');
+    expect(saved.publishedContent).toEqual(published);
+  });
+
+  it('publish promotes the current draft to the published copy', async () => {
+    const { uc, token } = setup({ status: 'draft' });
+    const saved = await uc.saveContent('site-1', 'user-1', edited(), token);
+
+    const result = await uc.publish('site-1', 'user-1', saved.updatedAt);
+
+    expect(result.status).toBe('active');
+    expect(result.publishedContent).toEqual(result.content);
+    expect(asSingle(result.publishedContent!).templateKey).toBe('edited-key');
+  });
+
+  it('discardDraft restores the published copy and re-derives its usages', async () => {
+    const usages: AssetUsage[] = [{ assetId: 'asset-1', slotKey: 'hero.image' }];
+    const { uc, repo, collector, token } = setup({ status: 'active' }, [], usages);
+    await uc.publish('site-1', 'user-1', token);
+    const publishedCopy = repo.sites[0].publishedContent;
+    const saved = await uc.saveContent('site-1', 'user-1', edited(), repo.sites[0].updatedAt);
+
+    const result = await uc.discardDraft('site-1', 'user-1', saved.updatedAt);
+
+    expect(result.content).toEqual(publishedCopy);
+    // The restored content is validated and re-collected like any other write —
+    // not written straight through as trusted.
+    expect(collector.collected.at(-1)).toEqual(publishedCopy);
+    expect(repo.lastUsages).toEqual(usages);
+  });
+
+  it('discardDraft falls back to the creation snapshot when never published', async () => {
+    const { uc, repo, token } = setup({ status: 'draft' });
+    const snapshot = repo.sites[0].snapshot;
+    const saved = await uc.saveContent('site-1', 'user-1', edited(), token);
+
+    const result = await uc.discardDraft('site-1', 'user-1', saved.updatedAt);
+
+    expect(result.content).toEqual(snapshot);
+  });
+
+  it('discardDraft: stale token throws STALE_VERSION', async () => {
+    const { uc, token } = setup({ status: 'draft' });
+    await uc.saveContent('site-1', 'user-1', edited(), token);
+    await expect(uc.discardDraft('site-1', 'user-1', token))
+      .rejects.toMatchObject({ code: 'STALE_VERSION' });
+  });
+});
+
 describe('SiteWriteUseCase.saveContent — validation gate', () => {
   it('rejects with INVALID_TEMPLATE_JSON and attaches the issues', async () => {
     const issues = [{ code: 'INVALID_COLOR_FIELD', message: 'not hex', path: 'sections[0].fields.accent' }];

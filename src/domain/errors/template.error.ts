@@ -8,6 +8,7 @@ export type TemplateErrorCode =
   | 'INVALID_DOMAIN'
   | 'DOMAIN_TAKEN'
   | 'NAME_TAKEN'
+  | 'NO_PUBLISHED_CONTENT'
   | 'UNSUPPORTED_FIELD_TYPE'
   | 'UNKNOWN';
 

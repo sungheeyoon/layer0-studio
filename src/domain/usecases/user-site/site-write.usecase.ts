@@ -1,6 +1,6 @@
 import { IUserSiteRepository } from '../../repositories/user-site.repository';
 import { ContentModel } from '../../entities/template.entity';
-import { UserSite, validateDomainSlug } from '../../entities/user-site.entity';
+import { UserSite, draftBaseline, validateDomainSlug } from '../../entities/user-site.entity';
 import { TemplateError } from '../../errors/template.error';
 import { SiteContentValidator } from '../ports/site-content-validator.port';
 import { AssetUsageCollector } from '../ports/asset-usage-collector.port';
@@ -70,18 +70,43 @@ export class SiteWriteUseCase {
     return this.userSiteRepo.update(siteId, { siteName }, expectedUpdatedAt);
   }
 
-  /** Publish the Site (status → active). */
+  /**
+   * Publish: copy the working content to the public copy (status → active).
+   *
+   * Before migration 029 this only flipped `status`, which meant the *first*
+   * publish was the only one that did anything — after it, every save was
+   * already live. Promotion is now the whole operation, and it is the only
+   * write that touches `publishedContent`.
+   */
   async publish(
     siteId: string,
     userId: string,
     expectedUpdatedAt: string,
   ): Promise<UserSite> {
     await this.loadOwned(siteId, userId);
-    return this.userSiteRepo.update(
-      siteId,
-      { status: 'active', publishedAt: new Date().toISOString() },
-      expectedUpdatedAt,
-    );
+    return this.userSiteRepo.publishContent(siteId, expectedUpdatedAt);
+  }
+
+  /**
+   * Throw the saved-but-unpublished draft away and reset the working copy to
+   * what visitors currently see (or to the Template preset, for a Site that has
+   * never been published).
+   *
+   * Deliberately routed through the normal content write rather than a bespoke
+   * RPC: the restored content still has to be validated and still has to
+   * re-derive asset usages, and duplicating that would be a second way to write
+   * content — the exact thing ADR-0015 §1 says not to build.
+   */
+  async discardDraft(
+    siteId: string,
+    userId: string,
+    expectedUpdatedAt: string,
+  ): Promise<UserSite> {
+    const site = await this.loadOwned(siteId, userId);
+    const baseline = draftBaseline(site);
+    await this.validate(baseline);
+    const usages = await this.assetUsageCollector.collect(baseline);
+    return this.userSiteRepo.updateContent(siteId, baseline, usages, expectedUpdatedAt);
   }
 
   /** Unpublish the Site (status → draft). */

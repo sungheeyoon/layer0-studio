@@ -12,22 +12,33 @@ import {
   createAssetUploadUseCase,
 } from '@/lib/di/asset';
 import { ContentModel } from '@/domain/entities/template.entity';
+import { EditorSite, toEditorSite } from '@/domain/entities/user-site.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { revalidatePath } from 'next/cache';
 import { withUser } from '@/lib/actions/server-action';
 
-export async function loadSiteAction(siteId: string) {
+/**
+ * Load a Site for the editor.
+ *
+ * Returns an `EditorSite`, not the `UserSite`: the published copy and the
+ * creation snapshot are whole ContentModels the browser never renders, and
+ * shipping all three tripled the prop the editor page serialises. The one thing
+ * the editor needs from the published copy — whether a saved draft is sitting
+ * unpublished — comes across as a boolean.
+ */
+export async function loadSiteAction(siteId: string): Promise<EditorSite | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const useCase = createGetUserSiteUseCase(supabase);
 
   try {
     const site = await useCase.execute(siteId);
-    if (site && user && site.userId !== user.id) {
+    if (!site) return null;
+    if (user && site.userId !== user.id) {
       console.warn('[loadSiteAction] FORBIDDEN: user %s attempted to access site %s', user?.id, siteId);
       return null;
     }
-    return site;
+    return toEditorSite(site);
   } catch (err) {
     if (err instanceof TemplateError) return null;
     console.error('[loadSiteAction] unexpected error for site %s:', siteId, err);
@@ -40,6 +51,22 @@ export async function saveContentAction(siteId: string, content: ContentModel, e
     const useCase = createSiteWriteUseCase(supabase);
     const site = await useCase.saveContent(siteId, user.id, content, expectedUpdatedAt);
     return { success: true as const, updatedAt: site.updatedAt };
+  });
+}
+
+/**
+ * Throw away the saved-but-unpublished draft and reset the working copy to the
+ * live Site (or, if it was never published, to the Template preset it came
+ * from). Returns the restored content so the editor can adopt it in place —
+ * a full reload would be the only other way to get the editor's in-memory copy
+ * back in step with the row.
+ */
+export async function discardDraftAction(siteId: string, expectedUpdatedAt: string) {
+  return withUser(async (user, supabase) => {
+    const useCase = createSiteWriteUseCase(supabase);
+    const site = await useCase.discardDraft(siteId, user.id, expectedUpdatedAt);
+    revalidatePath('/dashboard/editor');
+    return { success: true as const, content: site.content, updatedAt: site.updatedAt };
   });
 }
 
