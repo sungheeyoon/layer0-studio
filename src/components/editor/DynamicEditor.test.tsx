@@ -135,6 +135,12 @@ describe('DynamicEditor information architecture', () => {
     expect(screen.queryByRole('tablist', { name: ko.editor.pages.switcherLabel })).toBeNull();
   });
 
+  it('reserves the editor scrollbar gutter so short and long Pages keep the same content width', () => {
+    renderEditor();
+
+    expect(screen.getByTestId('editor-scroll-region')).toHaveClass('[scrollbar-gutter:stable]');
+  });
+
   it('shows reorder handles only for Blocks inside the active Multi Page', async () => {
     const user = userEvent.setup();
     renderEditor();

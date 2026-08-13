@@ -668,7 +668,10 @@ export default function DynamicEditor({ site }: DynamicEditorProps) {
           </TabsList>
         </Tabs>
 
-        <div className="flex-grow overflow-y-auto p-4">
+        <div
+          data-testid="editor-scroll-region"
+          className="flex-grow overflow-y-auto p-4 [scrollbar-gutter:stable]"
+        >
           {activeTab === 'content' ? (
             <div className="space-y-6">
               {/* Multi Page switcher stays in Content; settings live in Navigation. */}
