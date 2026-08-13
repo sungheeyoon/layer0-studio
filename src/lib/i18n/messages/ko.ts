@@ -86,8 +86,8 @@ export const ko = {
       titleLine1: '템플릿으로',
       titleEmphasis: '코드 없이',
       titleLine3: '웹사이트를 만드세요.',
-      description:
-        '템플릿을 고르고, 콘텐츠를 바꾸고, 즉시 배포하세요. 코드 없이 완성도 높은 디지털 경험을 만듭니다.',
+      descriptionLine1: '템플릿을 고르고, 콘텐츠를 바꾸고, 즉시 배포하세요.',
+      descriptionLine2: '코드 없이 완성도 높은 디지털 경험을 만듭니다.',
       previousTemplate: '이전 템플릿',
       nextTemplate: '다음 템플릿',
       pauseCarousel: '자동 전환 멈추기',
@@ -111,8 +111,8 @@ export const ko = {
     editorPreview: {
       title: '시각적으로 편집하세요.',
       titleEmphasis: '무엇이든 바꾸세요.',
-      description:
-        '텍스트·이미지·레이아웃을 실시간으로 수정하세요. 복잡한 메뉴나 코딩이 필요 없습니다. 직관적인 에디터로 사이트의 모든 디테일을 직접 제어합니다.',
+      descriptionLine1: '텍스트·이미지·레이아웃을 실시간으로 수정하세요.',
+      descriptionLine2: '복잡한 메뉴나 코딩이 필요 없습니다. 직관적인 에디터로 사이트의 모든 디테일을 직접 제어합니다.',
       experienceLabel: '경험',
       experienceValue: '실시간 편집',
       feedbackLabel: '피드백',
@@ -234,7 +234,8 @@ export const ko = {
     },
     projects: {
       title: '프로젝트 목록',
-      description: '만든 사이트를 한곳에서 관리하세요. 이름과 사이트 주소를 바꾸거나 게시·중단·삭제할 수 있어요.',
+      descriptionLine1: '만든 사이트를 한곳에서 관리하세요.',
+      descriptionLine2: '이름과 사이트 주소를 바꾸거나 게시·중단·삭제할 수 있어요.',
       lastSync: '최종 동기화',
       searchPlaceholder: '프로젝트 검색...',
       noProjects: '아직 만든 프로젝트가 없어요. 템플릿을 골라 첫 사이트를 만들어 보세요.',

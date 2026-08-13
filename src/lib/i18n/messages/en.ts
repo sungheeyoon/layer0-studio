@@ -83,8 +83,8 @@ export const en: Messages = {
       titleLine1: 'Build Websites',
       titleEmphasis: 'Without Code',
       titleLine3: 'Using Templates.',
-      description:
-        'Choose a template, customize your content, and launch instantly. High-fidelity digital experiences with no code required.',
+      descriptionLine1: 'Choose a template, customize your content, and launch instantly.',
+      descriptionLine2: 'High-fidelity digital experiences with no code required.',
       previousTemplate: 'Previous template',
       nextTemplate: 'Next template',
       pauseCarousel: 'Pause automatic rotation',
@@ -108,8 +108,8 @@ export const en: Messages = {
     editorPreview: {
       title: 'Edit Visually.',
       titleEmphasis: 'Change Everything.',
-      description:
-        'Modify text, images, and layouts in real-time. No complex menus or coding required. Our intuitive editor gives you direct control over every detail of your site.',
+      descriptionLine1: 'Modify text, images, and layouts in real-time.',
+      descriptionLine2: 'No complex menus or coding required. Our intuitive editor gives you direct control over every detail of your site.',
       experienceLabel: 'Experience',
       experienceValue: 'Real-time Editing',
       feedbackLabel: 'Feedback',
@@ -231,7 +231,8 @@ export const en: Messages = {
     },
     projects: {
       title: 'Projects',
-      description: "Manage all the sites you've built in one place. Rename them, set a site address, or publish, unpublish, and delete.",
+      descriptionLine1: "Manage all the sites you've built in one place.",
+      descriptionLine2: 'Rename them, set a site address, or publish, unpublish, and delete.',
       lastSync: 'Last Sync',
       searchPlaceholder: 'Search projects...',
       noProjects: "No projects yet. Pick a template to build your first site.",

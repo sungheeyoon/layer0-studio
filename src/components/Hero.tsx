@@ -70,8 +70,9 @@ export default function Hero({
           <br />
           {copy.titleLine3}
         </h1>
-        <p className="mt-5 max-w-xl text-balance text-body text-muted-foreground lg:text-left">
-          {copy.description}
+        <p className="mt-5 text-body text-muted-foreground lg:text-left">
+          <span className="block sm:whitespace-nowrap">{copy.descriptionLine1}</span>
+          <span className="block sm:whitespace-nowrap">{copy.descriptionLine2}</span>
         </p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
           <Button asChild size="lg">

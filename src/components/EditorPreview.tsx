@@ -19,11 +19,12 @@ export default function EditorPreview({
         <div className="mb-12 grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <h2 className="text-heading">
-              {t.title}{" "}
-              <span className="text-muted-foreground">{t.titleEmphasis}</span>
+              <span className="block">{t.title}</span>
+              <span className="block text-muted-foreground">{t.titleEmphasis}</span>
             </h2>
-            <p className="mt-4 max-w-sm text-body text-muted-foreground">
-              {t.description}
+            <p className="mt-4 text-body text-muted-foreground">
+              <span className="block sm:whitespace-nowrap">{t.descriptionLine1}</span>
+              <span className="block lg:whitespace-nowrap">{t.descriptionLine2}</span>
             </p>
             <div className="mt-8 grid grid-cols-2 gap-6">
               <div>
