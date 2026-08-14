@@ -1,84 +1,104 @@
 # Layer0 Studio
 
-> 노코드 웹사이트 빌더 — 비개발자가 Template 을 골라 시각적으로 편집하고 공개 URL로 게시하는 SaaS 플랫폼.
+템플릿을 골라 콘텐츠를 바꾸고, 원하는 주소로 게시할 수 있는 노코드 웹사이트 빌더입니다.
 
-- 🔗 **Live**: https://layer0-studio.vercel.app
+[Layer0 Studio 바로가기](https://layer0-studio.vercel.app)
 
-**Stack**: Next.js 16 (App Router) · TypeScript · Supabase (Auth/DB/Storage) · Tailwind CSS v4 · i18n (ko/en) · Vercel
+카페, 병원, 학원, 웨딩 등 업종별 템플릿에서 시작합니다. 텍스트와 이미지, 색상, 메뉴 구성을 편집한 뒤 `/site/<주소>` 형태의 공개 사이트로 게시할 수 있습니다. 한 화면으로 이어지는 사이트와 여러 페이지로 나뉜 사이트를 모두 지원합니다.
 
----
+## 사용 흐름
 
-## 핵심 설계 개선
+1. 템플릿을 선택해 내 사이트를 만듭니다.
+2. 에디터에서 콘텐츠, 메뉴, 디자인을 수정하고 미리보기로 결과를 확인합니다.
+3. 작업을 이어갈 필요가 있으면 **임시 저장**합니다.
+4. 방문자에게 보여줄 준비가 끝나면 **변경 사항 게시**를 누릅니다.
 
-| 문제 | Before → After | 결정 |
-|---|---|---|
-| 게시가 `status` 플래그였고 공개 렌더러가 편집 중인 작업본을 직접 읽고 있었음 — 첫 게시 이후 모든 저장이 곧바로 공개 사이트에 반영 | 편집 중 내용의 **공개 노출 → 차단**<br>"변경 사항 게시"가 **무의미 → 실제 승격**<br>자동저장 인프라 **4개 모듈 → 0개** | [ADR-0017](docs/adr/0017-explicit-save-and-draft-published-split.md) |
-| `SECURITY DEFINER` 함수 전부가 EXECUTE 권한을 회수한 적이 없어 PostgREST 로 직접 호출 가능 — RLS 는 우회됨 | 타 사용자 사이트 **덮어쓰기·삭제 가능 → 차단**<br>호출 롤 **PUBLIC → 함수별 1개 롤** | [마이그레이션 028](docs/migrations/028_harden_security_definer_rpcs.sql) |
-| DB · Storage · Auth 를 하나의 트랜잭션으로 삭제할 수 없어, 운영 환경에서 부분 파괴(계정만 남는 상태)가 발생 | 중간 실패 시 **부분 파괴 → 재개 후 완료**<br>삭제 대상 파일 경로를 Tombstone 으로 보존 | [ADR-0014](docs/adr/0014-account-erasure-tombstone-pipeline.md) |
-| 랜딩 페이지가 Template 을 렌더링하지 않는데도 11개 Template 의 CSS 를 모두 로드 (인증 세션 조회 → DI → Template Registry 경로) | 초기 stylesheet 요청 **13 → 1개**<br>Pretendard 요청 리소스 **2,061,242 → 232,628 bytes**<br>Lighthouse Mobile **72 → 97** | [ADR-0008](docs/adr/0008-keep-explicit-di-factories.md) · [검증 리포트](artifacts/lighthouse-2026-08-11/SUMMARY.md) |
-| 대시보드 목록이 사이트마다 ContentModel 세 벌(작업본·공개본·생성 스냅샷)을 클라이언트로 직렬화 — 목록이 읽는 건 이름·주소·상태·수정일뿐 | 목록 페이로드 **사이트당 ~27KB → ~0.3KB**<br>콘텐츠 컬럼이 **Postgres 밖으로 안 나감** (`select('*')` → 명시 컬럼) | 목록 전용 읽기 모델 `SiteSummary` ([#162](https://github.com/sungheeyoon/layer0-studio/issues/162)) |
-| 공개 사이트의 없는 슬러그·도메인이 404 본문을 HTTP 200 으로 반환 (루트 `loading.tsx` 가 앱 전체를 Suspense 로 감싸 응답 헤더가 먼저 나감) | 없는 페이지 **200 → 404**<br>전역 Suspense 폴백 **1개 → 세그먼트별 2개** | soft 404 제거 ([#161](https://github.com/sungheeyoon/layer0-studio/issues/161)) |
+자동저장은 사용하지 않습니다. 임시 저장은 사용자의 작업본만 갱신하고, 게시해야 공개 사이트가 바뀝니다. 다시 에디터를 열면 저장해 둔 작업을 이어서 편집하거나 현재 공개된 내용으로 되돌릴 수 있습니다. 대시보드의 미리보기도 공개본이 아닌 저장된 작업본을 보여줍니다.
 
-> Lighthouse 수치는 보존된 최적화 전·직후 프로덕션 배포를 Lighthouse 13.4.1 Mobile의 동일한 simulated throttling 조건으로 각각 3회 측정한 중앙값입니다. 범용 벤치마크나 실제 사용자 지표가 아닙니다.
->
-> 목록 페이로드는 프로덕션 DB 의 실제 Site 3개를 직렬화해 잰 값입니다 (합계 83.2KB → 0.95KB). Site 의 콘텐츠 크기는 Template 프리셋에 따라 5–21KB 로 달라지므로 사이트당 수치는 이 표본의 평균입니다. 404 상태 코드는 프로덕션 배포에서 `curl` 로 확인했습니다.
+이 저장 방식은 [ADR-0017](docs/adr/0017-explicit-save-and-draft-published-split.md)에 정리되어 있습니다.
 
-## Architecture
+## 주요 기능
 
-Clean Architecture — 의존성은 안쪽으로만 흐릅니다. Server Action이 요청마다 DI Factory에서 Use Case를 조립하고, Use Case는 Repository 인터페이스만 알며, Supabase 구현체는 Data 레이어에서 주입됩니다.
+- 업종별 템플릿 카탈로그와 템플릿 미리보기
+- 텍스트, 이미지, 색상, 글꼴 크기 편집
+- 블록 순서와 노출 여부, 메뉴 위치 변경
+- 단일 페이지와 다중 페이지 사이트 지원
+- 작업본과 공개본을 분리한 저장·게시 방식
+- 사이트 주소와 게시 상태를 관리하는 대시보드
+- 한국어·영어 UI, 다크 모드
+- 회원가입, 로그인, 비밀번호 재설정, 계정 삭제
 
-```mermaid
-flowchart LR
-    Client[Client] --> Action[Server Action]
-    Action --> DI[DI Factory]
-    DI --> UC[Use Case]
-    UC --> Repo[Repository]
-    Repo --> DB[(Supabase)]
+## 기술 구성
+
+Next.js 16 App Router와 TypeScript를 사용하며, 인증·데이터베이스·파일 저장소는 Supabase에서 처리합니다. UI는 Tailwind CSS v4와 Radix UI를 기반으로 만들고 Vercel에 배포합니다.
+
+```text
+src/app/         페이지, 라우트, Server Action
+src/components/  Studio UI와 에디터 컴포넌트
+src/domain/      엔티티, 유스케이스, 저장소 인터페이스
+src/data/        Supabase 저장소 구현
+src/lib/di/      요청별 의존성 조립
+src/templates/   템플릿별 콘텐츠 모델과 렌더러
 ```
 
-- **Domain layer** — 순수 비즈니스 로직(엔티티, 리포지토리 인터페이스, 유스케이스). Vitest 단위 테스트는 도메인 레이어만 in-memory fake로 검증합니다.
-- **요청별 DI** — 싱글톤 없이 매 요청마다 새 Supabase 클라이언트로 조립. 인증 컨텍스트가 절대 누설되지 않습니다.
-- **읽기 / 쓰기 경로 분리** ([ADR-0008](docs/adr/0008-keep-explicit-di-factories.md)) — 검증이 필요한 쓰기 경로만 Content Validator 와 Template Registry 를 끌어오고, 읽기 경로는 그 의존성을 아예 import 하지 않습니다. `pnpm performance:verify` 가 초기 스타일시트 수를 상한으로 고정해 Template 전용 CSS 의 재유입을 잡아냅니다 (실행 중인 서버가 필요해 CI 가 아니라 배포 전 로컬 검증 단계입니다).
-- **화면별 읽기 모델** — 읽기 경로는 `UserSite` 전체가 아니라 그 화면이 실제로 쓰는 만큼만 담은 타입을 반환합니다: 공개 렌더러는 `PublishedSite`(작업본 컬럼이 아예 없는 뷰에서 채움), 편집기는 `EditorSite`, 목록은 `SiteSummary`. Repository 의 `select` 컬럼이 그 타입을 따라가므로, 화면이 안 읽는 콘텐츠는 DB 밖으로 나오지 않습니다.
-- **타입드 에러** — Use Case가 던지는 도메인 에러 코드를 클라이언트가 활성 locale(ko/en)의 표시 문자열로 매핑(`src/lib/errors/messages.ts`).
+도메인 로직은 Supabase 구현을 직접 알지 않으며, 각 요청에서 필요한 저장소와 유스케이스를 조립합니다. 화면마다 필요한 데이터도 따로 읽습니다. 대시보드 목록은 이름·주소·상태 같은 요약 정보만 가져오고, 에디터는 작업본을, 공개 페이지는 공개본만 가져옵니다. 존재하지 않는 공개 주소와 미리보기 경로는 HTTP 404를 반환합니다.
 
-## Template system
+읽기와 쓰기 경로를 나눈 배경은 [ADR-0008](docs/adr/0008-keep-explicit-di-factories.md), 프로젝트에서 사용하는 용어와 데이터 관계는 [CONTEXT.md](CONTEXT.md)에서 확인할 수 있습니다.
 
-각 Template 은 `src/templates/<category>/<leaf>/` 안에 자기 토큰·라이브러리·렌더러를 모두 가진 자급식(self-contained) 구조 — Template 간 코드는 *전혀* 공유하지 않습니다 (DRY 보다 isolation 우선, [ADR-0001](docs/adr/0001-beta-model-template-isolation.md)). **코드가 source of truth**, `pnpm template:sync` 가 DB 로 반영 ([ADR-0002](docs/adr/0002-templates-source-of-truth-is-code.md)) — 디렉터리만 추가하면 codegen 이 자동으로 레지스트리에 등록.
+## 로컬 실행
 
-Site 는 **Single**(한 스크롤, `blocks[]`)과 **Multi**(라우팅되는 `pages[]` + 모든 Page 를 감싸는 `chrome`) 두 Site Type 으로 나뉘며 생성 시 `mode` 로 고정됩니다 — 진화하지 않습니다 (`ContentModel` 구조적 유니온, [ADR-0007](docs/adr/0007-single-multi-site-type-structural-union.md)). Block component 의 `fieldsSchema` 가 입력 구조의 진실이고, Site 의 Block 은 사용자 입력 **Value** 만 저장합니다 ([ADR-0016](docs/adr/0016-block-rename-and-field-value-split.md)).
-
-Editor 는 콘텐츠·내비게이션·디자인을 분리해 편집합니다. Multi Site 는 콘텐츠 탭에서 Page 를 전환하고 해당 Page 의 Block 만 다루며, 내비게이션 탭에서 Page 순서·이름·노출 위치를 관리합니다. 미리보기의 Block 을 누르면 대응하는 편집 폼으로 이동하고, 콘텐츠 재렌더 중에도 같은 Page 의 미리보기 스크롤을 보존합니다.
-
-**저장은 명시적입니다** — 자동저장은 없습니다. "임시 저장"은 사용자만 볼 수 있는 작업본을 갱신하고, "변경 사항 게시"가 그 작업본을 공개본으로 복사합니다. 방문자는 공개본만 봅니다. 저장 성공 표시는 화면에 보이는 편집까지 서버가 확인했을 때만 뜨고, 앱 안에서 편집기를 벗어나면 미저장 변경을 확인합니다. 탭 종료·브라우저 뒤로가기·크래시는 의도적으로 보장 범위 밖입니다 ([ADR-0017](docs/adr/0017-explicit-save-and-draft-published-split.md)).
-
-게시된 Site 의 정식 주소는 `/site/<slug>`입니다. 서브도메인 서빙은 제품 요구와 운영 조건이 구체화될 때 새로 검토하며, 현재 로드맵에서는 무기한 보류합니다 ([ADR-0009](docs/adr/0009-subdomain-public-serving.md)).
-
-새 Template 은 Claude Code 의 `new-template` 스킬이 자연어 brief 로부터 자급식 디렉터리(토큰·라이브러리·프리셋·렌더러)를 만들고 verify 게이트까지 통과시키는 방식으로 저작합니다.
-
-현재 용어는 [CONTEXT.md](CONTEXT.md), Template 저작·운영 절차는 [docs/TEMPLATE_SYSTEM.md](docs/TEMPLATE_SYSTEM.md), 결정의 이유와 역사는 [docs/adr/](docs/adr/)가 정본입니다.
-
-## Quick start
+Node.js 20.9 이상과 pnpm 11.9.0이 필요합니다.
 
 ```bash
-cp .env.local.example .env.local   # Supabase 자격 증명 채워넣기
 pnpm install
-pnpm dev                           # http://localhost:3000
+cp .env.local.example .env.local
+pnpm dev
 ```
 
-### Required environment variables
+브라우저에서 [http://localhost:3000](http://localhost:3000)을 열면 됩니다.
 
+`.env.local`에는 다음 값을 설정해야 합니다.
+
+| 변수 | 용도 |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 브라우저와 서버에서 사용하는 공개 키 |
+| `SUPABASE_SERVICE_ROLE_KEY` | 관리자 작업용 서버 키 |
+| `NEXT_PUBLIC_SITE_URL` | 사이트 기준 URL. 로컬에서는 `http://localhost:3000` |
+| `CRON_SECRET` | 이미지 정리 API 인증 토큰 |
+| `TEMPLATE_SYNC_SECRET` | 배포 후 템플릿 동기화 API 인증 토큰 |
+
+`UNSPLASH_ACCESS_KEY`와 `PEXELS_API_KEY`는 `pnpm template:image`를 사용할 때만 필요합니다. `SUPABASE_SERVICE_ROLE_KEY`는 브라우저에 노출하면 안 됩니다.
+
+Supabase 스키마는 개발 서버를 실행한다고 자동으로 만들어지지 않습니다. 새 프로젝트를 연결할 때는 [docs/migrations](docs/migrations)의 번호 순서와 함께 제공되는 실행 절차를 확인하세요. 이미 운영 중인 환경에는 아직 적용하지 않은 마이그레이션만 적용해야 합니다.
+
+## 확인 명령어
+
+```bash
+pnpm tsc --noEmit
+pnpm lint
+pnpm test
+pnpm template:verify:ci
+pnpm schema:manifest:check
+pnpm build
 ```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_SITE_URL=          # 예: https://layer0-studio.vercel.app — sitemap, robots, metadataBase, OG canonical
-CRON_SECRET=                   # /api/cron/cleanup-assets Bearer 토큰
-TEMPLATE_SYNC_SECRET=          # POST /api/admin/sync-templates Bearer 토큰 (Template 등록, ADR-0012)
-```
 
-> `NEXT_PUBLIC_SITE_URL`이 비어 있으면 dev에서는 `http://localhost:3000`으로 폴백하지만, 프로덕션 빌드는 **하드 실패**합니다. Vercel에 먼저 등록하세요.
+초기 페이지의 에셋 구성이 다시 무거워지지 않았는지는 개발 서버를 띄운 상태에서 `pnpm performance:verify http://127.0.0.1:3000/`로 확인할 수 있습니다. 기존 측정 결과는 [Lighthouse 검증 기록](artifacts/lighthouse-2026-08-11/SUMMARY.md)에 남겨 두었습니다.
 
----
+## 템플릿 작업
 
-> 본 저장소는 **포트폴리오 공개용**이며 별도 라이선스를 부여하지 않습니다 (All Rights Reserved). 코드 열람은 자유롭게 가능하나, 복제·재배포·상업적 사용은 금지합니다.
+각 템플릿은 `src/templates/<카테고리>/<이름>/` 아래에 렌더러, 디자인 토큰, 기본 콘텐츠를 함께 둡니다. 템플릿끼리 컴포넌트를 공유하지 않아 한 템플릿의 수정이 다른 템플릿의 모양을 바꾸지 않도록 했습니다.
+
+템플릿의 기준은 데이터베이스가 아니라 코드입니다. `pnpm template:sync`는 변경 내용을 먼저 미리보기만 하며, 실제 반영이 필요할 때 `--apply` 옵션을 사용합니다. 새 템플릿을 만들거나 기존 템플릿의 데이터 구조를 바꾸기 전에는 [템플릿 시스템 문서](docs/TEMPLATE_SYSTEM.md)를 먼저 확인하세요.
+
+## 문서
+
+- [CONTEXT.md](CONTEXT.md): 프로젝트 용어와 데이터 관계
+- [템플릿 시스템](docs/TEMPLATE_SYSTEM.md): 템플릿 제작, 검증, 동기화 절차
+- [디자인 시스템](docs/DESIGN_SYSTEM.md): Studio UI의 토큰과 컴포넌트 규칙
+- [ADR](docs/adr): 주요 기술 결정과 변경 배경
+- [마이그레이션](docs/migrations): 데이터베이스 변경 이력과 실행 절차
+
+## 라이선스
+
+이 저장소는 포트폴리오 공개용이며 별도 라이선스를 부여하지 않습니다. 코드는 열람할 수 있지만 복제, 재배포, 상업적 사용은 허용하지 않습니다.
