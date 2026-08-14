@@ -107,6 +107,8 @@ Route groups make URLs non-obvious from the file tree, so this table is authorit
 | `/api/cron/cleanup-assets` | Orphan asset cleanup cron. Bearer `CRON_SECRET`. `0 3 * * *` (Hobby plan = 1 cron/day) |
 | `/api/admin/sync-templates` | **POST** — Template registration. Bearer `TEMPLATE_SYNC_SECRET`. Runs after a successful **production** deploy only — renderer code must be live before the catalog row exists ([ADR-0012](./docs/adr/0012-template-publishing-pipeline.md)) |
 
+**No `loading.tsx` above a route that 404s.** Next flushes the response headers the moment a Suspense fallback renders, so a fallback in *any* ancestor segment freezes the status at 200 and every `notFound()` below it becomes a soft 404 — the 404 body served as a success. That is what a root `src/app/loading.tsx` did to `/site/**` and `/preview/**`. Put the fallback on the individual segment that wants it (`app/templates/`, `app/(authenticated)/dashboard/editor/`, the `(with-sidebar)` pages), never at a shared ancestor of `/site` or `/preview`. `src/app/__tests__/streaming-boundaries.test.ts` enforces it.
+
 ### Studio UI / design system
 
 **Read `docs/DESIGN_SYSTEM.md` before any chrome UI work.** Raw Tailwind palette classes (`text-zinc-400`, `bg-red-500`, …), legacy MD3 tokens, and `text-outline` **fail the build** — ESLint `local/no-raw-color-classes` is at **error** severity ([ADR-0011](./docs/adr/0011-studio-ui-redesign-shadcn-pretendard.md)).

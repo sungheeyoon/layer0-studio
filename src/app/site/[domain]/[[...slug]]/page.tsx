@@ -95,6 +95,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+/**
+ * `notFound()` here only produces a real 404 status while nothing above this
+ * route has started streaming.
+ *
+ * Next flushes the response headers the moment a Suspense fallback renders, and
+ * a status cannot be changed after that — so a `loading.tsx` in *any* ancestor
+ * segment turns every `notFound()` below it into a soft 404: the 404 body ships
+ * with a 200. That is exactly what a root `src/app/loading.tsx` did to this
+ * route, and it is why the fallback now lives on the individual segments that
+ * want it instead. `src/app/__tests__/streaming-boundaries.test.ts` holds the
+ * line; the framework rule is in
+ * `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/loading.md`.
+ *
+ * The stakes are indexing: `sitemap.ts` publishes these URLs, so a soft 404
+ * invites search engines to index pages of a user's Site that do not exist.
+ */
 export default async function PublicSitePage({ params }: Props) {
   const { domain, slug } = await params;
   const supabase = await createClient();
