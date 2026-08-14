@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import type { UserSite } from '@/domain/entities/user-site.entity';
+import type { SiteSummary } from '@/domain/entities/user-site.entity';
 import { I18nProvider } from '@/lib/i18n/provider';
 import { ko } from '@/lib/i18n/messages/ko';
 import SiteListTable from './SiteListTable';
@@ -12,16 +12,13 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-const site: UserSite = {
+const site: SiteSummary = {
   id: 'site-1',
   userId: 'user-1',
   templateId: 'template-1',
   siteName: '온유의원',
   domain: 'onyu',
   status: 'active',
-  content: { mode: 'single', templateKey: 'medical-clinic', globalStyles: {} as never, blocks: [] },
-  publishedContent: null,
-  snapshot: { mode: 'single', templateKey: 'medical-clinic', globalStyles: {} as never, blocks: [] },
   publishedAt: '2026-08-11T00:00:00.000Z',
   createdAt: '2026-08-11T00:00:00.000Z',
   updatedAt: '2026-08-11T00:00:00.000Z',

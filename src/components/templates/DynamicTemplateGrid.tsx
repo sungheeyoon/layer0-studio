@@ -1,7 +1,7 @@
 'use client';
 
 import { Template } from '@/domain/entities/template.entity';
-import { UserSite } from '@/domain/entities/user-site.entity';
+import { SiteSummary } from '@/domain/entities/user-site.entity';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -23,7 +23,7 @@ const ALL_CATEGORIES = '__all__';
 
 interface DynamicTemplateGridProps {
   templates: Template[];
-  mySites: UserSite[];
+  mySites: SiteSummary[];
   categories: string[];
   initialTotal: number;
 }

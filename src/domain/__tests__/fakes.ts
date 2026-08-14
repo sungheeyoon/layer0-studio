@@ -2,8 +2,10 @@ import { IUserSiteRepository } from '../repositories/user-site.repository';
 import {
   UserSite,
   PublishedSite,
+  SiteSummary,
   CreateUserSiteDto,
   UpdateUserSiteDto,
+  toSiteSummary,
 } from '../entities/user-site.entity';
 import { ContentModel, SingleContent } from '../entities/template.entity';
 import { TemplateError } from '../errors/template.error';
@@ -109,12 +111,17 @@ export class FakeUserSiteRepo implements IUserSiteRepository {
     return this.sites.find(s => s.id === id) ?? null;
   }
 
-  async findByUserId(userId: string) {
-    return this.sites.filter(s => s.userId === userId);
+  /**
+   * Strips the ContentModels, mirroring the real query's column list. A fake
+   * that returned whole `UserSite`s here would let a consumer read `.content`
+   * in a test and only fail in production.
+   */
+  async findByUserId(userId: string): Promise<SiteSummary[]> {
+    return this.sites.filter(s => s.userId === userId).map(toSiteSummary);
   }
 
-  async findAll() {
-    return [...this.sites];
+  async findAll(): Promise<SiteSummary[]> {
+    return this.sites.map(toSiteSummary);
   }
 
   async findByDomain(domain: string) {

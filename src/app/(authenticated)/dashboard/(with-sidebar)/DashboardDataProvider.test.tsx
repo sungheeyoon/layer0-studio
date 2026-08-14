@@ -4,19 +4,16 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import type { UserSite } from '@/domain/entities/user-site.entity';
+import type { SiteSummary } from '@/domain/entities/user-site.entity';
 import { DashboardDataProvider, useDashboardData } from './DashboardDataProvider';
 
-const makeSite = (siteName: string, updatedAt: string): UserSite => ({
+const makeSite = (siteName: string, updatedAt: string): SiteSummary => ({
   id: 'site-1',
   userId: 'user-1',
   templateId: 'tpl-1',
   siteName,
   domain: null,
   status: 'draft',
-  content: { mode: 'single', templateKey: 'cafe-default', globalStyles: {} as never, blocks: [] },
-  publishedContent: null,
-  snapshot: { mode: 'single', templateKey: 'cafe-default', globalStyles: {} as never, blocks: [] },
   publishedAt: null,
   createdAt: '2026-07-01T00:00:00.000Z',
   updatedAt,

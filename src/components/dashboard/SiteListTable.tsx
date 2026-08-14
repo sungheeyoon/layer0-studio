@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Settings as SettingsIcon } from "lucide-react";
-import type { UserSite } from "@/domain/entities/user-site.entity";
+import type { SiteSummary } from "@/domain/entities/user-site.entity";
 import { useDictionary } from "@/lib/i18n/provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,13 +18,13 @@ function formatDate(dateString: string): string {
 }
 
 interface SiteListTableProps {
-  sites: UserSite[];
+  sites: SiteSummary[];
   /** Shown when `sites` is empty (page-specific copy, e.g. "no sites" vs "no match"). */
   empty: ReactNode;
   /** Hovering a row reports it back — powers the spotlight / detail card on each page. */
-  onHoverSite?: (site: UserSite) => void;
+  onHoverSite?: (site: SiteSummary) => void;
   /** When provided, each row gets a gear button that opens that site's settings. */
-  onConfigure?: (site: UserSite) => void;
+  onConfigure?: (site: SiteSummary) => void;
 }
 
 /**

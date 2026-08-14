@@ -3,7 +3,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, within, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { UserSite } from '@/domain/entities/user-site.entity';
+import type { SiteSummary } from '@/domain/entities/user-site.entity';
 
 // ---------------------------------------------------------------------------
 // Regression cover for the "second delete hangs on 삭제 중…" bug.
@@ -34,22 +34,19 @@ vi.mock('@/app/(authenticated)/dashboard/editor/actions', () => ({
   unpublishSiteAction: vi.fn(),
 }));
 
-const site = (id: string, siteName: string): UserSite => ({
+const site = (id: string, siteName: string): SiteSummary => ({
   id,
   userId: 'user-1',
   templateId: 'tpl-1',
   siteName,
   domain: null,
   status: 'draft',
-  content: { mode: 'single', templateKey: 'cafe-default', globalStyles: {} as never, blocks: [] },
-  publishedContent: null,
-  snapshot: { mode: 'single', templateKey: 'cafe-default', globalStyles: {} as never, blocks: [] },
   publishedAt: null,
   createdAt: '2026-07-01T00:00:00.000Z',
   updatedAt: '2026-07-01T00:00:00.000Z',
 });
 
-let sites: UserSite[] = [];
+let sites: SiteSummary[] = [];
 
 vi.mock('../DashboardDataProvider', () => ({
   useDashboardData: () => ({

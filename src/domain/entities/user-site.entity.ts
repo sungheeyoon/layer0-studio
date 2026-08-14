@@ -45,6 +45,26 @@ export interface PublishedSite {
 }
 
 /**
+ * What a list view receives.
+ *
+ * A `UserSite` carries three whole ContentModels — `content`, `publishedContent`
+ * and `snapshot` — and the dashboard reads none of them: it shows a name, a
+ * domain, a status and a timestamp. Sending them anyway put ~25 KB of dead JSON
+ * per site into the RSC payload, growing linearly with the site count, for the
+ * browser to parse and hold.
+ *
+ * Same move as `PublishedSite` and `EditorSite`: the read model states what the
+ * screen needs, and the repository's column list follows it, so the draft never
+ * leaves Postgres on a path that has no use for it.
+ */
+export type SiteSummary = Omit<UserSite, 'content' | 'publishedContent' | 'snapshot'>;
+
+export function toSiteSummary(site: UserSite): SiteSummary {
+  const { content: _content, publishedContent: _publishedContent, snapshot: _snapshot, ...rest } = site;
+  return rest;
+}
+
+/**
  * What the editor client receives.
  *
  * `snapshot` and `publishedContent` are deliberately absent: both are whole

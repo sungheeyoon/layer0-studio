@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { UserSite } from "@/domain/entities/user-site.entity";
+import { SiteSummary } from "@/domain/entities/user-site.entity";
 import {
   updateSiteDomainAction,
   publishSiteAction,
@@ -27,7 +27,7 @@ import {
 
 interface SiteSettingsDialogProps {
   /** The site being configured. Never null — the parent renders nothing when no site is selected. */
-  site: UserSite;
+  site: SiteSummary;
   /**
    * The freshest `updatedAt` for optimistic concurrency. Read through the parent
    * rather than off `site`, so a retry after a STALE_VERSION refresh sends the
@@ -35,7 +35,7 @@ interface SiteSettingsDialogProps {
    */
   freshToken: (id: string, fallback: string) => string;
   /** Propagate a server-confirmed change up to the site list and the parent's copy. */
-  onPatch: (id: string, partial: Partial<UserSite>) => void;
+  onPatch: (id: string, partial: Partial<SiteSummary>) => void;
   onDeleted: (id: string) => void;
   onClose: () => void;
 }
@@ -162,7 +162,7 @@ export default function SiteSettingsDialog({
           if (isStaleConflict(result)) router.refresh();
         } else {
           onPatch(site.id, {
-            status: (isActive ? 'draft' : 'active') as UserSite['status'],
+            status: (isActive ? 'draft' : 'active') as SiteSummary['status'],
             updatedAt: result.updatedAt,
           });
           router.refresh();
