@@ -8,7 +8,9 @@ export default defineConfig({
       'src/data/**/*.test.ts',
       'src/lib/**/*.test.ts',
       'src/templates/**/*.test.tsx',
-      'src/app/**/*.test.tsx',
+      // `.ts` as well as `.tsx`: not every test under `src/app` renders — the
+      // routing/streaming guards are plain source checks.
+      'src/app/**/*.test.{ts,tsx}',
       'src/components/**/*.test.tsx',
       'scripts/lib/**/*.test.ts',
     ],
