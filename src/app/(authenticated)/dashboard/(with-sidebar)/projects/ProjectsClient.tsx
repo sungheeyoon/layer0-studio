@@ -1,6 +1,6 @@
 "use client";
 
-import { UserSite } from "@/domain/entities/user-site.entity";
+import { SiteSummary } from "@/domain/entities/user-site.entity";
 import { useState } from "react";
 import { Search, X } from "lucide-react";
 import { useDashboardData } from "../DashboardDataProvider";
@@ -21,7 +21,7 @@ export default function ProjectsClient() {
   const freshToken = (id: string, fallback: string) =>
     sites.find((s) => s.id === id)?.updatedAt ?? fallback;
   const [searchQuery, setSearchQuery] = useState('');
-  const [settingsSite, setSettingsSite] = useState<UserSite | null>(null);
+  const [settingsSite, setSettingsSite] = useState<SiteSummary | null>(null);
 
   const filteredSites = searchQuery.trim()
     ? sites.filter(s =>

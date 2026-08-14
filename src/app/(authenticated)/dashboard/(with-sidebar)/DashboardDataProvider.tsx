@@ -2,26 +2,26 @@
 
 import { createContext, useCallback, useContext, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { UserSite } from '@/domain/entities/user-site.entity';
+import { SiteSummary } from '@/domain/entities/user-site.entity';
 
 interface DashboardData {
   user: User;
-  sites: UserSite[];
-  patchSite: (id: string, partial: Partial<UserSite>) => void;
+  sites: SiteSummary[];
+  patchSite: (id: string, partial: Partial<SiteSummary>) => void;
   removeSite: (id: string) => void;
-  setSites: React.Dispatch<React.SetStateAction<UserSite[]>>;
+  setSites: React.Dispatch<React.SetStateAction<SiteSummary[]>>;
 }
 
 const Ctx = createContext<DashboardData | null>(null);
 
 interface ProviderProps {
   user: User;
-  initialSites: UserSite[];
+  initialSites: SiteSummary[];
   children: React.ReactNode;
 }
 
 export function DashboardDataProvider({ user, initialSites, children }: ProviderProps) {
-  const [sites, setSites] = useState<UserSite[]>(initialSites);
+  const [sites, setSites] = useState<SiteSummary[]>(initialSites);
   const [serverSites, setServerSites] = useState(initialSites);
 
   // A refresh can deliver a newer server snapshot after local patch/remove
@@ -33,7 +33,7 @@ export function DashboardDataProvider({ user, initialSites, children }: Provider
     setSites(initialSites);
   }
 
-  const patchSite = useCallback((id: string, partial: Partial<UserSite>) => {
+  const patchSite = useCallback((id: string, partial: Partial<SiteSummary>) => {
     setSites(prev => prev.map(s => (s.id === id ? { ...s, ...partial } : s)));
   }, []);
 

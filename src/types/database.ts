@@ -31,6 +31,13 @@ export type UserSiteRow = {
 };
 
 /**
+ * What the list `select` asks for — `UserSiteRow` minus the three ContentModel
+ * columns. Not a view: a column list, kept as a type so the mapper cannot read
+ * a field the query never fetched.
+ */
+export type SiteSummaryRow = Omit<UserSiteRow, 'content' | 'published_content' | 'snapshot'>;
+
+/**
  * The `published_sites` view (migration 029) — the only shape an anonymous
  * visitor can read. `content` and `snapshot` are not columns of it.
  */

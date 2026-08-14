@@ -3,6 +3,7 @@ import { IUserSiteRepository } from '@/domain/repositories/user-site.repository'
 import {
   UserSite,
   PublishedSite,
+  SiteSummary,
   CreateUserSiteDto,
   UpdateUserSiteDto,
 } from '@/domain/entities/user-site.entity';
@@ -10,7 +11,15 @@ import { ContentModel } from '@/domain/entities/template.entity';
 import { TemplateError } from '@/domain/errors/template.error';
 import { isNotFoundError } from '@/data/errors/supabase-error.adapter';
 import { AssetUsage } from '@/domain/usecases/ports/asset-usage-collector.port';
-import { UserSiteRow, PublishedSiteRow } from '@/types/database';
+import { UserSiteRow, PublishedSiteRow, SiteSummaryRow } from '@/types/database';
+
+/**
+ * The columns a list read fetches. Written out rather than `*` so the three
+ * ContentModel columns stay in Postgres — `SiteSummary` exists precisely
+ * because no list screen reads them.
+ */
+const SUMMARY_COLUMNS =
+  'id, user_id, template_id, site_name, domain, status, published_at, created_at, updated_at';
 
 export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -32,6 +41,20 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     };
   }
 
+  private mapSummaryRow = (row: SiteSummaryRow): SiteSummary => {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      templateId: row.template_id,
+      siteName: row.site_name,
+      domain: row.domain,
+      status: row.status,
+      publishedAt: row.published_at,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
   private mapPublishedRow = (row: PublishedSiteRow): PublishedSite => {
     return {
       id: row.id,
@@ -43,10 +66,10 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     };
   }
 
-  async findByUserId(userId: string): Promise<UserSite[]> {
+  async findByUserId(userId: string): Promise<SiteSummary[]> {
     const { data, error } = await this.supabase
       .from('user_sites')
-      .select('*')
+      .select(SUMMARY_COLUMNS)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -55,7 +78,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       throw new TemplateError('UNKNOWN');
     }
 
-    return (data ?? []).map(this.mapRow);
+    return (data ?? []).map(this.mapSummaryRow);
   }
 
   async findById(id: string): Promise<UserSite | null> {
@@ -74,10 +97,10 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
     return data ? this.mapRow(data) : null;
   }
 
-  async findAll(): Promise<UserSite[]> {
+  async findAll(): Promise<SiteSummary[]> {
     const { data, error } = await this.supabase
       .from('user_sites')
-      .select('*')
+      .select(SUMMARY_COLUMNS)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -85,7 +108,7 @@ export class SupabaseUserSiteRepositoryImpl implements IUserSiteRepository {
       throw new TemplateError('UNKNOWN');
     }
 
-    return (data ?? []).map(this.mapRow);
+    return (data ?? []).map(this.mapSummaryRow);
   }
 
   async create(dto: CreateUserSiteDto): Promise<UserSite> {

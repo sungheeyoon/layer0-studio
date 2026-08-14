@@ -2,15 +2,18 @@ import { ContentModel } from '../entities/template.entity';
 import {
   UserSite,
   PublishedSite,
+  SiteSummary,
   CreateUserSiteDto,
   UpdateUserSiteDto,
 } from '../entities/user-site.entity';
 import { AssetUsage } from '../usecases/ports/asset-usage-collector.port';
 
 export interface IUserSiteRepository {
-  findByUserId(userId: string): Promise<UserSite[]>;
+  /** List read model — no ContentModel. See `SiteSummary`. */
+  findByUserId(userId: string): Promise<SiteSummary[]>;
   findById(id: string): Promise<UserSite | null>;
-  findAll(): Promise<UserSite[]>;
+  /** Admin list, same read model as `findByUserId`. */
+  findAll(): Promise<SiteSummary[]>;
   create(data: CreateUserSiteDto): Promise<UserSite>;
   /**
    * Version-guarded metadata write. `expectedUpdatedAt` is required so a silent
