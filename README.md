@@ -16,8 +16,12 @@
 | `SECURITY DEFINER` 함수 전부가 EXECUTE 권한을 회수한 적이 없어 PostgREST 로 직접 호출 가능 — RLS 는 우회됨 | 타 사용자 사이트 **덮어쓰기·삭제 가능 → 차단**<br>호출 롤 **PUBLIC → 함수별 1개 롤** | [마이그레이션 028](docs/migrations/028_harden_security_definer_rpcs.sql) |
 | DB · Storage · Auth 를 하나의 트랜잭션으로 삭제할 수 없어, 운영 환경에서 부분 파괴(계정만 남는 상태)가 발생 | 중간 실패 시 **부분 파괴 → 재개 후 완료**<br>삭제 대상 파일 경로를 Tombstone 으로 보존 | [ADR-0014](docs/adr/0014-account-erasure-tombstone-pipeline.md) |
 | 랜딩 페이지가 Template 을 렌더링하지 않는데도 11개 Template 의 CSS 를 모두 로드 (인증 세션 조회 → DI → Template Registry 경로) | 초기 stylesheet 요청 **13 → 1개**<br>Pretendard 요청 리소스 **2,061,242 → 232,628 bytes**<br>Lighthouse Mobile **72 → 97** | [ADR-0008](docs/adr/0008-keep-explicit-di-factories.md) · [검증 리포트](artifacts/lighthouse-2026-08-11/SUMMARY.md) |
+| 대시보드 목록이 사이트마다 ContentModel 세 벌(작업본·공개본·생성 스냅샷)을 클라이언트로 직렬화 — 목록이 읽는 건 이름·주소·상태·수정일뿐 | 목록 페이로드 **사이트당 ~27KB → ~0.3KB**<br>콘텐츠 컬럼이 **Postgres 밖으로 안 나감** (`select('*')` → 명시 컬럼) | 목록 전용 읽기 모델 `SiteSummary` ([#162](https://github.com/sungheeyoon/layer0-studio/issues/162)) |
+| 공개 사이트의 없는 슬러그·도메인이 404 본문을 HTTP 200 으로 반환 (루트 `loading.tsx` 가 앱 전체를 Suspense 로 감싸 응답 헤더가 먼저 나감) | 없는 페이지 **200 → 404**<br>전역 Suspense 폴백 **1개 → 세그먼트별 2개** | soft 404 제거 ([#161](https://github.com/sungheeyoon/layer0-studio/issues/161)) |
 
-> 성능 수치는 보존된 최적화 전·직후 프로덕션 배포를 Lighthouse 13.4.1 Mobile의 동일한 simulated throttling 조건으로 각각 3회 측정한 중앙값입니다. 범용 벤치마크나 실제 사용자 지표가 아닙니다.
+> Lighthouse 수치는 보존된 최적화 전·직후 프로덕션 배포를 Lighthouse 13.4.1 Mobile의 동일한 simulated throttling 조건으로 각각 3회 측정한 중앙값입니다. 범용 벤치마크나 실제 사용자 지표가 아닙니다.
+>
+> 목록 페이로드는 프로덕션 DB 의 실제 Site 3개를 직렬화해 잰 값입니다 (합계 83.2KB → 0.95KB). Site 의 콘텐츠 크기는 Template 프리셋에 따라 5–21KB 로 달라지므로 사이트당 수치는 이 표본의 평균입니다. 404 상태 코드는 프로덕션 배포에서 `curl` 로 확인했습니다.
 
 ## Architecture
 
@@ -35,6 +39,7 @@ flowchart LR
 - **Domain layer** — 순수 비즈니스 로직(엔티티, 리포지토리 인터페이스, 유스케이스). Vitest 단위 테스트는 도메인 레이어만 in-memory fake로 검증합니다.
 - **요청별 DI** — 싱글톤 없이 매 요청마다 새 Supabase 클라이언트로 조립. 인증 컨텍스트가 절대 누설되지 않습니다.
 - **읽기 / 쓰기 경로 분리** ([ADR-0008](docs/adr/0008-keep-explicit-di-factories.md)) — 검증이 필요한 쓰기 경로만 Content Validator 와 Template Registry 를 끌어오고, 읽기 경로는 그 의존성을 아예 import 하지 않습니다. `pnpm performance:verify` 가 초기 스타일시트 수를 상한으로 고정해 Template 전용 CSS 의 재유입을 잡아냅니다 (실행 중인 서버가 필요해 CI 가 아니라 배포 전 로컬 검증 단계입니다).
+- **화면별 읽기 모델** — 읽기 경로는 `UserSite` 전체가 아니라 그 화면이 실제로 쓰는 만큼만 담은 타입을 반환합니다: 공개 렌더러는 `PublishedSite`(작업본 컬럼이 아예 없는 뷰에서 채움), 편집기는 `EditorSite`, 목록은 `SiteSummary`. Repository 의 `select` 컬럼이 그 타입을 따라가므로, 화면이 안 읽는 콘텐츠는 DB 밖으로 나오지 않습니다.
 - **타입드 에러** — Use Case가 던지는 도메인 에러 코드를 클라이언트가 활성 locale(ko/en)의 표시 문자열로 매핑(`src/lib/errors/messages.ts`).
 
 ## Template system
